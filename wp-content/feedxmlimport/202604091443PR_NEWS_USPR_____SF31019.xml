@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604091443PR_NEWS_USPR_____SF31019</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260409T144300-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260409</DateId>
+        <NewsItemId>SF31019</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260409:SF31019:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260409T144300-0400</FirstCreated>
+      <ThisRevisionCreated>20260409T144300-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>Astreas Performance Spheres Fly Aboard NASA's Orion Spacecraft on Artemis II Mission</HeadLine>
+        <DateLine>SAN FRANCISCO, April 9, 2026</DateLine>
+        <SlugLine>ASTREAS-space-choc</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604091443PR_NEWS_USPR_____SF31019.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="Astreas Nutrition Ltd." />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="Astreas Nutrition Ltd." />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="ARO" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="FOD" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="STM" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="REA" Scheme="IndustryCode" />
+        </SubjectCode>
+        <Property FormalName="CompanyName" Value="Astreas Nutrition Ltd." />
+        <Property FormalName="GeographyCode" Value="California" />
+        <Property FormalName="Contact" Value="Thomas Chapple, Astreas Media Coordinator, media@astreas.space, 206-321-9664; Shahreen Reza, Astreas Founder and CEO, sreza@astreas.space, 650-646-8396" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2953319/Astreas_Nutrition_International_Space_Station.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>Astreas Performance Spheres Fly Aboard NASA's Orion Spacecraft on Artemis II Mission</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">Astreas Performance Spheres Fly Aboard NASA's Orion Spacecraft on Artemis II Mission</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">SAN FRANCISCO, April 9, 2026</p>
+              </div>
+              <div class="xn-content">
+<p>First performance chocolate to orbit the Moon in more than 50 years, as performance nutrition meets deep space aboard NASA's Artemis II mission.</p><p><span class="legendSpanClass">SAN FRANCISCO</span>, <span class="legendSpanClass">April 9, 2026</span> /PRNewswire/ -- Astreas, a performance nutrition company pairing exceptional chocolate with functional ingredients for sustained energy and cognitive performance, today announced that its Astreas Performance Spheres were flown aboard NASA's Orion spacecraft during the Artemis II mission as part of the mission's food system.</p>
+    <div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder1">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2953319/Astreas_Nutrition_International_Space_Station.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2953319/Astreas_Nutrition_International_Space_Station.jpg" title="This image is an actual photograph captured by an astronaut aboard the International Space Station." alt="This image is an actual photograph captured by an astronaut aboard the International Space Station." />
+                        </a>
+                </p>
+    </div>
+<p>The spheres traveled with the crew and were consumed during the mission, marking the first chocolate specifically formulated for human performance to accompany a lunar mission in over fifty years. Guided by its founding principle, "Designed for Astronauts, Optimized for the Elite Performer in All of Us," Astreas combines premium Valrhona dark chocolate with a precise blend of functional ingredients, including Cognizin® citicoline, L-theanine, and finely stone-ground coffee beans, formulated to support sustained energy, focus, and cognitive clarity without the abrupt crash associated with conventional stimulants.</p><p>The chocolate was developed in collaboration with master chocolatier Michael Recchiuti, founder of<a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661072-1&amp;h=3460871924&amp;u=https%3A%2F%2Fwww.recchiuti.com%2F&amp;a=%C2%A0" target="_blank" rel="nofollow"> </a><a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661072-1&amp;h=4138898962&amp;u=https%3A%2F%2Fwww.recchiuti.com%2F&amp;a=Recchiuti+Confections" target="_blank" rel="nofollow">Recchiuti Confections</a>, extending his work at the intersection of fine chocolate and performance.</p><p>Astreas traces its origins to research into human performance in extreme environments and was recognized as a Phase 1 winner of the<a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661072-1&amp;h=1316901824&amp;u=https%3A%2F%2Fwww.nasa.gov%2Fnews-release%2Fnasa-announces-winners-of-deep-space-food-challenge%2F&amp;a=%C2%A0" target="_blank" rel="nofollow"> </a><a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661072-1&amp;h=2689872372&amp;u=https%3A%2F%2Fwww.nasa.gov%2Fnews-release%2Fnasa-announces-winners-of-deep-space-food-challenge%2F&amp;a=NASA+Deep+Space+Food+Challenge" target="_blank" rel="nofollow">NASA Deep Space Food Challenge</a> via Mission: Space Food. In collaboration with astronauts and space nutrition experts, the company has explored how nutrient-dense foods can support astronaut health, resilience, and performance during long-duration missions.</p><p>In space, food serves not only as fuel but as a critical support for psychological resilience and crew cohesion. Shared meals act as grounding rituals that sustain performance and morale in isolated, high-stress environments far from Earth.</p><p>"For long-duration spaceflights like a mission to Mars, food will play a critical role in astronaut performance, health, and morale," said<a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661072-1&amp;h=2824503263&amp;u=https%3A%2F%2Fvickiekloeris.com%2F&amp;a=%C2%A0" target="_blank" rel="nofollow"> </a><a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661072-1&amp;h=1203886819&amp;u=https%3A%2F%2Fvickiekloeris.com%2F&amp;a=Vickie+Kloeris" target="_blank" rel="nofollow">Vickie Kloeris</a>, former manager of NASA's Space Food Systems Laboratory. "It is especially exciting to see private companies advancing this frontier."</p><p>"To say this product is stellar is an understatement," said Scott Parazynski, former NASA astronaut and Chief Medical Officer of Astreas. "It has now been experienced across multiple spaceflight environments, culminating with the Artemis II mission. We are honored to have it accompany these pioneering explorers."</p><p>"Astreas was built for performance at the edge of what is possible," said Shahreen Reza, Founder and CEO of Astreas. "To have astronauts consuming it during Artemis II is an extraordinary validation of that vision."</p><p>Astreas Performance Spheres are available through the official <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661072-1&amp;h=2475781491&amp;u=http%3A%2F%2Fwww.astreas.com%2F&amp;a=Astreas+website" target="_blank" rel="nofollow">Astreas website</a>.</p><p><b>About Astreas</b><br />Astreas is a performance nutrition company at the intersection of space science, human performance, and fine chocolate, developing functional products designed to support sustained energy, cognitive clarity, and resilience. Its flagship Performance Spheres combine premium dark chocolate with clinically studied ingredients, translating space-driven innovation into a daily ritual for elite performers. Learn more at the official Astreas website.</p>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=SF31019&amp;sd=2026-04-09" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/astreas-performance-spheres-fly-aboard-nasas-orion-spacecraft-on-artemis-ii-mission-302738654.html" target="_blank">https://www.prnewswire.com/news-releases/astreas-performance-spheres-fly-aboard-nasas-orion-spacecraft-on-artemis-ii-mission-302738654.html</a></p><p>SOURCE Astreas Nutrition Ltd.</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=SF31019&amp;Transmission_Id=202604091443PR_NEWS_USPR_____SF31019&amp;DateId=20260409" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

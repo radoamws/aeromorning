@@ -1,0 +1,233 @@
+# Translation of Plugins - Post Types Order - Stable (latest release) in French (France)
+# This file is distributed under the same license as the Plugins - Post Types Order - Stable (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2025-11-05 09:47:02+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: GlotPress/4.0.3\n"
+"Language: fr\n"
+"Project-Id-Version: Plugins - Post Types Order - Stable (latest release)\n"
+
+#: include/class.options.php:169
+msgid "Enable this option to apply the sorting order specified in the query (ascending or descending). If the query order is set to DESC, the results will be displayed in reverse order."
+msgstr "Activer l’option pour appliquer l’ordre de tri spécifié dans la requête (croissant ou décroissant). Si l’ordre des requêtes est défini sur DESC, les résultats s’affichent dans l’ordre inverse."
+
+#: include/class.options.php:160
+msgid "Enable this option to apply your custom sort order to the admin interface, allowing you to view post types according to your specified sorting preferences."
+msgstr "Activer l’option pour appliquer votre ordre de tri personnalisé à l’interface d’administration, ce qui vous permet d’afficher les types de publications en fonction de vos préférences de tri spécifiées."
+
+#: include/class.options.php:156
+msgid "Admin Auto Apply Sort"
+msgstr "Appliquer automatiquement l’ordre de l’administration"
+
+#: include/class.options.php:144
+msgid "Auto Apply Sort"
+msgstr "Appliquer le tri automatique"
+
+#: include/class.options.php:222
+msgid "For better performance and user experience, consider hiding these links by default, particularly for very long lists. This will help streamline the interface, reducing visual clutter and enhancing page load times by making the HTML structure lighter."
+msgstr "Pour de meilleures performances et une meilleure UX, envisagez de masquer ces liens par défaut, en particulier pour les listes très longues. Cela permettra de rationaliser l’interface, de réduire l’encombrement visuel et d’améliorer les temps de chargement des pages en allégeant la structure HTML."
+
+#: include/class.options.php:221
+msgid "In the reorder interface, display an 'Edit' and 'View' link for each item, allowing users to quickly manage or preview individual items."
+msgstr "Dans l’interface de réorganisation, affichez un lien « Modifier » et « Afficher » pour chaque élément, ce qui permet aux utilisateurs de gérer ou de prévisualiser rapidement des éléments individuels."
+
+#: include/class.options.php:217
+msgid "Edit / View Links"
+msgstr "Modifier/visualiser les liens"
+
+#: include/class.options.php:179
+msgid "Admin Sort feature must be activated for this functionality."
+msgstr "La fonction de tri de l’admin doit être activée pour cette fonctionnalité."
+
+#: include/class.options.php:177
+msgid " icon will be displayed on the items, allowing for customization of the order."
+msgstr " une icône sera affichée sur les éléments, permettant la personnalisation de la commande."
+
+#: include/class.options.php:177
+msgid "Enable sortable drag-and-drop functionality within the default WordPress post type archive. An "
+msgstr "Activer la fonction de tri par glisser-déposer dans l’archive de type de publication WordPress par défaut. Un "
+
+#: include/class.options.php:92
+msgid "Display the ReOrder interface for the specified post types."
+msgstr "Afficher l’interface de tri pour les types de publication spécifiés."
+
+#: include/class.options.php:207
+msgid "No"
+msgstr "Non"
+
+#: include/class.options.php:206
+msgid "Yes"
+msgstr "Oui"
+
+#: include/class.functions.php:73
+msgid "an extra layer of security for your site. The easy way to completely hide your WordPress core files, themes and plugins"
+msgstr "une couche de sécurité supplémentaire pour votre site. Le moyen simple de masquer complètement vos fichiers, thèmes et extensions WordPress principaux"
+
+#: include/class.options.php:146
+msgid "No code update is necessarily"
+msgstr "Aucune mise à jour de code n’est nécessaire"
+
+#: include/class.options.php:146
+msgid "If checked, the plug-in automatically update the WordPress queries to use the new order"
+msgstr "Si coché, l’extension met automatiquement à jour les requêtes WordPress pour utiliser le nouvel ordre"
+
+#: include/class.options.php:165
+msgid "Use query ASC / DESC parameter "
+msgstr "Utiliser le paramètre de requête croissant/décroissant "
+
+#: include/class.options.php:174
+msgid "Archive Drag&Drop "
+msgstr "Glisser-déposer l’archive "
+
+#. Author of the plugin
+#: post-types-order.php
+msgid "Nsp Code"
+msgstr "Nsp Code"
+
+#. Description of the plugin
+#: post-types-order.php
+msgid "Posts Order and Post Types Objects Order using a Drag and Drop Sortable javascript capability"
+msgstr "Ordonner vos articles et vos types d’articles en utilisant un glisser/déposer créé en javascript"
+
+#. Plugin URI of the plugin
+#: post-types-order.php
+msgid "http://www.nsp-code.com"
+msgstr "http://www.nsp-code.com"
+
+#. Plugin Name of the plugin
+#: post-types-order.php
+msgid "Post Types Order"
+msgstr "Post Types Order"
+
+#: include/class.functions.php:114 include/class.functions.php:206
+msgid "Use commas instead of %s to separate excluded terms."
+msgstr "Utilisez des virgules plutôt que des %s pour séparer les termes à exclure."
+
+#: include/class.cpto.php:245
+msgid "make the configuration and save"
+msgstr "faire la configuration et enregistrer"
+
+#: include/class.cpto.php:245
+msgid "Settings Page"
+msgstr "Page des réglages"
+
+#: include/class.cpto.php:245
+msgid "Post Types Order must be configured. Please go to"
+msgstr "Post Types Order doit être configuré. Veuillez consulter la"
+
+#: include/class.options.php:240
+msgid "Save Settings"
+msgstr "Enregistrer les réglages"
+
+#: include/class.options.php:232
+msgid "code"
+msgstr "code"
+
+#: include/class.options.php:232
+msgid "This can also be controlled through"
+msgstr "Cela peut également être contrôlé par"
+
+#: include/class.options.php:232
+msgid "Apply the sort on Next / Previous site-wide navigation."
+msgstr "Appliquer le tri sur suivant/précédent de l’ensemble du site."
+
+#: include/class.options.php:228
+msgid "Next / Previous Apply"
+msgstr "Appliquer au Suivant / Précédent"
+
+#: include/class.options.php:149
+msgid "Additional Description and Examples"
+msgstr "Description supplémentaire et exemples"
+
+#: include/class.options.php:147
+msgid "If only certain queries need to use the custom sort, keep this unchecked and include 'orderby' => 'menu_order' into query parameters"
+msgstr "Si uniquement certaines requêtes nécessitent un tri personnalisé, ne cochez pas la case et incluez « orderby’ => ’menu_order » dans les paramètres de la requête"
+
+#: include/class.options.php:137
+msgid "Administrator"
+msgstr "Administrateur"
+
+#: include/class.options.php:136
+msgid "Editor"
+msgstr "Éditeur"
+
+#: include/class.options.php:135
+msgid "Author"
+msgstr "Auteur"
+
+#: include/class.options.php:134
+msgid "Contributor"
+msgstr "Contributeur"
+
+#: include/class.options.php:133
+msgid "Subscriber"
+msgstr "Abonné"
+
+#: include/class.options.php:130
+msgid "Minimum Level to use this plugin"
+msgstr "Rôle minimum pour utiliser cette extension"
+
+#: include/class.options.php:121
+msgid "Hide"
+msgstr "Masquer"
+
+#: include/class.options.php:120
+msgid "Show"
+msgstr "Voir"
+
+#: include/class.options.php:90
+msgid "Show / Hide re-order interface"
+msgstr "Afficher / Masquer l’interface de tri"
+
+#: include/class.options.php:86
+msgid "General"
+msgstr "Général"
+
+#: include/class.options.php:80
+msgid "General Settings"
+msgstr "Réglages généraux"
+
+#: include/class.options.php:65
+msgid "Settings Saved"
+msgstr "Réglages enregistrés"
+
+#: include/class.functions.php:72
+msgid "plugin which allow to custom sort categories and custom taxonomies terms"
+msgstr "extension permettant un tri personnalisé des catégories et des termes de taxonomies personnalisées"
+
+#: include/class.functions.php:72 include/class.functions.php:73
+msgid "Check our"
+msgstr "Découvrez notre plugin"
+
+#: include/class.functions.php:71
+msgid "Read more"
+msgstr "En savoir plus"
+
+#: include/class.functions.php:71
+msgid "Did you know there is available an Advanced version of this plug-in?"
+msgstr "Saviez-vous qu’il existe une version Avancée de cette extension ?"
+
+#: include/class.functions.php:70
+msgid "Did you find this plugin useful? Please support our work by purchasing the advanced version or write an article about this plugin in your blog with a link to our site"
+msgstr "Avez-vous trouvé cette extension utile ? Veuillez soutenir notre travail en achetant la version avancée ou écrivez une publication sur votre blog à propos de cette extension avec un lien vers notre site."
+
+#: include/class.interface.php:172
+msgid "Items Order Updated"
+msgstr "Ordre des éléments mis à jour"
+
+#: include/class.interface.php:107 include/class.interface.php:132
+msgid "Update"
+msgstr "Mise à jour"
+
+#: include/class.interface.php:89
+msgid "This plugin can't work without javascript, because it's use drag and drop and AJAX."
+msgstr "Cette extension ne peut pas fonctionner sans javascript car il utilise un système de glisser-déposer et fait appel à AJAX."
+
+#: include/class.cpto.php:567 include/class.cpto.php:569
+#: include/class.cpto.php:572 include/class.interface.php:81
+msgid "Re-Order"
+msgstr "Trier"

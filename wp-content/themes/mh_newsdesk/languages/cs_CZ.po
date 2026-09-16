@@ -1,0 +1,1213 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: MH Newsdesk v1.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2015-07-29 18:16+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Poedit 1.8.3\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
+"X-Poedit-Basepath: ..\n"
+"X-Textdomain-Support: yes\n"
+"Language: cs_CZ\n"
+"X-Poedit-SearchPath-0: .\n"
+
+# @ mh-newsdesk
+#: admin/admin.php:7
+msgid "Welcome to MH Newsdesk"
+msgstr "Vítejte v MH Newsdesk"
+
+# @ mh-newsdesk
+#: admin/admin.php:7
+msgid "Theme Info"
+msgstr "Informace o šabloně"
+
+# @ mh-newsdesk
+#: admin/admin.php:16
+#, php-format
+msgid "Welcome to %1s %2s"
+msgstr "Vítejte na %1s %2s"
+
+# @ mh-newsdesk
+#: admin/admin.php:20
+msgid "Important Links:"
+msgstr "Důležité odkazy:"
+
+# @ mh-newsdesk
+#: admin/admin.php:21
+msgid "Theme Info Page"
+msgstr "Stránka informací o šabloně"
+
+# @ mh-newsdesk
+#: admin/admin.php:22
+msgid "Support Center"
+msgstr "Centrum podpory"
+
+# @ mh-newsdesk
+#: admin/admin.php:23
+msgid "Facebook"
+msgstr "Facebook"
+
+# @ mh-newsdesk
+#: admin/admin.php:24
+msgid "Twitter"
+msgstr "Twitter"
+
+# @ mh-newsdesk
+#: admin/admin.php:25
+msgid "YouTube"
+msgstr "YouTube"
+
+# @ mh-newsdesk
+#: admin/admin.php:30
+#, php-format
+msgid "Getting Started with %s"
+msgstr "Začínáme s %s"
+
+# @ mh-newsdesk
+#: admin/admin.php:34
+msgid "Theme Documentation"
+msgstr "Dokumentace k šabloně"
+
+# @ mh-newsdesk
+#: admin/admin.php:35
+#, php-format
+msgid "Need support to setup and configure %s? Please have a look at the instructions in the theme documentation or register at our support forums when you click on \"Support\" in your MH Themes account."
+msgstr "Potřebujete pomoci s nastavením a konfigurací %s? Podívejte se na návod na infostránce k šabloně nebo se zaregistrujte v našich fórech, kliknutím na \"Podpora (Support)\" ve svém MH Themes účtu."
+
+# @ mh-newsdesk
+#: admin/admin.php:37
+msgid "Visit Documentation"
+msgstr "Prohlédnout dokumentaci k šabloně"
+
+# @ mh-newsdesk
+#: admin/admin.php:41 includes/mh-options.php:19
+msgid "Theme Options"
+msgstr "Nastavení šablony"
+
+# @ mh-newsdesk
+#: admin/admin.php:42
+#, php-format
+msgid "%s WordPress theme supports the Theme Customizer for all theme settings. Click \"Customize Theme\" to open the Customizer now."
+msgstr "%s podporuje všechna nastavení v Přizpůsobění šablony. Klikněte na \"Přizpůsobit šablonu\" pro otevření customizeru."
+
+# @ mh-newsdesk
+#: admin/admin.php:44
+msgid "Customize Theme"
+msgstr "Přizpůsobit šablonu"
+
+# @ mh-newsdesk
+#: admin/admin.php:48
+msgid "Upgrade to MH Themes Bundle"
+msgstr "Upgradovat na MH Themes Bundle"
+
+# @ mh-newsdesk
+#: admin/admin.php:49
+msgid "Do you want to have access to all Premium WordPress Themes by MH Themes including support and lifetime updates? You can upgrade to the MH Themes Bundle right away when you click on \"Shop\" in your MH Themes account."
+msgstr "Chcete mít přístup ke všem premiovým šablonám pro WordPress od MH Themes včetně podpory a doživotních aktualizací? Můžete ihned využít upgrade MH Themes Bundle kliknutím na \"Koupit (Shop)\" ve vašem MH Themes účtu."
+
+# @ mh-newsdesk
+#: admin/admin.php:51
+msgid "Login to MH Themes account"
+msgstr "Přihlášení k MH Themes účtu"
+
+# @ mh-newsdesk
+#: admin/admin.php:56
+msgid "Theme Screenshot"
+msgstr "Screenshot šablony"
+
+# @ mh-newsdesk
+#: admin/admin.php:62
+#, php-format
+msgid "%1s WordPress theme is proudly brought to you by %2s."
+msgstr "%1s WordPress šablona od  %2s."
+
+# @ mh-newsdesk
+#: admin/admin.php:76
+#, php-format
+msgid "Thanks for using %1s by MH Themes. To learn more about this theme, please %1s."
+msgstr "Děkujeme za používání %1s od MH Themes. K získání více informací k šabloně, navštivte %1s."
+
+# @ mh-newsdesk
+#: admin/admin.php:76
+msgid "click here"
+msgstr "klikněte zde"
+
+# @ mh-newsdesk
+#: comments.php:10
+#, php-format
+msgid "<span class=\"comment-count\">1 Comment</span> <span class=\"comment-count-more\">on \"%2$s\"</span>"
+msgid_plural "<span class=\"comment-count\">%1$s Comments</span> <span class=\"comment-count-more\">on \"%2$s\"</span>"
+msgstr[0] "<span class=\"comment-count\">1 Komentář</span> <span class=\"comment-count-more\">k \"%2$s\"</span>"
+msgstr[1] "<span class=\"comment-count\">%1$s Komentáře</span> <span class=\"comment-count-more\">k \"%2$s\"</span>"
+msgstr[2] "<span class=\"comment-count\">%1$s Komentářů</span> <span class=\"comment-count-more\">k \"%2$s\"</span>"
+
+# @ mh-newsdesk
+#: comments.php:18 includes/mh-custom-functions.php:154
+#: includes/mh-custom-functions.php:171
+msgid "&laquo;"
+msgstr "&laquo;"
+
+# @ mh-newsdesk
+#: comments.php:18 includes/mh-custom-functions.php:155
+#: includes/mh-custom-functions.php:171
+msgid "&raquo;"
+msgstr "&raquo;"
+
+# @ mh-newsdesk
+#: comments.php:25
+#, php-format
+msgid "<span class=\"comment-count\">%s</span> <span class=\"comment-count-more\">Trackbacks & Pingbacks</span>"
+msgstr "<span class=\"comment-count\">%s</span> <span class=\"comment-count-more\">Trackbacks & Pingbacks</span>"
+
+# @ mh-newsdesk
+#: comments.php:34
+msgid "Comments are closed."
+msgstr "Komentáře nejsou povoleny."
+
+# @ mh-newsdesk
+#: comments.php:45
+msgid "Leave a comment"
+msgstr "Zanechte komentář"
+
+# @ mh-newsdesk
+#: comments.php:46
+msgid "Your email address will not be published."
+msgstr "Vaše emailová adresa nebude zveřejněna."
+
+# @ mh-newsdesk
+#: comments.php:48
+msgid "Comment"
+msgstr "Komentář"
+
+# @ mh-newsdesk
+#: content-none.php:4
+msgid "Sorry, but nothing matched your search terms. Please try again with different keywords."
+msgstr "Omlouváme se, ale nenašli jsme nic, co by odpovídalo vašemu vyhledávání. Zkuste to znovu s jinými klíčovými slovy."
+
+# @ mh-newsdesk
+#: content-none.php:6
+msgid "It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps searching can help."
+msgstr "Zdá se, že Váš požadavek&rsquo;nelze nalézt&rsquo;. Zkuste použít vyhledávání."
+
+# @ mh-newsdesk
+#: content-none.php:12
+msgid "Popular Articles"
+msgstr "Populární články"
+
+# @ mh-newsdesk
+#: content-none.php:17
+msgid "Random Articles"
+msgstr "Náhodné články"
+
+# @ mh-newsdesk
+#: content-related.php:9 includes/mh-options.php:82
+msgid "Related Articles"
+msgstr "Související články"
+
+# @ mh-newsdesk
+#: content-single.php:4
+msgid "TOPICS:"
+msgstr "TÉMATA:"
+
+# @ mh-newsdesk
+#: footer.php:34
+#, php-format
+msgid "Copyright %1$s | MH Newsdesk by %2$s"
+msgstr "Copyright %1$s | MH Newsdesk od %2$s"
+
+# @ mh-newsdesk
+#: functions.php:48
+msgid "Header Navigation"
+msgstr "Navigace v záhlaví"
+
+# @ mh-newsdesk
+#: functions.php:49
+msgid "Social Icons"
+msgstr "Sociální ikony"
+
+# @ mh-newsdesk
+#: functions.php:50
+msgid "Main Navigation"
+msgstr "Hlavní navigace"
+
+# @ mh-newsdesk
+#: functions.php:51
+msgid "Footer Navigation"
+msgstr "Navigace v zápatí"
+
+# @ mh-newsdesk
+#: functions.php:113
+msgid "Global Sidebar"
+msgstr "Hlavní postranní sloupec"
+
+# @ mh-newsdesk
+#: functions.php:113
+msgid "Sidebar used globally throughout your site."
+msgstr "Postranní sloupec, který se používá na všech místech na vaší stránce."
+
+# @ mh-newsdesk
+#: functions.php:114
+msgid "Home 1 - Large Column (Top)"
+msgstr "Home 1 - Velký sloupec (Nahoře)"
+
+# @ mh-newsdesk
+#: functions.php:114 functions.php:117
+msgid "Large column on Homepage."
+msgstr "Velký sloupec na Hlavní stránce."
+
+# @ mh-newsdesk
+#: functions.php:115
+msgid "Home 2 - First Column"
+msgstr "Home 2 - První sloupec"
+
+# @ mh-newsdesk
+#: functions.php:115
+msgid "First column on Homepage."
+msgstr "První sloupec na Hlavní stránce."
+
+# @ mh-newsdesk
+#: functions.php:116
+msgid "Home 3 - Second Column"
+msgstr "Home 3 - Druhý sloupec"
+
+# @ mh-newsdesk
+#: functions.php:116
+msgid "Second column on Homepage."
+msgstr "Druhý sloupec na Hlavní stránce."
+
+# @ mh-newsdesk
+#: functions.php:117
+msgid "Home 4 - Large Column (Bottom)"
+msgstr "Home 4 - Velký sloupec (Dole)"
+
+# @ mh-newsdesk
+#: functions.php:118
+msgid "Home 5 - Sidebar"
+msgstr "Home 5 - Postranní sloupec"
+
+# @ mh-newsdesk
+#: functions.php:118
+msgid "Sidebar on Homepage."
+msgstr "Postranní sloupec na Hlavní stránce."
+
+# @ mh-newsdesk
+#: functions.php:119
+msgid "Header Advertisement"
+msgstr "Inzerce v záhlaví"
+
+# @ mh-newsdesk
+#: functions.php:119
+msgid "728*90 advertisement spot in the header."
+msgstr "728*90 inzerce v záhlaví."
+
+# @ mh-newsdesk
+#: functions.php:120
+msgid "Post Advertisement (Top)"
+msgstr "Inzerce v příspěvku (Nahoře)"
+
+# @ mh-newsdesk
+#: functions.php:120
+msgid "728*90 advertisement spot above your post text."
+msgstr "728*90 inzerce nad textem příspěvku."
+
+# @ mh-newsdesk
+#: functions.php:121
+msgid "Post Advertisement (Bottom)"
+msgstr "Inzerce v příspěvku (Dole)"
+
+# @ mh-newsdesk
+#: functions.php:121
+msgid "728*90 advertisement spot underneath your post text."
+msgstr "728*90 inzerce pod textem příspěvku."
+
+# @ mh-newsdesk
+#: functions.php:122
+msgid "Footer Advertisement"
+msgstr "Inzerce v zápatí"
+
+# @ mh-newsdesk
+#: functions.php:122
+msgid "728*90 advertisement spot in the footer."
+msgstr "728*90 inzerce v zápatí."
+
+# @ mh-newsdesk
+#: functions.php:123
+msgid "Footer 1 - First Column"
+msgstr "Zápatí 1 - První sloupec"
+
+# @ mh-newsdesk
+#: functions.php:123
+msgid "First column widget area in the footer."
+msgstr "První sloupec widgetů v zápatí."
+
+# @ mh-newsdesk
+#: functions.php:124
+msgid "Footer 2 - Second Column"
+msgstr "Zápatí 2 - Druhý sloupec"
+
+# @ mh-newsdesk
+#: functions.php:124
+msgid "Second column widget area in the footer."
+msgstr "Druhý sloupec widgetů v zápatí."
+
+# @ mh-newsdesk
+#: functions.php:125
+msgid "Footer 3 - Third Column"
+msgstr "Zápatí 3 - Třetí sloupec"
+
+# @ mh-newsdesk
+#: functions.php:125
+msgid "Third column widget area in the footer."
+msgstr "Třetí sloupec widgetů v zápatí."
+
+# @ mh-newsdesk
+#: functions.php:126
+msgid "Contact"
+msgstr "Kontakt"
+
+# @ mh-newsdesk
+#: functions.php:126
+msgid "Sidebar on contact template."
+msgstr "Postranní sloupec na kontaktní šabloně."
+
+# @ mh-newsdesk
+#: includes/mh-breadcrumb.php:16
+msgid "Home"
+msgstr "Home"
+
+# @ mh-newsdesk
+#: includes/mh-breadcrumb.php:27
+msgid "Media"
+msgstr "Média"
+
+# @ mh-newsdesk
+#: includes/mh-breadcrumb.php:60 includes/widgets/mh-authors.php:55
+msgid "Authors"
+msgstr "Autoři"
+
+# @ mh-newsdesk
+#: includes/mh-breadcrumb.php:62 includes/mh-custom-functions.php:68
+msgid "Page not found (404)"
+msgstr "Stránka nenalezena (404)"
+
+# @ mh-newsdesk
+#: includes/mh-breadcrumb.php:64
+msgid "Search"
+msgstr "Hledat"
+
+# @ mh-newsdesk
+#: includes/mh-breadcrumb.php:74 includes/mh-breadcrumb.php:77
+msgid "Yearly Archives"
+msgstr "Roční archiv"
+
+# @ mh-newsdesk
+#: includes/mh-breadcrumb.php:75
+msgid "Monthly Archives"
+msgstr "Měsíční archiv"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:50
+#, php-format
+msgctxt "post author"
+msgid "Articles by %s"
+msgstr "Články %s"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:62 template-sitemap.php:22
+msgid "Archives"
+msgstr "Archivy"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:70
+#, php-format
+msgid "Search Results for %s"
+msgstr "Výsledky hledání pro %s"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:94
+#, php-format
+msgctxt "post author"
+msgid "Posted By: %s"
+msgstr "Publikováno: %s"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:204
+msgid "Back to post"
+msgstr "Zpět na příspěvek"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:206
+msgid "Previous image"
+msgstr "Předchozí obrázek"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:209
+msgid "Previous post"
+msgstr "Předchozí příspěvek"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:216
+msgid "Next image"
+msgstr "Následující obrázek"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:218
+msgid "Next post"
+msgstr "Následující příspěek"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:238
+#, php-format
+msgid "%1$s at %2$s"
+msgstr "%1$s z %2$s"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:242
+msgid "(Edit)"
+msgstr "(Editovat)"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:245
+msgid "Your comment is awaiting moderation."
+msgstr "Váš komentář čeká na schválení."
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:262
+msgid "Name "
+msgstr "Jméno"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:263
+msgid "Email "
+msgstr "Email "
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:264
+msgid "Website"
+msgstr "Webová stránka"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:293
+msgid "Share on Facebook"
+msgstr "Sdílet na Facebooku"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:302
+msgid "Share on Google+"
+msgstr "Sdílet na Google+"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:23
+msgid "General"
+msgstr "Hlavní"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:24
+msgid "Layout"
+msgstr "Vzhled"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:25
+msgid "Typography"
+msgstr "Typografie"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:26
+msgid "News Ticker"
+msgstr "News Ticker"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:32 includes/mh-options.php:167
+msgid "Read More"
+msgstr "Číst dále"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:56 includes/mh-options.php:187
+msgid "Hot Topics"
+msgstr "Žhavá témata"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:72
+msgid "Favicon Upload"
+msgstr "Nahrát Favicon"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:73
+msgid "Custom Excerpt Length in Words"
+msgstr "Vlastní délka perexu ve slovech"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:74
+msgid "Custom Excerpt More-Text"
+msgstr "Vlastní text perexu Číst dále"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:75
+msgid "Copyright Text"
+msgstr "Text copyrightu"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:77
+msgid "Breadcrumb Navigation"
+msgstr "Drobečková navigace"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:77 includes/mh-options.php:78
+#: includes/mh-options.php:79 includes/mh-options.php:80
+#: includes/mh-options.php:81 includes/mh-options.php:82
+#: includes/mh-options.php:83 includes/mh-options.php:92
+#: includes/mh-options.php:132
+msgid "Enable"
+msgstr "Povolit"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:77 includes/mh-options.php:78
+#: includes/mh-options.php:79 includes/mh-options.php:80
+#: includes/mh-options.php:81 includes/mh-options.php:82
+#: includes/mh-options.php:83 includes/mh-options.php:92
+#: includes/mh-options.php:133
+msgid "Disable"
+msgstr "Zakázat"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:78
+msgid "Featured Image on Posts"
+msgstr "Zvýrazněný obrázek v příspěvku"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:79
+msgid "Sharing Buttons"
+msgstr "Tlačítka sdílení"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:80
+msgid "Post/Attachment Navigation"
+msgstr "Navigace v příspěvku / příloze"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:81
+msgid "Author Box"
+msgstr "Informace o autorovi"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:83
+msgid "Comments on Pages"
+msgstr "Komentáře na stránce"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:84
+msgid "Sidebar"
+msgstr "Postranní sloupec"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:84 includes/mh-options.php:134
+msgid "Right Sidebar"
+msgstr "Pravý postranní sloupec"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:84 includes/mh-options.php:135
+msgid "Left Sidebar"
+msgstr "Levý postranní sloupec"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:90
+msgid "Change default Font Size (px)"
+msgstr "Změnit velikost písma (px)"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:92
+msgid "Google Webfonts"
+msgstr "Google Webfonts"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:93
+msgid "Google Webfonts Characters"
+msgstr "Google Webfonts znaky"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:93 includes/mh-options.php:136
+msgid "Latin"
+msgstr "Latinka"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:93 includes/mh-options.php:137
+msgid "Latin Extended"
+msgstr "Rozšířená latinka"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:93 includes/mh-options.php:138
+msgid "Greek"
+msgstr "Řecká"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:93 includes/mh-options.php:139
+msgid "Greek Extended"
+msgstr "Řecká rozšířená"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:93 includes/mh-options.php:140
+msgid "Cyrillic"
+msgstr "Cyrilice"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:93 includes/mh-options.php:141
+msgid "Cyrillic Extended"
+msgstr "Rozšířená cyrilice"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:94
+msgid "Google Webfont for Headings"
+msgstr "Google Webfont pro nadpisy"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:95
+msgid "Google Webfont for Body Text"
+msgstr "Google Webfont pro text stránky"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:96
+msgid "Imported Google Font Styles"
+msgstr "Importované styly Google Fontů"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:98
+msgid "Enable Ticker"
+msgstr "Povolit Ticker"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:99
+msgid "Ticker Title"
+msgstr "Nadpis tickeru"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:100
+msgid "Limit Post Number"
+msgstr "Max. počet příspěvků"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:101
+msgid "Custom Categories (use ID - e.g. 3,5,9):"
+msgstr "Uživatelské kategorie (použijte ID - např. 3,5,9):"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:102
+msgid "Custom Tags (use slug - e.g. lifestyle):"
+msgstr "Uživatelské štítky (použijte slug - např. lifestyle):"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:103 includes/widgets/mh-custom-posts.php:128
+#: includes/widgets/mh-posts-grid.php:112
+#: includes/widgets/mh-posts-large.php:99 includes/widgets/mh-posts-list.php:98
+#: includes/widgets/mh-recent-posts.php:52
+msgid "Skip Posts (Offset):"
+msgstr "Přeskočit příspěvky  (Offset):"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:104 includes/widgets/mh-custom-posts.php:153
+#: includes/widgets/mh-posts-grid.php:129
+#: includes/widgets/mh-posts-large.php:116
+#: includes/widgets/mh-posts-list.php:115
+#: includes/widgets/mh-recent-posts.php:57
+msgid "Ignore Sticky Posts"
+msgstr "Ignorovat Sticky Posts"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:106 includes/mh-options.php:107
+#: includes/mh-options.php:108 includes/mh-options.php:109
+#: includes/mh-options.php:110
+#, php-format
+msgctxt "options panel"
+msgid "Theme Color %d"
+msgstr "Barva šablony %d"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:111
+msgid "Text Color (Navigation/Footer)"
+msgstr "Barva textu (Navigace/Patička)"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:9
+msgid "MH Authors widget to display a list of authors including the number of published posts."
+msgstr "MH Autoři - widget k zobrazení seznamu autorů včetně počtu publikovaných příspěvků."
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:31 includes/widgets/mh-authors.php:33
+#, php-format
+msgid "Articles by %s"
+msgstr "Články od %s"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:34
+#, php-format
+msgctxt "author post count"
+msgid "published %d articles"
+msgstr "publikované %d články"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:39
+msgid "No authors found"
+msgstr "Nenalezen žádný autor"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:59 includes/widgets/mh-comments.php:45
+#: includes/widgets/mh-custom-posts.php:97
+#: includes/widgets/mh-facebook-page.php:47
+#: includes/widgets/mh-posts-grid.php:81 includes/widgets/mh-posts-large.php:68
+#: includes/widgets/mh-posts-list.php:67
+#: includes/widgets/mh-recent-posts.php:44 includes/widgets/mh-youtube.php:37
+msgid "Title:"
+msgstr "Název:"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:63
+msgid "Limit Author Number:"
+msgstr "Max. počet autorů:"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:67
+msgid "Skip Authors (Offset):"
+msgstr "Přeskočit autory (Offset):"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:71
+msgid "User Role:"
+msgstr "Uživatelské pole:"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:73
+msgid "All Users"
+msgstr "Všichni uživatelé"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:74
+msgid "Administrator"
+msgstr "Administrátor"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:75
+msgid "Editor"
+msgstr "Editor"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:76
+msgid "Author"
+msgstr "Autor"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:77
+msgid "Contributor"
+msgstr "Spolupracovník"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:78
+msgid "Subscriber"
+msgstr "Odběratel"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:82
+msgid "Order Authors by:"
+msgstr "Seřadit autory podle:"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:84
+msgid "Number of Posts"
+msgstr "Počet příspěvků"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:85
+msgid "User Name"
+msgstr "Uživatelské jméno"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:89
+msgid "Order:"
+msgstr "Seřadit:"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:91
+msgid "Ascending"
+msgstr "Sestupně"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:92
+msgid "Descending"
+msgstr "Sestupně"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-comments.php:9
+msgid "MH Recent Comments widget to display your recent comments including user avatars."
+msgstr "MH Poslední komentáře - widget k zobrazení posledních komentářů včetně uživatelských avatarů."
+
+# @ mh-newsdesk
+#: includes/widgets/mh-comments.php:26
+#, php-format
+msgctxt "comment widget"
+msgid "%1$s on %2$s"
+msgstr "%1$s z %2$s"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-comments.php:41
+msgid "Recent Comments"
+msgstr "Poslední komentáře"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-comments.php:49
+msgid "Limit Comment Number:"
+msgstr "Max. počet komentářů:"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-comments.php:53
+msgid "Skip Comments (Offset):"
+msgstr "Přeskočit komentáře (Offset):"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:9
+msgid "Custom Pages Widget to display pages based on page IDs."
+msgstr "Zobrazení vybraných stránek podle ID."
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:68
+msgid "Title (optional):"
+msgstr "Název (optional):"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:72
+msgid "Link Title to URL (optional):"
+msgstr "Title URL odkazu (volitelné):"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:76
+msgid "Filter Pages by ID (comma separated):"
+msgstr "Filtrovat strany podle ID (oddělte čárkou):"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:80
+#: includes/widgets/mh-custom-posts.php:140
+msgid "Display Excerpts:"
+msgstr "Zobrazit perexy (zkrácené výpisy příspěvků):"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:82
+msgid "Excerpt for first Page"
+msgstr "Perex pro první stranu"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:83
+msgid "Excerpt for all Pages"
+msgstr "Perex pro všechny strany"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:84
+#: includes/widgets/mh-custom-posts.php:144
+msgid "Display no Excerpts"
+msgstr "Nezobrazovat perexy (zkrácené výpisy příspěvků)"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:9
+msgid "Display posts from any category or tag."
+msgstr "Zobrazit příspěvky všech kategorií a štítků."
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:101
+#: includes/widgets/mh-posts-grid.php:85 includes/widgets/mh-posts-large.php:72
+#: includes/widgets/mh-posts-list.php:71
+msgid "Select a Category:"
+msgstr "Vybrat kategorii:"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:103
+#: includes/widgets/mh-posts-grid.php:87 includes/widgets/mh-posts-large.php:74
+#: includes/widgets/mh-posts-list.php:73
+msgid "All"
+msgstr "Vše"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:116
+#: includes/widgets/mh-posts-grid.php:100
+#: includes/widgets/mh-posts-large.php:87 includes/widgets/mh-posts-list.php:86
+msgid "Multiple Categories Filter by ID:"
+msgstr "Filtr pro více kategorií podle ID:"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:120
+#: includes/widgets/mh-posts-grid.php:104
+#: includes/widgets/mh-posts-large.php:91 includes/widgets/mh-posts-list.php:90
+msgid "Filter Posts by Tags (e.g. lifestyle):"
+msgstr "Filtrovat příspěvky podle štítků (např. lifestyle):"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:124
+#: includes/widgets/mh-posts-grid.php:108
+#: includes/widgets/mh-posts-large.php:95 includes/widgets/mh-posts-list.php:94
+#: includes/widgets/mh-recent-posts.php:48
+msgid "Limit Post Number:"
+msgstr "Max. počet příspěvků:"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:132
+#: includes/widgets/mh-posts-grid.php:116
+#: includes/widgets/mh-posts-large.php:103
+#: includes/widgets/mh-posts-list.php:102
+msgid "Post Order:"
+msgstr "Řazení příspěvků:"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:134
+#: includes/widgets/mh-posts-grid.php:118
+#: includes/widgets/mh-posts-large.php:105
+#: includes/widgets/mh-posts-list.php:104
+msgid "Latest Posts"
+msgstr "Poslední příspěvky"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:135
+#: includes/widgets/mh-posts-grid.php:119
+#: includes/widgets/mh-posts-large.php:106
+#: includes/widgets/mh-posts-list.php:105
+msgid "Random Posts"
+msgstr "Náhodné příspěvky"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:136
+#: includes/widgets/mh-posts-grid.php:120
+#: includes/widgets/mh-posts-large.php:107
+#: includes/widgets/mh-posts-list.php:106
+msgid "Popular Posts"
+msgstr "Populární příspěvky"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:142
+msgid "Excerpt for first Post"
+msgstr "Perex pro první příspěvek"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:143
+msgid "Excerpt for all Posts"
+msgstr "Perex pro všechny příspěvky"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:148
+#: includes/widgets/mh-posts-grid.php:124
+#: includes/widgets/mh-posts-large.php:111
+#: includes/widgets/mh-posts-list.php:110
+msgid "Link Title to custom URL (optional):"
+msgstr "Title URL ručně zadaného odkazu (volitelné):"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:13
+#: includes/widgets/mh-facebook-page.php:43
+msgid "Follow on Facebook"
+msgstr "Sledovat na Facebooku"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:51
+msgid "Facebook Page URL:"
+msgstr "Facebook URL:"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-posts-grid.php:9
+msgid "Display posts as grid on front page for use in \"Home 1\" or \"Home 4\" widget areas."
+msgstr "Zobrazit příspěvky jako mřížku na přední straně pro užití v \"Home 1\" nebo \"Home 4\" widget prostoru."
+
+# @ mh-newsdesk
+#: includes/widgets/mh-posts-large.php:9
+msgid "Display posts with large images on front page for use in \"Home 1\" or \"Home 4\" widget areas."
+msgstr "Zobrazit příspěvky s velkými obrázky na přední straně pro použití v \"Home 1\" nebo \"Home 4\" widget prostoru."
+
+# @ mh-newsdesk
+#: includes/widgets/mh-posts-list.php:9
+msgid "Display a list of posts on front page for use in \"Home 1\" or \"Home 4\" widget areas."
+msgstr "Zobrazit seznam příspěvků na přední straně pro použití v  \"Home 1\" v \"Home 4\" widget prostoru."
+
+# @ mh-newsdesk
+#: includes/widgets/mh-recent-posts.php:9
+msgid "Display a list of most recent posts."
+msgstr "Zobrazit seznam posledních příspěvků."
+
+# @ mh-newsdesk
+#: includes/widgets/mh-youtube.php:9
+msgid "Widget to display a YouTube Video."
+msgstr "Widget k zobrazení YouTube Video."
+
+# @ mh-newsdesk
+#: includes/widgets/mh-youtube.php:41
+msgid "Video ID of your Featured Video:"
+msgstr "Video ID vašeho doporručeného videa:"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-youtube.php:43
+msgid "Also known as the Watch Code (Eg: fQydqPWdjoc)"
+msgstr "Také známý jako Watch Code (Eg: fQydqPWdjoc)"
+
+# @ mh-newsdesk
+#: template-sitemap.php:7
+msgid "Recent Articles"
+msgstr "Poslední články"
+
+# @ mh-newsdesk
+#: template-sitemap.php:15
+msgid "Pages"
+msgstr "Stránky"
+
+# @ mh-newsdesk
+#: template-sitemap.php:28
+msgid "Categories"
+msgstr "Kategorie"
+
+# @ mh-newsdesk
+#: template-sitemap.php:30
+msgid "No categories"
+msgstr "Žádné kategorie"
+
+# @ mh-newsdesk
+#: template-authorbox.php:4
+msgid "About the Author"
+msgstr "O Autorovi"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:293 includes/mh-custom-functions.php:302
+msgid "SHARE"
+msgstr "SDÍLET"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:296
+msgid "Tweet This Post"
+msgstr "Tweetuj tento příspěvek"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:296
+msgid "TWEET"
+msgstr "TWEET"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:299
+msgid "Pin This Post"
+msgstr "Zapinuj tento příspěvek"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:299
+msgid "PIN"
+msgstr "ZAPINUJ"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:85
+msgid "Hide Post Meta Data"
+msgstr "Skrýt metadata příspěvku"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:86 includes/widgets/mh-custom-posts.php:157
+msgid "Hide Date"
+msgstr "Skrýt datum"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:87
+msgid "Hide Author"
+msgstr "Skrýt autora"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:88
+msgid "Hide Categories"
+msgstr "Skrýt kategorie"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:8
+msgctxt "widget name"
+msgid "MH Facebook Page"
+msgstr "MH Facebook"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:9
+msgid "Widget to display your Facebook page on your website."
+msgstr "Widget k zobrazení Facebookové stránky na vaší webové stránce."
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:55
+msgid "Width (min. 280px):"
+msgstr "Šířka (min. 280px):"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:59
+msgid "Height (min. 130px):"
+msgstr "Výška (min. 130px):"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:64
+msgid "Hide cover photo"
+msgstr "Skrýt vrchní fotografii"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:68
+msgid "Show profile photos"
+msgstr "Zobrazit profilové fotografie"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:72
+msgid "Show posts from FB page"
+msgstr "Zobrazit příspěvky z FB strany"
+
+# @ mh-newsdesk
+#: comments.php:39
+#, php-format
+msgid "<span class=\"comment-count\">Be the first to comment</span> <span class=\"comment-count-more\">on \"%s\"</span>"
+msgstr "<span class=\"comment-count\">Vložte komentář jako první</span> <span class=\"comment-count-more\">k \"%s\"</span>"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:8
+msgctxt "widget name"
+msgid "MH Authors Widget"
+msgstr "MH Autoři (MH Authors Widget)"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-comments.php:8
+msgctxt "widget name"
+msgid "MH Recent Comments"
+msgstr "MH Poslední komentáře (MH Recent Comments)"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:8
+msgctxt "widget name"
+msgid "MH Custom Pages"
+msgstr "MH Vybrané stránky (MH Custom Pages)"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:8
+msgctxt "widget name"
+msgid "MH Custom Posts"
+msgstr "MH Vybrané příspěvky (MH Custom Posts)"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-posts-grid.php:8
+msgctxt "widget name"
+msgid "MH Posts Grid (Homepage)"
+msgstr "MH Mřížka příspěvků (MH Posts Grid, Homepage)"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-posts-large.php:8
+msgctxt "widget name"
+msgid "MH Posts Large (Homepage)"
+msgstr "MH Velký příspěvek (MH Posts Large, Homepage)"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-posts-list.php:8
+msgctxt "widget name"
+msgid "MH Posts List (Homepage)"
+msgstr "MH Seznam příspěvků (MH Posts List, Homepage)"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-recent-posts.php:8
+msgctxt "widget name"
+msgid "MH Recent Posts"
+msgstr "MH Poslední příspěvky (MH Recent Posts)"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-youtube.php:8
+msgctxt "widget name"
+msgid "MH YouTube Video"
+msgstr "MH YouTube Video"

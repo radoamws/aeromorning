@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml"/>
+  <NewsEnvelope>
+    <TransmissionId>202106100245PR_NEWS_USPR_____IO06990</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire"/>
+    </SentFrom>
+    <DateAndTime>20210610T024500-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing"/>
+    <Priority FormalName="4"/>
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20210610</DateId>
+        <NewsItemId>IO06990</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20210610:IO06990:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release"/>
+      <FirstCreated>20210610T024500-0400</FirstCreated>
+      <ThisRevisionCreated>20210610T024500-0400</ThisRevisionCreated>
+      <Status FormalName="Usable"/>
+    </NewsManagement>
+    
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main"/>
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>Elbit Systems Considers Potential Notes Offering in Israel</HeadLine>
+        <DateLine>HAIFA, Israel, June 10, 2021</DateLine>
+        <SlugLine>Elbit-Systems</SlugLine>
+      </NewsLines>
+      
+      <AdministrativeMetadata>
+        <FileName>202106100245PR_NEWS_USPR_____IO06990.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire"/>
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="Elbit Systems Ltd"/>
+          </Party>
+          <Contribution FormalName="Supplier"/>
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR"/>
+          </Party>
+          <Contribution FormalName="Editor"/>
+        </Contributor>
+        <Property FormalName="Source" Value="Elbit Systems Ltd"/>
+      </AdministrativeMetadata>
+      
+      <DescriptiveMetadata>
+        <Language FormalName="en-US"/>
+        <Genre FormalName="Press Release"/>
+        <SubjectCode>
+          <Subject FormalName="ARO" Scheme="IndustryCode"/>
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="CPR" Scheme="IndustryCode"/>
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="HMS" Scheme="IndustryCode"/>
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="STW" Scheme="IndustryCode"/>
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="AFI" Scheme="IndustryCode"/>
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="ACC" Scheme="SubjectCode"/>
+        </SubjectCode>
+        <Property FormalName="StockSymbol" Value="Stuttgart:EB2"/>
+        <Property FormalName="StockSymbol" Value="TelAviv:ESLT"/>
+        <Property FormalName="StockSymbol" Value="Frankfurt:EB2"/>
+        <Property FormalName="StockSymbol" Value="Berlin:EB2"/>
+        <Property FormalName="StockSymbol" Value="NASDAQ-NMS:ESLT"/>
+        <Property FormalName="StockSymbol" Value="Munich:EB2"/>
+        <Property FormalName="CompanyName" Value="Elbit Systems Ltd"/>
+        <Property FormalName="GeographyCode" Value="Israel"/>
+        <Property FormalName="GeographyCode" Value="United States of America"/>
+        <Property FormalName="GeographyCode" Value="New York"/>
+      </DescriptiveMetadata>
+      
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml"/>
+        <DataContent>
+        
+<!-- start embedded XHTML document -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:xn="http://www.xmlnews.org/ns/">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>Elbit Systems Considers Potential Notes Offering in Israel</title>
+<style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+.prntblns{
+BORDER-TOP: 1pt; BORDER-RIGHT: 1pt; BORDER-COLLAPSE: collapse; BORDER-BOTTOM: 1pt; BORDER-LEFT: 1pt
+}
+.prnsbb1{
+BORDER-BOTTOM:1pt
+}
+.prnsbr1{
+BORDER-RIGHT:1pt
+}
+.prnvab{
+VERTICAL-ALIGN: BOTTOM
+}
+.prnpr6{
+PADDING-RIGHT:0.50em
+}
+.prnpl6{
+PADDING-LEFT:0.50em
+}
+.prnsbt1{
+BORDER-TOP:1pt
+}
+.prnvat{
+VERTICAL-ALIGN: TOP
+}
+.prnsbl1{
+BORDER-LEFT:1pt
+}
+</style>
+</head>
+
+<body>
+
+<div class="xn-newslines">
+<h1 class="xn-hedline">Elbit Systems Considers Potential Notes Offering in Israel</h1>
+<p class="xn-distributor">PR Newswire</p>
+<p class="xn-dateline">HAIFA, Israel, June 10, 2021</p></div>
+
+<div class="xn-content">
+
+<p><span class="xn-location">HAIFA, Israel</span>, <span class="xn-chron">June 10, 2021</span> /PRNewswire/ -- <a target="_blank" href="https://elbitsystems.com/" rel="nofollow">Elbit Systems Ltd.<b> </b></a>(NASDAQ: ESLT) (TASE: ESLT)<b> </b>("Elbit Systems") announced today that it is considering, and the Board of Directors has authorized management to prepare for, a notes offering in <span class="xn-location">Israel</span> (the "Notes"), under the Company's shelf prospectus dated <span class="xn-chron">September 30, 2020</span> (the "Shelf Prospectus"), which was described in the Company's press release dated <span class="xn-chron">September 29, 2020</span> (the "Offering"). It is planned that the Notes will be listed on the Tel Aviv Stock Exchange, and offered in a uniform public offering, under an Israeli shelf offering report that the Company will publish, pursuant to the Israeli Securities Law, 1968, and the regulations promulgated thereunder. </p>
+<p>The execution, timing, terms and amount to be raised in the contemplated Offering have not been finally determined and are subject to further approval of the Company's Board of Directors and the approval of the Tel Aviv Stock Exchange. There is no assurance that the Offering will be completed. <span> </span></p>
+<p>In preparation for the potential Offering, the Company has published today in <span class="xn-location">Israel</span> draft Deeds of Trust and summaries of their terms in Hebrew.</p>
+<p>Any securities, if offered, will not be registered under the U.S. Securities Act of 1933, as amended (the "Securities Act"), and may not be offered or sold in <span class="xn-location">the United States</span> or to U.S. Persons (as defined in Regulation "S" promulgated under the Securities Act) without registration under the Securities Act or an exemption from the registration requirements of the Securities Act. Any offering of securities pursuant to the Shelf Prospectus and any shelf offering report, if made, will be made only in <span class="xn-location">Israel</span>. This announcement shall not constitute a solicitation or an offer to buy any securities. </p>
+<p><b><u>About Elbit Systems </u></b></p>
+<p>Elbit Systems Ltd. is an international high technology company engaged in a wide range of defense, homeland security and commercial programs throughout the world. The Company, which includes Elbit Systems and its subsidiaries, operates in the areas of aerospace, land and naval systems, command, control, communications, computers, intelligence surveillance and reconnaissance ("C4ISR"), unmanned aircraft systems, advanced electro-optics, electro-optic space systems, EW suites, signal intelligence systems, data links and communications systems, radios, cyber-based systems and munitions. The Company also focuses on the upgrading of existing platforms, developing new technologies for defense, homeland security and commercial applications and providing a range of support services, including training and simulation systems.</p>
+<p>For additional information, visit: <a target="_blank" href="https://elbitsystems.com/" rel="nofollow">https://elbitsystems.com/</a>, follow us on <a target="_blank" href="https://twitter.com/ElbitSystemsLtd" rel="nofollow">Twitter</a> or visit our official <a target="_blank" href="https://www.facebook.com/elbitsystemsltd/" rel="nofollow">Facebook</a>, <a target="_blank" href="https://www.youtube.com/c/elbitsystems" rel="nofollow">Youtube</a> and <a target="_blank" href="https://www.linkedin.com/company/elbitsystems/" rel="nofollow">LinkedIn</a> Channels.</p>
+<p> </p>
+<div><table cellspacing="0" cellpadding="0" border="0" class="prntblns"><tr><td class="prnsbt1 prnsbr1 prnvab prnsbb1 prnpl6 prnsbl1 prnpr6"><p class="prnews_p"><span class="prnews_span"><b><u>Company Contact</u></b><b>:        </b></span></p>
+<p class="prnews_p"><span class="prnews_span"><b>Joseph Gaspar</b>, <i>Executive VP &amp; CFO</i></span></p>
+<p class="prnews_p"><span class="prnews_span">Tel:  +972-4-8316663</span></p>
+<p class="prnews_p"><span class="prnews_span"><u><a target="_blank" href="mailto:j.gaspar@elbitsystems.com" class="prnews_a" rel="nofollow">j.gaspar@elbitsystems.com</a></u></span></p>
+<p class="prnews_p"><span class="prnews_span" /> </p>
+<p class="prnews_p"><span class="prnews_span"><b>Rami Myerson, </b><i>Director, Investor Relations</i></span></p>
+<p class="prnews_p"><span class="prnews_span">Tel: +972-77-2948984</span></p>
+<p class="prnews_p"><span class="prnews_span"><a target="_blank" href="mailto:rami.myerson@elbitsystems.com" class="prnews_a" rel="nofollow">rami.myerson@elbitsystems.com</a></span></p>
+<p class="prnews_p"><span class="prnews_span" /> </p>
+<p class="prnews_p"><span class="prnews_span"><b>David Vaaknin</b>, <i>VP, Head of Corporate Communications</i></span></p>
+<p class="prnews_p"><span class="prnews_span">Tel: +972-77-2946691 </span></p>
+<p class="prnews_p"><span class="prnews_span"><a target="_blank" href="mailto:david.vaaknin@elbitsystems.com" class="prnews_a" rel="nofollow">david.vaaknin@elbitsystems.com</a></span></p>
+</td><td class="prnsbt1 prnsbr1 prnvat prnsbb1 prnpl6 prnsbl1 prnpr6"><p class="prnews_p"><span class="prnews_span"><b><u>IR Contact</u></b><b>:</b> </span></p>
+<p class="prnews_p"><span class="prnews_span"><b>Ehud Helft</b></span></p>
+<p class="prnews_p"><span class="prnews_span"><b>Kenny Green</b></span></p>
+<p class="prnews_p"><span class="prnews_span"><i>GK Investor Relations</i><i><span class="prnews_span"> </span></i></span></p>
+<p class="prnews_p"><span class="prnews_span">Tel: 1-646-201-9246</span></p>
+<p class="prnews_p"><span class="prnews_span"><a target="_blank" href="mailto:elbitsystems@gkir.com" class="prnews_a" rel="nofollow">elbitsystems@gkir.com</a></span></p>
+</td></tr></table></div><p> </p>
+<p>This press release may contain forward–looking statements (within the meaning of Section 27A of the Securities Act of 1933, as amended, Section 21E of the Securities Exchange Act of 1934, as amended and the Israeli Securities Law, 1968) regarding Elbit Systems Ltd. and/or its subsidiaries (collectively the Company), to the extent such statements do not relate to historical or current facts. Forward-looking statements are based on management's current expectations, estimates, projections and assumptions about future events. Forward–looking statements are made pursuant to the safe harbor provisions of the Private Securities Litigation Reform Act of 1995, as amended. These statements are not guarantees of future performance and involve certain risks, uncertainties and assumptions about the Company, which are difficult to predict, including projections of the Company's future financial results, its anticipated growth strategies and anticipated trends in its business.  Therefore, actual future results, performance and trends may differ materially from these forward–looking statements due to a variety of factors, including, without limitation: scope and length of customer contracts; governmental regulations and approvals; changes in governmental budgeting priorities; general market, political and economic conditions in the countries in which the Company operates or sells, including <span class="xn-location">Israel</span> and <span class="xn-location">the United States</span> among others; changes in global health and macro-economic conditions; differences in anticipated and actual program performance, including the ability to perform under long-term fixed-price contracts; changes in the competitive environment; and the outcome of legal and/or regulatory proceedings.  The factors listed above are not all-inclusive, and further information is contained in Elbit Systems Ltd.'s latest annual report on Form 20-F, which is on file with the U.S. Securities and Exchange Commission. All forward–looking statements speak only as of the date of this release. Although the Company believes the expectations reflected in the forward-looking statements contained herein are reasonable, it cannot guarantee future results, level of activity, performance or achievements. Moreover, neither the Company nor any other person assumes responsibility for the accuracy and completeness of any of these forward-looking statements. The Company does not undertake to update its forward-looking statements.</p>
+<p>Elbit Systems Ltd., its logo, brand, product, service and process names appearing in this Press Release are the trademarks or service marks of Elbit Systems Ltd. or its affiliated companies.  All other brand, product, service and process names appearing are the trademarks of their respective holders.  Reference to or use of a product, service or process other than those of Elbit Systems Ltd. does not imply recommendation, approval, affiliation or sponsorship of that product, service or process by Elbit Systems Ltd. Nothing contained herein shall be construed as conferring by implication, estoppel or otherwise any license or right under any patent, copyright, trademark or other intellectual property right of Elbit Systems Ltd. or any third party, except as expressly granted herein.</p>
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://c212.net/c/img/favicon.png?sn=IO06990&amp;sd=2021-06-10" /> View original content:<a id="PRNURL" rel="nofollow" href="http://www.prnewswire.com/news-releases/elbit-systems-considers-potential-notes-offering-in-israel-301309775.html">http://www.prnewswire.com/news-releases/elbit-systems-considers-potential-notes-offering-in-israel-301309775.html</a></p>
+<p>SOURCE  Elbit Systems Ltd</p>
+</div>
+<img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=IO06990&amp;Transmission_Id=202106100245PR_NEWS_USPR_____IO06990&amp;DateId=20210610" style="border:0px; width:1px; height:1px;"/>
+</body>
+</html>
+
+<!-- end embedded XHTML document -->
+
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

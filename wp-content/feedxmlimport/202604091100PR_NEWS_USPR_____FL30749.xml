@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604091100PR_NEWS_USPR_____FL30749</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260409T110000-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260409</DateId>
+        <NewsItemId>FL30749</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260409:FL30749:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260409T110000-0400</FirstCreated>
+      <ThisRevisionCreated>20260409T110000-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>Eve Air Mobility Builds Flight-Test Momentum With 50 Successful Flights</HeadLine>
+        <DateLine>GAVIÃO PEIXOTO, Brazil, April 9, 2026</DateLine>
+        <SlugLine>EVEAIR-50-flights</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604091100PR_NEWS_USPR_____FL30749.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="Eve Air Mobility" />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="Eve Air Mobility" />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="AIR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="TRA" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="ARO" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="CPR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <Property FormalName="StockSymbol" Value="NYSE: EVEX" />
+        <Property FormalName="StockSymbol" Value="NYSE:EVEX" />
+        <Property FormalName="StockSymbol" Value="NYSE:EVEXW" />
+        <Property FormalName="StockSymbol" Value="SaoPaulo:EVEB31" />
+        <Property FormalName="CompanyName" Value="Eve Air Mobility" />
+        <Property FormalName="GeographyCode" Value="Brazil" />
+        <Property FormalName="Contact" Value="Eve Air Mobility, media@eveairmobility.com" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2848342/eve_Logo.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>Eve Air Mobility Builds Flight-Test Momentum With 50 Successful Flights</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+.prntac{
+TEXT-ALIGN: CENTER
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">Eve Air Mobility Builds Flight-Test Momentum With 50 Successful Flights</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">GAVIÃO PEIXOTO, Brazil, April 9, 2026</p>
+              </div>
+              <div class="xn-content">
+<p class="prntac"><i>High-Fidelity Flight Data and Knowledge Gains Continue to Mature the Program</i></p><p><span class="legendSpanClass">GAVIÃO PEIXOTO, Brazil</span>, <span class="legendSpanClass">April 9, 2026</span> /PRNewswire/ -- Eve Air Mobility ("Eve") (NYSE: EVEX, EVEXW; B3: EVEB31), a global leader in advanced air mobility solutions, has reached its 50<sup>th</sup> successful test flight with its full-scale engineering prototype, accumulating over two hours of flight time. Since the aircraft's first flight on Dec. 19, 2025, these flights have generated high‑fidelity data and knowledge gains that are strengthening Eve's understanding of performance and systems behavior as the company advances toward the future certification pathway of its eVTOL.</p>
+    <div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder1">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2848342/eve_Logo.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2848342/eve_Logo.jpg" title="Eve Air Mobility Logo (PRNewsfoto/Eve Air Mobility)" alt="Eve Air Mobility Logo (PRNewsfoto/Eve Air Mobility)" />
+                        </a>
+                </p>
+    </div>
+<p>"Reaching 50 successful test flights with our engineering prototype is more than a technical milestone. It is clear evidence of the maturity of our program and the strength of the solutions we are building," said Johann Bordais, chief executive officer at Eve. "Eve is uniquely positioned to deliver not only a high‑performance eVTOL aircraft but also aftermarket services, operational and airspace solutions that customers and cities will require to deploy urban air mobility at scale."</p><p>The fast pace of testing continues to validate the performance and operational capability of Eve's eVTOL. This achievement spotlights the company's product development process, based on the proven Embraer methodology. This consists of an integrated approach that combines aircraft development with solutions to help operators, cities, vertiports and air navigation providers prepare for the introduction of urban aviation.</p><p>The results and knowledge gained from flights with the full-scale engineering prototype are central to the development of Eve's conforming prototypes and the commercial aircraft. The company expects to begin producing its conforming prototypes this year, progressing toward a total of six that will be used in the certification flight test campaign with Brazil's civil aviation authority, ANAC.</p><p>With 50 test flights completed, Eve is now expanding flight envelope evaluations, gradually increasing forward speed, evaluating energy management, controllability and stability, noise and vibration, among others, leading to full transition flights later this year.</p><p><b>Images: </b><a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4660803-1&amp;h=2384886288&amp;u=https%3A%2F%2Feve.imagerelay.com%2Ffl%2Fdd63ffc6faa842c19ca7591b49317aae&amp;a=https%3A%2F%2Feve.imagerelay.com%2Ffl%2Fdd63ffc6faa842c19ca7591b49317aae" target="_blank" rel="nofollow">https://eve.imagerelay.com/fl/dd63ffc6faa842c19ca7591b49317aae</a></p><p><b><u>About Eve Air Mobility</u></b></p><p>Eve Air Mobility is dedicated to accelerating the Urban Air Mobility (UAM) ecosystem. Benefitting from a start-up mindset, backed by <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4660803-1&amp;h=681023856&amp;u=https%3A%2F%2Fwww.embraer.com%2Fen%2F&amp;a=Embraer%27s" target="_blank" rel="nofollow">Embraer's</a> 56-year history of aerospace expertise, and with a singular focus, Eve is taking a holistic approach to progressing the UAM ecosystem, with an advanced eVTOL project, comprehensive global services and support network and a unique air traffic management solution. Eve is listed on the New York Stock Exchange (EVEX; EVEXW) and the São Paulo Stock Exchange (EVEB31), where its shares of common stock, public warrants and Brazilian Depository Receipts are traded. For more information, please visit <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4660803-1&amp;h=2228284775&amp;u=http%3A%2F%2Fwww.eveairmobility.com%2F&amp;a=www.eveairmobility.com" target="_blank" rel="nofollow">www.eveairmobility.com</a>.</p><p><b><u>Forward-Looking Statement Disclosure</u></b> </p><p>Certain statements contained in this release are forward-looking statements within the meaning of the U.S. Private Securities Litigation Reform Act of 1995. These forward-looking statements may be identified by words such as "may," "will," "expect," "intend," "anticipate," "believe," "estimate," "plan," "project," "could," "should," "would," "continue," "seek," "target," "guidance," "outlook," "if current trends continue," "optimistic," "forecast" and other similar words or expressions. All statements, other than statements of historical facts, are forward-looking statements, including, but not limited to, statements about the company's plans, objectives, expectations, outlooks, projections, intentions, estimates, and other statements of future events or conditions, including with respect to all companies or entities named within. These forward-looking statements are based on the company's current objectives, beliefs and expectations, and they are subject to significant risks and uncertainties that may cause actual results and financial position and timing of certain events to differ materially from the information in the forward-looking statements. These risks and uncertainties include, but are not limited to, those set forth herein as well as in Part I, Item 1A. Risk Factors and Part II, Item 7. Management's Discussion and Analysis of Financial Condition and Results of Operations of the company's most recent Annual Report on Form 10-K, Part I, Item 2. Management's Discussion and Analysis of Financial Condition and Results of Operations and Part II, Item 1A. Risk Factors of the company's most recent Quarterly Report on Form 10-Q, and other risks and uncertainties listed from time to time in the company's other filings with the Securities and Exchange Commission. Additionally, there may be other factors of which the company is not currently aware that may affect matters discussed in the forward-looking statements and may also cause actual results to differ materially from those discussed. The company does not assume any obligation to publicly update or supplement any forward-looking statement to reflect actual results, changes in assumptions or changes in other factors affecting these forward-looking statements. other than as required by law. Any forward-looking statements speak only as of the date hereof or as of the dates indicated in the statement.</p>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=FL30749&amp;sd=2026-04-09" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/eve-air-mobility-builds-flight-test-momentum-with-50-successful-flights-302738432.html" target="_blank">https://www.prnewswire.com/news-releases/eve-air-mobility-builds-flight-test-momentum-with-50-successful-flights-302738432.html</a></p><p>SOURCE Eve Air Mobility</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=FL30749&amp;Transmission_Id=202604091100PR_NEWS_USPR_____FL30749&amp;DateId=20260409" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

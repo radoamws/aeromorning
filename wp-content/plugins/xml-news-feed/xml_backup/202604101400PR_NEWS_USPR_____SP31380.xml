@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604101400PR_NEWS_USPR_____SP31380</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260410T140000-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260410</DateId>
+        <NewsItemId>SP31380</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260410:SP31380:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260410T140000-0400</FirstCreated>
+      <ThisRevisionCreated>20260410T140000-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>Azul Files 20-F Annual Report for Fiscal Year 2025 in the U.S.</HeadLine>
+        <DateLine>SÃO PAULO, April 10, 2026</DateLine>
+        <SlugLine>AZUL-20-F-Report-2025</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604101400PR_NEWS_USPR_____SP31380.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="AZUL LINHAS AÉREAS BRASILEIRAS" />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="Azul S.A." />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="AIR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="OTC" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="TRA" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="TRN" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="AIF" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="PAV" Scheme="IndustryCode" />
+        </SubjectCode>
+        <Property FormalName="StockSymbol" Value="NYSE:AZUL" />
+        <Property FormalName="StockSymbol" Value="SaoPaulo:AZUL4" />
+        <Property FormalName="StockSymbol" Value="B3:AZUL53" />
+        <Property FormalName="StockSymbol" Value="OTC:AZLUY" />
+        <Property FormalName="StockSymbol" Value="OTC:AZULQ" />
+        <Property FormalName="CompanyName" Value="Azul S.A." />
+        <Property FormalName="GeographyCode" Value="Brazil" />
+        <Property FormalName="Contact" Value="Media Relations: Tel: +55 11 98196-1035, imprensa@voeazul.com.br; Investor Relations: Tel: +55 11 4831 2880, invest@voeazul.com.br" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>Azul Files 20-F Annual Report for Fiscal Year 2025 in the U.S.</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">Azul Files 20-F Annual Report for Fiscal Year 2025 in the U.S.</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">SÃO PAULO, April 10, 2026</p>
+              </div>
+              <div class="xn-content">
+<p><span class="legendSpanClass">SÃO PAULO</span>, <span class="legendSpanClass">April 10, 2026</span> /PRNewswire/ -- Azul Brazilian Airlines (B3:AZUL53, OTC: AZLUY) announces that it filed its Form 20-F annual report for fiscal year 2025 with the U.S. Securities and Exchange Commission (SEC) on April 2nd, 2026.</p>
+<p>The report is available on the SEC's website at <a href="https://nam10.safelinks.protection.outlook.com/?url=http%3A%2F%2Fwww.sec.gov%2F&amp;data=05%7C02%7Crodrigo.malmeida%40voeazul.com.br%7C95dc5ad65cf043da465e08de9598c982%7C8f309b91b0604b60bbb5091c51b75cfd%7C0%7C0%7C639112680654555825%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&amp;sdata=Xunj8QJRdH61LIpsAqwBWmHbJKu2N9TmFDGWkzz%2FmwI%3D&amp;reserved=0" target="_blank" rel="nofollow">www.sec.gov</a> and on Azul's Investor Relations website at ri.voeazul.com.br. Azul's shareholders and holders of American depositary shares can also request the document from Azul's Investor Relations department.</p><p><b>About Azul  <br /></b>Azul S.A. (B3: AZUL53; OTC: AZULQ), the largest airline in Brazil in terms of cities served, offers more than 800 daily flights to 137 destinations. With an operational fleet of around 200 aircraft and over 15,000 crew members, the company operates a network of 250 direct routes. Azul was ranked by Cirium (a leading aviation data analytics company) as the 2nd most punctual airline in the world in 2023. In 2020, Azul was awarded as the best airline in the world by TripAdvisor, marking the first time a Brazilian airline achieved first place in the Traveler's Choice Awards. For more information, visit Azul's website, <a href="http://www.voeazul.com.br/imprensa" target="_blank" rel="nofollow">www.voeazul.com.br/imprensa.</a></p>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=SP31380&amp;sd=2026-04-10" /> View original content:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/azul-files-20-f-annual-report-for-fiscal-year-2025-in-the-us-302739006.html" target="_blank">https://www.prnewswire.com/news-releases/azul-files-20-f-annual-report-for-fiscal-year-2025-in-the-us-302739006.html</a></p><p>SOURCE Azul S.A.</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=SP31380&amp;Transmission_Id=202604101400PR_NEWS_USPR_____SP31380&amp;DateId=20260410" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

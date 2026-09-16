@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604100855PR_NEWS_USPR_____NY31566</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260410T085500-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260410</DateId>
+        <NewsItemId>NY31566</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260410:NY31566:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260410T085500-0400</FirstCreated>
+      <ThisRevisionCreated>20260410T085500-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>NYSE Content Update: Sourcery Founder Molly O'Shea Joins as a Media Partner</HeadLine>
+        <DateLine>NEW YORK, April 10, 2026</DateLine>
+        <SlugLine>NYSE-update-April-10</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604100855PR_NEWS_USPR_____NY31566.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="NYSE Group, Inc." />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="New York Stock Exchange" />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="FIN" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="CPR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="FNT" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="BRD" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="PUB" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="ARO" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="RAD" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="ENT" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="BFA" Scheme="SubjectCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="ICE" Scheme="SubjectCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="ECO" Scheme="SubjectCode" />
+        </SubjectCode>
+        <Property FormalName="StockSymbol" Value="NYSE:ICE" />
+        <Property FormalName="CompanyName" Value="New York Stock Exchange" />
+        <Property FormalName="GeographyCode" Value="New York" />
+        <Property FormalName="GeographyCode" Value="California" />
+        <Property FormalName="Contact" Value="Joe Benarroch, joe.benarroch@nyse.com, Head of Content, Media Partnerships, &amp; Distribution" />
+        <Property FormalName="Video" Value="https://mma.prnewswire.com/media/2953816/NYSE_Market_Update_April_10.mp4" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2953815/NYSE_MNTN_Closing_Bell.jpg" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2581322/New_York_Stock_Exchange_Logo.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>NYSE Content Update: Sourcery Founder Molly O'Shea Joins as a Media Partner</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+.prntac{
+TEXT-ALIGN: CENTER
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">NYSE Content Update: Sourcery Founder Molly O'Shea Joins as a Media Partner</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">NEW YORK, April 10, 2026</p>
+              </div>
+              <div class="xn-content">
+<p class="prntac"><i>NYSE issues a pre-market daily advisory direct from the trading floor.</i></p><p><span class="legendSpanClass">NEW YORK</span>, <span class="legendSpanClass">April 10, 2026</span> /PRNewswire/ -- The New York Stock Exchange (NYSE) provides a daily pre-market update directly from the NYSE Trading Floor. Access today's NYSE Pre-market update for market insights before trading begins. </p>
+    <div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder1">
+                <p title="Sourcery is an investing and technology newsletter and podcast."><iframe id="PlayMedia_2953816" src="https://mma.prnewswire.com/playmedia/2953816/NYSE_Market_Update_April_10.html" width="560" height="325" frameborder="0" scrolling="no"> </iframe></p>
+    </div>
+<p><b>Kristen Scholer delivers the pre-market update on April 10th</b></p><ul type="disc"><li>The S&amp;P 500 finished Thursday's session just 2.5% from its record high, as traders await to see if the two-week ceasefire can hold.</li><li>Artemis II prepares for splashdown later tonight, with the moment set to take place after 8 PM ET, and Payload's Jacqueline Feldscher will join NYSE Live with more.</li><li>The NYSE celebrates 50 years of options trading on NYSE Arca Options this month, ringing the closing bell from San Francisco.</li><li>Sourcery Founder Molly O'Shea and the NYSE entered a media partnership recently to expand technology and investing coverage coast to coast.</li></ul><p><b><u>Opening Bell</u></b><br />Natixis and Loomis Sayles celebrate the Natixis Loomis Sayles Focused Growth LSGR ETF</p><p><b><u>Closing Bell</u></b><br />The NYSE celebrates the 50<sup>th</sup> anniversary of trading options in San Francisco</p><p><b>For market insights, IPO activity, and today's opening bell, download the NYSE TV App: </b><a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661631-1&amp;h=1409787563&amp;u=https%3A%2F%2Ftv.nyse.com%2F&amp;a=TV.NYSE.com" target="_blank" rel="nofollow"><b>TV.NYSE.com</b></a></p>
+<div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder2">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2953815/NYSE_MNTN_Closing_Bell.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2953815/NYSE_MNTN_Closing_Bell.jpg" title="MNTN's CEO Mark Douglas rang yesterday's closing bell" alt="MNTN's CEO Mark Douglas rang yesterday's closing bell" />
+                        </a>
+                </p>
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2581322/New_York_Stock_Exchange_Logo.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2581322/New_York_Stock_Exchange_Logo.jpg" title="NYSE Logo (PRNewsfoto/New York Stock Exchange)" alt="NYSE Logo (PRNewsfoto/New York Stock Exchange)" />
+                        </a>
+                </p>
+</div>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=NY31566&amp;sd=2026-04-10" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/nyse-content-update-sourcery-founder-molly-oshea-joins-as-a-media-partner-302739259.html" target="_blank">https://www.prnewswire.com/news-releases/nyse-content-update-sourcery-founder-molly-oshea-joins-as-a-media-partner-302739259.html</a></p><p>SOURCE New York Stock Exchange</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=NY31566&amp;Transmission_Id=202604100855PR_NEWS_USPR_____NY31566&amp;DateId=20260410" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

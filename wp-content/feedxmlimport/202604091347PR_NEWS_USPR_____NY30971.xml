@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604091347PR_NEWS_USPR_____NY30971</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260409T134700-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260409</DateId>
+        <NewsItemId>NY30971</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260409:NY30971:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260409T134700-0400</FirstCreated>
+      <ThisRevisionCreated>20260409T134700-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>Mach Industries Appoints Amanda Sustak as Senior Vice President of Business Development</HeadLine>
+        <DateLine>HUNTINGTON BEACH, Calif., April 9, 2026</DateLine>
+        <SlugLine>MACH-Appoints</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604091347PR_NEWS_USPR_____NY30971.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="RELATIVITY VENTURES" />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="Mach Industries" />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="ARO" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="CPR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="HTS" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="PER" Scheme="SubjectCode" />
+        </SubjectCode>
+        <Property FormalName="CompanyName" Value="Mach Industries" />
+        <Property FormalName="GeographyCode" Value="California" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2752788/Mach_Industries__Logo.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>Mach Industries Appoints Amanda Sustak as Senior Vice President of Business Development</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">Mach Industries Appoints Amanda Sustak as Senior Vice President of Business Development</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">HUNTINGTON BEACH, Calif., April 9, 2026</p>
+              </div>
+              <div class="xn-content">
+<p><span class="legendSpanClass">HUNTINGTON BEACH, Calif.</span>, <span class="legendSpanClass">April 9, 2026</span> /PRNewswire/ -- <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661023-1&amp;h=3661814313&amp;u=https%3A%2F%2Fmachindustries.com%2F&amp;a=Mach+Industries" target="_blank" rel="nofollow"><b>Mach Industries</b></a>, a defense manufacturing company that develops advanced unmanned systems, today announced the appointment of Amanda Sustak as Senior Vice President of Business Development.</p>
+    <div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder1">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2752788/Mach_Industries__Logo.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2752788/Mach_Industries__Logo.jpg" title="Mach Industries (PRNewsfoto/Mach Industries)" alt="Mach Industries (PRNewsfoto/Mach Industries)" />
+                        </a>
+                </p>
+    </div>
+<p>In this role, Sustak is responsible for driving strategic growth across the U.S. Department of War (DoW), Intelligence Community, and National and Homeland Security sectors. She will work directly with customers to understand their most complex operational and mission challenges, aligning Mach Industries' innovative solutions to deliver critical capability and expand the company's footprint in national security markets.</p><p>"I'm excited to join Mach Industries at such a pivotal time in the company's growth. Mach is developing truly breakthrough capabilities that address some of the most urgent challenges facing our warfighters and national security operators today," said Amanda Sustak. "I look forward to working closely with our customers to deeply understand their mission needs and deliver innovative, mission-critical solutions that give them a decisive advantage."</p><p>"Amanda's extensive experience in building growth organizations and partnering with national security customers gives her the leadership needed to drive Mach's next phase of expansion," said Ethan Thornton, CEO and founder of Mach Industries.</p><p>Sustak brings more than 17 years of proven leadership in both operational and business development roles. She has a strong track record of building high-performing growth organizations, developing and executing market expansion strategies, and consistently delivering revenue growth.</p><p>Most recently, Sustak served as Head of Business Development at Somewear Labs, a fast-growing startup focused on tactical communications solutions for manned and unmanned systems. Prior to Somewear Labs, she held key leadership positions including Division Vice President for Advancing National Security Growth at Jacobs Engineering Group, Deputy Program Manager at the Department of Homeland Security, and Senior Duty Officer with the Federal Bureau of Investigation supporting the U.S. National Security Council.</p><p><b>About Mach Industries</b></p><p>Founded in 2023, Mach Industries is a defense manufacturing company headquartered in Huntington Beach, California. The company develops advanced unmanned systems and the manufacturing infrastructure to scale their production. By vertically integrating weapons, propulsion, and manufacturing, Mach delivers the speed, adaptability, and resilience required to preserve the allied edge in an increasingly contested world. For more information, please visit us at <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661023-1&amp;h=160502988&amp;u=http%3A%2F%2Fmachindustries.com%2F&amp;a=machindustries.com" target="_blank" rel="nofollow">machindustries.com</a> and follow us on <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661023-1&amp;h=2342611154&amp;u=https%3A%2F%2Fwww.linkedin.com%2Ffeed%2F&amp;a=LinkedIn+" target="_blank" rel="nofollow">LinkedIn </a>and <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661023-1&amp;h=2452687963&amp;u=https%3A%2F%2Fx.com%2FMach_Industries&amp;a=X" target="_blank" rel="nofollow">X</a>.</p><p><b>Media Contact<br /></b><a href="mailto:Press@machindustries.com" target="_blank" rel="nofollow">Press@machindustries.com</a></p>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=NY30971&amp;sd=2026-04-09" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/mach-industries-appoints-amanda-sustak-as-senior-vice-president-of-business-development-302738603.html" target="_blank">https://www.prnewswire.com/news-releases/mach-industries-appoints-amanda-sustak-as-senior-vice-president-of-business-development-302738603.html</a></p><p>SOURCE Mach Industries</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=NY30971&amp;Transmission_Id=202604091347PR_NEWS_USPR_____NY30971&amp;DateId=20260409" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

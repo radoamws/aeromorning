@@ -1,0 +1,25 @@
+# Environment / secrets (per-environment, differs between local and prod)
+wp-config.php
+.htaccess
+.user.ini
+php.ini
+.ftpquota
+
+# WordPress runtime / generated data (not source, regenerated automatically)
+wp-content/uploads/
+wp-content/upgrade/
+wp-content/upgrade-temp-backup/
+wp-content/cache/
+wp-content/gallery/*/cache/
+wp-content/debug.log
+*.log
+
+# Private stats tool (contains .htpasswd)
+/stat/
+
+# Session scratch files
+prompt
+
+# OS junk
+Thumbs.db
+.DS_Store

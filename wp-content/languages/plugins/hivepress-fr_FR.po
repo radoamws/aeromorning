@@ -1,0 +1,1961 @@
+# Translation of Plugins - HivePress &#8211; Business Directory &amp; Classified Ads WordPress Plugin - Stable (latest release) in French (France)
+# This file is distributed under the same license as the Plugins - HivePress &#8211; Business Directory &amp; Classified Ads WordPress Plugin - Stable (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2022-10-05 20:51:53+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: GlotPress/4.0.0-alpha.4\n"
+"Language: fr\n"
+"Project-Id-Version: Plugins - HivePress &#8211; Business Directory &amp; Classified Ads WordPress Plugin - Stable (latest release)\n"
+
+#: includes/fields/class-phone.php:62
+msgid "Select the country calling code displayed by default."
+msgstr "Sélectionnez l’indicatif du pays affiché par défaut."
+
+#: includes/fields/class-phone.php:61
+msgid "Default Country"
+msgstr "Pays par défaut"
+
+#: includes/configs/settings.php:294
+msgid "First Name and First Letter of Last Name"
+msgstr "Prénom et première lettre du nom"
+
+#: includes/configs/settings.php:296
+msgid "First Letter of First Name and Last Name"
+msgstr "Première lettre du prénom et du nom"
+
+#. translators: %s: terms URL.
+#: includes/components/class-admin.php:1710
+msgid "Share Usage Data"
+msgstr "Partager les données d’utilisation"
+
+#. translators: %s: terms URL.
+#: includes/components/class-admin.php:1710
+msgid "Help us make HivePress better by sharing <a href=\"%s\" target=\"_blank\">non-sensitive usage data</a> or dismiss this notice to opt out."
+msgstr "Aidez-nous à améliorer HivePress en partageant <a href=\"%s\" target=\"_blank\">les données d’utilisation non sensibles</a> ou rejetez cette notification pour ignorer."
+
+#: includes/fields/class-phone.php:52
+msgid "Countries"
+msgstr "Pays"
+
+#: includes/fields/class-phone.php:42
+msgid "Phone"
+msgstr "Téléphone"
+
+#: includes/fields/class-phone.php:53
+msgid "Select countries to restrict the available calling codes."
+msgstr "Sélectionnez les pays pour restreindre les codes d’appel disponibles."
+
+#. translators: %s: terms URL.
+#: includes/configs/settings.php:408
+msgid "Check this option to allow tracking <a href=\"%s\" target=\"_blank\">non-sensitive usage data</a> and help us make HivePress better."
+msgstr "Cochez cette option pour autoriser le suivi <a href=\"%s\" target=\"_blank\">des données d’utilisation non sensibles</a> et nous aider à améliorer HivePress."
+
+#: includes/configs/settings.php:406
+msgid "Allow usage tracking"
+msgstr "Autoriser le suivi d’utilisation"
+
+#: includes/configs/settings.php:405
+msgid "Usage Tracking"
+msgstr "Suivi d’utilisation"
+
+#: includes/configs/strings.php:66
+msgid "Something went wrong."
+msgstr "Un problème est survenu."
+
+#: includes/fields/class-attachment-upload.php:356
+#: includes/fields/class-attachment-upload.php:358
+msgid "Download"
+msgstr "Télécharger"
+
+#: includes/components/class-attribute.php:757
+msgid "Set the field name used for storing the attribute values."
+msgstr "Définissez le nom du champ utilisé pour stocker les valeurs de l’attribut."
+
+#: includes/forms/class-plugin-deactivate.php:43
+msgid "Other"
+msgstr "Autres"
+
+#: includes/forms/class-plugin-deactivate.php:62
+msgid "Submit & Deactivate"
+msgstr "Envoyer & désactiver"
+
+#: includes/forms/class-plugin-deactivate.php:49
+msgid "Extra details, e.g. conflicting themes, plugins, missing features or docs."
+msgstr "Détails supplémentaires, par exemple des thèmes ou des extensions conflictuels, des fonctionnalités ou des documentations manquantes."
+
+#: includes/forms/class-plugin-deactivate.php:42
+msgid "The docs are not helpful"
+msgstr "Les documentations ne sont pas utiles"
+
+#: includes/forms/class-plugin-deactivate.php:41
+msgid "It conflicts with other plugins"
+msgstr "Il entre en conflit avec d’autres extensions."
+
+#: includes/forms/class-plugin-deactivate.php:40
+msgid "Poor integration with page builders"
+msgstr "Mauvaise intégration avec les constructeurs de pages"
+
+#: includes/forms/class-plugin-deactivate.php:39
+msgid "The layout is too basic or broken"
+msgstr "La mise en page est trop basique ou brisée"
+
+#: includes/forms/class-plugin-deactivate.php:38
+msgid "It lacks the required features"
+msgstr "Il ne dispose pas des fonctionnalités nécessaires"
+
+#: includes/forms/class-plugin-deactivate.php:28
+msgid "Please help us improve by sharing the deactivation reason. Select \"Other\" to proceed without sharing."
+msgstr "Veuillez nous aider à nous améliorer en partageant la raison de la désactivation. Sélectionnez « Autre » pour procéder sans partager."
+
+#: includes/emails/class-user-register.php:48
+msgid "Hi, %user_name%! Thank you for registering, now you can access website areas that require an account."
+msgstr "Bonjour, %user_name%! Merci de vous être inscrit, vous pouvez maintenant accéder aux zones du site qui nécessitent un compte."
+
+#: includes/configs/strings.php:115
+msgid "Listing Category"
+msgstr "Catégorie d’annonce"
+
+#: includes/configs/settings.php:415
+msgid "Please enter the license keys for purchased themes and extensions, each key on a new line."
+msgstr "Veuillez saisir les clés de licence des thèmes et extensions achetés, chaque clé sur une nouvelle ligne."
+
+#: includes/configs/settings.php:414
+msgid "License Keys"
+msgstr "Clés de licence"
+
+#: includes/configs/settings.php:400
+msgid "HivePress Store"
+msgstr "Boutique HivePress"
+
+#. translators: %s: plugin name.
+#: includes/components/class-admin.php:1865
+msgid "Deactivate %s"
+msgstr "Désactiver %s"
+
+#: includes/templates/class-page-narrow.php:68
+#: includes/templates/class-page-sidebar-left.php:79
+#: includes/templates/class-page-wide.php:59
+msgid "Page Description"
+msgstr "Description de la page"
+
+#: includes/templates/class-user-view-page.php:59
+#: includes/templates/class-vendor-view-page.php:59
+msgid "Summary"
+msgstr "Résumé"
+
+#: includes/configs/strings.php:76
+msgctxt "plural"
+msgid "Related"
+msgstr "Similaire"
+
+#: includes/configs/strings.php:73
+msgid "Widgets"
+msgstr "Widgets"
+
+#: includes/configs/strings.php:72
+msgid "Actions"
+msgstr "Actions"
+
+#: includes/configs/strings.php:51
+msgid "Profile"
+msgstr "Profil"
+
+#: includes/configs/strings.php:49
+msgid "Message"
+msgstr "Message"
+
+#: includes/configs/strings.php:48
+msgid "Menu"
+msgstr "Menu"
+
+#: includes/configs/strings.php:47
+msgid "Toolbar"
+msgstr "Barre d’outils"
+
+#: includes/configs/strings.php:46
+msgid "Result Count"
+msgstr "Nombre de résultats"
+
+#: includes/configs/strings.php:43
+msgid "Form"
+msgstr "Formulaire"
+
+#: includes/templates/class-page-narrow.php:61
+#: includes/templates/class-page-sidebar-left.php:72
+#: includes/templates/class-page-wide.php:52
+msgid "Page Title"
+msgstr "Titre de page"
+
+#: includes/configs/strings.php:52
+msgid "Pagination"
+msgstr "Pagination"
+
+#: includes/configs/strings.php:50
+msgid "Completed"
+msgstr "Terminé"
+
+#: includes/configs/strings.php:45
+msgid "Sort Form"
+msgstr "Formulaire de tri"
+
+#: includes/configs/strings.php:44
+msgid "Filter Form"
+msgstr "Formulaire de filtrage"
+
+#: includes/configs/strings.php:75
+msgctxt "plural"
+msgid "Secondary"
+msgstr "Secondaires"
+
+#: includes/configs/strings.php:74
+msgctxt "plural"
+msgid "Primary"
+msgstr "Principaux"
+
+#: includes/components/class-attribute.php:738
+msgid "Pages"
+msgstr "Pages"
+
+#: includes/components/class-attribute.php:739
+msgid "Create a page for each attribute option"
+msgstr "Créer une page pour chaque option d’attribut"
+
+#: includes/components/class-attribute.php:757
+msgid "Use lowercase letters, numbers, and underscores only."
+msgstr "Utilisez uniquement des lettres minuscules, des chiffres et des tirets bas."
+
+#: includes/components/class-attribute.php:756
+msgid "Field Name"
+msgstr "Nom du champ"
+
+#: includes/configs/meta-boxes.php:182
+msgid "Mark this user as verified"
+msgstr "Marquer ce compte comme vérifié"
+
+#: includes/components/class-user.php:294
+msgctxt "user"
+msgid "Unverified"
+msgstr "Non vérifié"
+
+#. translators: %s: Discount percentage.
+#: templates/admin/extensions.php:61
+msgid "Save %s"
+msgstr "Enregistrer %s"
+
+#: includes/configs/settings.php:344
+msgid "Security"
+msgstr "Sécurité"
+
+#: includes/configs/settings.php:346
+msgid "Restrict access to the WordPress back-end"
+msgstr "Restreindre l’accès à l’interface d’administration de WordPress"
+
+#: includes/configs/settings.php:345
+msgid "Check this option to block the WordPress back-end access for regular users."
+msgstr "Cochez cette option pour bloquer l’accès à l’interface d’administration de WordPress pour les internautes ordinaires."
+
+#: includes/fields/class-repeater.php:165
+msgid "Remove"
+msgstr "Retirer"
+
+#: includes/fields/class-repeater.php:175
+msgid "Add Item"
+msgstr "Ajouter un élément"
+
+#: includes/configs/settings.php:35
+msgid "Display categories instead of listings"
+msgstr "Afficher les catégories au lieu des annonces"
+
+#: includes/configs/meta-boxes.php:142
+msgid "Display subcategories instead of listings"
+msgstr "Afficher les sous-catégories au lieu des annonces"
+
+#: includes/fields/class-date.php:382 includes/fields/class-time.php:124
+msgid "Clear"
+msgstr "Effacer"
+
+#. translators: %s: link URL.
+#: includes/components/class-admin.php:1697
+msgid "Great start with HivePress! Check out our <a href=\"%1$s\">premium themes</a> and <a href=\"%2$s\">extensions</a> for more tailored design and functionality."
+msgstr "Un grand départ avec HivePress ! Testez nos <a href=\"%1$s\">thèmes premium</a> et <a href=\"%2$s\">extensions</a> pour une conception et des fonctionnalités sur mesure."
+
+#: includes/fields/class-attachment-upload.php:83
+msgctxt "attachment"
+msgid "Protected"
+msgstr "Protégé"
+
+#: includes/fields/class-attachment-upload.php:84
+msgid "Protect files from direct access"
+msgstr "Protéger les fichiers contre l’accès direct"
+
+#: includes/configs/strings.php:205
+msgid "Allowed File Types"
+msgstr "Types de fichier autorisés"
+
+#: includes/configs/strings.php:204
+msgid "Allow file attachments"
+msgstr "Autoriser les fichiers joints"
+
+#: includes/configs/strings.php:203
+msgid "Attachments"
+msgstr "Fichiers joints"
+
+#: includes/components/class-email.php:103
+msgid "Recipient"
+msgstr "Destinataire"
+
+#: includes/components/class-email.php:102 includes/configs/meta-boxes.php:37
+msgid "Event"
+msgstr "Évènement"
+
+#: includes/configs/post-types.php:50 includes/configs/post-types.php:51
+msgid "No templates found."
+msgstr "Aucun modèle trouvé."
+
+#: includes/configs/post-types.php:49
+msgid "Search Templates"
+msgstr "Rechercher des modèles"
+
+#: includes/configs/post-types.php:46
+msgid "Edit Template"
+msgstr "Modifier le modèle"
+
+#: includes/configs/post-types.php:45 includes/configs/post-types.php:47
+msgid "Add Template"
+msgstr "Ajouter un modèle"
+
+#: includes/components/class-editor.php:232
+#: includes/components/class-template.php:200
+#: includes/configs/meta-boxes.php:21 includes/configs/post-types.php:43
+msgid "Template"
+msgstr "Modèle"
+
+#: includes/configs/post-types.php:42 includes/configs/post-types.php:48
+msgid "Templates"
+msgstr "Modèles"
+
+#: includes/components/class-email.php:101
+msgid "Subject"
+msgstr "Objet"
+
+#: includes/configs/strings.php:67
+msgid "User"
+msgstr "Compte"
+
+#: includes/configs/post-types.php:44
+msgctxt "template"
+msgid "Add New"
+msgstr "Ajouter un nouveau"
+
+#: includes/configs/post-types.php:28
+msgid "Search Emails"
+msgstr "Rechercher des e-mails"
+
+#: includes/configs/post-types.php:29 includes/configs/post-types.php:30
+msgid "No emails found."
+msgstr "Aucun e-mail trouvé."
+
+#: includes/configs/post-types.php:25
+msgid "Edit Email"
+msgstr "Modifier l’e-mail"
+
+#: includes/configs/post-types.php:24 includes/configs/post-types.php:26
+msgid "Add Email"
+msgstr "Ajouter un e-mail"
+
+#: includes/configs/post-types.php:23
+msgctxt "email"
+msgid "Add New"
+msgstr "Ajouter un nouveau"
+
+#: includes/blocks/class-user-login-form.php:28
+msgid "User Login Form"
+msgstr "Formulaire de connexion internaute"
+
+#. translators: %s: link URL.
+#: includes/components/class-admin.php:1684
+msgid "It's been more than 2 weeks since you installed HivePress, that's awesome! If you find it useful, please leave a review on <a href=\"%s\" target=\"_blank\">WordPress.org</a> to help us spread the word."
+msgstr "Cela fait plus de 2 semaines que vous avez installé HivePress, c’est génial ! Si vous trouvez cela utile, veuillez laisser votre avis sur <a href=\"%s\" target=\"_blank\">WordPress.org</a> pour nous aider à passer le mot."
+
+#: includes/configs/strings.php:159
+msgid "Set the title display format to generate titles based on attributes."
+msgstr "Définissez le format d’affichage des titres pour générer les titres basés sur les attributs."
+
+#: includes/configs/settings.php:258
+msgid "Allow direct registration"
+msgstr "Autoriser les inscriptions directes"
+
+#: includes/configs/strings.php:171
+msgid "Vendor Registered"
+msgstr "Vendeur inscrit"
+
+#: includes/configs/strings.php:69
+msgid "Registered Users"
+msgstr "Internautes inscrits"
+
+#: includes/configs/strings.php:68
+msgid "All Users"
+msgstr "Tous les internautes"
+
+#: includes/emails/class-vendor-register.php:29
+msgid "A new vendor profile has been registered, click on the following link to view it: %vendor_url%"
+msgstr "Un nouveau profil annonceur s’est inscrit, cliquez sur le lien suivant pour le voir : %vendor_url%"
+
+#: includes/components/class-attribute.php:1451
+msgid "Include in keyword search"
+msgstr "Inclure dans la recherche de mots-clés"
+
+#: includes/components/class-attribute.php:1450
+msgctxt "attribute"
+msgid "Indexable"
+msgstr "Indexable"
+
+#: includes/components/class-attribute.php:1443
+msgctxt "attribute"
+msgid "Filterable"
+msgstr "Filtrable"
+
+#: includes/fields/class-image-size.php:91
+msgid "Left"
+msgstr "À gauche"
+
+#: includes/fields/class-image-size.php:93
+msgid "Right"
+msgstr "À droite"
+
+#: includes/fields/class-image-size.php:106
+msgid "Bottom"
+msgstr "En bas"
+
+#: includes/fields/class-image-size.php:104
+msgid "Top"
+msgstr "En haut"
+
+#: includes/fields/class-image-size.php:79
+msgid "Height"
+msgstr "Hauteur"
+
+#: includes/fields/class-image-size.php:69
+msgid "Width"
+msgstr "Largeur "
+
+#: includes/configs/strings.php:41
+msgid "Price"
+msgstr "Prix"
+
+#: includes/configs/strings.php:39
+msgid "Default Fields"
+msgstr "Champs par défaut"
+
+#: includes/configs/settings.php:77
+msgid "Enable image zoom"
+msgstr "Activer le zoom sur image"
+
+#: includes/controllers/class-listing.php:184
+#: includes/controllers/class-vendor.php:70
+msgctxt "imperative"
+msgid "Complete Profile"
+msgstr "Compléter le profil"
+
+#: includes/fields/class-date.php:138
+msgid "Date Offset"
+msgstr "Décalage de date"
+
+#: includes/fields/class-image-size.php:92
+#: includes/fields/class-image-size.php:105
+msgid "Center"
+msgstr "Centrer"
+
+#: includes/fields/class-image-size.php:87
+#: includes/fields/class-image-size.php:100
+msgid "Crop Position"
+msgstr "Position de recadrage"
+
+#: includes/configs/image-sizes.php:22 includes/configs/image-sizes.php:29
+msgid "Landscape size"
+msgstr "Taille paysage"
+
+#: includes/configs/image-sizes.php:29
+msgctxt "size"
+msgid "large"
+msgstr "grand"
+
+#: includes/configs/image-sizes.php:15 includes/configs/image-sizes.php:22
+msgctxt "size"
+msgid "small"
+msgstr "petit"
+
+#: includes/configs/image-sizes.php:15
+msgid "Square size"
+msgstr "Taille carré"
+
+#: includes/fields/class-date.php:139
+msgid "Set the number of days after today to define the minimum date."
+msgstr "Définissez le nombre de jours après aujourd’hui pour définir la date minimale."
+
+#. translators: %s: themes URL.
+#: includes/components/class-admin.php:1672
+msgid "The current theme doesn't declare HivePress support, if you notice any styling issues please consider using one of the <a href=\"%s\">official themes</a> instead."
+msgstr "Le thème actuel ne déclare pas la prise en charge de HivePress, si vous remarquez des problèmes de style, veuillez plutôt considérer un de nos <a href=\"%s\">thèmes officiels.</a>."
+
+#: includes/configs/strings.php:147
+msgid "Display only verified listings"
+msgstr "Afficher uniquement les annonces vérifiées"
+
+#: includes/configs/settings.php:143
+msgid "Reporting"
+msgstr "Signalement"
+
+#: includes/configs/strings.php:151
+msgid "Allow reporting listings"
+msgstr "Autoriser le signalement d’annonce"
+
+#: includes/configs/strings.php:176
+msgid "Display only verified vendors"
+msgstr "Afficher uniquement les annonceurs validés"
+
+#: includes/configs/settings.php:320
+msgid "Allow user registration"
+msgstr "Autoriser l’inscription des internautes"
+
+#: templates/admin/themes.php:34
+msgctxt "theme"
+msgid "Active"
+msgstr "Actif"
+
+#: templates/admin/themes.php:15
+msgid "Theme Details"
+msgstr "Détails du thème"
+
+#: includes/components/class-admin.php:139 templates/admin/themes.php:6
+msgid "Themes"
+msgstr "Thèmes"
+
+#: includes/configs/meta-boxes.php:166
+msgctxt "vendor"
+msgid "Verified"
+msgstr "Vérifié"
+
+#: includes/fields/class-select.php:97
+msgid "Maximum Selection"
+msgstr "Selection maximale"
+
+#: templates/admin/themes.php:20
+msgid "Preview"
+msgstr "Prévisualiser"
+
+#. translators: %s: field label.
+#: includes/configs/strings.php:98
+msgid "\"%s\" field contains too many values."
+msgstr "Le champ « %s » contient  trop de valeurs."
+
+#: includes/configs/strings.php:177
+msgid "Mark this vendor as verified"
+msgstr "Marquer cet annonceur comme étant validé"
+
+#: includes/components/class-attribute.php:1493
+msgid "Icon"
+msgstr "Icône"
+
+#: includes/fields/class-attachment-upload.php:75
+msgid "File Types"
+msgstr "Types de fichier"
+
+#: includes/configs/strings.php:202
+#: includes/fields/class-attachment-upload.php:64
+msgid "Attachment"
+msgstr "Fichier joint"
+
+#: includes/fields/class-date.php:146 includes/fields/class-time.php:35
+msgid "Time"
+msgstr "Heure"
+
+#: includes/controllers/class-user.php:206
+#: includes/templates/class-user-email-verify-page.php:28
+msgid "Email Verified"
+msgstr "E-mail vérifié"
+
+#: includes/emails/class-user-email-verify.php:28
+#: includes/emails/class-user-email-verify.php:47
+msgid "Email Verification"
+msgstr "Vérification de l’e-mail"
+
+#: includes/fields/class-date.php:147
+msgid "Allow setting time"
+msgstr "Autoriser le réglage de l’heure"
+
+#: includes/components/class-user.php:110
+#: includes/components/class-user.php:183
+#: includes/controllers/class-user.php:454
+#: includes/controllers/class-user.php:525
+msgid "Please check your email to activate your account."
+msgstr "Veuillez consulter votre e-mail pour activer votre compte."
+
+#: includes/configs/settings.php:337
+msgid "Require email address verification"
+msgstr "Rendre obligatoire une vérification de l’adresse e-mail"
+
+#: templates/user/register/user-email-verify-message.php:5
+msgid "Thank you! Your email address has been verified and you can start using your account."
+msgstr "Merci ! Votre adresse e-mail a été validée, vous pouvez maintenant utiliser votre compte."
+
+#: includes/emails/class-user-email-verify.php:48
+msgid "Hi, %user_name%! Please click on the following link to verify your email address: %email_verify_url%"
+msgstr "Bonjour %user_name% ! Veuillez cliquer sur le lien suivant pour vérifier votre adresse e-mail : %email_verify_url%"
+
+#: includes/emails/class-user-email-verify.php:29
+msgid "This email is sent to users when email verification is required."
+msgstr "Cet e-mail est envoyé aux internautes lorsqu’une vérification d’e-mail est nécessaire."
+
+#: includes/fields/class-select.php:117
+msgid "Search any of the selected options"
+msgstr "Rechercher n’importe laquelle des options sélectionnées"
+
+#: includes/configs/settings.php:328
+msgid "Generate username from the email address"
+msgstr "Générer un identifiant à partir de l’adresse e-mail"
+
+#: includes/components/class-attribute.php:1555
+msgid "Manually approve changes"
+msgstr "Approuver manuellement les modifications"
+
+#: includes/blocks/class-listing-hide-toggle.php:31
+msgid "Hide"
+msgstr "Masquer"
+
+#: includes/configs/strings.php:114
+msgid "Listing Attributes"
+msgstr "Attributs des objets listés"
+
+#: includes/blocks/class-listing-hide-toggle.php:35
+msgid "Unhide"
+msgstr "Ne plus masquer"
+
+#: includes/configs/strings.php:169
+msgid "Vendor Attributes"
+msgstr "Attributs de l’annonceur"
+
+#: includes/components/class-attribute.php:1554
+msgctxt "attribute"
+msgid "Moderated"
+msgstr "Modéré"
+
+#: templates/admin/extensions.php:38 templates/admin/themes.php:25
+msgid "Purchase"
+msgstr "Acheter"
+
+#: includes/configs/strings.php:61
+msgid "Authorization"
+msgstr "Autorisation"
+
+#: includes/fields/class-google-oauth-button.php:119
+msgid "Please set Google Client ID and Secret to proceed."
+msgstr "Veuillez définir votre ID client et Secret Google pour procéder."
+
+#: includes/fields/class-text.php:139
+msgid "Click to copy"
+msgstr "Cliquez pour copier"
+
+#: includes/fields/class-google-oauth-button.php:36
+msgid "Grant Access"
+msgstr "Accorder l’accès"
+
+#: includes/configs/settings.php:216 includes/configs/settings.php:285
+msgctxt "noun"
+msgid "Display Name"
+msgstr "Nom à afficher"
+
+#: templates/admin/extensions.php:49
+msgctxt "extension"
+msgid "Active"
+msgstr "Active"
+
+#: includes/configs/settings.php:217
+msgid "User Name"
+msgstr "Nom de l’utilisateur/utilisatrice"
+
+#: includes/configs/settings.php:297
+msgid "Full Name"
+msgstr "Nom complet"
+
+#: includes/configs/strings.php:58
+msgid "Client Secret"
+msgstr "Secret client"
+
+#: includes/configs/strings.php:59
+msgid "Redirect URL"
+msgstr "URL de redirection"
+
+#: templates/admin/extensions.php:40 templates/admin/themes.php:27
+msgid "Install"
+msgstr "Installer"
+
+#: templates/admin/extensions.php:45
+msgid "Update"
+msgstr "Mettre à jour"
+
+#: templates/admin/extensions.php:67
+msgctxt "noun"
+msgid "Support"
+msgstr "Support"
+
+#: templates/admin/extensions.php:65
+msgid "Docs"
+msgstr "Documentations"
+
+#: includes/configs/strings.php:175
+msgid "Display vendors on the front-end"
+msgstr "Afficher les annonceurs sur l’interface publique"
+
+#: includes/fields/class-google-oauth-button.php:57
+msgid "Revoke Access"
+msgstr "Révoquer l’accès"
+
+#: includes/configs/strings.php:153
+msgid "Set the number of days after which an expired listing is deleted."
+msgstr "Définissez le nombre de jours après lequel une annonce expirée est supprimée."
+
+#: includes/configs/strings.php:130
+msgid "Listing Renewed"
+msgstr "Annonce renouvelée"
+
+#: includes/configs/strings.php:54
+msgid "Storage Period"
+msgstr "Période de stockage"
+
+#: includes/configs/strings.php:53
+msgid "Storage"
+msgstr "Stockage"
+
+#: includes/configs/strings.php:38
+msgid "Expiration Date"
+msgstr "Date d’expiration"
+
+#: includes/fields/class-attachment-upload.php:362
+#: templates/listing/edit/page/listing-delete-link.php:5
+msgid "Delete"
+msgstr "Supprimer"
+
+#: includes/configs/meta-boxes.php:84
+msgid "Featuring Date"
+msgstr "Date de mise en avant"
+
+#: includes/configs/strings.php:104
+msgid "Related Listings"
+msgstr "Annonces similaires"
+
+#: includes/configs/strings.php:142
+msgid "Related Listings per Page"
+msgstr "Annonces similaires par page"
+
+#: includes/configs/strings.php:173
+msgid "Vendors per Page"
+msgstr "Annonceurs par page"
+
+#: includes/configs/strings.php:154
+msgid "Set a date on which the listing will expire."
+msgstr "Définissez une date à laquelle l’annonce expirera."
+
+#: includes/configs/strings.php:80
+msgctxt "sort order"
+msgid "Date Registered"
+msgstr "Date d’inscription"
+
+#: includes/configs/strings.php:155
+msgid "Set a date on which the listing will lose featured status."
+msgstr "Définissez la date à laquelle une annonce perdra l’état mis en avant."
+
+#: includes/configs/strings.php:170
+msgid "Vendor Search Form"
+msgstr "Formulaire de recherche d’annonceur"
+
+#: includes/configs/strings.php:172
+msgid "Vendors Page"
+msgstr "Page des annonceurs"
+
+#: includes/configs/strings.php:174
+msgid "Choose a page that displays all vendors."
+msgstr "Choisissez une page qui affiche tous les annonceurs."
+
+#: includes/fields/class-embed.php:28
+msgctxt "field"
+msgid "Embed"
+msgstr "Contenu embarqué"
+
+#: includes/fields/class-text.php:97
+msgid "Regex Pattern"
+msgstr "Composition de Regex"
+
+#: includes/configs/strings.php:120
+msgid "Renew Listing"
+msgstr "Renouveler l’annonce"
+
+#: includes/configs/strings.php:42
+msgid "Overview"
+msgstr "Vue d’ensemble"
+
+#: includes/blocks/class-user-register-form.php:28
+msgid "User Registration Form"
+msgstr "Formulaire d’inscription d’utilisateur/utilisatrice"
+
+#: includes/emails/class-listing-expire.php:48
+msgid "Hi, %user_name%! Your listing \"%listing_title%\" has expired, click on the following link to renew it: %listing_url%"
+msgstr "Bonjour %user_name% ! Votre annonce « %listing_title% » a expiré, cliquez sur le lien suivant pour la renouveler : %listing_url%"
+
+#. translators: %s: Listing title.
+#: includes/configs/strings.php:136
+msgid "Thank you! Your listing \"%s\" has been renewed and will appear at the top of the page."
+msgstr "Merci ! Votre annonce « %s » a été renouvelée et apparaitra en haut de la page."
+
+#: includes/components/class-listing.php:715
+msgid "Edit"
+msgstr "Modifier"
+
+#: includes/configs/strings.php:82
+msgctxt "sort order"
+msgid "Random"
+msgstr "Aléatoire"
+
+#: includes/configs/strings.php:81
+msgctxt "sort order"
+msgid "Title"
+msgstr "Titre"
+
+#: includes/configs/strings.php:78
+msgctxt "sort order"
+msgid "Name"
+msgstr "Nom"
+
+#: includes/configs/strings.php:71
+msgctxt "quantity"
+msgid "Number"
+msgstr "Nombre"
+
+#: includes/configs/strings.php:70
+msgctxt "quantity"
+msgid "Columns"
+msgstr "Colonnes"
+
+#: includes/models/class-listing.php:77
+msgctxt "listing"
+msgid "Pending"
+msgstr "En attente"
+
+#: includes/configs/strings.php:183
+msgid "Parent Category"
+msgstr "Catégorie parente"
+
+#: includes/configs/strings.php:184
+msgid "Add Category"
+msgstr "Ajouter une catégorie"
+
+#: includes/components/class-attribute.php:1518
+#: includes/configs/meta-boxes.php:132
+msgctxt "sort priority"
+msgid "Order"
+msgstr "Ordre"
+
+#: includes/components/class-attribute.php:1487
+#: includes/components/class-attribute.php:1488
+msgid "Page"
+msgstr "Page"
+
+#: includes/components/class-attribute.php:1485
+#: includes/components/class-attribute.php:1486
+msgid "Block"
+msgstr "Bloc"
+
+#: includes/configs/strings.php:17
+msgctxt "noun"
+msgid "Display"
+msgstr "Affichage"
+
+#: includes/components/class-attribute.php:1457
+msgctxt "attribute"
+msgid "Sortable"
+msgstr "Triable"
+
+#: includes/configs/strings.php:18
+msgctxt "noun"
+msgid "Search"
+msgstr "Recherche"
+
+#: includes/fields/class-select.php:89
+msgctxt "selection"
+msgid "Multiple"
+msgstr "Multiple"
+
+#: includes/fields/class-number.php:70
+msgctxt "quantity"
+msgid "Decimals"
+msgstr "Décimales"
+
+#: includes/components/class-attribute.php:511
+msgid "Add Option"
+msgstr "Ajouter une option"
+
+#: includes/components/class-attribute.php:512
+msgid "Edit Option"
+msgstr "Modifier l’option"
+
+#: includes/components/class-attribute.php:515
+msgid "Search Options"
+msgstr "Options de recherche"
+
+#: includes/components/class-attribute.php:731
+msgctxt "attribute"
+msgid "Searchable"
+msgstr "Recherchable"
+
+#: includes/components/class-attribute.php:1486
+#: includes/components/class-attribute.php:1488
+msgctxt "area"
+msgid "secondary"
+msgstr "secondaire"
+
+#: includes/configs/strings.php:109
+msgid "Featuring of Listings"
+msgstr "Mise en avant des annonces"
+
+#: includes/configs/strings.php:110
+msgid "Featured Listings"
+msgstr "Annonces mises en avant"
+
+#: includes/configs/strings.php:111
+msgid "View Listings"
+msgstr "Voir les annonces"
+
+#: includes/fields/class-radio.php:28
+msgid "Radio Buttons"
+msgstr "Boutons radio"
+
+#: includes/fields/class-field.php:230
+msgctxt "field"
+msgid "optional"
+msgstr "facultatif"
+
+#. translators: %s: extension name.
+#: includes/configs/strings.php:92
+msgid "%s extension is incompatible with the current HivePress version, please update HivePress or deactivate it."
+msgstr "L’extension %s est incompatible avec la version actuelle d’HivePress, merci de mettre à jour HivePress ou de le désactiver."
+
+#: includes/configs/strings.php:84
+msgctxt "imperative"
+msgid "Add Details"
+msgstr "Ajouter des détails"
+
+#: includes/configs/post-types.php:66
+msgctxt "listing"
+msgid "Add New"
+msgstr "Ajouter une nouvelle"
+
+#: includes/configs/strings.php:40
+msgid "Free"
+msgstr "Gratuite"
+
+#: includes/configs/strings.php:57
+msgid "Client ID"
+msgstr "ID client"
+
+#: includes/configs/strings.php:60
+msgid "App ID"
+msgstr "ID de l’application"
+
+#: includes/configs/strings.php:77
+msgctxt "sort order"
+msgid "Item Count"
+msgstr "Nombre d’éléments"
+
+#: includes/components/class-attribute.php:1485
+#: includes/components/class-attribute.php:1487
+msgctxt "area"
+msgid "primary"
+msgstr "principal"
+
+#: includes/configs/strings.php:164
+msgid "Add Vendor"
+msgstr "Ajouter un annonceur"
+
+#: includes/configs/strings.php:195
+msgctxt "attribute"
+msgid "Add New"
+msgstr "Ajouter un nouveau"
+
+#: includes/configs/strings.php:196
+msgid "Add Attribute"
+msgstr "Ajouter un attribut"
+
+#: includes/configs/strings.php:79
+msgctxt "sort order"
+msgid "Date Added"
+msgstr "Date de création"
+
+#. translators: %s: terms URL.
+#: includes/configs/strings.php:94
+msgid "I agree to the <a href=\"%s\" target=\"_blank\">terms and conditions</a>"
+msgstr "Je confirme avoir lu et accepté les <a href=\"%s\" target=\"_blank\">termes et conditions</a>"
+
+#: includes/configs/strings.php:83
+msgctxt "sort"
+msgid "Order"
+msgstr "Tri"
+
+#: includes/emails/class-user-register.php:29
+msgid "This email is sent to users after registration."
+msgstr "Cet e-mail est envoyé aux internautes après leur inscription."
+
+#: includes/emails/class-listing-expire.php:29
+msgid "This email is sent to users when listing is expired."
+msgstr "Cet e-mail est envoyé aux internautes quand leur annonce est expirée."
+
+#: includes/emails/class-listing-reject.php:29
+msgid "This email is sent to users when listing is rejected."
+msgstr "Cet e-mail est envoyé aux internautes quand leur annonce est rejetée."
+
+#: includes/emails/class-listing-approve.php:29
+msgid "This email is sent to users when listing is approved."
+msgstr "Cet e-mail est envoyé aux internautes quand leur annonce est approuvée."
+
+#: includes/fields/class-field.php:141
+msgctxt "field"
+msgid "Required"
+msgstr "Obligatoire"
+
+#: includes/fields/class-select.php:77
+msgctxt "field"
+msgid "Select"
+msgstr "Liste déroulante"
+
+#: includes/components/class-admin.php:896
+msgctxt "plural"
+msgid "Installed"
+msgstr "Installées"
+
+#: includes/components/class-admin.php:891
+msgctxt "plural"
+msgid "All"
+msgstr "Toutes"
+
+#: includes/components/class-attribute.php:514
+msgid "Parent Option"
+msgstr "Option parente"
+
+#: includes/components/class-attribute.php:516
+msgid "No options found."
+msgstr "Aucune option trouvée."
+
+#: includes/components/class-attribute.php:955
+msgctxt "field"
+msgid "requires review"
+msgstr "nécessite une vérification"
+
+#: includes/components/class-listing.php:582 includes/configs/meta-boxes.php:77
+#: includes/models/class-listing.php:91
+#: templates/listing/view/listing-featured-badge.php:7
+msgctxt "listing"
+msgid "Featured"
+msgstr "Mise en avant"
+
+#: includes/components/class-listing.php:586 includes/configs/meta-boxes.php:70
+#: includes/models/class-listing.php:97
+#: templates/listing/view/listing-verified-badge.php:7
+msgctxt "listing"
+msgid "Verified"
+msgstr "Validée"
+
+#: includes/components/class-attribute.php:1421
+msgctxt "attribute"
+msgid "Editable"
+msgstr "Modifiable"
+
+#: includes/configs/strings.php:118
+msgid "Listing Expiration"
+msgstr "Expiration de l’annonce"
+
+#: includes/configs/strings.php:145
+msgid "Make listings featured"
+msgstr "Rendre les annonces mises en avant"
+
+#: includes/configs/strings.php:181
+msgid "Categories"
+msgstr "Catégories"
+
+#: includes/configs/strings.php:185
+msgid "Edit Category"
+msgstr "Modifier la catégorie"
+
+#: includes/configs/strings.php:186
+msgid "Update Category"
+msgstr "Mettre à jour la catégorie"
+
+#: includes/configs/strings.php:187
+msgid "View Category"
+msgstr "Voir la catégorie"
+
+#: includes/configs/strings.php:188
+msgid "Search Categories"
+msgstr "Rechercher des catégories"
+
+#: includes/configs/strings.php:190
+msgctxt "imperative"
+msgid "Select Category"
+msgstr "Sélectionner une catégorie"
+
+#. translators: %s: field label.
+#: includes/configs/strings.php:96
+#: includes/fields/class-attachment-select.php:70
+#: includes/fields/class-date.php:320 includes/fields/class-email.php:88
+#: includes/fields/class-regex.php:73 includes/fields/class-text.php:211
+msgid "\"%s\" field contains an invalid value."
+msgstr "Le champ « %s » contient une valeur invalide."
+
+#. translators: %s: field label.
+#: includes/fields/class-field.php:517 includes/fields/class-file.php:79
+msgid "\"%s\" field is required."
+msgstr "Le champ « %s » est obligatoire."
+
+#: includes/fields/class-textarea.php:43
+msgid "Formatting"
+msgstr "Formatage"
+
+#: includes/fields/class-textarea.php:44
+msgid "Allow HTML formatting"
+msgstr "Autoriser le formatage HTML"
+
+#: includes/configs/strings.php:65
+msgid "Changes have been saved."
+msgstr "Les modifications ont été enregistrées."
+
+#: includes/configs/strings.php:64
+msgid "Save Changes"
+msgstr "Enregistrer les modifications"
+
+#: includes/models/class-listing.php:76
+msgctxt "listing"
+msgid "Hidden"
+msgstr "Masqué"
+
+#. translators: %s: WooCommerce.
+#: includes/configs/strings.php:88
+msgid "%s Product"
+msgstr "produit %s"
+
+#: includes/components/class-attribute.php:513
+msgid "Update Option"
+msgstr "Mettre à jour l’option"
+
+#: includes/components/class-attribute.php:1458
+msgid "Display as a sorting option"
+msgstr "Affichage comme option de tri"
+
+#: includes/configs/post-types.php:92
+msgctxt "vendor"
+msgid "Add New"
+msgstr "Ajouter un nouveau"
+
+#: includes/configs/strings.php:55
+msgid "API Key"
+msgstr "Clé de l’API"
+
+#: includes/components/class-attribute.php:1502
+msgid "Set the attribute display format."
+msgstr "Définissez le format d’affichage des attributs."
+
+#: includes/emails/class-user-password-request.php:29
+msgid "This email is sent to users when a password reset is requested."
+msgstr "Cet e-mail est envoyé aux internautes lorsqu’une réinitialisation de mot de passe est demandée."
+
+#. translators: %s: token list.
+#: includes/configs/strings.php:90
+msgid "The following tokens are available: %s."
+msgstr "Les jetons suivants sont disponibles : %s."
+
+#: includes/fields/class-date-range.php:63
+msgid "Date Range"
+msgstr "Plage de dates"
+
+#: includes/fields/class-date.php:126
+msgid "Minimum Date"
+msgstr "Date minimale"
+
+#: includes/fields/class-date.php:132
+msgid "Maximum Date"
+msgstr "Date maximale"
+
+#. translators: 1: field label, 2: date.
+#: includes/fields/class-date.php:336
+msgid "\"%1$s\" can't be later than %2$s."
+msgstr "« %1$s » ne peut pas être ultérieur à %2$s."
+
+#. translators: 1: field label, 2: date.
+#: includes/fields/class-date.php:327
+msgid "\"%1$s\" can't be earlier than %2$s."
+msgstr "« %1$s » ne peut pas être antérieur à %2$s."
+
+#: includes/emails/class-listing-update.php:29
+msgid "Listing \"%listing_title%\" %listing_url% has been updated with the following details: %listing_attributes%."
+msgstr "L’annonce « %listing_title% » %listing_url% a été mise à jour avec les détails suivants : %listing_attributes%."
+
+#: includes/configs/strings.php:121
+msgid "Add Listing"
+msgstr "Ajouter une annonce"
+
+#: includes/configs/settings.php:153 includes/configs/strings.php:36
+msgid "Expiration"
+msgstr "Expiration"
+
+#: includes/fields/class-select.php:106 includes/fields/class-select.php:116
+msgid "Options"
+msgstr "Options"
+
+#: includes/fields/class-url.php:28
+msgid "URL"
+msgstr "URL"
+
+#: includes/configs/strings.php:129
+msgid "Listing Expired"
+msgstr "Annonce expirée"
+
+#: includes/configs/strings.php:141
+msgid "Featured Listings per Page"
+msgstr "Annonces mises en avant par page"
+
+#: includes/configs/strings.php:146
+msgid "Display only featured listings"
+msgstr "Afficher uniquement les annonces mises en avant"
+
+#: includes/configs/strings.php:37
+msgid "Expiration Period"
+msgstr "Période d’expiration"
+
+#: includes/components/class-attribute.php:681
+msgid "Edit Options"
+msgstr "Modifier les options"
+
+#: includes/configs/strings.php:31
+msgid "Details"
+msgstr "Détails"
+
+#: includes/configs/strings.php:143
+msgid "Mark this listing as verified"
+msgstr "Marquer cette annonce comme validée"
+
+#: includes/configs/strings.php:150
+msgid "Allow submitting new listings"
+msgstr "Autoriser la proposition de nouvelles annonces"
+
+#: includes/configs/strings.php:152
+msgid "Set the number of days after which a listing expires."
+msgstr "Définissez le nombre de jour après lequel une annonce expire."
+
+#: includes/configs/strings.php:158
+msgid "Please provide details that will help us verify that this listing violates the terms of service."
+msgstr "Veuillez fournir les détails pour nous aider à vérifier que cette annonce viole les termes du service."
+
+#: includes/configs/strings.php:140
+msgid "Regular Listings per Page"
+msgstr "Annonces normales par page"
+
+#. Description of the plugin
+msgid "Multipurpose directory, listing & classifieds plugin."
+msgstr "Extension polyvalente de répertoire et de petites annonces."
+
+#: includes/components/class-admin.php:140 templates/admin/extensions.php:6
+msgid "Extensions"
+msgstr "Extensions"
+
+#: includes/components/class-attribute.php:1428
+#: includes/components/class-attribute.php:1464
+msgid "Field Type"
+msgstr "Type de champ"
+
+#: includes/configs/strings.php:24
+msgid "Name"
+msgstr "Nom"
+
+#: includes/fields/class-field.php:142
+msgid "Make this field required"
+msgstr "Rendre ce champ obligatoire"
+
+#: includes/fields/class-attachment-upload.php:68
+#: includes/fields/class-checkbox.php:47
+msgid "Caption"
+msgstr "Légende"
+
+#: includes/fields/class-checkbox.php:97
+msgid "Yes"
+msgstr "Oui"
+
+#: includes/configs/strings.php:162
+msgid "Vendor"
+msgstr "Annonceur"
+
+#. translators: %s: files number.
+#: includes/controllers/class-attachment.php:171
+msgid "Only up to %s files can be uploaded."
+msgstr "Seulement %s peuvent être téléversés"
+
+#: includes/controllers/class-user.php:579
+msgid "Password reset key is expired or invalid."
+msgstr "Réinitialisation de la clé expirée ou invalide"
+
+#: includes/fields/class-attachment-upload.php:120
+msgid "Select Files"
+msgstr "Choisissez des fichiers"
+
+#. translators: 1: field label, 2: number.
+#: includes/fields/class-number.php:192
+msgid "\"%1$s\" can't be lower than %2$s."
+msgstr "\"%1$s\" ne peut pas être moins de  %2$s."
+
+#. translators: 1: field label, 2: number.
+#: includes/fields/class-number.php:197
+msgid "\"%1$s\" can't be greater than %2$s."
+msgstr "\"%1$s\"ne peut pas être plus grand que  %2$s."
+
+#: includes/configs/strings.php:168
+msgid "No vendors found."
+msgstr "Aucun annonceur trouvé."
+
+#: includes/fields/class-checkbox.php:97
+msgid "No"
+msgstr "Aucun"
+
+#: includes/fields/class-number.php:87
+msgid "Maximum Value"
+msgstr "Valeur maximale"
+
+#: includes/fields/class-number.php:80
+msgid "Minimum Value"
+msgstr "Valeur minimale"
+
+#: includes/fields/class-date.php:119 includes/fields/class-number.php:63
+#: includes/fields/class-select.php:82 includes/fields/class-text.php:76
+msgid "Placeholder"
+msgstr "Texte indicatif"
+
+#: templates/page/no-results-message.php:7
+msgid "Sorry, but nothing matched your search terms. Please try again with some different keywords."
+msgstr "Désolé, mais rien ne correspond à vos termes de recherche. Veuillez réessayer avec d’autres mots-clés."
+
+#: templates/page/no-results-message.php:6
+msgid "Nothing found"
+msgstr "Aucun résultat"
+
+#: includes/components/class-attribute.php:732
+msgid "Display in the search form"
+msgstr "Afficher dans le formulaire de recherche"
+
+#: includes/components/class-user.php:198 includes/configs/settings.php:292
+#: includes/configs/settings.php:327 includes/models/class-user.php:48
+msgid "Username"
+msgstr "Identifiant"
+
+#: includes/configs/strings.php:33
+msgid "Editing"
+msgstr "Modification"
+
+#: includes/fields/class-select.php:90
+msgid "Allow multiple selection"
+msgstr "Autoriser la sélection multiple"
+
+#: includes/fields/class-text.php:83
+msgid "Minimum Length"
+msgstr "Longueur minimale"
+
+#: includes/fields/class-text.php:90
+msgid "Maximum Length"
+msgstr "Longueur maximale"
+
+#. translators: 1: field label, 2: length.
+#: includes/fields/class-text.php:201
+msgid "\"%1$s\" should be at least %2$s characters long."
+msgstr "« %1$s » doit faire au moins  %2$s caractères de long."
+
+#. translators: 1: field label, 2: length.
+#: includes/fields/class-text.php:206
+msgid "\"%1$s\" can't be longer than %2$s characters."
+msgstr "« %1$s » ne peut pas être plus long de  %2$s caractères."
+
+#: includes/fields/class-textarea.php:35
+msgid "Textarea"
+msgstr "Zone de texte"
+
+#: includes/components/class-attribute.php:1444
+msgid "Display in the filter form"
+msgstr "Afficher dans le formulaire de filtrage"
+
+#. translators: %s: extensions number.
+#: templates/admin/extensions.php:78
+msgid "%s Extensions"
+msgstr "%s extensions"
+
+#: includes/fields/class-number-range.php:42
+msgid "Number Range"
+msgstr "Plage de nombres"
+
+#: includes/configs/strings.php:166
+msgid "Vendors"
+msgstr "Annonceurs"
+
+#: includes/configs/strings.php:163
+msgid "View Vendor"
+msgstr "Voir l’annonceur"
+
+#: includes/configs/strings.php:165
+msgid "Edit Vendor"
+msgstr "Modifier l’annonceur"
+
+#: includes/configs/strings.php:167
+msgid "Search Vendors"
+msgstr "Rechercher des annonceurs"
+
+#: includes/components/class-attribute.php:1422
+msgid "Allow front-end editing"
+msgstr "Autoriser la modification via l’interface publique"
+
+#: includes/configs/strings.php:117
+msgid "Listing Search Form"
+msgstr "Formulaire de recherche d’annonce"
+
+#: includes/configs/strings.php:26
+msgid "Status"
+msgstr "État"
+
+#: includes/configs/strings.php:144
+msgid "Make this listing featured"
+msgstr "Mettre en avant cette annonce"
+
+#: includes/configs/strings.php:116
+msgid "Listing Categories"
+msgstr "Catégories d’annonce"
+
+#. translators: %s: version number.
+#: templates/admin/extensions.php:82
+msgid "Version %s"
+msgstr "Version %s"
+
+#: templates/admin/extensions.php:47 templates/admin/themes.php:32
+msgid "Activate"
+msgstr "Activer"
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+msgid "https://hivepress.io/"
+msgstr "https://hivepress.io/"
+
+#. Plugin Name of the plugin
+#. Author of the plugin
+msgid "HivePress"
+msgstr "HivePress"
+
+#: includes/forms/class-user-password-reset.php:44
+msgid "Please enter a new password below."
+msgstr "Veuillez saisir un nouveau mot de passe ci-dessous."
+
+#: includes/forms/class-user-password-request.php:45
+msgid "Please enter your username or email address, you will receive a link to create a new password via email."
+msgstr "Veuillez saisir votre identifiant ou votre adresse e-mail. Un lien permettant de créer un nouveau mot de passe vous sera envoyé par e-mail."
+
+#: templates/user/login/user-password-request-link.php:5
+msgid "Forgot password?"
+msgstr "Mot de passe oublié ?"
+
+#: includes/configs/strings.php:63
+msgid "My Account"
+msgstr "Mon compte"
+
+#. translators: %s: date.
+#: includes/configs/strings.php:86
+msgid "Added on %s"
+msgstr "Ajouté le %s"
+
+#: includes/configs/strings.php:28
+msgid "Images"
+msgstr "Images"
+
+#: includes/configs/strings.php:30
+msgid "Description"
+msgstr "Description"
+
+#: includes/configs/strings.php:23
+msgid "Title"
+msgstr "Titre"
+
+#: includes/configs/strings.php:119
+msgid "Submit Listing"
+msgstr "Poster une annonce"
+
+#: includes/configs/strings.php:21
+msgid "Sort by"
+msgstr "Trier par"
+
+#: includes/configs/meta-boxes.php:124 includes/configs/strings.php:27
+msgid "Image"
+msgstr "Image"
+
+#: includes/components/class-attribute.php:1501
+msgid "Format"
+msgstr "Format"
+
+#: includes/fields/class-checkboxes.php:28
+msgid "Checkboxes"
+msgstr "Cases à cocher"
+
+#: includes/fields/class-checkbox.php:42
+msgid "Checkbox"
+msgstr "Case à cocher"
+
+#: includes/fields/class-number.php:56
+msgid "Number"
+msgstr "Nombre"
+
+#: includes/fields/class-text.php:70
+msgid "Text"
+msgstr "Texte"
+
+#: includes/configs/strings.php:199
+msgid "No attributes found."
+msgstr "Aucun attribut trouvé."
+
+#: includes/configs/strings.php:194
+msgid "Attribute"
+msgstr "Attribut"
+
+#: includes/components/class-attribute.php:1412
+#: includes/configs/strings.php:193
+msgid "Attributes"
+msgstr "Attributs"
+
+#: includes/configs/strings.php:103
+msgid "All Listings"
+msgstr "Toutes les annonces"
+
+#: includes/configs/strings.php:123
+msgid "Edit Listing"
+msgstr "Modifier l’annonce"
+
+#: includes/configs/strings.php:101
+msgid "Listing"
+msgstr "Annonce"
+
+#: includes/configs/strings.php:131
+msgid "Listing Updated"
+msgstr "Annonce mise à jour"
+
+#: includes/configs/strings.php:128
+msgid "Listing Rejected"
+msgstr "Annonce rejetée"
+
+#: includes/configs/strings.php:127
+msgid "Listing Approved"
+msgstr "Annonce approuvée"
+
+#: includes/configs/strings.php:149
+msgid "Manually approve new listings"
+msgstr "Approuver manuellement les nouvelles annonces"
+
+#: includes/configs/strings.php:102
+msgid "Listings"
+msgstr "Annonces"
+
+#: includes/forms/class-user-delete.php:61
+#: includes/templates/class-user-edit-settings-page.php:49
+#: templates/user/edit/page/user-delete-link.php:5
+msgid "Delete Account"
+msgstr "Supprimer le compte"
+
+#: includes/forms/class-user-update.php:77
+msgid "Current Password"
+msgstr "Mot de passe actuel"
+
+#: includes/configs/settings.php:293 includes/models/class-user.php:77
+msgid "First Name"
+msgstr "Prénom"
+
+#: includes/configs/meta-boxes.php:125 includes/models/class-user.php:133
+msgid "Select Image"
+msgstr "Sélectionner une image"
+
+#: includes/forms/class-user-password-reset.php:50
+#: includes/forms/class-user-update.php:68
+msgid "New Password"
+msgstr "Nouveau mot de passe"
+
+#: includes/configs/settings.php:368
+msgid "Protected Forms"
+msgstr "Formulaires protégés"
+
+#: includes/configs/strings.php:56
+msgid "Secret Key"
+msgstr "Clé secrète"
+
+#: includes/configs/settings.php:376
+msgid "Site Key"
+msgstr "Clé du site"
+
+#: includes/controllers/class-user.php:315
+msgid "This email is already registered."
+msgstr "Cet e-mail est déjà utilisé."
+
+#: includes/controllers/class-user.php:309
+msgid "This username is already in use."
+msgstr "Cet identifient est déjà utilisé."
+
+#: includes/forms/class-form.php:147
+msgid "Submit"
+msgstr "Envoyer"
+
+#: includes/configs/strings.php:25
+msgid "Date"
+msgstr "Date"
+
+#: includes/configs/strings.php:62
+msgid "Return to My Account"
+msgstr "Retour vers mon compte"
+
+#: includes/emails/class-user-register.php:47
+msgid "Registration Complete"
+msgstr "Enregistrement Complet"
+
+#: includes/fields/class-attachment-select.php:36
+#: includes/fields/class-attachment-upload.php:122
+msgid "Select File"
+msgstr "Choisissez un fichier"
+
+#: includes/fields/class-number-range.php:69
+msgid "Min"
+msgstr "Minimum"
+
+#: includes/fields/class-number-range.php:82
+msgid "Max"
+msgstr "Maximum"
+
+#: includes/configs/strings.php:20
+msgid "Filter"
+msgstr "Filtre"
+
+#: includes/forms/class-user-login.php:28
+#: includes/templates/class-user-login-page.php:28
+msgid "Login User"
+msgstr "Login Utilisateur"
+
+#: includes/forms/class-user-register.php:28
+msgid "Register User"
+msgstr "Enregistrement utilisateur"
+
+#: includes/configs/strings.php:29
+msgid "Select Images"
+msgstr "Choisir des Images"
+
+#: includes/models/class-user.php:113
+msgid "Profile Info"
+msgstr "Infos Profil"
+
+#: includes/models/class-user.php:132
+msgid "Profile Image"
+msgstr "Image du Profil"
+
+#: templates/user/password-reset/user-password-reset-message.php:5
+msgid "Password reset link is expired or invalid."
+msgstr "Lien de réinitialisation expiré ou invalide"
+
+#: templates/listing/edit/block/listing-view-link.php:7
+msgid "View"
+msgstr "Voir"
+
+#: includes/configs/strings.php:137
+msgid "Listing has been reported."
+msgstr "Cette publication a été signalée"
+
+#: includes/configs/strings.php:180
+msgid "Category"
+msgstr "Catégorie"
+
+#. translators: %s: Listings number.
+#: includes/configs/strings.php:106
+msgid "%s Listing"
+msgid_plural "%s Listings"
+msgstr[0] "%s annonce"
+msgstr[1] "%s annonces"
+
+#: includes/configs/strings.php:124
+msgid "Delete Listing"
+msgstr "Supprimer une annonce"
+
+#: includes/configs/strings.php:122
+msgid "View Listing"
+msgstr "Voir une annonce"
+
+#: includes/configs/strings.php:138
+msgid "Listings Page"
+msgstr "Page des annonces"
+
+#. translators: %s: date.
+#: templates/user/view/user-registered-date.php:8
+msgid "Member since %s"
+msgstr "Membre depuis %s"
+
+#. translators: %s: Vendor name.
+#: includes/configs/strings.php:108
+msgid "Listings by %s"
+msgstr "Annonces de %s"
+
+#: includes/forms/class-user-delete.php:44
+msgid "Please enter your password below to permanently delete your account."
+msgstr "Veuillez saisir votre mot de passe ci-dessous pour supprimer définitivement votre compte."
+
+#: includes/menus/class-user-account.php:35
+msgid "Sign Out"
+msgstr "Se déconnecter"
+
+#: includes/configs/strings.php:22
+msgid "Keywords"
+msgstr "Mots-clés"
+
+#: includes/configs/strings.php:197
+msgid "Edit Attribute"
+msgstr "Modifier l’attribut"
+
+#: includes/forms/class-user-password-request.php:46
+msgid "Password reset email has been sent."
+msgstr "Un e-mail de réinitialisation du mot de passe a été envoyé."
+
+#: includes/models/class-user.php:63
+msgid "Password"
+msgstr "Mot de passe"
+
+#: includes/emails/class-user-register.php:28
+msgid "User Registered"
+msgstr "Internaute inscrit"
+
+#: includes/configs/settings.php:268
+msgid "Users"
+msgstr "Comptes"
+
+#: includes/controllers/class-user.php:307
+msgid "Username contains invalid characters."
+msgstr "L’identifiant contient des caractères invalides."
+
+#: includes/components/class-admin.php:1646 includes/configs/strings.php:16
+#: templates/admin/settings.php:6
+msgid "Settings"
+msgstr "Réglages"
+
+#: includes/configs/strings.php:182
+msgid "All Categories"
+msgstr "Toutes les catégories"
+
+#: includes/components/class-user.php:364
+#: includes/controllers/class-user.php:184
+#: includes/forms/class-user-login.php:75
+#: templates/user/login/user-login-link.php:17
+#: templates/user/register/user-login-link.php:5
+msgid "Sign In"
+msgstr "Se connecter"
+
+#: includes/components/class-user.php:377
+#: includes/forms/class-user-register.php:69
+#: templates/user/login/user-register-link.php:7
+msgid "Register"
+msgstr "S’inscrire"
+
+#: includes/components/class-user.php:390
+#: includes/controllers/class-user.php:198
+#: includes/forms/class-user-password-request.php:28
+#: includes/forms/class-user-password-reset.php:71
+#: includes/templates/class-user-password-reset-page.php:28
+#: templates/user/password-reset/user-password-reset-message.php:6
+msgid "Reset Password"
+msgstr "Réinitialiser le mot de passe"
+
+#: includes/components/class-attribute.php:1478
+msgid "Areas"
+msgstr "Zones"
+
+#: includes/components/class-attribute.php:1479
+msgid "Choose the template areas where you want to display this attribute."
+msgstr "Choisissez les zones du modèle dans lesquelles vous souhaitez afficher cet attribut."
+
+#: includes/configs/settings.php:111 includes/configs/settings.php:126
+#: includes/configs/strings.php:34
+msgid "Submission"
+msgstr "Envoi"
+
+#: includes/configs/post-types.php:21 includes/configs/post-types.php:27
+#: includes/configs/strings.php:32
+msgid "Emails"
+msgstr "E-mails"
+
+#: includes/configs/settings.php:295 includes/models/class-user.php:92
+msgid "Last Name"
+msgstr "Nom de famille"
+
+#: includes/configs/settings.php:252 includes/configs/settings.php:257
+#: includes/configs/settings.php:304 includes/configs/settings.php:319
+msgid "Registration"
+msgstr "Inscription"
+
+#: includes/emails/class-user-password-request.php:28
+#: includes/emails/class-user-password-request.php:47
+msgid "Password Reset"
+msgstr "Réinitialisation du mot de passe"
+
+#: includes/configs/settings.php:358
+msgid "Integrations"
+msgstr "Intégrations"
+
+#: includes/configs/strings.php:35
+msgid "Moderation"
+msgstr "Modération"
+
+#: includes/configs/strings.php:112
+msgid "Search Listings"
+msgstr "Rechercher des annonces"
+
+#: includes/configs/strings.php:113
+msgid "No listings found."
+msgstr "Aucune annonce trouvée."
+
+#: includes/configs/strings.php:126
+msgid "Listing Submitted"
+msgstr "Annonce envoyée"
+
+#: includes/configs/strings.php:132
+msgid "Listing Reported"
+msgstr "Annonce signalée"
+
+#: includes/configs/strings.php:148
+msgid "Are you sure you want to permanently delete this listing?"
+msgstr "Confirmez-vous vouloir définitivement supprimer cette annonce ?"
+
+#: includes/configs/strings.php:156
+msgid "Choose a page that displays all listings."
+msgstr "Choisissez une page qui affiche toutes les annonces."
+
+#: includes/configs/strings.php:157
+msgid "Choose a page with terms that user has to accept before submitting a new listing."
+msgstr "Choisissez une page avec les termes que les internautes doivent accepter avant de proposer une annonce."
+
+#: includes/configs/strings.php:198
+msgid "Search Attributes"
+msgstr "Rechercher des attributs"
+
+#: includes/configs/strings.php:189
+msgid "No categories found."
+msgstr "Aucune catégorie trouvée."
+
+#. translators: %s: file extensions.
+#: includes/controllers/class-attachment.php:183
+#: includes/fields/class-file.php:83
+msgid "Only %s files are allowed."
+msgstr "Seuls les fichiers %s sont autorisés."
+
+#: includes/controllers/class-user.php:442
+#: includes/controllers/class-user.php:449
+msgid "Username or password is incorrect."
+msgstr "L’identifiant ou le mot de passe est incorrect."
+
+#: includes/controllers/class-user.php:651
+msgid "Current password is required."
+msgstr "Le mot de passe actuel est nécessaire."
+
+#: includes/controllers/class-user.php:655
+msgid "Current password is incorrect."
+msgstr "Le mot de passe actuel est incorrect."
+
+#: includes/controllers/class-user.php:740
+msgid "Password is incorrect."
+msgstr "Le mot de passe est incorrect."
+
+#. translators: 1: results range start, 2: results range end, 3: total results.
+#: includes/blocks/class-result-count.php:55
+msgid "Showing %1$s-%2$s of %3$s results"
+msgstr "Affichage de %1$s-%2$s résultats sur %3$s"
+
+#: includes/components/class-form.php:528
+msgid "Captcha is invalid."
+msgstr "Le CAPTCHA est invalide."
+
+#: includes/configs/post-types.php:22 includes/configs/settings.php:336
+#: includes/fields/class-email.php:28 includes/models/class-user.php:56
+msgid "Email"
+msgstr "E-mail"
+
+#: includes/forms/class-user-login.php:51
+#: includes/forms/class-user-password-request.php:51
+msgid "Username or Email"
+msgstr "Identifiant ou e-mail"
+
+#: includes/forms/class-user-password-request.php:64
+msgid "Send Email"
+msgstr "Envoyer un e-mail"
+
+#: includes/configs/strings.php:19
+msgid "Search"
+msgstr "Rechercher"
+
+#: includes/configs/strings.php:125
+msgid "Report Listing"
+msgstr "Signaler l’annonce"
+
+#: includes/configs/strings.php:139
+msgid "Listings Page Display"
+msgstr "Affichage de la page des annonces"
+
+#: includes/configs/settings.php:116
+msgid "Submission Terms Page"
+msgstr "Page des conditions d’envoi"
+
+#: includes/configs/settings.php:309
+msgid "Registration Terms Page"
+msgstr "Page des termes d’inscription"
+
+#: includes/emails/class-listing-approve.php:48
+msgid "Hi, %user_name%! Your listing \"%listing_title%\" has been approved, click on the following link to view it: %listing_url%"
+msgstr "Bonjour %user_name% ! Votre annonce « %listing_title% » a été approuvée, cliquez sur le lien suivant pour la voir : %listing_url%"
+
+#: templates/user/register/user-login-link.php:5
+msgid "Already have an account?"
+msgstr "Vous avez déjà un compte ?"
+
+#: templates/user/login/user-register-link.php:7
+msgid "Don't have an account yet?"
+msgstr "Vous n’avez pas encore de compte ?"
+
+#: includes/controllers/class-user.php:517
+msgid "User with this username doesn't exist."
+msgstr "Aucun compte existe avec cet identifiant."
+
+#: includes/controllers/class-user.php:515
+msgid "User with this email doesn't exist."
+msgstr "Aucun compte existe avec cet e-mail."
+
+#: includes/emails/class-listing-reject.php:48
+msgid "Hi, %user_name%! Unfortunately, your listing \"%listing_title%\" has been rejected."
+msgstr "Bonjour %user_name% ! Malheureusement votre annonce  « %listing_title% » a été rejetée."
+
+#: includes/configs/settings.php:310
+msgid "Choose a page with terms that user has to accept before registering."
+msgstr "Choisissez une page avec les termes que l’internaute doit accepter avant de s’inscrire."
+
+#: includes/emails/class-user-password-request.php:48
+msgid "Hi, %user_name%! Please click on the following link to set a new password: %password_reset_url%"
+msgstr "Bonjour %user_name% ! Veuillez cliquer sur le lien suivant pour définir un nouveau mot de passe : %password_reset_url%"
+
+#. translators: %s: Listing title.
+#: includes/configs/strings.php:134
+msgid "Thank you! Your listing \"%s\" has been submitted and will be reviewed as soon as possible."
+msgstr "Merci ! Votre annonce « %s » a été envoyée et sera vérifiée dès que possible."
+
+#: includes/emails/class-listing-report.php:29
+msgid "Listing \"%listing_title%\" %listing_url% has been reported with the following details: %report_details%"
+msgstr "L’annonce « %listing_title% » %listing_url% a été signalée avec les détails suivants : %report_details%"
+
+#: includes/emails/class-listing-submit.php:29
+msgid "A new listing \"%listing_title%\" has been submitted, click on the following link to view it: %listing_url%"
+msgstr "Une nouvelle annonce « %listing_title% » a été envoyée, cliquez sur le lien suivant pour la voir : %listing_url%"

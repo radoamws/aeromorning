@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604091210PR_NEWS_USPR_____NY30857</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260409T121000-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260409</DateId>
+        <NewsItemId>NY30857</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260409:NY30857:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260409T121000-0400</FirstCreated>
+      <ThisRevisionCreated>20260409T121000-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>FlyHouse Appoints Brian P. Reid as Chief Revenue Officer</HeadLine>
+        <DateLine>LOS ANGELES, April 9, 2026</DateLine>
+        <SlugLine>FLYHOUSE-Appoint</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604091210PR_NEWS_USPR_____NY30857.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="DebVisors" />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="FlyHouse" />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="TRA" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="AIR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="SPT" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="PER" Scheme="SubjectCode" />
+        </SubjectCode>
+        <Property FormalName="CompanyName" Value="FlyHouse" />
+        <Property FormalName="GeographyCode" Value="California" />
+        <Property FormalName="Contact" Value="Deb Duffy, deb@debvisors.com" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2953251/FlyHouse_Logo.jpg" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2953252/FlyHouse_Brian_P_Reid_Headshot.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>FlyHouse Appoints Brian P. Reid as Chief Revenue Officer</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+.prntac{
+TEXT-ALIGN: CENTER
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">FlyHouse Appoints Brian P. Reid as Chief Revenue Officer</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">LOS ANGELES, April 9, 2026</p>
+              </div>
+              <div class="xn-content">
+<p class="prntac"><i>Former Wheels Up executive joins FlyHouse as the private aviation company scales its platform, partnerships, and leadership team</i></p><p><span class="legendSpanClass">LOS ANGELES</span>, <span class="legendSpanClass">April 9, 2026</span> /PRNewswire/ -- <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4660911-1&amp;h=2230125713&amp;u=https%3A%2F%2Fwww.goflyhouse.com%2F&amp;a=FlyHouse" target="_blank" rel="nofollow">FlyHouse</a>, the company redefining the private aviation experience for modern travelers and aircraft owners, today announced the appointment of Brian P. Reid as its first Chief Revenue Officer.</p>
+    <div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder1">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2953251/FlyHouse_Logo.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2953251/FlyHouse_Logo.jpg" title="FlyHouse Appoints New Chief Revenue Officer" alt="FlyHouse Appoints New Chief Revenue Officer" />
+                        </a>
+                </p>
+    </div>
+<p>Reid will report directly to CEO Jack E. Lambert Jr. and lead revenue strategy across the organization. He brings more than 25 years of experience building and scaling companies across private aviation and other consumer-driven industries focused on the high-net-worth consumer. As Executive Vice President of Wheels Up, he led enterprise sales and secured strategic partnerships with American Express, Goldman Sachs, Morgan Stanley, and Costco. Reid most recently served as Chief Sales and Marketing Officer of Thomas James Homes, where he oversaw integrated revenue strategy across sales, marketing, and customer experience.</p><p>FlyHouse has established itself as an innovator in private aviation – connecting aircraft owners, operators, and on-demand flyers through a first-ever marketplace built for transparency, ease, and a flight that's in a class of its own.</p><p>As FlyHouse grows, it is becoming a preferred partner across leagues, teams, and sports media – including LIV Golf's 4Aces GC, New York Jets, and ESPN College GameDay – as well as professional athletes like Wayne Gretzky, Justin Rose, and Blake Griffin. The company is also continuing to introduce new capabilities like FriendShare, which lets clients organize group charters and split costs directly within the app.</p><p>"FlyHouse has been on a meteoric rise, and we're not slowing down," said Jack E. Lambert Jr., CEO, FlyHouse. "Bringing on our first CRO is a major milestone, and there's no one better suited to lead that charge than Brian. He knows this space inside and out and will be integral in taking a platform like this to the next level."</p><p>"Private aviation operates with strong demand, and FlyHouse is building the infrastructure to support it at scale," said Brian P. Reid, Chief Revenue Officer, FlyHouse. "The experience is simpler, more consistent, and designed to allow our clients to move up and down the aircraft food chain based upon each trip. This type of customization is a differentiator, and we are just getting started."</p><p><b>About FlyHouse</b> <br />FlyHouse is disrupting private aviation by making it accessible, transparent, and community-driven, while maintaining the highest standards of safety and luxury. At the intersection of technology and service, FlyHouse connects travelers to aircraft owners and operators worldwide, offering instant booking, real-time availability, and a platform built for creating lifelong memories.</p>
+<div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder2">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2953252/FlyHouse_Brian_P_Reid_Headshot.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2953252/FlyHouse_Brian_P_Reid_Headshot.jpg" title="Brian P. Reid Joins FlyHouse as new Chief Revenue Officer" alt="Brian P. Reid Joins FlyHouse as new Chief Revenue Officer" />
+                        </a>
+                </p>
+</div>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=NY30857&amp;sd=2026-04-09" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/flyhouse-appoints-brian-p-reid-as-chief-revenue-officer-302738517.html" target="_blank">https://www.prnewswire.com/news-releases/flyhouse-appoints-brian-p-reid-as-chief-revenue-officer-302738517.html</a></p><p>SOURCE FlyHouse</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=NY30857&amp;Transmission_Id=202604091210PR_NEWS_USPR_____NY30857&amp;DateId=20260409" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

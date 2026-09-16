@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604091329PR_NEWS_USPR_____CL28055</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260409T132900-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260409</DateId>
+        <NewsItemId>CL28055</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260409:CL28055:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260409T132900-0400</FirstCreated>
+      <ThisRevisionCreated>20260409T132900-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>Veteran Ventures Capital Invests in Hybron Technologies to Accelerate Next-Generation Defense Manufacturing</HeadLine>
+        <DateLine>MCLEAN, Va., April 6, 2026</DateLine>
+        <SlugLine>VVC-Investment</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604091329PR_NEWS_USPR_____CL28055.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="Veteran Ventures Capital" />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="Veteran Ventures Capital" />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="ARO" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="CPR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="MNG" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="MFG" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="FIN" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="VEN" Scheme="SubjectCode" />
+        </SubjectCode>
+        <Property FormalName="CompanyName" Value="Veteran Ventures Capital" />
+        <Property FormalName="GeographyCode" Value="Virginia" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/1995898/Veteran_Ventures_Capital_Logo.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>Veteran Ventures Capital Invests in Hybron Technologies to Accelerate Next-Generation Defense Manufacturing</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">Veteran Ventures Capital Invests in Hybron Technologies to Accelerate Next-Generation Defense Manufacturing</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">MCLEAN, Va., April 6, 2026</p>
+              </div>
+              <div class="xn-content">
+<p><i>Investment from Veteran Ventures Capital's Veterans Fund II supports breakthrough composite manufacturing platform designed to accelerate production of critical aerospace and defense components</i></p><p><span class="legendSpanClass">MCLEAN, Va.</span>, <span class="legendSpanClass">April 6, 2026</span> /PRNewswire/ -- Veteran Ventures Capital (VVC) today announced an investment in <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4658244-1&amp;h=1612878529&amp;u=https%3A%2F%2Fhybron.com%2F&amp;a=Hybron+Technologies" target="_blank" rel="nofollow">Hybron Technologies</a> ("Hybron"), an advanced manufacturing company developing technology to accelerate production of next-generation composite products for dual-use applications, including mission-critical aerospace and defense components. The investment adds Hybron to VVC's growing Fund II portfolio alongside <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4658244-1&amp;h=1357831938&amp;u=https%3A%2F%2Fwww.vatnsystems.com%2F&amp;a=Vatn+Systems%2C" target="_blank" rel="nofollow">Vatn Systems,</a> <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4658244-1&amp;h=1959459129&amp;u=https%3A%2F%2Fagilespaceindustries.com%2F&amp;a=Agile+Space+Industries%2C" target="_blank" rel="nofollow">Agile Space Industries,</a> and <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4658244-1&amp;h=2142889175&amp;u=https%3A%2F%2Fturionspace.com%2F&amp;a=Turion+Space" target="_blank" rel="nofollow">Turion Space</a>, reinforcing the firm's thesis that scalable, dual-use manufacturing technologies are essential to rebuilding Western defense industrial capacity.</p>
+    <div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder1">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/1995898/Veteran_Ventures_Capital_Logo.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/1995898/Veteran_Ventures_Capital_Logo.jpg" title="(PRNewsfoto/Veteran Ventures Capital) (PRNewsfoto/Veteran Ventures Capital)" alt="(PRNewsfoto/Veteran Ventures Capital) (PRNewsfoto/Veteran Ventures Capital)" />
+                        </a>
+                </p>
+    </div>
+<p>The investment was made through Veteran Ventures Capital's Veterans Fund II as part of Hybron's oversubscribed $20 million Series Seed financing round led by Marque Ventures.</p><p>Founded in 2022 and headquartered in El Segundo, California, Hybron developed advanced composite manufacturing technologies with applications across aerospace structures, unmanned systems, industrial equipment, and next-generation defense platforms. The company's proprietary composite manufacturing process enables lightweight, high-strength structural components to be produced faster and at lower cost than traditional metal or composite manufacturing techniques. The company's hybrid chopped-fiber polymer process enables complex parts to be manufactured up to 100 times faster than conventional composite methods, while maintaining the structural performance required for aerospace and defense applications.</p><p>Hybron was co-founded by Brennan Lieu and Aaron Guo, who began collaborating on advanced composite manufacturing while studying engineering at Stanford University and UC Berkeley, respectively. Lieu, who serves as CEO, previously led product development at AWA Composites and held engineering roles at Moog Aircraft. Guo serves as Chief Technology Officer and brings experience from Boeing and AWA Forged Composites, where he contributed to composite material innovation and filed multiple patent applications. Hybron is a graduate of the Northrop Grumman Technology Accelerator.</p><p>Hybron's composite components can be up to 90% lighter than many aerospace-grade metals while maintaining required performance profiles. Importantly, Hybron's all-US supply chain helps maintain costs well below traditional aerospace grade metals, much of which is imported from countries not aligned with our values. The technology allows advanced composite structures to be manufactured with both the strength of continuous carbon-fiber materials and the speed and manufacturability of chopped-fiber composites.</p><p>"Defense readiness increasingly depends on how quickly we can scale manufacturing," said Steve Kiser, General Partner at Veteran Ventures Capital. "Hybron is tackling one of the hardest upstream problems in defense technology—how to produce high-performance structural components at the speed and scale modern conflicts demand. Their manufacturing platform has the potential to fundamentally change the economics of producing critical systems by compressing cycle times from weeks to hours without sacrificing strength of maintaining performance. As a firm built by operators who have seen firsthand how supply chain constraints affect readiness, Veteran Ventures invests in technologies that can close the gap between what the warfighter needs and what industry can deliver. Hybron is exactly that kind of company."</p><p>Growing global demand for munitions and defense systems exposed structural weaknesses in Western manufacturing capacity. Conflicts in Ukraine and the Middle East continues to drive unprecedented consumption of artillery, missiles, rockets and air defense interceptors; U.S. defense leaders have warned that replenishing stockpiles will require significant expansion of domestic production capacity.</p><p>The Department of Defense identified munitions production and advanced manufacturing capacity as central pillars of its effort to rebuild the U.S. defense industrial base and expand domestic manufacturing capability for critical defense systems.</p><p>The company's manufacturing approach is designed to support large-scale domestic production of lightweight structural components for aerospace, defense, and industrial applications. Hybron's first products include composite 155mm artillery shell casings and turbine fan blades, both currently in advanced prototyping.</p><p>"Modern aerospace and defense systems are still built around manufacturing processes that haven't fundamentally changed in decades," said Brennan Lieu, co-founder and CEO of Hybron Technologies. "Our goal is to make advanced composites manufacturable at industrial scale so critical systems can be built faster, lighter, and more efficiently. Veteran Ventures Capital understands both the technology and the mission, and we're excited to partner with them as we scale."</p><p>This investment supports Hybron's continued engineering development and manufacturing expansion as the company moves toward low-rate initial munitions production and broad commercialization across defense and industrial markets.</p><p><b>About Veteran Ventures Capital</b></p><p>Veteran Ventures Capital invests in dual-use national security technologies, focusing on companies led by veteran entrepreneurs and operators. Committed to advancing U.S. technological superiority, Veteran Ventures Capital provides capital, mentorship, and strategic guidance to high-growth companies serving critical government and commercial markets. VVC's portfolio includes leading companies in defense, aerospace, advanced manufacturing, cybersecurity, and other sectors essential to national security, including notable investments in <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4658244-1&amp;h=3856397878&amp;u=https%3A%2F%2Fwww.vatnsystems.com%2F&amp;a=Vatn+Systems" target="_blank" rel="nofollow">Vatn Systems</a>, <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4658244-1&amp;h=2896289332&amp;u=https%3A%2F%2Fwww.hiddenlevel.com%2F&amp;a=Hidden+Level" target="_blank" rel="nofollow">Hidden Level</a>, <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4658244-1&amp;h=14024888&amp;u=https%3A%2F%2Fwww.cambium-usa.com%2F&amp;a=Cambium" target="_blank" rel="nofollow">Cambium</a>, <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4658244-1&amp;h=3504879447&amp;u=https%3A%2F%2Fagilespaceindustries.com%2F&amp;a=Agile+Space+Industries" target="_blank" rel="nofollow">Agile Space Industries</a>, and <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4658244-1&amp;h=1957621044&amp;u=https%3A%2F%2Fasylonrobotics.com%2F&amp;a=Asylon+Robotics" target="_blank" rel="nofollow">Asylon Robotics</a>, amongst others. For more information, visit <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4658244-1&amp;h=3160977927&amp;u=https%3A%2F%2Fwww.veteranventures.us%2F&amp;a=www.veteranventures.us" target="_blank" rel="nofollow">www.veteranventures.us</a> and follow the firm on <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4658244-1&amp;h=594660230&amp;u=https%3A%2F%2Fwww.linkedin.com%2Fcompany%2Fveteran-ventures-capital-llc%2F&amp;a=LinkedIn" target="_blank" rel="nofollow">LinkedIn</a>.</p><p><b>About Hybron Technologies</b></p><p>Hybron Technologies is an advanced manufacturing company developing next-generation composite materials and scalable manufacturing processes capable of replacing metal components in aerospace, defense, and industrial systems. By combining high-performance materials with rapid manufacturing methods, Hybron enables lighter, stronger, and more cost-efficient components across a wide range of applications. For more information, visit <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4658244-1&amp;h=2856279974&amp;u=https%3A%2F%2Fhybron.com%2F&amp;a=hybron.com" target="_blank" rel="nofollow">hybron.com</a>.</p><p><b>Media Contact</b></p><p>For media inquiries, please contact: <b><a href="mailto:investorrelations@veteranventures.us" target="_blank" rel="nofollow">investorrelations@veteranventures.us</a></b></p>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=CL28055&amp;sd=2026-04-09" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/veteran-ventures-capital-invests-in-hybron-technologies-to-accelerate-next-generation-defense-manufacturing-302738589.html" target="_blank">https://www.prnewswire.com/news-releases/veteran-ventures-capital-invests-in-hybron-technologies-to-accelerate-next-generation-defense-manufacturing-302738589.html</a></p><p>SOURCE Veteran Ventures Capital</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=CL28055&amp;Transmission_Id=202604091329PR_NEWS_USPR_____CL28055&amp;DateId=20260409" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

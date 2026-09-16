@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604100915PR_NEWS_USPR_____NY31529</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260410T091500-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260410</DateId>
+        <NewsItemId>NY31529</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260410:NY31529:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260410T091500-0400</FirstCreated>
+      <ThisRevisionCreated>20260410T091500-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>Fuse Expands U.S. Radiation Testing Capacity with New Albuquerque Facility</HeadLine>
+        <DateLine>SAN LEANDRO, Calif., April 10, 2026</DateLine>
+        <SlugLine>FUSE-Expands</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604100915PR_NEWS_USPR_____NY31529.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="AGENT OF CHANGE" />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="Fuse Energy Technologies Corporation" />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="CPR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="ARO" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="CXP" Scheme="SubjectCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="PDT" Scheme="SubjectCode" />
+        </SubjectCode>
+        <Property FormalName="CompanyName" Value="Fuse Energy Technologies Corporation" />
+        <Property FormalName="GeographyCode" Value="California" />
+        <Property FormalName="Contact" Value="Hayley Milbourn, hayley@agentofchange.com, 410-404-7619" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2953770/Fuse_Energy_Technologies_Corporation_Image.jpg" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2565029/Fuse_Logo.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>Fuse Expands U.S. Radiation Testing Capacity with New Albuquerque Facility</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+.prntac{
+TEXT-ALIGN: CENTER
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">Fuse Expands U.S. Radiation Testing Capacity with New Albuquerque Facility</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">SAN LEANDRO, Calif., April 10, 2026</p>
+              </div>
+              <div class="xn-content">
+<p class="prntac"><i>Next-generation testing infrastructure will help alleviate critical bottlenecks and accelerate the deployment of defense, space, and semiconductor technologies</i></p><p><span class="legendSpanClass">SAN LEANDRO, Calif.</span>, <span class="legendSpanClass">April 10, 2026</span> /PRNewswire/ -- <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661595-1&amp;h=10253546&amp;u=https%3A%2F%2Fwww.f.energy%2F&amp;a=Fuse" target="_blank" rel="nofollow">Fuse</a>, a leading U.S.-based fusion company, today announced the establishment of a new state-of-the-art facility in Albuquerque, New Mexico that will expand U.S. radiation effects testing capacity for critical defense, space, and semiconductor technologies. Fuse Federal has acquired several acres of land and will invest tens of millions of dollars to build next-generation radiation testing infrastructure. The facility is expected to create dozens of high-skilled engineering and technical jobs over the coming years and is scheduled to begin serving customers by summer 2026.</p>
+    <div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder1">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2953770/Fuse_Energy_Technologies_Corporation_Image.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2953770/Fuse_Energy_Technologies_Corporation_Image.jpg" title="Fuse's new state-of-the-art facility in Albuquerque, New Mexico." alt="Fuse's new state-of-the-art facility in Albuquerque, New Mexico." />
+                        </a>
+                </p>
+    </div>
+<p>"Fusion technology has transformative potential in both commercial and national security applications, and New Mexico is perfectly situated to capitalize on both," said <b>U.S. Senator Martin Heinrich. </b>"I'm excited to work with Fuse Energy Technologies on their Albuquerque facility as they build radiation testing capabilities that support the national security mission of Sandia National Laboratories and Los Alamos National Laboratory. Fusion is bringing good-paying jobs to New Mexico that will support the clean energy transition and support our national defense."</p><p>The Albuquerque site will deliver Radiation-as-a-Service (RaaS), enabling rapid, on-demand testing for U.S. and allied government agencies, defense programs, and commercial companies developing advanced electronics, satellites, and other technologies that must operate in radiation-intense environments. The facility will house advanced radiation sources that replicate extreme radiation and space environments, helping meet the urgent need for expanded testing capacity as next-generation capabilities come online. Fuse is scaling its capabilities to help alleviate critical testing bottlenecks and accelerate deployment timelines.</p><p>"Demand for radiation effects testing is growing rapidly as governments and companies deploy increasingly sophisticated defense platforms, satellites, advancement in chips and semiconductors, and critical infrastructure technologies," said<b> JC Btaiche, Founder and CEO of Fuse.</b> "By expanding to New Mexico, we're building next-generation testing infrastructure in one of the nation's most important national security and research hubs. This facility will help relieve testing bottlenecks and accelerate the fielding of critical defense and space systems, as well as advanced electronics, while driving the real-world applications of fusion technology."</p><p>Fuse expects the new facility to come online roughly two years sooner and at a fraction of the cost of comparable government-budgeted testing infrastructure, demonstrating how private-sector investment can help bridge near-term capability gaps while demand for radiation testing continues to increase.</p><p>"I'm proud to announce that Fuse Energy Technologies is opening a new facility in Albuquerque. This site will support fusion energy creation and also build a radiation testing facility that complements work being done at Sandia National Laboratories," said <b>U.S. Senator Ben Ray Luján</b>. "New Mexico is showing how states can keep up with innovation by making it easier for advanced energy companies to grow. This investment will boost our economy, create high-quality jobs, and strengthen New Mexico's leadership in energy, national security, and new technologies."</p><p>New Mexico has emerged as a leading center for advanced energy and national security innovation, with a strong ecosystem anchored by Los Alamos National Laboratory and Sandia National Laboratories. Fuse Federal has established Cooperative Research and Development agreements (CRADAs) with both laboratories.</p><p>"New Mexico continues to lead the nation in advanced science, energy innovation and national security research," said <b>Governor Michelle Lujan Grisham. </b>"Fuse's investment in Albuquerque is yet another indication that our state is at the forefront of cutting-edge technology while creating high-quality jobs and expanding opportunities for collaboration with our national laboratories and research institutions."</p><p>The expansion builds on Fuse's growing presence across the United States, including its headquarters and fusion research and radiation testing operations in San Leandro, California.</p><p><b>About Fuse<br /></b>Fuse Energy Technologies Corporation is accelerating the world's transition to fusion energy by securing clean, reliable, global energy abundance while also ensuring U.S. and Allied competitiveness through radiation effects testing. Through its subsidiary, Fuse Federal Enterprise, LLC, the company provides essential radiation services to U.S. government agencies, supporting critical defense and energy initiatives.</p>
+<div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder2">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2565029/Fuse_Logo.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2565029/Fuse_Logo.jpg" title="Fuse Energy Technologies Corporation (PRNewsfoto/Fuse Energy Technologies Corporation)" alt="Fuse Energy Technologies Corporation (PRNewsfoto/Fuse Energy Technologies Corporation)" />
+                        </a>
+                </p>
+</div>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=NY31529&amp;sd=2026-04-10" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/fuse-expands-us-radiation-testing-capacity-with-new-albuquerque-facility-302739243.html" target="_blank">https://www.prnewswire.com/news-releases/fuse-expands-us-radiation-testing-capacity-with-new-albuquerque-facility-302739243.html</a></p><p>SOURCE Fuse Energy Technologies Corporation</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=NY31529&amp;Transmission_Id=202604100915PR_NEWS_USPR_____NY31529&amp;DateId=20260410" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

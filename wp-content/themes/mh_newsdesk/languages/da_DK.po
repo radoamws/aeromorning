@@ -1,0 +1,1256 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: MH Newsdesk v1.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2015-07-21 17:00+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Poedit 1.6.6\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
+"_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
+"X-Poedit-Basepath: ../\n"
+"X-Textdomain-Support: yes\n"
+"Language: da_DK\n"
+"X-Poedit-SearchPath-0: .\n"
+
+# @ mh-newsdesk
+#: admin/admin.php:7
+msgid "Welcome to MH Newsdesk"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:7
+msgid "Theme Info"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:16
+#, php-format
+msgid "Welcome to %1s %2s"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:20
+msgid "Important Links:"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:21
+msgid "Theme Info Page"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:22
+msgid "Support Center"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:23
+msgid "Facebook"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:24
+msgid "Twitter"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:25
+msgid "YouTube"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:30
+#, php-format
+msgid "Getting Started with %s"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:34
+msgid "Theme Documentation"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:35
+#, php-format
+msgid ""
+"Need support to setup and configure %s? Please have a look at the "
+"instructions in the theme documentation or register at our support forums "
+"when you click on \"Support\" in your MH Themes account."
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:37
+msgid "Visit Documentation"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:41 includes/mh-options.php:19
+msgid "Theme Options"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:42
+#, php-format
+msgid ""
+"%s WordPress theme supports the Theme Customizer for all theme settings. "
+"Click \"Customize Theme\" to open the Customizer now."
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:44
+msgid "Customize Theme"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:48
+msgid "Upgrade to MH Themes Bundle"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:49
+msgid ""
+"Do you want to have access to all Premium WordPress Themes by MH Themes "
+"including support and lifetime updates? You can upgrade to the MH Themes "
+"Bundle right away when you click on \"Shop\" in your MH Themes account."
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:51
+msgid "Login to MH Themes account"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:56
+msgid "Theme Screenshot"
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:62
+#, php-format
+msgid "%1s WordPress theme is proudly brought to you by %2s."
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:76
+#, php-format
+msgid ""
+"Thanks for using %1s by MH Themes. To learn more about this theme, please "
+"%1s."
+msgstr ""
+
+# @ mh-newsdesk
+#: admin/admin.php:76
+msgid "click here"
+msgstr "Klik her"
+
+# @ mh-newsdesk
+#: comments.php:10
+#, php-format
+msgid ""
+"<span class=\"comment-count\">1 Comment</span> <span class=\"comment-count-"
+"more\">on \"%2$s\"</span>"
+msgid_plural ""
+"<span class=\"comment-count\">%1$s Comments</span> <span class=\"comment-"
+"count-more\">on \"%2$s\"</span>"
+msgstr[0] ""
+"<span class=\"comment-count\">1 Kommentar</span> <span class=\"comment-count-"
+"more\">på \"%2$s\"</span>"
+msgstr[1] ""
+"<span class=\"comment-count\">%1$s Kommentarer</span> <span class=\"comment-"
+"count-more\">på \"%2$s\"</span>"
+
+# @ mh-newsdesk
+#: comments.php:18 includes/mh-custom-functions.php:154
+#: includes/mh-custom-functions.php:171
+msgid "&laquo;"
+msgstr ""
+
+# @ mh-newsdesk
+#: comments.php:18 includes/mh-custom-functions.php:155
+#: includes/mh-custom-functions.php:171
+msgid "&raquo;"
+msgstr ""
+
+# @ mh-newsdesk
+#: comments.php:25
+#, php-format
+msgid ""
+"<span class=\"comment-count\">%s</span> <span class=\"comment-count-more"
+"\">Trackbacks & Pingbacks</span>"
+msgstr ""
+
+# @ mh-newsdesk
+#: comments.php:34
+msgid "Comments are closed."
+msgstr "Kommentarer er lukket"
+
+# @ mh-newsdesk
+#: comments.php:45
+msgid "Leave a comment"
+msgstr "Efterlad en kommentar"
+
+# @ mh-newsdesk
+#: comments.php:46
+msgid "Your email address will not be published."
+msgstr "Din e-mail adresse vil ikke blive offentliggjort."
+
+# @ mh-newsdesk
+#: comments.php:48
+msgid "Comment"
+msgstr "Kommentar"
+
+# @ mh-newsdesk
+#: content-none.php:4
+msgid ""
+"Sorry, but nothing matched your search terms. Please try again with "
+"different keywords."
+msgstr "Desværre, men din søgning gav intet resultat. Prøv et andet søgeord."
+
+# @ mh-newsdesk
+#: content-none.php:6
+msgid ""
+"It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps "
+"searching can help."
+msgstr "Vi kan ikke finde det du leder efter, måske ville en søgning hjælpe."
+
+# @ mh-newsdesk
+#: content-none.php:12
+msgid "Popular Articles"
+msgstr "Populære artikler"
+
+# @ mh-newsdesk
+#: content-none.php:17
+msgid "Random Articles"
+msgstr "Tilfældige artikler"
+
+# @ mh-newsdesk
+#: content-related.php:9 includes/mh-options.php:82
+msgid "Related Articles"
+msgstr "Relaterede artikler"
+
+# @ mh-newsdesk
+#: content-single.php:4
+msgid "TOPICS:"
+msgstr "EMNER:"
+
+# @ mh-newsdesk
+#: footer.php:34
+#, php-format
+msgid "Copyright %1$s | MH Newsdesk by %2$s"
+msgstr "Copyright %1$s | MH Newsdesk by %2$s"
+
+# @ mh-newsdesk
+#: functions.php:48
+msgid "Header Navigation"
+msgstr "Navigation i sidehoved"
+
+# @ mh-newsdesk
+#: functions.php:49
+msgid "Social Icons"
+msgstr "Sociale ikoner"
+
+# @ mh-newsdesk
+#: functions.php:50
+msgid "Main Navigation"
+msgstr "Hovedmenu"
+
+# @ mh-newsdesk
+#: functions.php:51
+msgid "Footer Navigation"
+msgstr "Navigation i sidefod"
+
+# @ mh-newsdesk
+#: functions.php:113
+msgid "Global Sidebar"
+msgstr "Global Sidebar"
+
+# @ mh-newsdesk
+#: functions.php:113
+msgid "Sidebar used globally throughout your site."
+msgstr "Sidebaren bruges på hele din side."
+
+# @ mh-newsdesk
+#: functions.php:114
+msgid "Home 1 - Large Column (Top)"
+msgstr ""
+
+# @ mh-newsdesk
+#: functions.php:114 functions.php:117
+msgid "Large column on Homepage."
+msgstr "Stor sidebar på forsiden."
+
+# @ mh-newsdesk
+#: functions.php:115
+msgid "Home 2 - First Column"
+msgstr ""
+
+# @ mh-newsdesk
+#: functions.php:115
+msgid "First column on Homepage."
+msgstr "Første kolonne på forsiden."
+
+# @ mh-newsdesk
+#: functions.php:116
+msgid "Home 3 - Second Column"
+msgstr ""
+
+# @ mh-newsdesk
+#: functions.php:116
+msgid "Second column on Homepage."
+msgstr "Anden kolonne på forsiden."
+
+# @ mh-newsdesk
+#: functions.php:117
+msgid "Home 4 - Large Column (Bottom)"
+msgstr ""
+
+# @ mh-newsdesk
+#: functions.php:118
+msgid "Home 5 - Sidebar"
+msgstr ""
+
+# @ mh-newsdesk
+#: functions.php:118
+msgid "Sidebar on Homepage."
+msgstr "Sidebar på forsiden."
+
+# @ mh-newsdesk
+#: functions.php:119
+msgid "Header Advertisement"
+msgstr ""
+
+# @ mh-newsdesk
+#: functions.php:119
+msgid "728*90 advertisement spot in the header."
+msgstr "728*90 reklameplads i toppen af siden."
+
+# @ mh-newsdesk
+#: functions.php:120
+msgid "Post Advertisement (Top)"
+msgstr ""
+
+# @ mh-newsdesk
+#: functions.php:120
+msgid "728*90 advertisement spot above your post text."
+msgstr "728*90 reklame over teksten på indlæg."
+
+# @ mh-newsdesk
+#: functions.php:121
+msgid "Post Advertisement (Bottom)"
+msgstr ""
+
+# @ mh-newsdesk
+#: functions.php:121
+msgid "728*90 advertisement spot underneath your post text."
+msgstr "728*90 reklame under teksten på indlæg."
+
+# @ mh-newsdesk
+#: functions.php:122
+msgid "Footer Advertisement"
+msgstr ""
+
+# @ mh-newsdesk
+#: functions.php:122
+msgid "728*90 advertisement spot in the footer."
+msgstr "728*90 reklame i footeren"
+
+# @ mh-newsdesk
+#: functions.php:123
+msgid "Footer 1 - First Column"
+msgstr ""
+
+# @ mh-newsdesk
+#: functions.php:123
+msgid "First column widget area in the footer."
+msgstr "Første kolonne i footeren"
+
+# @ mh-newsdesk
+#: functions.php:124
+msgid "Footer 2 - Second Column"
+msgstr ""
+
+# @ mh-newsdesk
+#: functions.php:124
+msgid "Second column widget area in the footer."
+msgstr "Anden kolonne i footeren"
+
+# @ mh-newsdesk
+#: functions.php:125
+msgid "Footer 3 - Third Column"
+msgstr ""
+
+# @ mh-newsdesk
+#: functions.php:125
+msgid "Third column widget area in the footer."
+msgstr "Tredje kolonne i footeren"
+
+# @ mh-newsdesk
+#: functions.php:126
+msgid "Contact"
+msgstr "Kontakt"
+
+# @ mh-newsdesk
+#: functions.php:126
+msgid "Sidebar on contact template."
+msgstr "Sidebar på kontaktside."
+
+# @ mh-newsdesk
+#: includes/mh-breadcrumb.php:16
+msgid "Home"
+msgstr "Forside"
+
+# @ mh-newsdesk
+#: includes/mh-breadcrumb.php:27
+msgid "Media"
+msgstr "Medier"
+
+# @ mh-newsdesk
+#: includes/mh-breadcrumb.php:60 includes/widgets/mh-authors.php:55
+msgid "Authors"
+msgstr "Forfattere"
+
+# @ mh-newsdesk
+#: includes/mh-breadcrumb.php:62 includes/mh-custom-functions.php:68
+msgid "Page not found (404)"
+msgstr "Side ikke fundet (404)"
+
+# @ mh-newsdesk
+#: includes/mh-breadcrumb.php:64
+msgid "Search"
+msgstr "Søg"
+
+# @ mh-newsdesk
+#: includes/mh-breadcrumb.php:74 includes/mh-breadcrumb.php:77
+msgid "Yearly Archives"
+msgstr "Årlige arkiver"
+
+# @ mh-newsdesk
+#: includes/mh-breadcrumb.php:75
+msgid "Monthly Archives"
+msgstr "Månedlige arkiver"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:50
+#, php-format
+msgctxt "post author"
+msgid "Articles by %s"
+msgstr "Artikler af %s"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:62 template-sitemap.php:22
+msgid "Archives"
+msgstr "Arkiver"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:70
+#, php-format
+msgid "Search Results for %s"
+msgstr "Søgeresultater for %s"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:94
+#, php-format
+msgctxt "post author"
+msgid "Posted By: %s"
+msgstr "Indlæg af: %s"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:204
+msgid "Back to post"
+msgstr "Tilbage til indlæg"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:206
+msgid "Previous image"
+msgstr "Forrige billede"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:209
+msgid "Previous post"
+msgstr "Forrige indlæg"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:216
+msgid "Next image"
+msgstr "Næste billede"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:218
+msgid "Next post"
+msgstr "Næste indlæg"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:238
+#, php-format
+msgid "%1$s at %2$s"
+msgstr "%1$s ved %2$s"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:242
+msgid "(Edit)"
+msgstr "(Redigér)"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:245
+msgid "Your comment is awaiting moderation."
+msgstr "Din kommentar afventer gennemgang."
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:262
+msgid "Name "
+msgstr "Navn"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:263
+msgid "Email "
+msgstr "E-mail"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:264
+msgid "Website"
+msgstr "Hjemmeside"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:293
+msgid "Share on Facebook"
+msgstr "Del på Facebook"
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:302
+msgid "Share on Google+"
+msgstr "Del på Google+"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:23
+msgid "General"
+msgstr "Generelt"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:24
+msgid "Layout"
+msgstr "Udseende"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:25
+msgid "Typography"
+msgstr "Typography"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:26
+msgid "News Ticker"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:32 includes/mh-options.php:167
+msgid "Read More"
+msgstr "Læs mere"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:56 includes/mh-options.php:187
+msgid "Hot Topics"
+msgstr "Populære emner"
+
+# @ mh-newsdesk
+#: includes/mh-options.php:72
+msgid "Favicon Upload"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:73
+msgid "Custom Excerpt Length in Words"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:74
+msgid "Custom Excerpt More-Text"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:75
+msgid "Copyright Text"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:77
+msgid "Breadcrumb Navigation"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:77 includes/mh-options.php:78
+#: includes/mh-options.php:79 includes/mh-options.php:80
+#: includes/mh-options.php:81 includes/mh-options.php:82
+#: includes/mh-options.php:83 includes/mh-options.php:92
+#: includes/mh-options.php:132
+msgid "Enable"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:77 includes/mh-options.php:78
+#: includes/mh-options.php:79 includes/mh-options.php:80
+#: includes/mh-options.php:81 includes/mh-options.php:82
+#: includes/mh-options.php:83 includes/mh-options.php:92
+#: includes/mh-options.php:133
+msgid "Disable"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:78
+msgid "Featured Image on Posts"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:79
+msgid "Sharing Buttons"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:80
+msgid "Post/Attachment Navigation"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:81
+msgid "Author Box"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:83
+msgid "Comments on Pages"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:84
+msgid "Sidebar"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:84 includes/mh-options.php:134
+msgid "Right Sidebar"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:84 includes/mh-options.php:135
+msgid "Left Sidebar"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:90
+msgid "Change default Font Size (px)"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:92
+msgid "Google Webfonts"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:93
+msgid "Google Webfonts Characters"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:93 includes/mh-options.php:136
+msgid "Latin"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:93 includes/mh-options.php:137
+msgid "Latin Extended"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:93 includes/mh-options.php:138
+msgid "Greek"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:93 includes/mh-options.php:139
+msgid "Greek Extended"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:93 includes/mh-options.php:140
+msgid "Cyrillic"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:93 includes/mh-options.php:141
+msgid "Cyrillic Extended"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:94
+msgid "Google Webfont for Headings"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:95
+msgid "Google Webfont for Body Text"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:96
+msgid "Imported Google Font Styles"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:98
+msgid "Enable Ticker"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:99
+msgid "Ticker Title"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:100
+msgid "Limit Post Number"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:101
+msgid "Custom Categories (use ID - e.g. 3,5,9):"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:102
+msgid "Custom Tags (use slug - e.g. lifestyle):"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:103 includes/widgets/mh-custom-posts.php:128
+#: includes/widgets/mh-posts-grid.php:112
+#: includes/widgets/mh-posts-large.php:99
+#: includes/widgets/mh-posts-list.php:98
+#: includes/widgets/mh-recent-posts.php:52
+msgid "Skip Posts (Offset):"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:104 includes/widgets/mh-custom-posts.php:153
+#: includes/widgets/mh-posts-grid.php:129
+#: includes/widgets/mh-posts-large.php:116
+#: includes/widgets/mh-posts-list.php:115
+#: includes/widgets/mh-recent-posts.php:57
+msgid "Ignore Sticky Posts"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:106 includes/mh-options.php:107
+#: includes/mh-options.php:108 includes/mh-options.php:109
+#: includes/mh-options.php:110
+#, php-format
+msgctxt "options panel"
+msgid "Theme Color %d"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:111
+msgid "Text Color (Navigation/Footer)"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:9
+msgid ""
+"MH Authors widget to display a list of authors including the number of "
+"published posts."
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:31 includes/widgets/mh-authors.php:33
+#, php-format
+msgid "Articles by %s"
+msgstr "Artikler af %s"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:34
+#, php-format
+msgctxt "author post count"
+msgid "published %d articles"
+msgstr "publiserede %d artikler"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:39
+msgid "No authors found"
+msgstr "Ingen forfattere fundet"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:59 includes/widgets/mh-comments.php:45
+#: includes/widgets/mh-custom-posts.php:97
+#: includes/widgets/mh-facebook-page.php:47
+#: includes/widgets/mh-posts-grid.php:81
+#: includes/widgets/mh-posts-large.php:68
+#: includes/widgets/mh-posts-list.php:67
+#: includes/widgets/mh-recent-posts.php:44 includes/widgets/mh-youtube.php:37
+msgid "Title:"
+msgstr "Titel:"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:63
+msgid "Limit Author Number:"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:67
+msgid "Skip Authors (Offset):"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:71
+msgid "User Role:"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:73
+msgid "All Users"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:74
+msgid "Administrator"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:75
+msgid "Editor"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:76
+msgid "Author"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:77
+msgid "Contributor"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:78
+msgid "Subscriber"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:82
+msgid "Order Authors by:"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:84
+msgid "Number of Posts"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:85
+msgid "User Name"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:89
+msgid "Order:"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:91
+msgid "Ascending"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:92
+msgid "Descending"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-comments.php:9
+msgid ""
+"MH Recent Comments widget to display your recent comments including user "
+"avatars."
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-comments.php:26
+#, php-format
+msgctxt "comment widget"
+msgid "%1$s on %2$s"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-comments.php:41
+msgid "Recent Comments"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-comments.php:49
+msgid "Limit Comment Number:"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-comments.php:53
+msgid "Skip Comments (Offset):"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:9
+msgid "Custom Pages Widget to display pages based on page IDs."
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:68
+msgid "Title (optional):"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:72
+msgid "Link Title to URL (optional):"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:76
+msgid "Filter Pages by ID (comma separated):"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:80
+#: includes/widgets/mh-custom-posts.php:140
+msgid "Display Excerpts:"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:82
+msgid "Excerpt for first Page"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:83
+msgid "Excerpt for all Pages"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:84
+#: includes/widgets/mh-custom-posts.php:144
+msgid "Display no Excerpts"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:9
+msgid "Display posts from any category or tag."
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:101
+#: includes/widgets/mh-posts-grid.php:85
+#: includes/widgets/mh-posts-large.php:72
+#: includes/widgets/mh-posts-list.php:71
+msgid "Select a Category:"
+msgstr "Vælg en kategori:"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:103
+#: includes/widgets/mh-posts-grid.php:87
+#: includes/widgets/mh-posts-large.php:74
+#: includes/widgets/mh-posts-list.php:73
+msgid "All"
+msgstr "Alle"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:116
+#: includes/widgets/mh-posts-grid.php:100
+#: includes/widgets/mh-posts-large.php:87
+#: includes/widgets/mh-posts-list.php:86
+msgid "Multiple Categories Filter by ID:"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:120
+#: includes/widgets/mh-posts-grid.php:104
+#: includes/widgets/mh-posts-large.php:91
+#: includes/widgets/mh-posts-list.php:90
+msgid "Filter Posts by Tags (e.g. lifestyle):"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:124
+#: includes/widgets/mh-posts-grid.php:108
+#: includes/widgets/mh-posts-large.php:95
+#: includes/widgets/mh-posts-list.php:94
+#: includes/widgets/mh-recent-posts.php:48
+msgid "Limit Post Number:"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:132
+#: includes/widgets/mh-posts-grid.php:116
+#: includes/widgets/mh-posts-large.php:103
+#: includes/widgets/mh-posts-list.php:102
+msgid "Post Order:"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:134
+#: includes/widgets/mh-posts-grid.php:118
+#: includes/widgets/mh-posts-large.php:105
+#: includes/widgets/mh-posts-list.php:104
+msgid "Latest Posts"
+msgstr "Seneste indlæg"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:135
+#: includes/widgets/mh-posts-grid.php:119
+#: includes/widgets/mh-posts-large.php:106
+#: includes/widgets/mh-posts-list.php:105
+msgid "Random Posts"
+msgstr "Tilfældige indlæg"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:136
+#: includes/widgets/mh-posts-grid.php:120
+#: includes/widgets/mh-posts-large.php:107
+#: includes/widgets/mh-posts-list.php:106
+msgid "Popular Posts"
+msgstr "Populære indlæg"
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:142
+msgid "Excerpt for first Post"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:143
+msgid "Excerpt for all Posts"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:148
+#: includes/widgets/mh-posts-grid.php:124
+#: includes/widgets/mh-posts-large.php:111
+#: includes/widgets/mh-posts-list.php:110
+msgid "Link Title to custom URL (optional):"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:13
+#: includes/widgets/mh-facebook-page.php:43
+msgid "Follow on Facebook"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:51
+msgid "Facebook Page URL:"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-posts-grid.php:9
+msgid ""
+"Display posts as grid on front page for use in \"Home 1\" or \"Home 4\" "
+"widget areas."
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-posts-large.php:9
+msgid ""
+"Display posts with large images on front page for use in \"Home 1\" or "
+"\"Home 4\" widget areas."
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-posts-list.php:9
+msgid ""
+"Display a list of posts on front page for use in \"Home 1\" or \"Home 4\" "
+"widget areas."
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-recent-posts.php:9
+msgid "Display a list of most recent posts."
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-youtube.php:9
+msgid "Widget to display a YouTube Video."
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-youtube.php:41
+msgid "Video ID of your Featured Video:"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-youtube.php:43
+msgid "Also known as the Watch Code (Eg: fQydqPWdjoc)"
+msgstr ""
+
+# @ mh-newsdesk
+#: template-sitemap.php:7
+msgid "Recent Articles"
+msgstr ""
+
+# @ mh-newsdesk
+#: template-sitemap.php:15
+msgid "Pages"
+msgstr ""
+
+# @ mh-newsdesk
+#: template-sitemap.php:28
+msgid "Categories"
+msgstr ""
+
+# @ mh-newsdesk
+#: template-sitemap.php:30
+msgid "No categories"
+msgstr ""
+
+# @ mh-newsdesk
+#: template-authorbox.php:4
+msgid "About the Author"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:293 includes/mh-custom-functions.php:302
+msgid "SHARE"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:296
+msgid "Tweet This Post"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:296
+msgid "TWEET"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:299
+msgid "Pin This Post"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-custom-functions.php:299
+msgid "PIN"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:85
+msgid "Hide Post Meta Data"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:86 includes/widgets/mh-custom-posts.php:157
+msgid "Hide Date"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:87
+msgid "Hide Author"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/mh-options.php:88
+msgid "Hide Categories"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:8
+msgctxt "widget name"
+msgid "MH Facebook Page"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:9
+msgid "Widget to display your Facebook page on your website."
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:55
+msgid "Width (min. 280px):"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:59
+msgid "Height (min. 130px):"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:64
+msgid "Hide cover photo"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:68
+msgid "Show profile photos"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-facebook-page.php:72
+msgid "Show posts from FB page"
+msgstr ""
+
+# @ mh-newsdesk
+#: comments.php:39
+#, php-format
+msgid ""
+"<span class=\"comment-count\">Be the first to comment</span> <span class="
+"\"comment-count-more\">on \"%s\"</span>"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-authors.php:8
+msgctxt "widget name"
+msgid "MH Authors Widget"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-comments.php:8
+msgctxt "widget name"
+msgid "MH Recent Comments"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-pages.php:8
+msgctxt "widget name"
+msgid "MH Custom Pages"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-custom-posts.php:8
+msgctxt "widget name"
+msgid "MH Custom Posts"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-posts-grid.php:8
+msgctxt "widget name"
+msgid "MH Posts Grid (Homepage)"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-posts-large.php:8
+msgctxt "widget name"
+msgid "MH Posts Large (Homepage)"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-posts-list.php:8
+msgctxt "widget name"
+msgid "MH Posts List (Homepage)"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-recent-posts.php:8
+msgctxt "widget name"
+msgid "MH Recent Posts"
+msgstr ""
+
+# @ mh-newsdesk
+#: includes/widgets/mh-youtube.php:8
+msgctxt "widget name"
+msgid "MH YouTube Video"
+msgstr ""

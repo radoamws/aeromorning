@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604091058PR_NEWS_USPR_____NY30701</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260409T105800-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260409</DateId>
+        <NewsItemId>NY30701</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260409:NY30701:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260409T105800-0400</FirstCreated>
+      <ThisRevisionCreated>20260409T105800-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>One Year After Hudson River Sightseeing Helicopter Tragedy, Victims' Family and Members of Congress Highlight Bipartisan Helicopter Safety Legislation</HeadLine>
+        <DateLine>NEW YORK, April 9, 2026</DateLine>
+        <SlugLine>Helicopter-Safety-Act</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604091058PR_NEWS_USPR_____NY30701.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="ICR" />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="Gersowitz Libo &amp; Korek P.C." />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="LGL" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="TRA" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="AIR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="USN" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="AVO" Scheme="SubjectCode" />
+        </SubjectCode>
+        <Property FormalName="CompanyName" Value="Gersowitz Libo &amp; Korek P.C." />
+        <Property FormalName="GeographyCode" Value="New York" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2953109/Family_Escobar_Camprubi___NY_Skyline.jpg" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2953147/GLK_Law_and_Kreindler_Logo.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>One Year After Hudson River Sightseeing Helicopter Tragedy, Victims' Family and Members of Congress Highlight Bipartisan Helicopter Safety Legislation</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+.prntac{
+TEXT-ALIGN: CENTER
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">One Year After Hudson River Sightseeing Helicopter Tragedy, Victims' Family and Members of Congress Highlight Bipartisan Helicopter Safety Legislation</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">NEW YORK, April 9, 2026</p>
+              </div>
+              <div class="xn-content">
+<p class="prntac"><i>Gersowitz Libo &amp; Korek and Kreindler &amp; Kreindler Join U.S. Reps Nadler &amp; Goldman and Local Manhattan Elected Officials to </i><i>Urge Congress to Pass the Helicopter Safety Parity Act</i></p><p><span class="legendSpanClass">NEW YORK</span>, <span class="legendSpanClass">April 9, 2026</span> /PRNewswire/ -- Nearly a dozen members of the Escobar Camprubí family were joined today by their attorneys at Gersowitz Libo &amp; Korek P.C. and Kreindler &amp; Kreindler LLP, along with U.S. Rep. Jerrold Nadler (NY-12) and Rep. Dan Goldman (NY-10) at Hudson River Park to mark the one-year anniversary of a fatal sightseeing helicopter crash that claimed the lives of five members of the Camprubí family on April 10, 2025. The event also served as a public call for Congress to pass the Helicopter Safety Parity Act, bipartisan legislation introduced today by Reps. Nadler, Goldman, Malliotakis (NY-11), and Menendez (NJ-08), that would close longstanding regulatory loopholes and require sightseeing helicopter operators to meet the same rigorous safety standards as commercial airlines.</p>
+    <div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder1">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2953109/Family_Escobar_Camprubi___NY_Skyline.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2953109/Family_Escobar_Camprubi___NY_Skyline.jpg" title="Agustín Escobar Cañadas (49), Mercè Camprubí Montal (39), Agus Escobar Camprubí (10), Mercè Escobar Camprubí (8), Víctor Escobar Camprubí (4)" alt="Agustín Escobar Cañadas (49), Mercè Camprubí Montal (39), Agus Escobar Camprubí (10), Mercè Escobar Camprubí (8), Víctor Escobar Camprubí (4)" />
+                        </a>
+                </p>
+    </div>
+<p>Agustín Escobar Cañadas, 49; Mercè Camprubí Montal, 39; and their three children - Agus, 10; Mercè, 8; and Víctor, 4 - were killed when a Bell 206L-4 sightseeing helicopter crashed into the Hudson River just 16 minutes into the flight. One year later, the official investigation by the National Transportation Safety Board (NTSB) remains ongoing. Eleven members of the Camprubí family traveled from Spain to attend today's press conference to speak publicly about their loss and their hopes for reform.</p><p>"No other family should have to experience the loss our family has experienced," said <b>Joan Camprubí Montal, speaking on behalf of the Escobar Camprubí family</b>. "Aviation safety is not a choice, it is a responsibility. Our prayer is that no family will have to endure what we have had to endure."</p><p>"The Camprubí family lost two generations of their family in sixteen minutes – a father, a mother, three beautiful children," said <b>Jeff Korek, Senior Trial Partner at Gersowitz Libo &amp; Korek P.C.</b> "The regulatory framework governing the sightseeing helicopter industry has not kept pace with the responsibility these operators carry. We owe it to this family, and to every person that boards a sightseeing helicopter, to close this loophole once and for all."</p><p>"The Helicopter Safety Parity Act is a targeted, common-sense legislation designed to ensure that sightseeing operators are held to the highest possible safety standards, preventing tragedies like this from happening again," said <b>Vincent Lesch, Partner at Kreindler &amp; Kreindler LLP</b>.  "This law has the ability to improve helicopter safety not only in New York, but in other cities where sightseeing helicopters proliferate: Las Vegas, Los Angeles, and many places throughout Hawaii."</p><p>"Helicopters do not just rip apart mid-flight and fall from the sky," said <b>Cydney Korek, Attorney at Gersowitz Libo &amp; Korek P.C.</b> "There are approximately 30,000 sightseeing helicopter flights per year in Manhattan, and we want all of them to be safe. Our goal today is two-fold: to honor the victims of last year's horrific crash in the Hudson, and to honor their memories by turning this tragedy into action."</p><p>"The 2025 Hudson River crash stands as a tragic reminder of the enduring impact of sudden loss. On this painful first anniversary, I offer my continued comfort to the family of the victims and commend them for turning their profound grief over their horrific loss into valiant advocacy for the safety of us all," said<b> Rep. Jerrold Nadler (NY-12)</b>. "In the year since the crash, this incident has prompted reflection, investigation, and renewed calls for vigilance and safety, even as the memory of those lost continues to be honored with solemn remembrance. I am proud to have authored the Helicopter Safety and Parity Act and to introduce it with my colleagues today. The bill puts forth a simple notion: helicopters should be held to the same safety standards as airplanes. Such a notion is common sense, and it's time for our laws and regulators to catch up. By adopting the safety measures outlined in the bill, we can work to reduce the risk of another crash in the future."</p><p>"For too long, sightseeing helicopter operators have exploited regulatory gaps to operate under lower safety standards than other passenger aircraft, and that is unacceptable," said <b>Rep. Nicole Malliotakis (NY-11)</b>. "Every passenger deserves the same level of protection, regardless of the aircraft they board. The Helicopter Safety Parity Act closes these loopholes, strengthens oversight, and puts passengers and communities first. We owe it to these families, and to future passengers, to act with urgency."</p><p>"I am proud to co-lead legislation to protect our communities by ensuring that helicopter flights are held to the highest possible safety standards," said <b>Rep. Rob Menendez (NJ-08)</b>. "Last year's Hudson River helicopter crash that claimed the lives of six people only made it more urgent to address serious helicopter safety issues. I'm grateful to join Congressman Nadler on this bill and I remain committed to doing everything possible to keep our neighbors safe."</p><p>The Helicopter Safety Parity Act, led by Representatives Nadler and Malliotakis in a bipartisan effort, would close dangerous regulatory gaps by requiring helicopters carrying fare-paying passengers to meet the same high safety standards, equivalent to FAA Part 121, that already apply to commercial airlines. The legislation would also require modern safety equipment, including cockpit voice and flight data recorders, terrain awareness technology, and stronger maintenance programs and pilot fatigue rules, and would provide $50 million annually from FY2026 through FY2030 to fund FAA oversight, inspections, and enforcement of the enhanced standards. The NTSB is among the safety advocates that have long recommended abolishing the exemptions the legislation targets.</p><p>The April 2025 crash drew renewed attention to what safety advocates have long characterized as an unacceptable disparity between the standards governing commercial air travel and those applied to fare-paying sightseeing flights. Just two weeks ago, three people were killed in a sightseeing helicopter crash on Kauai, underscoring the urgency of legislative action.</p><p>The Helicopter Safety Parity Act would direct the FAA to finalize rulemaking within 18 months, rescind conflicting exemptions, and report to Congress within 12 months on staffing, oversight progress, and integration of rotorcraft into Part 121-equivalent safety systems. The legislation is designed to apply the same proven safety framework that has made commercial air travel the safest form of transportation to the sightseeing helicopter industry.</p><p><b>About Gersowitz Libo &amp; Korek P.C.<br /></b>Gersowitz Libo &amp; Korek P.C. is one of New York's premier personal injury law firms, with over 40 years of experience and more than $1 billion recovered for injured victims in New York and New Jersey. Led by Partners Edward H. Gersowitz, Jeff S. Korek and Michael A. Fruhling, the firm has deep experience litigating complex aviation disaster cases. This includes a wrongful death lawsuit against multiple production companies on behalf of a pilot killed in a plane crash during the filming of the Tom Cruise film <i>American Made</i> in South America, alleging the production disregarded basic safety procedures and failed to properly supervise the flight. The firm's aviation practice is led by Senior Trial Partner Jeff S. Korek and Attorney Cydney (Cyd) Korek. Cyd was a former Assistant District Attorney and a law clerk for the New York State Court of Appeals. Recognized in Best Lawyers® since 2006, Jeff was named "Lawyer of the Year" for Product Liability Litigation – Plaintiffs, New York City in 2026, "Lawyer of the Year" for Medical Malpractice Law – Plaintiffs, New York City in 2020, and "Lawyer of the Year" for Personal Injury Litigation – Plaintiffs, New York City in 2016. All partners have been selected by their peers for inclusion in The Best Lawyers in America. For more information, visit <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4660755-1&amp;h=3915590833&amp;u=https%3A%2F%2Furl.us.m.mimecastprotect.com%2Fs%2FWvUfCXD7rNIoEp3XiVhMTWGA2x%3Fdomain%3Dlawyertime.com%2F&amp;a=www.lawyertime.com" target="_blank" rel="nofollow">www.lawyertime.com</a>.</p><p><b>About Kreindler &amp; Kreindler LLP<br /></b>Kreindler is the preeminent aviation accident law firm in the world. Our attorneys have been appointed leading counsel in nearly every major commercial airline disaster case in the U.S. and abroad, including 2025's tragic collision near Washington, D.C., between an Army helicopter and an American Eagle passenger jet. Kreindler represents 34 of the 67 victims of that crash. In 2024, the firm was named Transportation Law Firm of the Year by the National Law Journal. Kreindler's aviation practice is led by 3 attorneys who are also commercial-rated, veteran military pilots from the Army, Navy and Marines. Kreindler's aviation accident practice has achieved an unmatched record of success representing people globally who have been injured or lost family members in international and domestic airline disasters. The firm maintains offices in New York, Boston and Los Angeles.</p><p><b>MEDIA CONTACT:<br /></b><a href="mailto:Joan.Vollero@icrinc.com" target="_blank" rel="nofollow">Joan.Vollero@icrinc.com</a> </p>
+<div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder2">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2953147/GLK_Law_and_Kreindler_Logo.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2953147/GLK_Law_and_Kreindler_Logo.jpg" title="" alt="" />
+                        </a>
+                </p>
+</div>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=NY30701&amp;sd=2026-04-09" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/one-year-after-hudson-river-sightseeing-helicopter-tragedy-victims-family-and-members-of-congress-highlight-bipartisan-helicopter-safety-legislation-302738410.html" target="_blank">https://www.prnewswire.com/news-releases/one-year-after-hudson-river-sightseeing-helicopter-tragedy-victims-family-and-members-of-congress-highlight-bipartisan-helicopter-safety-legislation-302738410.html</a></p><p>SOURCE Gersowitz Libo &amp; Korek P.C.</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=NY30701&amp;Transmission_Id=202604091058PR_NEWS_USPR_____NY30701&amp;DateId=20260409" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

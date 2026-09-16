@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604100808PR_NEWS_USPR_____SP31386</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260410T080800-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260410</DateId>
+        <NewsItemId>SP31386</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260410:SP31386:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260410T080800-0400</FirstCreated>
+      <ThisRevisionCreated>20260410T080800-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>EMBRAER S.A. ANNOUNCES MATERIAL FACT NEW CFO</HeadLine>
+        <DateLine>SÃO JOSÉ DOS CAMPOS, Brazil, April 10, 2026</DateLine>
+        <SlugLine>EMBRAER-Personnel</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604100808PR_NEWS_USPR_____SP31386.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="EMBRAER-EMPRESA BRASILEIRA DE AERONAUTICA S.A." />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="Embraer S.A." />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="FIN" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="AIR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="TRN" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="TRA" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="PAV" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="ARO" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="PER" Scheme="SubjectCode" />
+        </SubjectCode>
+        <Property FormalName="StockSymbol" Value="SaoPaulo:EMBJ3" />
+        <Property FormalName="StockSymbol" Value="NYSE:EMBJ" />
+        <Property FormalName="CompanyName" Value="Embraer S.A." />
+        <Property FormalName="GeographyCode" Value="Brazil" />
+        <Property FormalName="Contact" Value="PRESS OFFICES: Headquarters (Brazil), Corporate Communications, embraer@idealhks.com, Cell: +55 11 98890 7777, Tel.: +55 11 4873 7984" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>EMBRAER S.A. ANNOUNCES MATERIAL FACT NEW CFO</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+.prntac{
+TEXT-ALIGN: CENTER
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">EMBRAER S.A. ANNOUNCES MATERIAL FACT NEW CFO</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">SÃO JOSÉ DOS CAMPOS, Brazil, April 10, 2026</p>
+              </div>
+              <div class="xn-content">
+<p><span class="legendSpanClass">SÃO JOSÉ DOS CAMPOS, Brazil</span>, <span class="legendSpanClass">April 10, 2026</span> /PRNewswire/ -- Embraer S.A. (the "Company") hereby informs its shareholders and the investors in general that its Board of Directors has elected Mr. Felipe Santana Santiago de Lima as Executive Vice President, Financial &amp; Investor Relations, effective April 13, 2026.</p>
+<p>Currently the Company's Global Director of Treasury, Mr. Felipe Santana, has 18 years of experience at Embraer, with leadership roles across strategic areas including financial operations, treasury, insurance, customer finance, and shared services. Throughout his career, he has developed solid expertise in corporate finance and treasury, with exposure to capital markets, liability management, relationships with investors and financial institutions, aircraft financing, and risk management, in addition to extensive experience leading teams, with a strong focus on financial discipline, efficient capital allocation, and consistent results delivery.</p><p>The Company emphasizes that the appointment of the new Executive Vice President, Financial &amp; Investor Relations ensures continuity in its financial management, does not affect its strategy, operations, or financial commitments, and reaffirms its confidence in the strength of its position and in the execution of its business plan focused on sustainable growth.</p><p>The Company wishes Mr. Felipe Santana every success in his new role.</p><p class="prntac">São José dos Campos, April 10, 2026.</p><p class="prntac"><b>Francisco Gomes Neto<br /></b>Executive Vice President, Financial &amp; Investor Relations</p>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=SP31386&amp;sd=2026-04-10" /> View original content:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/embraer-sa-announces-material-fact-new-cfo-302739242.html" target="_blank">https://www.prnewswire.com/news-releases/embraer-sa-announces-material-fact-new-cfo-302739242.html</a></p><p>SOURCE Embraer S.A.</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=SP31386&amp;Transmission_Id=202604100808PR_NEWS_USPR_____SP31386&amp;DateId=20260410" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

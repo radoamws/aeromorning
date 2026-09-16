@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml"/>
+  <NewsEnvelope>
+    <TransmissionId>202105030630PR_NEWS_USPR_____LA62280</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire"/>
+    </SentFrom>
+    <DateAndTime>20210503T063000-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing"/>
+    <Priority FormalName="4"/>
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20210503</DateId>
+        <NewsItemId>LA62280</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20210503:LA62280:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release"/>
+      <FirstCreated>20210503T063000-0400</FirstCreated>
+      <ThisRevisionCreated>20210503T063000-0400</ThisRevisionCreated>
+      <Status FormalName="Usable"/>
+    </NewsManagement>
+    
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main"/>
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>Ecuatoriana Airlines Restores Air Service in Ecuador and Selects Discover the World to Handle Domestic and Key International Market Sales</HeadLine>
+        <DateLine>SCOTTSDALE, Ariz., May 3, 2021</DateLine>
+        <SlugLine>DISCOVER-Ecuador-Air</SlugLine>
+      </NewsLines>
+      
+      <AdministrativeMetadata>
+        <FileName>202105030630PR_NEWS_USPR_____LA62280.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire"/>
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="VAUGHAN COMMUNICATIONS"/>
+          </Party>
+          <Contribution FormalName="Supplier"/>
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR"/>
+          </Party>
+          <Contribution FormalName="Editor"/>
+        </Contributor>
+        <Property FormalName="Source" Value="Discover the World"/>
+      </AdministrativeMetadata>
+      
+      <DescriptiveMetadata>
+        <Language FormalName="en-US"/>
+        <Genre FormalName="Press Release"/>
+        <SubjectCode>
+          <Subject FormalName="AIR" Scheme="IndustryCode"/>
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="TRA" Scheme="IndustryCode"/>
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="LIC" Scheme="SubjectCode"/>
+        </SubjectCode>
+        <Property FormalName="CompanyName" Value="Discover the World"/>
+        <Property FormalName="GeographyCode" Value="Arizona"/>
+        <Property FormalName="Contact" Value="Nancy Vaughan, Vaughan Communications, (602) 912-9126, nvaughanpr@aol.com"/>
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/1501024/Ecuadoriana.jpg"/>
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/332149/discover_the_world_logo.jpg"/>
+      </DescriptiveMetadata>
+      
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml"/>
+        <DataContent>
+        
+<!-- start embedded XHTML document -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:xn="http://www.xmlnews.org/ns/">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>Ecuatoriana Airlines Restores Air Service in Ecuador and Selects Discover the World to Handle Domestic and Key International Market Sales</title>
+<style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+</style>
+</head>
+
+<body>
+
+<div class="xn-newslines">
+<h1 class="xn-hedline">Ecuatoriana Airlines Restores Air Service in Ecuador and Selects Discover the World to Handle Domestic and Key International Market Sales</h1>
+<p class="xn-distributor">PR Newswire</p>
+<p class="xn-dateline">SCOTTSDALE, Ariz., May 3, 2021</p></div>
+
+<div class="xn-content">
+
+<p><span class="xn-location">SCOTTSDALE, Ariz.</span>, <span class="xn-chron">May 3, 2021</span> /PRNewswire/ -- Ecuatoriana Airlines is embarking on a special mission to bring back air travel to domestic <span class="xn-location">Ecuador</span> with low fares that will make travel affordable when it starts service in <span class="xn-chron">October 2021</span>. Discover the World has been appointed as Ecuatoriana's sales partner in the local Ecuadorian market and will be responsible for developing sales in <span class="xn-location">Colombia</span>, <span class="xn-location">Peru</span>, <span class="xn-location">USA</span>, <span class="xn-location">Canada</span>, <span class="xn-location">Germany</span>, <span class="xn-location">France</span>, <span class="xn-location">Italy</span>, <span class="xn-location">Spain</span>, <span class="xn-location">Holland</span>, and the <span class="xn-location">United Kingdom</span>.</p>
+
+    <div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder1">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/1501024/Ecuadoriana.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/1501024/Ecuadoriana.jpg" title="New Ecuatoriana Airlines logo" alt="New Ecuatoriana Airlines logo" />
+                        </a>
+                </p>
+
+    </div>
+<p>Ecuatoriana Airlines also revealed its new logo which embodies the culture of the airline. Selecting a stylized hummingbird illustrates the airline's commitment to work hard on behalf of its customers as well as bringing all the flavors and colors of beautiful <span class="xn-location">Ecuador</span> to their passengers' experience.</p>
+<p>"With Ecuatoriana Airlines and Discover the World, a new era for Ecuadorian tourism has begun," said <span class="xn-person">Eduardo Delgado</span>, President &amp; CEO of the airline. "We selected Discover the World as our partner because they have a vast knowledge of the Ecuadorian market and the best relations with travel and tour operator agencies."</p>
+<p>"Together, Ecuatoriana Airlines and Discover the World will continue to move forward with its commitment and work to reactivate national and international tourism to Ecuador.  We are making it easier to access <span class="xn-location">Ecuador's</span> airports, where many have been shut down and providing cost reductions in fares across <span class="xn-location">Ecuador</span>," added <span class="xn-person">Eduardo Delgado</span>.</p>
+<p>Rocío de Díaz, Director of Discover the World Ecuador said, "We join Ecuadorian Airlines' vision of offering both Ecuadorians and tourists a unique, warm and excellent service with the highest safety standards. We are sure that this strategic alliance will be fruitful in every way."</p>
+<p>Ecuatoriana Airlines has chosen the Boeing 717-200 aircraft with a capacity of 115 passengers in a three-class configuration.  The airline will also use the Dash8-Q400 turboprop on domestic and some transborder international flights. This aircraft has a capacity of 78 passengers in a dual class configuration.</p>
+<p>For more information about Discover the World, visit discovertheworld.com or call +1 480 707 5566.</p>
+<p><u>About Discover the World<br/></u>Discover the World has earned a reputation as an innovative global sales representation leader in the travel industry through a worldwide network of 85 offices in more than 60 countries. With a portfolio of over 100 clients utilizing its sales, marketing and business process outsourcing services, the work of Discover the World has a direct positive impact on the growth of our clients and trade industry partners every day.</p>
+<p><u>About Ecuatoriana Airlines<br/></u>It is the first "hybrid" airline serving all domestic airports within <span class="xn-location">Ecuador</span> with visionary expansion plans, both in the passenger as well as in the cargo lines with a fleet of 717-200's and Q-400's and low operating costs. Guided and managed by an exceptional executive team with vast experience in the commercial and private aviation sector providing excellent customer service, training, flexibility, social responsibility, safety and security. It's the new flag carrier of <span class="xn-location">Ecuador</span>, inspiring national pride in a new local domestic airline. We are committed to promote local and international tourism with convenient schedules, quick aircraft turnarounds, competitive fares and connecting new city pairs while serving destinations more than twice a week, allowing for more connectivity and efficient travel plans. The carrier offers unique travel packages, corporate and frequent flyer programs as well as dedicated product and destination training.</p>
+
+<div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder2">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/332149/discover_the_world_logo.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/332149/discover_the_world_logo.jpg" title="Discover the World's logo. (PRNewsFoto/Discover the World Marketing) (PRNewsFoto/)" alt="Discover the World's logo. (PRNewsFoto/Discover the World Marketing) (PRNewsFoto/)" />
+                        </a>
+                </p>
+
+</div>
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://c212.net/c/img/favicon.png?sn=LA62280&amp;sd=2021-05-03" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="http://www.prnewswire.com/news-releases/ecuatoriana-airlines-restores-air-service-in-ecuador-and-selects-discover-the-world-to-handle-domestic-and-key-international-market-sales-301281810.html">http://www.prnewswire.com/news-releases/ecuatoriana-airlines-restores-air-service-in-ecuador-and-selects-discover-the-world-to-handle-domestic-and-key-international-market-sales-301281810.html</a></p>
+<p>SOURCE  Discover the World</p>
+</div>
+<img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=LA62280&amp;Transmission_Id=202105030630PR_NEWS_USPR_____LA62280&amp;DateId=20210503" style="border:0px; width:1px; height:1px;"/>
+</body>
+</html>
+
+<!-- end embedded XHTML document -->
+
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604130000PR_NEWS_USPR_____TO32083</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260413T000000-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260413</DateId>
+        <NewsItemId>TO32083</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260413:TO32083:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260413T000000-0400</FirstCreated>
+      <ThisRevisionCreated>20260413T000000-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>MDA SPACE UNVEILS SPACE CONTROL PLATFORM MDA MIDNIGHT™, DESIGNED TO DEFEND AND PROTECT THE SPACE DOMAIN</HeadLine>
+        <DateLine>TORONTO and COLORADO SPRINGS, Colo., April 13, 2026</DateLine>
+        <SlugLine>MDA-MIDNIGHT-control</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604130000PR_NEWS_USPR_____TO32083.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="MDA Space Ltd." />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="MDA Space" />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="AIR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="TRA" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="ARO" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="CPR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="STM" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="TDS" Scheme="SubjectCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="PDT" Scheme="SubjectCode" />
+        </SubjectCode>
+        <Property FormalName="StockSymbol" Value="Toronto:MDA" />
+        <Property FormalName="StockSymbol" Value="NYSE:MDA" />
+        <Property FormalName="CompanyName" Value="MDA Space" />
+        <Property FormalName="GeographyCode" Value="Ontario" />
+        <Property FormalName="GeographyCode" Value="Colorado" />
+        <Property FormalName="Contact" Value="MEDIA CONTACTS: Amy MacLeod, Vice President, Corporate Communications, 613-796-6937, amy.macleod@mda.space; INVESTOR CONTACTS: Jim Floros, Vice President, Investor Relations, 289-914-0209, jim.floros@mda.space" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2954467/MDA_Space_MDA_SPACE_UNVEILS_SPACE_CONTROL_PLATFORM_MDA_MIDNIGHT_.jpg" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2954266/MDA_Space_MDA_SPACE_UNVEILS_SPACE_CONTROL_PLATFORM_MDA_MIDNIGHT_.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>MDA SPACE UNVEILS SPACE CONTROL PLATFORM MDA MIDNIGHT™, DESIGNED TO DEFEND AND PROTECT THE SPACE DOMAIN</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">MDA SPACE UNVEILS SPACE CONTROL PLATFORM MDA MIDNIGHT™, DESIGNED TO DEFEND AND PROTECT THE SPACE DOMAIN</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">TORONTO and COLORADO SPRINGS, Colo., April 13, 2026</p>
+              </div>
+              <div class="xn-content">
+<p><i>Initial MDA MIDNIGHT<sup>™</sup> mission is designed to rendezvous with low Earth orbit space assets to track, counter, capture and de-orbit</i></p><p><span class="legendSpanClass">TORONTO and COLORADO SPRINGS, Colo.</span>, <span class="legendSpanClass">April 13, 2026</span> /PRNewswire/ - MDA Space Ltd. (TSX: MDA) (NYSE: MDA), a trusted mission partner to the rapidly expanding global space industry, today at the 41<sup>st</sup> Space Symposium in Colorado Springs announced MDA MIDNIGHT<i><sup>™</sup></i>, a space control platform for defence organizations to defend and protect the space domain.</p>
+    <div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder1">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2954467/MDA_Space_MDA_SPACE_UNVEILS_SPACE_CONTROL_PLATFORM_MDA_MIDNIGHT_.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2954467/MDA_Space_MDA_SPACE_UNVEILS_SPACE_CONTROL_PLATFORM_MDA_MIDNIGHT_.jpg" title="MDA MIDNIGHT (CNW Group/MDA Space)" alt="MDA MIDNIGHT (CNW Group/MDA Space)" />
+                        </a>
+                </p>
+    </div>
+<p>MDA MIDNIGHT<i><sup>™</sup></i> is a maneuverable spacecraft that employs high-reliability rendezvous and proximity operations (RPO) to detect, identify, counter and deter threats to critical space assets and orbits. The spacecraft can also be used to augment existing military missions through on-orbit surveillance, asset relocation and satellite refueling. Equipped with a suite of active and passive payload capabilities and world-leading robotics, MDA MIDNIGHT<i><sup>™</sup></i> turns space domain awareness into actionable decision-making, enabling defence organizations to maintain operational continuity in the increasingly contested domain.</p><p>"With new and emerging threats from adversaries, the critical space infrastructure that we all depend on requires greater protection," said Mike Greenley, CEO of MDA Space. "Backed by 40 years of on-orbit robotics operations, decades of mission planning and satellite operations, advanced digital technologies and our high-volume commercial production capacity, MDA MIDNIGHT<i><sup>™</sup></i> brings together the elements required for this critical mission, helping national and international defence organizations safeguard the space domain on which billions rely."</p><p>With nations around the world increasingly relying on satellites for national security and economic prosperity, a report on Global Counterspace Capabilities from the Secure World Foundation indicates that a growing number of countries are identifying the need to develop space control, or 'bodyguard', satellites to mitigate the growing threat landscape. The importance of the space domain was also recently recognized in Canada, with the federal government declaring space as a key sovereign capability. In this context, MDA MIDNIGHT<i><sup>™</sup></i> is designed to address emerging customer requirements by providing defence organizations with flight-proven technology in a mission-ready solution that can be rapidly configured, built and deployed to respond to new and emerging threats in space.</p><p>The initial MDA MIDNIGHT<i><sup>™</sup></i> mission is designed to rendezvous with multiple collaborative assets in low Earth orbit and employ a range of protective and defensive capabilities, including:</p><ul type="disc"><li>On-orbit inspection and reporting of satellite status</li><li>Electronic counter measures detection, attribution and mitigation</li><li>Rendezvous and proximity operations, cooperative satellite capture and release</li><li>De-orbiting of a customer's non-operational asset</li></ul><p>On the ground, operational procedures for MDA MIDNIGHT<i><sup>™</sup></i> will be supported by an established flight controller team with unparalleled experience conducting over 100 free-flyer captures and decades of robotics operations on-orbit. For select customers, MDA MIDNIGHT<i><sup>™</sup></i> can be operated through an established MDA Space Mission Control Centre.</p><p>MDA MIDNIGHT<i><sup>™</sup></i> also leverages recent advancements and investments in the company's diverse product suite, including MDA SKYMAKER<i><sup>™</sup></i> commercial robotics and MDA AURORA<i><sup>™</sup></i> satellite bus platform.</p><p>"At MDA Space, our technology and our team have millions of hours of experience planning and conducting on-orbit operations," said Holly Johnson, Vice President of Robotics and Space Operations at MDA Space. "As we bring this leadership to serve space defence customers, we are actively seeking military partnerships to collaborate on upcoming mission profiles and timing, as well as commercial payload partners to augment our suite of on-orbit capabilities."</p><p>Military partners interested in collaborating on product launch missions for MDA MIDNIGHT<i><sup>™</sup></i>. should contact <a href="mailto:midnight@mda.space" rel="nofollow" xmlns="http://www.w3.org/1999/xhtml">midnight@mda.space</a>.</p><p><b>FORWARD-LOOKING STATEMENTS</b></p><p>This press release may contain forward-looking information within the meaning of applicable securities legislation, which reflects the company's current expectations regarding future events. Such forward-looking information includes, but is not limited to, statements regarding the expected capabilities, performance, use, mission profiles and deployment of MDA MIDNIGHT<i><sup>™</sup></i>, the scope, timing and execution of any future missions, the nature and extent of any potential customer use cases, partnerships or mission authorizations, the potential applications of the platform for defence and space domain operations, and MDA Space's ability to develop, configure, deploy, deliver and support a mission-ready space control platform to meet evolving defence and space domain requirements.</p><p>Forward-looking statements are based on certain assumptions and analyses made by MDA Space in light of management's experience and perception of historical trends, current conditions and expected future developments and other factors it believes are appropriate, and are subject to risks and uncertainties and other factors which may cause the actual results, performance or achievements of MDA Space to differ materially from those anticipated in such forward-looking statements for a variety of reasons, including without limitation the risks and uncertainties detailed under the "Risk Factors" section of MDA Space's annual information form dated March 4, 2026.</p><p>Although MDA Space believes that the assumptions underlying these statements are reasonable, they may prove to be incorrect and there can be no assurance that actual results will be consistent with the forward-looking statements. There are a number of additional risks and uncertainties affecting or that could affect MDA Space, which could cause actual results and developments to differ materially from those described in, expressed or implied by these forward-looking statements. Accordingly, readers should not place undue reliance on any forward-looking statements or information included within this press release. These forward-looking statements speak only as of the date of this news release. Except as required by law, MDA Space is not under any obligation, and expressly disclaims any intention or obligation, to update or revise any forward-looking statements, whether as a result of new information, future events or otherwise<i>.</i></p><p><b>ABOUT MDA SPACE</b></p><p>Building the space between proven and possible, MDA Space (TSX:MDA; NYSE:MDA) is a trusted mission partner to the global defence and space industry. A robotics, satellite systems and geointelligence pioneer with a 55-year+ story of world firsts and more than 450 missions, MDA Space is a global leader in communications satellites, Earth and space observation, and space exploration and infrastructure. The global MDA Space team of more than 4,000 space experts has the knowledge and know-how to turn an audacious customer vision into an achievable mission—bringing to bear a one-of-a-kind mix of experience, engineering excellence and wide-eyed wonder that's been in our DNA since day one. For those who dream big and push boundaries on the ground and in the stars to change the world for the better, we'll take you there. For more information, visit mda.space.</p><p><b>SOCIAL MEDIA<br /></b>LinkedIn:         <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4662150-1&amp;h=1012700602&amp;u=http%3A%2F%2Fwww.linkedin.com%2Fcompany%2Fmdaspace&amp;a=linkedin.com%2Fcompany%2Fmdaspace" target="_blank" rel="nofollow">linkedin.com/company/mdaspace</a><br />X:                    <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4662150-1&amp;h=2307084706&amp;u=http%3A%2F%2Fwww.twitter.com%2FMDA_space&amp;a=twitter.com%2FMDA_space" target="_blank" rel="nofollow">twitter.com/MDA_space</a><br />Facebook:       <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4662150-1&amp;h=2421496470&amp;u=http%3A%2F%2Fwww.facebook.com%2FMDAspace&amp;a=facebook.com%2FMDAspace" target="_blank" rel="nofollow">facebook.com/MDAspace</a><br />YouTube:         <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4662150-1&amp;h=562164491&amp;u=https%3A%2F%2Fwww.youtube.com%2Fc%2Fmdaspace&amp;a=youtube.com%2Fc%2Fmdaspace" target="_blank" rel="nofollow">youtube.com/c/mdaspace</a><br />Instagram:       <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4662150-1&amp;h=3850881910&amp;u=http%3A%2F%2Fwww.instagram.com%2FMDA_space&amp;a=instagram.com%2FMDA_space" target="_blank" rel="nofollow">instagram.com/MDA_space</a></p>
+<div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder2">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2954266/MDA_Space_MDA_SPACE_UNVEILS_SPACE_CONTROL_PLATFORM_MDA_MIDNIGHT_.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2954266/MDA_Space_MDA_SPACE_UNVEILS_SPACE_CONTROL_PLATFORM_MDA_MIDNIGHT_.jpg" title="MDA Space logo (CNW Group/MDA Space)" alt="MDA Space logo (CNW Group/MDA Space)" />
+                        </a>
+                </p>
+</div>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=TO32083&amp;sd=2026-04-13" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/mda-space-unveils-space-control-platform-mda-midnight-designed-to-defend-and-protect-the-space-domain-302739971.html" target="_blank">https://www.prnewswire.com/news-releases/mda-space-unveils-space-control-platform-mda-midnight-designed-to-defend-and-protect-the-space-domain-302739971.html</a></p><p>SOURCE MDA Space</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=TO32083&amp;Transmission_Id=202604130000PR_NEWS_USPR_____TO32083&amp;DateId=20260413" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

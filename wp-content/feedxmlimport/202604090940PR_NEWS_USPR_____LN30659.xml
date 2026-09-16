@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604090940PR_NEWS_USPR_____LN30659</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260409T094000-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260409</DateId>
+        <NewsItemId>LN30659</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260409:LN30659:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260409T094000-0400</FirstCreated>
+      <ThisRevisionCreated>20260409T094000-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>$100Billion+ Drone Services Boom Fuels Rapid Rise of Drone-as-a-Service</HeadLine>
+        <DateLine>NEW YORK, April 9, 2026</DateLine>
+        <SlugLine>MNU-Drone-ZenaTech</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604090940PR_NEWS_USPR_____LN30659.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="Market IQ Media Group Limited" />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="Market News Updates" />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="CPR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="OTC" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="AIR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="ARO" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="INO" Scheme="SubjectCode" />
+        </SubjectCode>
+        <Property FormalName="StockSymbol" Value="NASDAQ:AVAV" />
+        <Property FormalName="StockSymbol" Value="NASDAQ:EH" />
+        <Property FormalName="StockSymbol" Value="NASDAQ:UAVS" />
+        <Property FormalName="StockSymbol" Value="NASDAQ:ZENA" />
+        <Property FormalName="StockSymbol" Value="NYSE:UMAC" />
+        <Property FormalName="CompanyName" Value="Market News Updates" />
+        <Property FormalName="GeographyCode" Value="United States of America" />
+        <Property FormalName="GeographyCode" Value="New York" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2852558/Market_News_Updates_Logo.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>$100Billion+ Drone Services Boom Fuels Rapid Rise of Drone-as-a-Service</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">$100Billion+ Drone Services Boom Fuels Rapid Rise of Drone-as-a-Service</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">NEW YORK, April 9, 2026</p>
+              </div>
+              <div class="xn-content">
+<p><b><i>Advanced AI, automation, and data analytics push DaaS into the mainstream across key industries</i></b></p><p><i>Market News Updates News Commentary Counter</i></p><p><span class="legendSpanClass">NEW YORK</span>, <span class="legendSpanClass">April 9, 2026</span> /PRNewswire/ -- The Drone-as-a-Service (DaaS) industry is growing quickly as more companies choose to 'rent' drone services instead of buying and managing drones themselves. This approach saves money upfront and gives businesses access to skilled operators and advanced technology without the hassle. Right now, the global DaaS market is worth around $12–13 billion, and it's <a href="https://www.futuremarketreport.com/industry-report/drone-as-a-service-market" target="_blank" rel="nofollow">expected to grow</a> to about $34 billion by 2032, showing steady and reliable growth over the next several years fueling active companies to increase operations and forging ahead in the industry that include: <b>ZenaTech, Inc.</b> (NASDAQ: ZENA), <b>EHang Holdings Limited</b> (NASDAQ: EH), <b>AeroVironment, Inc.</b> (NASDAQ: AVAV), <b>AgEagle Aerial Systems Inc. </b>(NYSE: UAVS), <b>Unusual Machines, Inc.</b> (NYSE American: UMAC).</p>
+<div id="prni_dvprnejpg44eeleft" dir="ltr" style="width: 100%; text-align: left;"><img id="prnejpg44eeleft" style="width: 400px; height: 59px;" title="Market News Updates Logo" src="https://mma.prnewswire.com/media/2852558/Market_News_Updates_Logo.jpg" alt="Market News Updates Logo" align="middle" /></div><p>A big reason for this growth is how useful drones have become across different industries. In agriculture, they help monitor crops; in construction and energy, they inspect sites and infrastructure; and in logistics, they're starting to support delivery services. When you look at the broader drone services market (not just DaaS), the numbers are even bigger—it's <a href="https://www.mordorintelligence.com/industry-reports/drone-services-market" target="_blank" rel="nofollow">projected to jump</a> from about $30 billion in 2025 to over $100 billion by 2030. That shows just how fast demand is increasing as drone technology improves and becomes more accessible.</p><p>Overall, the future looks strong for DaaS as more businesses move toward flexible, subscription-style services instead of owning expensive equipment. The entire <a href="https://www.grandviewresearch.com/industry-analysis/drone-market-report#:~:text=The%20global%20drone%20market%20size,capabilities%20of%20drones%20across%20industries" target="_blank" rel="nofollow">drone market could reach</a> over $160 billion by 2030, with services like DaaS playing a major role in that growth. As technology keeps getting better and regulations become clearer, it's likely that drone services will become a normal part of everyday business operations across many industries.</p><p><b>ZenaTech's (NASDAQ: ZENA) Announces its 21st Acquisition, Expanding National Drone as a Service Network and Pacific Northwest Footprint to Serve Business and Government </b><b><i>- </i></b>ZenaTech, Inc. ($<a href="https://stocktwits.com/symbol/ZENA" target="_blank" rel="nofollow">ZENA</a>) (FSE: 49Q) (BMV: ZENA) ("ZenaTech"), a technology solution provider specializing in AI (Artificial Intelligence) drone, Drone as a Service (DaaS), enterprise SaaS, and Quantum Computing solutions, today announces that it has completed its 21st acquisition, adding to its national expansion of Drone as a Service U.S. locations. The acquisition of Andy Paris &amp; Associates, a Lake Oswego, Oregon-based, long-established land surveying firm, strengthens ZenaTech's customer base and presence in the Portland area, accelerating drone-enabled inspections, surveys, and other services in the Pacific Northwest region for business and government customers. </p><p>"Strengthening the Pacific Northwest operations puts us right at the intersection of forestry and environmental monitoring, critical energy infrastructure, and ports and logistics surveillance, which is exactly where Drone as a Service delivers the most value for mission-critical operations," said Shaun Passley, Ph.D., ZenaTech CEO. "DaaS goes beyond flying drones by providing an AI-driven autonomy platform that turns aerial operations into continuous, actionable intelligence while automating manual, labor-intensive tasks. We're delivering efficiency in the field, and high-value data and insights that help business and government make faster, smarter decisions at scale."</p><p>Andy Paris &amp; Associates, founded in 1952, provides boundary, topographic, and construction staking surveys supporting commercial and infrastructure development for customers across Oregon and Washington states. Its longstanding relationships and presence complement ZenaTech's existing Portland area DaaS location, creating a unified base for scalable DaaS expansion in the region.</p><p>The company's Drone as a Service strategy entails building a scalable AI drone automation platform delivered through a network of locations, integrating its ZenaDrone drones to streamline legacy workflows, while providing centralized accelerated drone data analytics, and expanding service capabilities across multiple services improving speed, precision, safety and smart data access.</p><p>ZenaTech's Drone as a Service platform is designed to provide business and government clients with subscription and usage-based access to fast and superior drone-based services for a host of surveying, inspection, maintenance, power washing, inventory management, and precision agriculture services, without the capital costs or operational burdens of ownership. By acquiring established, profitable service companies currently using low-tech processes and ripe for drone innovation, ZenaTech is building a global, multi-service DaaS network of locations in communities anchored by longstanding, existing customers and revenue, for next-gen drone integration designed for speed, precision, data, and safety benefits. The company has a total of 24 international DaaS locations and is continuing to expand its network and portfolio of services. <b><i>Continued…</i></b> <b>Read this full release and additional news for ZENA by visiting:</b> <a href="https://www.zenatech.com/newsroom/" target="_blank" rel="nofollow">https://www.zenatech.com/newsroom/</a></p><p><i>In other Military/UAV/Drone industry news of note:</i></p><p><b>EHang Holdings Limited (NASDAQ: EH),</b> a global leader in Advanced Air Mobility (AAM), recently <a href="https://www.ehang.com/news/1361.html" target="_blank" rel="nofollow">announced</a> that on March 19, its management team, led by Founder, Chairman, and Chief Executive Officer Huazhi Hu, together with Chief Operating Officer Wang Zhao, Chief Financial Officer Conor Yang, Vice President and East China Regional General Manager Li Xiaona, and Vice President of R&amp;D Wang Dong, met with high-level Thai government officials and representatives from Thai enterprises in Bangkok. The meeting included Mr. Phiphat Ratchakitprakarn, Deputy Prime Minister and Minister of Transport; Mr. Punya Chupanit, Deputy Permanent Secretary, Ministry of Transport; Mr. Jiraroth Sukolrat, Director-General, Office of Transport and Traffic Policy and Planning (OTP); Air Chief Marshal Manat Chavanaprayoon, Director General, Civil Aviation Authority of Thailand (CAAT); Mr. Kajonpat Maklin, Deputy Director General, CAAT; Mr. Warayu Prateepasen, Director, Strategy and Planning Division, Office of the Permanent Secretary; and other senior officials.</p><p>The discussions focused on leveraging EHang's pilotless electric vertical takeoff and landing (eVTOL) aircraft across multiple applications to promote the development of a new three-dimensional transportation system in Thailand, helping cities alleviate traffic congestion, enhance emergency medical response capabilities, and achieve low-altitude connectivity across regions. The talks aimed to advance the commercialization of EHang's advanced air mobility ecosystem in Thailand and support the country's goal of becoming a regional hub for future aviation technology in Asia-Pacific.</p><p>The United States Air Force has <a href="https://finance.yahoo.com/sectors/healthcare/articles/av-ues-awarded-25m-afrl-120000254.html" target="_blank" rel="nofollow">awarded</a> UES, a division of advanced research and development leader <b>AeroVironment, Inc. (NASDAQ: AVAV),</b> a three-year, $25M contract to transition innovative human health and performance technologies from research to field deployment.</p><p>Supporting the Air Force Research Laboratory's 711th Human Performance Wing Human Effectiveness Directorate (711 HPW), AV will mature mid-stage sensor, diagnostic, and material technologies that have remained largely confined to Technology Readiness Levels (TRL) 3-5. Work completed under this contract will accelerate the delivery of deployable solutions to enhance warfighter readiness, resilience, and survivability.</p><p><b>AgEagle Aerial Systems Inc. (NYSE: UAVS)</b> (dba, EagleNXT), a leading provider of full stack drone, sensors and software solutions for customers worldwide in the commercial and government verticals, recently <a href="https://finance.yahoo.com/sectors/technology/articles/eaglenxt-announces-fifteen-unit-ebee-120000541.html" target="_blank" rel="nofollow">announced</a> the sale of 15 eBee VISION unmanned aerial systems to a U.S. Army unit stationed in Europe. The order contributes to the platform's expanding global deployment across allied defense and security missions and marks a cumulative delivery milestone for the system.</p><p>"Ongoing acquisition of the eBee VISION by U.S. and allied defense operators shows that this platform delivers operational value in mission-critical environments," said EagleNXT CEO Bill Irby. "We see a strong increase in both domestic and international adoption, which is driving repeat orders, strengthening customer partnerships, and growing the installed base. We are proud to provide this capability and after-sale support and sustainment to the U.S. Army."</p><p><b>Unusual Machines, Inc. (NYSE American: UMAC),</b> a United States-based manufacturer and distributor of drone parts, recently <a href="https://www.unusualmachines.com/press-release/?i=163410" target="_blank" rel="nofollow">announced</a> it has priced a public offering for the sale of 8,823,529 shares of its common stock in a public offering (the 'Offering') at a price of $17.00 per share. Participation in this offering includes a strategic investment from Ondas Inc. (NASDAQ: ONDS) along with fundamental institutional investors.</p><p>Dominari Securities LLC and JonesTrading Institutional Services LLC are acting as co-placement agents for the Offering.</p><p>The closing of the Offering is expected to occur on or about March 23, 2026, subject to the satisfaction of customary closing conditions.The Company expects to receive aggregate gross proceeds of approximately $150.0 million from the Offering, before deducting placement agent fees and other related expenses. The Company intends to use the net proceeds from the Offering to acquire additional inventory, for working capital needs, and for general corporate purposes.</p><p>DISCLAIMER: MarketNewsUpdates.com (MNU) is a third party publisher and news dissemination service provider, which disseminates electronic information through multiple online media channels. MNU is NOT affiliated in any manner with any company mentioned herein. MNU and its affiliated companies are a news dissemination solutions provider and are NOT a registered broker/dealer/analyst/adviser, holds no investment licenses and may NOT sell, offer to sell or offer to buy any security. MNU'S market updates, news alerts and corporate profiles are NOT a solicitation or recommendation to buy, sell or hold securities. The material in this release is intended to be strictly informational and is NEVER to be construed or interpreted as research material. All readers are strongly urged to perform research and due diligence on their own and consult a licensed financial professional before considering any level of investing in stocks. All material included herein is republished content and details which were previously disseminated by the companies mentioned in this release. MNU is not liable for any investment decisions by its readers or subscribers. Investors are cautioned that they may lose all or a portion of their investment when investing in stocks. <b>This press release was distributed on behalf of </b><b>ZenaTech, Inc.</b>  For current services performed MNU was compensated forty six hundred dollars for news coverage of the current press releases issued by ZenaTech, Inc. by the company. MNU HOLDS NO SHARES OF ANY COMPANY NAMED IN THIS RELEASE</p><p>This release contains "forward-looking statements" within the meaning of Section 27A of the Securities Act of 1933, as amended, and Section 21E the Securities Exchange Act of 1934, as amended and such forward-looking statements are made pursuant to the safe harbor provisions of the Private Securities Litigation Reform Act of 1995. "Forward-looking statements" describe future expectations, plans, results, or strategies and are generally preceded by words such as "may", "future", "plan" or "planned", "will" or "should", "expected," "anticipates", "draft", "eventually" or "projected". You are cautioned that such statements are subject to a multitude of risks and uncertainties that could cause future circumstances, events, or results to differ materially from those projected in the forward-looking statements, including the risks that actual results may differ materially from those projected in the forward-looking statements as a result of various factors, and other risks identified in a company's annual report on Form 10-K or 10-KSB and other filings made by such company with the Securities and Exchange Commission. You should consider these factors in evaluating the forward-looking statements included herein, and not place undue reliance on such statements. The forward-looking statements in this release are made as of the date hereof and MNU undertakes no obligation to update such statements.</p><p>Contact Information:</p><p>Media Contact email: <a href="mailto:editor@marketnewsupdates.com" target="_blank" rel="nofollow">editor@marketnewsupdates.com</a> - +1(561)486-1799</p><p>Logo:  <a href="https://mma.prnewswire.com/media/2852558/Market_News_Updates_Logo.jpg" target="_blank" rel="nofollow">https://mma.prnewswire.com/media/2852558/Market_News_Updates_Logo.jpg</a></p>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=LN30659&amp;sd=2026-04-09" /> View original content:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/100billion-drone-services-boom-fuels-rapid-rise-of-drone-as-a-service-302738334.html" target="_blank">https://www.prnewswire.com/news-releases/100billion-drone-services-boom-fuels-rapid-rise-of-drone-as-a-service-302738334.html</a></p><p>SOURCE Market News Updates</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=LN30659&amp;Transmission_Id=202604090940PR_NEWS_USPR_____LN30659&amp;DateId=20260409" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

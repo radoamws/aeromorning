@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604100900PR_NEWS_USPR_____FL31557</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260410T090000-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260410</DateId>
+        <NewsItemId>FL31557</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260410:FL31557:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260410T090000-0400</FirstCreated>
+      <ThisRevisionCreated>20260410T090000-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>Lockheed Martin Secures First Contract for PAC-3® MSE Accelerated Production, Strengthening the Arsenal of Freedom</HeadLine>
+        <DateLine>DALLAS, April 10, 2026</DateLine>
+        <SlugLine>LMT-PAC3MSE-prod</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604100900PR_NEWS_USPR_____FL31557.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="LOCKHEED MARTIN MISSILES AND FIRE CONTROL ORLANDO" />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="Lockheed Martin" />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="HMS" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="ARO" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="CON" Scheme="SubjectCode" />
+        </SubjectCode>
+        <Property FormalName="StockSymbol" Value="NYSE:NYSE: LMT" />
+        <Property FormalName="StockSymbol" Value="NYSE:LMT" />
+        <Property FormalName="CompanyName" Value="Lockheed Martin" />
+        <Property FormalName="GeographyCode" Value="Maryland" />
+        <Property FormalName="GeographyCode" Value="Texas" />
+        <Property FormalName="Contact" Value="Jacqueline Lorenzetti, jacqueline.m.lorenzetti@lmco.com, 972-310-1979" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2953803/PAC_3.jpg" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/489034/Lockheed_Martin_Logo.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>Lockheed Martin Secures First Contract for PAC-3® MSE Accelerated Production, Strengthening the Arsenal of Freedom</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">Lockheed Martin Secures First Contract for PAC-3® MSE Accelerated Production, Strengthening the Arsenal of Freedom</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">DALLAS, April 10, 2026</p>
+              </div>
+              <div class="xn-content">
+<p><span class="legendSpanClass">DALLAS</span>, <span class="legendSpanClass">April 10, 2026</span> /PRNewswire/ -- The U.S. government awarded Lockheed Martin (NYSE: LMT) a multibillion-dollar contract to continue critical accelerated production of PAC-3 Missile Segment Enhancement (MSE). The $4.7 billion undefinitized contract action (UCA) enables Lockheed Martin to advance production acceleration and deliver record numbers of combat-proven interceptors for American and allied forces this year.</p>
+    <div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder1">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2953803/PAC_3.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2953803/PAC_3.jpg" title="The U.S. government awarded Lockheed Martin a multibillion-dollar contract to continue critical accelerated production of PAC-3 MSE." alt="The U.S. government awarded Lockheed Martin a multibillion-dollar contract to continue critical accelerated production of PAC-3 MSE." />
+                        </a>
+                </p>
+    </div>
+<p>The contract follows the landmark framework agreement signed with the Department of War (DoW) on <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661623-1&amp;h=3548152600&amp;u=https%3A%2F%2Fnews.lockheedmartin.com%2F2026-01-06-Lockheed-Martin-and-Department-of-War-Advance-Landmark-Acquisition-Transformation-to-Accelerate-PAC-3-R-MSE-Production&amp;a=Jan.+6" target="_blank" rel="nofollow">Jan. 6</a> to ramp up PAC-3 MSE production as part of the administration's Acquisition Transformation Strategy, and a decisive step that gives our warfighters an unmatched defensive shield.</p><p><b>WHY IT MATTERS</b></p><p>PAC-3 MSE is the world's undisputed advanced air defense missile, providing a critical shield against a wide range of threats. Its performance has been proven in operations including Operation Epic Fury, where it continues to successfully defend forces and infrastructure. Today's announcement adds government funding to what industry has already invested to maintain strong munitions stockpiles, ensuring America and its allies continue to keep adversaries at bay.</p><p><b>EXPERT PERSPECTIVE</b> </p><p>"We are answering the nation's call with urgency and partnering with the DoW to accelerate PAC-3 MSE production faster than ever before," said Tim Cahill, president, Lockheed Martin Missiles and Fire Control. "Our investments in our facilities, workforce and supply chain ensure we can deliver at scale and with speed. With the right tools, proven processes and skilled employees in place, we are positioned to deliver a record number of munitions in support of the warfighter and our allies."</p><p><b>ADDITIONAL CONTEXT </b></p><ul type="disc"><li><b>Multibillion-Dollar Investment:</b> Lockheed Martin has invested more than $7 billion since President Donald Trump's first term to expand capacity for priority systems, including approximately $2 billion dedicated to accelerating munitions production. The company recently broke ground on the <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661623-1&amp;h=629411945&amp;u=https%3A%2F%2Fnews.lockheedmartin.com%2F2026-01-29-Lockheed-Martin-and-U-S-Department-of-War-Sign-Framework-Agreement-to-Quadruple-THAAD-Interceptor-Production-Capacity&amp;a=Munitions+Acceleration+Center%2C" target="_blank" rel="nofollow">Munitions Acceleration Center,</a> a world-class facility that will prepare the workforce of the future, and announced the opening of the <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661623-1&amp;h=412470935&amp;u=https%3A%2F%2Fnews.lockheedmartin.com%2F2026-03-31-Lockheed-Martin-Opens-Rapid-Fielding-Center%2C-Accelerating-Defense-Innovation-and-Production&amp;a=Rapid+Fielding+Center" target="_blank" rel="nofollow">Rapid Fielding Center</a> to streamline the end-to-end development, testing and prototype production of next-generation systems and solutions for U.S. government customers.</li></ul><ul type="disc"><li><b>Acquisition Transformation Strategy: </b>Lockheed Martin was the first in the industry to announce a framework agreement for munitions acceleration under the DoW's Acquisition Transformation Strategy, tripling production of the combat-proven PAC-3 MSE interceptor. That was followed by additional agreements to quadruple the production capacity of Terminal High Altitude Area Defense <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661623-1&amp;h=1885734477&amp;u=https%3A%2F%2Fnews.lockheedmartin.com%2F2026-01-29-Lockheed-Martin-and-U-S-Department-of-War-Sign-Framework-Agreement-to-Quadruple-THAAD-Interceptor-Production-Capacity%3F_gl%3D1*1hmxc71*_gcl_au*NjU3MzY1NzYzLjE3Njg3NjE5Nzk.&amp;a=(THAAD)+interceptors" target="_blank" rel="nofollow">(THAAD) interceptors</a> as well as <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661623-1&amp;h=3858145888&amp;u=https%3A%2F%2Fnews.lockheedmartin.com%2F2026-03-25-Lockheed-Martin-Answers-the-Nations-Call-and-Quadruples-Precision-Strike-Missile-Production%3F_gl%3D1*hb98pq*_gcl_au*NjU3MzY1NzYzLjE3Njg3NjE5Nzk.&amp;a=Precision+Strike+Missiles+(PrSM)" target="_blank" rel="nofollow">Precision Strike Missiles (PrSM)</a>.</li></ul><ul type="disc"><li><b>American Job Growth:</b> Lockheed Martin continues to expand its workforce, creating tens of thousands of high-quality American jobs across manufacturing, engineering and skilled trades. These investments ensure America and its allies have the proven capabilities needed to protect people, infrastructure and freedom around the globe.</li></ul><p><b>About Lockheed Martin</b> <br />Lockheed Martin is a global defense technology company driving innovation and advancing scientific discovery. Our all-domain mission solutions and 21st Century Security® vision accelerate the delivery of transformative technologies to ensure those we serve always stay ahead of ready. More information at <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661623-1&amp;h=1667772428&amp;u=https%3A%2F%2Fedge.prnewswire.com%2Fc%2Flink%2F%3Ft%3D0%26l%3Den%26o%3D4589900-1%26h%3D538694719%26u%3Dhttps%253A%252F%252Fedge.prnewswire.com%252Fc%252Flink%252F%253Ft%253D0%2526l%253Den%2526o%253D4562743-1%2526h%253D1427421723%2526u%253Dhttps%25253A%25252F%25252Flockheedmartin.com%25252F%2526a%253DLockheedmartin.com%26a%3DLockheedmartin.com&amp;a=Lockheedmartin.com" target="_blank" rel="nofollow">Lockheedmartin.com</a>.   </p><p> </p>
+<div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder2">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/489034/Lockheed_Martin_Logo.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/489034/Lockheed_Martin_Logo.jpg" title="Lockheed Martin Logo. (PRNewsfoto/Lockheed Martin)" alt="Lockheed Martin Logo. (PRNewsfoto/Lockheed Martin)" />
+                        </a>
+                </p>
+</div>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=FL31557&amp;sd=2026-04-10" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/lockheed-martin-secures-first-contract-for-pac-3-mse-accelerated-production-strengthening-the-arsenal-of-freedom-302739266.html" target="_blank">https://www.prnewswire.com/news-releases/lockheed-martin-secures-first-contract-for-pac-3-mse-accelerated-production-strengthening-the-arsenal-of-freedom-302739266.html</a></p><p>SOURCE Lockheed Martin</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=FL31557&amp;Transmission_Id=202604100900PR_NEWS_USPR_____FL31557&amp;DateId=20260410" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

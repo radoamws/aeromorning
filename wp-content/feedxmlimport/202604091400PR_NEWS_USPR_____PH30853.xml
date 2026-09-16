@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604091400PR_NEWS_USPR_____PH30853</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260409T140000-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260409</DateId>
+        <NewsItemId>PH30853</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260409:PH30853:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260409T140000-0400</FirstCreated>
+      <ThisRevisionCreated>20260409T140000-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>General Dynamics to Webcast 2026 First-Quarter Financial Results Conference Call</HeadLine>
+        <DateLine>RESTON, Va., April 9, 2026</DateLine>
+        <SlugLine>GENERAL-DYNAMICS-call</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604091400PR_NEWS_USPR_____PH30853.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="GENERAL DYNAMICS CORP." />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="General Dynamics" />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="HTS" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="ARO" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="HMS" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="CPR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="FVT" Scheme="SubjectCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="CCA" Scheme="SubjectCode" />
+        </SubjectCode>
+        <Property FormalName="StockSymbol" Value="NYSE:GD" />
+        <Property FormalName="CompanyName" Value="General Dynamics" />
+        <Property FormalName="GeographyCode" Value="Virginia" />
+        <Property FormalName="Contact" Value="Jeff A. Davis, Tel: 703 876 3483, press@generaldynamics.com" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/81320/general_dynamics_logo.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>General Dynamics to Webcast 2026 First-Quarter Financial Results Conference Call</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">General Dynamics to Webcast 2026 First-Quarter Financial Results Conference Call</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">RESTON, Va., April 9, 2026</p>
+              </div>
+              <div class="xn-content">
+<p><span class="legendSpanClass">RESTON, Va.</span>, <span class="legendSpanClass">April 9, 2026</span> /PRNewswire/ -- General Dynamics (NYSE: GD) will webcast its first-quarter financial results conference call on Wednesday, April 29, beginning at 9 a.m. EDT.</p><p>The live webcast of the conference call will be available at <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4660904-1&amp;h=1641522412&amp;u=http%3A%2F%2Fwww.gd.com%2F&amp;a=www.gd.com" target="_blank" rel="nofollow">www.gd.com</a>. A replay will be available shortly after the live presentation.</p><p>More information about General Dynamics is available at <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4660904-1&amp;h=1902233531&amp;u=https%3A%2F%2Fwww.gd.com&amp;a=www.gd.com" target="_blank" rel="nofollow">www.gd.com</a>.  </p><div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder8094"><p><a href="https://mma.prnewswire.com/media/81320/general_dynamics_logo.html" target="_blank" rel="nofollow"><img src="https://mma.prnewswire.com/media/81320/general_dynamics_logo.jpg" title="General Dynamics (PRNewsFoto/General Dynamics) (PRNewsFoto/General Dynamics)" alt="General Dynamics (PRNewsFoto/General Dynamics) (PRNewsFoto/General Dynamics)" /></a></p></div><p> </p>
+<div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder0">
+</div>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=PH30853&amp;sd=2026-04-09" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/general-dynamics-to-webcast-2026-first-quarter-financial-results-conference-call-302738547.html" target="_blank">https://www.prnewswire.com/news-releases/general-dynamics-to-webcast-2026-first-quarter-financial-results-conference-call-302738547.html</a></p><p>SOURCE General Dynamics</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=PH30853&amp;Transmission_Id=202604091400PR_NEWS_USPR_____PH30853&amp;DateId=20260409" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

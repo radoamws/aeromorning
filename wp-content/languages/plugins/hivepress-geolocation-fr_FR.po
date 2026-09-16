@@ -1,0 +1,168 @@
+# Translation of Plugins - HivePress Geolocation - Stable (latest release) in French (France)
+# This file is distributed under the same license as the Plugins - HivePress Geolocation - Stable (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2022-10-07 19:29:34+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: GlotPress/4.0.0-alpha.3\n"
+"Language: fr\n"
+"Project-Id-Version: Plugins - HivePress Geolocation - Stable (latest release)\n"
+
+#: includes/configs/settings.php:82
+msgid "Use miles instead of kilometers"
+msgstr "Utilisez les miles au lieu des kilomètres"
+
+#: includes/configs/settings.php:73
+msgid "Set the radius that defines the location search area."
+msgstr "Définissez le rayon qui définit la zone de recherche de la localisation."
+
+#: includes/configs/settings.php:62
+msgid "Set the maximum allowed zoom level for maps."
+msgstr "Définissez le niveau de zoom maximal autorisé pour les cartes."
+
+#: includes/configs/settings.php:53
+msgid "Select countries to restrict the location of the search results."
+msgstr "Sélectionnez des pays pour restreindre la localisation des résultats de la recherche."
+
+#: includes/configs/settings.php:40
+msgid "Choose the map provider and set the API credentials for it in the Integrations section."
+msgstr "Choisissez le fournisseur de cartes et définissez ses infos de connexion de l’API dans la section « Intégrations »."
+
+#: includes/configs/settings.php:25
+msgid "Select the content types that should have the location features."
+msgstr "Sélectionnez les types de contenu qui doivent avoir les fonctionnalités de localisation."
+
+#: includes/configs/settings.php:24
+msgid "Content Types"
+msgstr "Types de contenu"
+
+#: includes/components/class-geolocation.php:650
+msgctxt "kilometers"
+msgid "km"
+msgstr "km"
+
+#: includes/components/class-geolocation.php:650
+msgctxt "miles"
+msgid "mi"
+msgstr "miles"
+
+#: includes/configs/settings.php:128
+msgid "Set the API key without HTTP restrictions used for generating regions from locations."
+msgstr "Définissez la clé de l’API sans restriction HTTP utilisée pour générer des régions à partir des localisations."
+
+#: includes/components/class-geolocation.php:674
+msgctxt "sort order"
+msgid "Distance"
+msgstr "Distance"
+
+#: includes/configs/settings.php:96
+msgid "Generate regions from locations"
+msgstr "Générer des régions à partir de la localisation"
+
+#: includes/configs/settings.php:95
+msgid "Check this option to create a page for each region."
+msgstr "Cochez cette option pour créer une page pour chaque région."
+
+#: includes/configs/settings.php:88
+msgid "Allow users to change radius"
+msgstr "Permettre aux internautes de modifier le rayon"
+
+#: includes/configs/settings.php:39
+msgid "Map Provider"
+msgstr "Fournisseur de carte"
+
+#: includes/components/class-geolocation.php:751
+#: includes/components/class-geolocation.php:795
+msgid "Map"
+msgstr "Carte"
+
+#: includes/components/class-geolocation.php:190
+msgid "No regions found"
+msgstr "Aucune région trouvée"
+
+#: includes/components/class-geolocation.php:189
+msgid "Search Regions"
+msgstr "Rechercher des régions"
+
+#: includes/components/class-geolocation.php:188
+msgid "Parent Region"
+msgstr "Région parente"
+
+#: includes/components/class-geolocation.php:187
+msgid "View Region"
+msgstr "Voir une région"
+
+#: includes/components/class-geolocation.php:186
+msgid "Update Region"
+msgstr "Mettre une région à jour"
+
+#: includes/components/class-geolocation.php:185
+msgid "Edit Region"
+msgstr "Modifier la région"
+
+#: includes/components/class-geolocation.php:184
+msgid "Add Region"
+msgstr "Ajouter une région"
+
+#: includes/components/class-geolocation.php:183
+msgid "Region"
+msgstr "Région"
+
+#: includes/components/class-geolocation.php:182
+#: includes/configs/settings.php:94
+msgid "Regions"
+msgstr "Régions"
+
+#: includes/configs/settings.php:103
+msgid "Hide the exact address"
+msgstr "Masquer l’adresse exacte"
+
+#: includes/configs/settings.php:102
+msgid "Address"
+msgstr "Adresse"
+
+#: includes/configs/settings.php:61
+msgid "Zoom"
+msgstr "Zoom"
+
+#: includes/components/class-geolocation.php:641
+#: includes/configs/settings.php:72
+msgid "Radius"
+msgstr "Rayon"
+
+#: includes/configs/settings.php:52
+msgid "Countries"
+msgstr "Pays"
+
+#: includes/configs/settings.php:15
+msgid "Geolocation"
+msgstr "Géolocalisation"
+
+#. Description of the plugin
+msgid "Allow users to search listings by location."
+msgstr "Permettre aux internautes de rechercher des annonces selon la localisation."
+
+#. Author URI of the plugin
+msgid "https://hivepress.io/"
+msgstr "https://hivepress.io/"
+
+#. Author of the plugin
+msgid "HivePress"
+msgstr "HivePress"
+
+#. Plugin Name of the plugin
+msgid "HivePress Geolocation"
+msgstr "HivePress Geolocation"
+
+#: includes/components/class-geolocation.php:118
+#: includes/components/class-geolocation.php:126
+#: includes/components/class-geolocation.php:738
+msgid "Location"
+msgstr "Localisation"
+
+#: includes/fields/class-location.php:113
+msgid "Locate Me"
+msgstr "Me localiser"

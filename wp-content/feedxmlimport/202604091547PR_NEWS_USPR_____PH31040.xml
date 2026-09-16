@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604091547PR_NEWS_USPR_____PH31040</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260409T154700-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260409</DateId>
+        <NewsItemId>PH31040</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260409:PH31040:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260409T154700-0400</FirstCreated>
+      <ThisRevisionCreated>20260409T154700-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>Laser-Enabled Power Transmission Orbital Network (LEPTON) Press Release</HeadLine>
+        <DateLine>BROOMFIELD, Colo., April 9, 2026</DateLine>
+        <SlugLine>VOLTA-LEPTON</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604091547PR_NEWS_USPR_____PH31040.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="Volta Space Technologies" />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="Volta Space Technologies" />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="UTI" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="TLS" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="CPR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="ARO" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="STM" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="OIL" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="BFA" Scheme="SubjectCode" />
+        </SubjectCode>
+        <Property FormalName="CompanyName" Value="Volta Space Technologies" />
+        <Property FormalName="GeographyCode" Value="Colorado" />
+        <Property FormalName="Contact" Value="news@voltaspace.co" />
+        <Property FormalName="Video" Value="https://mma.prnewswire.com/media/2953330/Volta_s_LEPTON_enabled_LightGrid_Simulation__Logo.mp4" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2953329/Volta_Space_Technologies__Logo.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>Laser-Enabled Power Transmission Orbital Network (LEPTON) Press Release</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+.prntac{
+TEXT-ALIGN: CENTER
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">Laser-Enabled Power Transmission Orbital Network (LEPTON) Press Release</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">BROOMFIELD, Colo., April 9, 2026</p>
+              </div>
+              <div class="xn-content">
+<p class="prntac"><i>PA Kailas K Mehta (Volta Space US), Paul E Damphousse, (Volta Space US), Diego Paldao (US)</i></p><p><span class="legendSpanClass">BROOMFIELD, Colo.</span>, <span class="legendSpanClass">April 9, 2026</span> /PRNewswire/ -- In April 2024, NASA Space Technology Mission Directorate (STMD) published a list of 187 technical shortfalls impeding space exploration and science missions. The #1 rated technical shortfall was "survive and operate through the lunar night;" an appreciable challenge with lunar nights lasting as long as 14 days with temperatures as low as -230°C. While government agencies and industry determine how to best approach this unique challenge, Volta Space Technologies U.S. and the U.S. Naval Research Laboratory (NRL), funded by the Department of War's Operational Energy Capability Improvement Fund (OECIF) and in collaboration with NASA, are actively developing a novel and ambitious solution. The Laser-Enabled Power Transmission Orbital Network (LEPTON) is a breakthrough public-private partnership for our country designed to deliver sustainable energy to the most demanding and disadvantaged environments in space through optical wireless power transfer (OWPT).</p>
+    <div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder1">
+                <p title="Volta's LEPTON-enabled LightGrid Simulation"><iframe id="PlayMedia_2953330" src="https://mma.prnewswire.com/playmedia/2953330/Volta_s_LEPTON_enabled_LightGrid_Simulation__Logo.html" width="560" height="325" frameborder="0" scrolling="no"> </iframe></p>
+    </div>
+<p>LEPTON aims to demonstrate OWPT from low lunar orbit (LLO) by pairing a satellite-hosted, high-power, collaboratively pointed laser payload and high-efficiency, tuned photovoltaic receiver. This results in a scalable architecture capable of delivering electric power over hundreds of kilometers, thus reducing lunar surface operation's dependency on solar illumination, extending mission lengths well beyond the current two-week limit, and enabling exploration into permanently shadowed regions (PSRs) such as deep craters. In addition, this solution allows end-users to significantly reduce the mass allocation for batteries; a change that will dramatically lower the cost of launching, landing, and operating hardware on the lunar surface.</p><p>Beyond orbit-to-surface applications, this laser/pointing/receiver package has a wide variety of other promising use cases. In lieu of cables, OWPT could be used for surface-to-surface power distribution from sources such as fission surface power (FSP) reactors or vertical solar array technology (VSAT) on both the Moon and Mars. Terrestrially, this technology could offer DoW and Naval Applications by enabling wireless recharging of autonomous drones or the delivery of power to disadvantaged regions on Earth, such as disaster zones or difficult-to-reach polar zones, where conventional infrastructure is limited or entirely absent.</p><p>The LEPTON effort combines NASA's expertise in lunar exploration, NRL's expertise in directed energy research, and Volta's focus on scalable, commercial power delivery solutions. In 2028, the team plans to demonstrate this technology from low lunar orbit to the Moon's surface, proving the operational feasibility of this architecture and paving the way for lunar night survival and operation. LEPTON will be the first integrated, mission-ready system designed to operate in real environments that holds government backing, commercial scalability, and precision pointing, acquisition, and tracking. The lunar demonstration will mark a critical milestone in space energy systems, proving that sustainable power can be delivered where it has never been possible before. By laying this foundation, the Department of War, NASA, and Volta are enabling the next era of exploration on the Moon, Mars, and in remote environments on Earth, establishing LEPTON not only as a solution for lunar night survival, but as a critical element supporting the United States' continued leadership in the development of advanced technologies.</p><p>The LEPTON program is supported in funding by the Operational Energy Capability Improvement Fund (OECIF), a program run by the Operational Energy – Innovation (OE-I) Directorate under the Deputy Assistant Secretary of War for Energy Resilience and Optimization. This funding enables the Naval Research Laboratory to work in collaboration with Volta Space Technologies and NASA to develop a first-of-a-kind optical wireless power transfer technology to be demonstrated from low lunar orbit to the lunar surface.</p><p><b>About Volta Space Technologies</b></p><p>Volta is developing wireless power beaming systems for space defense applications and UAS enhancements. Volta's core capabilities include a Power-over-Fiber (PoF) payload for tethered drone platforms and a OWPT system to extend lunar missions and increase private and government ROI. Volta's LightGrid is a power beaming constellation designed to deliver continuous energy to surface assets during the lunar night and to permanently shadowed regions (PSRs) of the Moon. Volta works alongside partners across the defense and commercial space sectors to advance the infrastructure that will power the next era of human exploration.</p>
+<div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder2">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2953329/Volta_Space_Technologies__Logo.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2953329/Volta_Space_Technologies__Logo.jpg" title="Black logo" alt="Black logo" />
+                        </a>
+                </p>
+</div>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=PH31040&amp;sd=2026-04-09" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/laser-enabled-power-transmission-orbital-network-lepton-press-release-302738707.html" target="_blank">https://www.prnewswire.com/news-releases/laser-enabled-power-transmission-orbital-network-lepton-press-release-302738707.html</a></p><p>SOURCE Volta Space Technologies</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=PH31040&amp;Transmission_Id=202604091547PR_NEWS_USPR_____PH31040&amp;DateId=20260409" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

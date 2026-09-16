@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604102250PR_NEWS_USPR_____SF32139</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260410T225000-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260410</DateId>
+        <NewsItemId>SF32139</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260410:SF32139:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260410T225000-0400</FirstCreated>
+      <ThisRevisionCreated>20260410T225000-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>Splashdown! Lockheed Martin-Built Orion Spacecraft Safely Returns Astronauts to Earth, Completing NASA's Artemis II Mission</HeadLine>
+        <DateLine>DENVER, April 10, 2026</DateLine>
+        <SlugLine>LOCKHEED-Orion-return</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604102250PR_NEWS_USPR_____SF32139.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="LOCKHEED MARTIN SPACE SYSTEMS COMPANY" />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="Lockheed Martin" />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="ARO" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="CPR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="STM" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="USN" Scheme="IndustryCode" />
+        </SubjectCode>
+        <Property FormalName="StockSymbol" Value="NYSE:LMT" />
+        <Property FormalName="CompanyName" Value="Lockheed Martin" />
+        <Property FormalName="GeographyCode" Value="Colorado" />
+        <Property FormalName="Contact" Value="Gary Napier, 720-224-7955, gary.p.napier@lmco.com" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2954318/Lockheed_Martin_NASA_Orion_spacecraft_splashing_down.jpg" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/627587/LOCKHEED_MARTIN_Logo.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>Splashdown! Lockheed Martin-Built Orion Spacecraft Safely Returns Astronauts to Earth, Completing NASA's Artemis II Mission</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+.prntac{
+TEXT-ALIGN: CENTER
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">Splashdown! Lockheed Martin-Built Orion Spacecraft Safely Returns Astronauts to Earth, Completing NASA's Artemis II Mission</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">DENVER, April 10, 2026</p>
+              </div>
+              <div class="xn-content">
+<p class="prntac"><i>First crewed deep space mission in 53 years validates Orion for future lunar exploration</i></p><p><span class="legendSpanClass">DENVER</span>, <span class="legendSpanClass">April 10, 2026</span> /PRNewswire/ -- After traveling 694,481 miles to the Moon and back, the Lockheed Martin (NYSE: LMT)-built <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4662210-1&amp;h=3745648071&amp;u=https%3A%2F%2Fwww.lockheedmartin.com%2Fen-us%2Fproducts%2Forion.html&amp;a=Orion+spacecraft" target="_blank" rel="nofollow">Orion spacecraft</a> has successfully splashed down in the Pacific Ocean, completing <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4662210-1&amp;h=602160172&amp;u=https%3A%2F%2Fwww.nasa.gov%2Fmission%2Fartemis-ii%2F&amp;a=NASA%27s+Artemis+II+mission" target="_blank" rel="nofollow">NASA's Artemis II mission</a> and marking a major milestone in humanity's return to deep space exploration.</p>
+    <div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder1">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2954318/Lockheed_Martin_NASA_Orion_spacecraft_splashing_down.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2954318/Lockheed_Martin_NASA_Orion_spacecraft_splashing_down.jpg" title="NASA’s Orion spacecraft splashing down in the Pacific Ocean after its historic Artemis II mission. Credit NASA" alt="NASA’s Orion spacecraft splashing down in the Pacific Ocean after its historic Artemis II mission. Credit NASA" />
+                        </a>
+                </p>
+    </div>
+<p>Following a 10-day journey around the Moon, Orion and its four-person crew dramatically re-entered Earth's atmosphere at speeds approaching 24,000 mph before deploying parachutes and splashing down off the coast of southern California. The mission demonstrated Orion's ability to safely carry astronauts beyond low-Earth orbit, farther from Earth than humans have ever traveled and return them safely home – capabilities essential for NASA's future Artemis missions.</p><p>"As Orion brings its crew safely home from humanity's first crewed mission to deep space in more than five decades, we've proven what's possible through relentless innovation, discipline, and partnership," said Robert Lightfoot, president of Lockheed Martin Space. "I am incredibly proud of our Lockheed Martin team. This mission validates Orion's performance in the most demanding environment and confirms we are ready to take bold next steps – returning astronauts to the lunar surface."</p><p><b>Orion's Mission: Setting the Stage for Future Exploration </b></p><p>During the mission aboard Orion, astronauts Reid Wiseman, Victor Glover, Christina Koch, and Canadian Space Agency astronaut Jeremy Hansen traveled thousands of miles beyond the far side of the Moon on a free-return trajectory. Along the way, the crew:</p><ul type="disc"><li>Conducted critical system evaluations, including life support, navigation, communications, propulsion operations and manual piloting</li><li>Captured science imagery and observations of the far side lunar surface</li><li>Tested Orion's fully integrated environmental control and life support systems, as well as advanced avionics and crew interfaces</li><li>Set the record for the farthest human spaceflight from Earth at 252,756 miles</li></ul><p>These systems enabled astronauts to live and work in deep space while gathering essential data. The data will be used to refine systems and operations ahead of <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4662210-1&amp;h=1582149038&amp;u=https%3A%2F%2Fwww.nasa.gov%2Fmission%2Fartemis-iii%2F&amp;a=Artemis+III" target="_blank" rel="nofollow">Artemis III</a> which will demonstrate critical docking with NASA's Human Landing System and <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4662210-1&amp;h=2343509053&amp;u=https%3A%2F%2Fwww.nasa.gov%2Fmission%2Fartemis-iv%2F&amp;a=Artemis+IV" target="_blank" rel="nofollow">Artemis IV</a>, which aims to land astronauts on the Moon for the first time since Apollo.</p><p>Orion performed exceptionally well throughout the mission, including its most demanding phase, Earth re-entry. The spacecraft's heat shield withstood temperatures nearing 5,000 degrees Fahrenheit, while its parachute system executed a precise descent sequence to ensure a safe landing.</p><p>After splashdown, recovery teams extracted the crew via helicopter and transported them to the USS John P. Murtha recover ship. The astronauts will undergo post-mission medical evaluations before returning to shore and then flying to NASA's Johnson Space Center in Houston.</p><p>Lockheed Martin is the prime contractor for NASA's Orion spacecraft and has led its design, development, and production. The company continues to work alongside NASA and its partners to enable sustainable lunar exploration and support the agency's long-term goals for human exploration of Mars.</p><p><b>About Lockheed Martin</b></p><p>Lockheed Martin is a global defense technology company driving innovation and advancing scientific discovery. Our all-domain mission solutions and 21st Century Security vision accelerate the delivery of transformative technologies to ensure those we serve always stay ahead of ready. More information at Lockheedmartin.com.</p>
+<div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder2">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/627587/LOCKHEED_MARTIN_Logo.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/627587/LOCKHEED_MARTIN_Logo.jpg" title="Lockheed Martin Logo. (PRNewsfoto/Lockheed Martin)" alt="Lockheed Martin Logo. (PRNewsfoto/Lockheed Martin)" />
+                        </a>
+                </p>
+</div>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=SF32139&amp;sd=2026-04-10" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/splashdown-lockheed-martin-built-orion-spacecraft-safely-returns-astronauts-to-earth-completing-nasas-artemis-ii-mission-302739687.html" target="_blank">https://www.prnewswire.com/news-releases/splashdown-lockheed-martin-built-orion-spacecraft-safely-returns-astronauts-to-earth-completing-nasas-artemis-ii-mission-302739687.html</a></p><p>SOURCE Lockheed Martin</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=SF32139&amp;Transmission_Id=202604102250PR_NEWS_USPR_____SF32139&amp;DateId=20260410" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

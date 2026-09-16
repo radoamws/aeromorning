@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604100830PR_NEWS_USPR_____SF31497</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260410T083000-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260410</DateId>
+        <NewsItemId>SF31497</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260410:SF31497:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260410T083000-0400</FirstCreated>
+      <ThisRevisionCreated>20260410T083000-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>XTI Aerospace Schedules Fourth Quarter and Full Year 2025 Earnings Webcast</HeadLine>
+        <DateLine>ENGLEWOOD, Colo., April 10, 2026</DateLine>
+        <SlugLine>XTI-Q4FY25-Conf-Call</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604100830PR_NEWS_USPR_____SF31497.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="XTI Aerospace, Inc." />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="XTI Aerospace, Inc." />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="ARO" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="CPR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="AIR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="CCA" Scheme="SubjectCode" />
+        </SubjectCode>
+        <Property FormalName="StockSymbol" Value="NASDAQ-NMS:XTIA" />
+        <Property FormalName="StockSymbol" Value="NASDAQ:XTIA" />
+        <Property FormalName="CompanyName" Value="XTI Aerospace, Inc." />
+        <Property FormalName="GeographyCode" Value="Colorado" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2656341/XTI_Aerospace_Vertical_Logo_Black.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>XTI Aerospace Schedules Fourth Quarter and Full Year 2025 Earnings Webcast</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+.prntac{
+TEXT-ALIGN: CENTER
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">XTI Aerospace Schedules Fourth Quarter and Full Year 2025 Earnings Webcast</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">ENGLEWOOD, Colo., April 10, 2026</p>
+              </div>
+              <div class="xn-content">
+<p class="prntac"><b><i>Company to Provide 4Q2025 &amp; FY2025 Earnings Update and 2026 Guidance</i></b></p><p><span class="legendSpanClass">ENGLEWOOD, Colo.</span>, <span class="legendSpanClass">April 10, 2026</span> /PRNewswire/ -- XTI Aerospace, Inc. (Nasdaq: XTIA) ("XTI" or the "Company"), an aerospace technology company focused on building and scaling its Drone Nerds, LLC ("Drone Nerds") subsidiary, a drone platform serving enterprise and government customers, today announced that it will release its fourth quarter and full year 2025 financial results on April 14, 2026, after market close.</p>
+    <div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder1">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2656341/XTI_Aerospace_Vertical_Logo_Black.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2656341/XTI_Aerospace_Vertical_Logo_Black.jpg" title="XTI Aerospace Logo (PRNewsfoto/XTI Aerospace, Inc.)" alt="XTI Aerospace Logo (PRNewsfoto/XTI Aerospace, Inc.)" />
+                        </a>
+                </p>
+    </div>
+<p>In conjunction with the earnings release, management will host an earnings webcast on April 15, 2026, at 3:30 PM CT (4:30 PM ET), which will consist of a video-based question and answer session with Scott Pomeroy, Chief Executive Officer, and Brooke Turk, Chief Financial Officer.</p><p>Rather than reading scripted remarks during the call, XTI will post prepared remarks, providing additional detail and context regarding the Company's financial results and business update, to the Investor Relations section of its website at <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661562-1&amp;h=2437524308&amp;u=https%3A%2F%2Fir.xtiaerospace.com%2Fir-news-events%2F&amp;a=xtiaerospace.com" target="_blank" rel="nofollow">xtiaerospace.com</a> under "IR News &amp; Events" on April 15 after the release is issued, allowing more time in the call for live questions and answers.</p><p>To participate in the call, please register in advance using this link: <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661562-1&amp;h=1033868877&amp;u=https%3A%2F%2Fxti-aerospace-earnings-call-4q-fy25.open-exchange.net%2F&amp;a=XTI+Aerospace+April+15+earnings+call" target="_blank" rel="nofollow">XTI Aerospace April 15 earnings call</a>. The registration link is also available in the Investor Relations section of the Company's website under "IR News &amp; Events." Dial-in information will be provided upon registration.</p><p>A replay of the event will be available in the Investor Relations section of the Company's website under "IR News &amp; Events" following the conclusion and will remain available for at least 30 days.</p><p><b>About XTI Aerospace, Inc.<br /></b>XTI Aerospace, Inc. (Nasdaq: XTIA) is an aerospace technology company focused on the advancement of vertical flight. Through its Drone Nerds business, acquired in November 2025, XTIA is a premier provider of unmanned aircraft systems ("UAS"), solutions, services and hardware. Through its XTI Aircraft business, the Company is engaged in the development of advanced vertical takeoff and landing ("VTOL") aircraft with the range and speed of planes and the take-off and landing capability of helicopters.</p><p>For more information about XTI, please visit <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661562-1&amp;h=1613199330&amp;u=https%3A%2F%2Fxtiaerospace.com%2F&amp;a=xtiaerospace.com" target="_blank" rel="nofollow">xtiaerospace.com</a> and follow XTI on LinkedIn, Instagram, X, and YouTube.</p><p><b>Contacts:</b></p><p><b>General inquiries:<br /></b>Email: <a href="mailto:contact@xtiaerospace.com" target="_blank" rel="nofollow">contact@xtiaerospace.com</a><br />Web: <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4661562-1&amp;h=3348620591&amp;u=https%3A%2F%2Fxtiaerospace.com%2Fcontact&amp;a=https%3A%2F%2Fxtiaerospace.com%2Fcontact" target="_blank" rel="nofollow">https://xtiaerospace.com/contact</a></p><p><b>Investor Relations:<br /></b>Dave Gentry, CEO<br />RedChip Companies, Inc.<br />Phone: 1-407-644-4256<br />Email: <a href="mailto:XTIA@redchip.com" target="_blank" rel="nofollow">XTIA@redchip.com</a></p>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=SF31497&amp;sd=2026-04-10" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/xti-aerospace-schedules-fourth-quarter-and-full-year-2025-earnings-webcast-302739159.html" target="_blank">https://www.prnewswire.com/news-releases/xti-aerospace-schedules-fourth-quarter-and-full-year-2025-earnings-webcast-302739159.html</a></p><p>SOURCE XTI Aerospace, Inc.</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=SF31497&amp;Transmission_Id=202604100830PR_NEWS_USPR_____SF31497&amp;DateId=20260410" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

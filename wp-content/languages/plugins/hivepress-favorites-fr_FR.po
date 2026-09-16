@@ -1,0 +1,40 @@
+# Translation of Plugins - HivePress Favorites - Stable (latest release) in French (France)
+# This file is distributed under the same license as the Plugins - HivePress Favorites - Stable (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2022-10-07 17:51:53+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: GlotPress/4.0.0-alpha.3\n"
+"Language: fr\n"
+"Project-Id-Version: Plugins - HivePress Favorites - Stable (latest release)\n"
+
+#: includes/controllers/class-favorite.php:42
+msgid "Favorites"
+msgstr "Favoris"
+
+#. Description of the plugin
+msgid "Allow users to keep a list of favorite listings."
+msgstr "Permettre aux internautes de conserver une liste d’annonces favorites."
+
+#. Author URI of the plugin
+msgid "https://hivepress.io/"
+msgstr "https://hivepress.io/"
+
+#. Author of the plugin
+msgid "HivePress"
+msgstr "HivePress"
+
+#: includes/blocks/class-favorite-toggle.php:34
+msgid "Remove from Favorites"
+msgstr "Retirer des favoris"
+
+#. Plugin Name of the plugin
+msgid "HivePress Favorites"
+msgstr "HivePress Favorites"
+
+#: includes/blocks/class-favorite-toggle.php:33
+msgid "Add to Favorites"
+msgstr "Ajouter aux favoris"

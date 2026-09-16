@@ -1,0 +1,79 @@
+# AeroMorning.com
+Site: https://aeromorning.com/en
+Type: Aviation News & Travel Media
+
+## Priority Content
+https://aeromorning.com/en/blog/aero-culture/
+https://aeromorning.com/en/blog/news/air-transport/
+https://aeromorning.com/en/blog/news/airportss/
+https://aeromorning.com/en/blog/news/airshows/
+https://aeromorning.com/en/blog/news/artificial-intelligence/
+https://aeromorning.com/en/blog/aero-culture/books-films/
+https://aeromorning.com/en/blog/news/business-aviation/
+https://aeromorning.com/en/blog/news/cargo/
+https://aeromorning.com/en/blog/news/certification/
+https://aeromorning.com/en/blog/news/challenges/
+https://aeromorning.com/en/blog/chronicles/
+https://aeromorning.com/en/blog/news/cyber-security/
+https://aeromorning.com/en/blog/news/defence/
+https://aeromorning.com/en/blog/news/drones/
+https://aeromorning.com/en/blog/news/electric-aviation/
+https://aeromorning.com/en/blog/news/employment/
+https://aeromorning.com/en/blog/news/environment/
+https://aeromorning.com/en/blog/news/evtol-news/
+https://aeromorning.com/en/blog/news/exhibitions/
+https://aeromorning.com/en/blog/news/finance/
+https://aeromorning.com/en/blog/news/helicopters/
+https://aeromorning.com/en/blog/news/industry/
+https://aeromorning.com/en/blog/news/innovationn/
+https://aeromorning.com/en/blog/news/logistics/
+https://aeromorning.com/en/blog/news/management-changes/
+https://aeromorning.com/en/blog/news/mro/mro-mro/
+https://aeromorning.com/en/blog/news/mro/
+https://aeromorning.com/en/blog/news/new-energies-for-aviation/
+https://aeromorning.com/en/blog/news/
+https://aeromorning.com/en/blog/news/paris-air-show-2025/
+https://aeromorning.com/en/blog/news/research-and-analysis/
+https://aeromorning.com/en/blog/news/satellites/
+https://aeromorning.com/en/blog/news/services/
+https://aeromorning.com/en/blog/news/space/
+https://aeromorning.com/en/blog/news/training/
+https://aeromorning.com/en/blog/news/transports-news/
+https://aeromorning.com/en/blog/news/uavs/
+https://aeromorning.com/en/blog/news/universities/
+https://aeromorning.com/en/blog/news/vertiports/
+https://aeromorning.com/en/blog/whos-who/
+
+## Latest Articles
+https://aeromorning.com/en/space-solar-wins-1-3m-aria-contract/
+https://aeromorning.com/en/airbus-boosts-a320-deliveries-in-toulouse-with-new-centre/
+https://aeromorning.com/en/acg-appoints-jilinda-crowley-as-chief-financial-officer/
+https://aeromorning.com/en/jill-m-albertelli-named-pratt-whitney-president-in-2027/
+https://aeromorning.com/en/ascendance-acquires-limatech/
+https://aeromorning.com/en/south-korea-expands-mh-60r-fleet/
+https://aeromorning.com/en/alatyr-and-seleway-join-forces-for-europen-data-centers/
+https://aeromorning.com/en/airbaltic-files-for-chapter-11/
+https://aeromorning.com/en/epcor-and-mas-sign-long-term-apu-support-agreement/
+https://aeromorning.com/en/anas-cargo-consolidation-a-stronger-japanese-air-freight/
+https://aeromorning.com/en/aerospacelab-iris%c2%b2-e2-4b-contract/
+https://aeromorning.com/en/iberia-obtains-approval-for-comprehensive-a350-maintenance/
+https://aeromorning.com/en/hyprspace-and-the-french-ministry-announce-the-launch-of-baguette-one/
+https://aeromorning.com/en/laurent-perrier-named-managing-director-of-groupe-dubreuil/
+https://aeromorning.com/en/reusable-orbital-spaceplane-program-vortex/
+https://aeromorning.com/en/gkn-aerospace-breks-ground-on-north-charlestown-expansion/
+https://aeromorning.com/en/order-of-airbus-u050-capa-x-drone/
+https://aeromorning.com/en/eutelsat-orders-229-additional-oneweb-satellites-from-airbus/
+https://aeromorning.com/en/russified-il-114-300-targets-india-as-ties-deepen/
+https://aeromorning.com/en/ariane-6-secures-largest-orders-at-international-space-summit/
+
+## Sitemap
+https://aeromorning.com/en/sitemap_index.xml
+
+## AI Crawling Guidance
+Allow: /
+Disallow: /wp-admin/
+Disallow: /cart/
+Disallow: /checkout/
+
+## Language
+en_US

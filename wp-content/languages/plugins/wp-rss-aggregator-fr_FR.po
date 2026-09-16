@@ -1,0 +1,839 @@
+# Translation of Plugins - RSS Aggregator &#8211; RSS Import, News Feeds, Feed to Post, and Autoblogging - Stable (latest release) in French (France)
+# This file is distributed under the same license as the Plugins - RSS Aggregator &#8211; RSS Import, News Feeds, Feed to Post, and Autoblogging - Stable (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2025-11-24 13:23:33+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: GlotPress/4.0.3\n"
+"Language: fr\n"
+"Project-Id-Version: Plugins - RSS Aggregator &#8211; RSS Import, News Feeds, Feed to Post, and Autoblogging - Stable (latest release)\n"
+
+#: core/modules/admin.php:129 v4/src/Modules/LogsToolModule.php:33
+msgid "Logs"
+msgstr "Journaux"
+
+#: v4/includes/Aventura/Wprss/Core/Licensing/Settings.php:187
+msgid "License"
+msgstr "Licence"
+
+#: v4/includes/opml-importer.php:201 v4/includes/opml-importer.php:232
+msgid "ID"
+msgstr "ID"
+
+#: v4/includes/opml-importer.php:264
+msgid "WP RSS OPML"
+msgstr "WP RSS OPML"
+
+#: v4/includes/scripts.php:36
+msgid "OK"
+msgstr "OK"
+
+#: v4/includes/scripts.php:37 core/js/dist/admin.js:37 core/js/dist/admin.js:38
+#: core/js/dist/admin.js:108
+msgid "Cancel"
+msgstr "Annuler"
+
+#: v4/includes/scripts.php:53 core/js/dist/admin.js:37 core/js/dist/admin.js:38
+msgid "Pause"
+msgstr "Pause"
+
+#. Plugin Name of the plugin
+#: wp-rss-aggregator.php core/modules/debugInfo.php:25
+msgid "WP RSS Aggregator"
+msgstr "WP RSS Aggregator"
+
+#: v4/includes/opml-importer.php:74
+msgid "Howdy! Import your feeds here from an OPML (.xml) export file."
+msgstr "Salut ! Importez vos flux ici à partir d'un fichier d'exportation OPML (.xml)."
+
+#: v4/includes/opml-importer.php:75
+msgid "Click the button below, choose your file, and click 'Upload'."
+msgstr "Cliquez sur le bouton ci-dessous, choisissez votre fichier et cliquez sur «Envoyer»."
+
+#: v4/includes/opml-importer.php:76
+msgid "We will take care of the rest."
+msgstr "Nous nous occuperons du reste."
+
+#: v4/includes/opml-importer.php:109
+msgid "Sorry, an error has been encountered."
+msgstr "Désolé, une erreur s'est produite."
+
+#: v4/includes/opml-importer.php:117
+msgid "Sorry, it seems your uploaded file has been misplaced!"
+msgstr "Désolé, il semble que votre fichier téléchargé se soit égaré !"
+
+#: v4/includes/system-info.php:106
+msgid "Your server supports fsockopen."
+msgstr "Votre serveur supporte fsockopen."
+
+#: v4/includes/system-info.php:106
+msgid "Your server does not support fsockopen."
+msgstr "Votre serveur ne supporte pas fsockopen."
+
+#: v4/includes/update.php:67
+msgid "No Follow"
+msgstr "No Follow"
+
+#: core/edd-sl-updater.php:516
+#: v4/includes/libraries/EDD_licensing/EDD_SL_Plugin_Updater.php:519
+msgid "Error"
+msgstr "Erreur "
+
+#: v4/includes/Aventura/Wprss/Core/Licensing/Settings.php:346
+msgid "Status"
+msgstr "État"
+
+#: core/src/Utils/Strings.php:152 v4/includes/misc-functions.php:312
+msgid "&hellip;"
+msgstr "&hellip;"
+
+#. translators: If your word count is based on single characters (East Asian
+#. characters), enter 'characters'. Otherwise, enter 'words'. Do not translate
+#. into your own language.
+#: v4/includes/misc-functions.php:320
+msgctxt "word count: words or characters?"
+msgid "words"
+msgstr "mots"
+
+#: v4/includes/scripts.php:31
+msgid "Failed to import"
+msgstr "Échec de l&rsquo;importation"
+
+#: v4/includes/scripts.php:64
+msgid "Activating..."
+msgstr "Activation&hellip;"
+
+#: v4/includes/scripts.php:65
+msgid "Deactivating..."
+msgstr "Désactivation&hellip;"
+
+#: v4/includes/scripts.php:70
+msgid "Sending..."
+msgstr "Envoi&hellip;"
+
+#: v4/includes/opml-importer.php:63
+msgid "Import OPML"
+msgstr "Importer OPML"
+
+#: v4/includes/scripts.php:35
+msgid "Bulk Add"
+msgstr "Ajout groupé"
+
+#: v4/includes/scripts.php:78
+msgid "Your message has been sent and we'll send you a confirmation e-mail when we receive it."
+msgstr "Votre message a bien été transmis. Vous en recevrez une confirmation dès réception par nos soins."
+
+#: v4/includes/Aventura/Wprss/Core/Licensing/AjaxController.php:104
+msgid "No license"
+msgstr "Pas de licence"
+
+#: v4/includes/Aventura/Wprss/Core/Licensing/Settings.php:359
+msgid "Failed to get license information. This is a temporary problem. Check your internet connection and try again later."
+msgstr "Échec de la récupération des infos de la licence. Il s'agit d'un problème passager. Veuillez vérifier votre connexion internet et ré-essayer plus tard."
+
+#: v4/includes/scripts.php:20 v4/includes/scripts.php:34
+msgid "Please wait ..."
+msgstr "Veuillez patienter&hellip;"
+
+#: v4/includes/update.php:69
+msgid "Follow"
+msgstr "Follow"
+
+#: v4/includes/Aventura/Wprss/Core/Licensing/Settings.php:242
+#: core/js/dist/admin.js:37 core/js/dist/admin.js:108 core/js/dist/admin.js:112
+msgid "Enter your license key"
+msgstr "Entrez votre clé de licence"
+
+#: v4/includes/opml-importer.php:265
+msgid "Import Feeds from an OPML file into WP RSS Aggregator"
+msgstr "Importer les flux via un fichier OPML dans WP RSS Aggregator."
+
+#: v4/includes/scripts.php:40
+msgid "Remove selected from Blacklist"
+msgstr "Enlever le flux sélectionné de la Liste noire"
+
+#: v4/includes/opml-importer.php:194
+msgid "Feeds were imported successfully!"
+msgstr "Les flux ont bien été importés&nbsp;!"
+
+#: v4/includes/Aventura/Wprss/Core/Model/AdminAjaxNotice/ServiceProvider.php:344
+msgid "The feed sources have been activated!"
+msgstr "Les sources de flux ont bien été activées&nbsp;!"
+
+#: v4/includes/image-caching.php:514
+msgid "Invalid URL provided: \"%1$s\""
+msgstr "Erreur dans l'URL fournie&nbsp;: « %1$s »"
+
+#: v4/includes/image-caching.php:538
+msgid "Could not create directory: \"%1$s\". Filename: \"%2$s\""
+msgstr "Impossible de créer le répertoire&nbsp;: « %1$s ». Nom du fichier&nbsp;: « %2$s »"
+
+#: v4/includes/system-info.php:64
+msgid "Could not determine database driver version"
+msgstr "Échec d'identification de la version du driver de la base."
+
+#: v4/includes/image-caching.php:544
+msgid "The file library cannot be read from %1$s"
+msgstr "Le fichier de librairie ne peut pas être lu à partir de %1$s"
+
+#: v4/includes/Aventura/Wprss/Core/Licensing/AjaxController.php:103
+msgid "No event specified"
+msgstr "Aucun évènement spécifié"
+
+#: v4/includes/Aventura/Wprss/Core/Licensing/AjaxController.php:130
+msgid "Invalid event specified"
+msgstr "Évènement spécifié non valide"
+
+#: v4/includes/scripts.php:72
+msgid "There was an error sending the form. Please use the <a href=\"%s\">contact form on our site.</a>"
+msgstr "Il y a eu une erreur à l’envoi du formulaire. Veuillez utiliser le <a href=\"%s\">formulaire de contact sur notre site.</a>"
+
+#: v4/includes/Aventura/Wprss/Core/Licensing/AjaxController.php:93
+msgid "No nonce"
+msgstr "Aucun nonce"
+
+#: v4/includes/Aventura/Wprss/Core/Licensing/AjaxController.php:98
+msgid "Bad nonce"
+msgstr "Mauvais nonce"
+
+#: v4/includes/scripts.php:38
+msgid "The feed items listed here will be disregarded when importing new items from your feed sources."
+msgstr "Les éléments de flux répertoriés ici ne seront pas pris en compte lors de l’importation de nouveaux éléments depuis vos sources de flux."
+
+#: v4/includes/Aventura/Wprss/Core/Licensing/Settings.php:410
+msgid "Renew your license to continue receiving updates and support."
+msgstr "Renouvelez votre licence pour continuer à recevoir des mises à jour et du support."
+
+#: v4/includes/Aventura/Wprss/Core/Licensing/Settings.php:391
+msgid "No activations left. Click here to manage the sites you've activated licenses on."
+msgstr "Aucune activation restante. Cliquez ici pour gérer les sites sur lesquels vous avez activé une licence."
+
+#: v4/includes/Aventura/Wprss/Core/Licensing/AjaxController.php:102
+#: v4/includes/Aventura/Wprss/Core/Licensing/AjaxController.php:156
+msgid "No addon ID"
+msgstr "Aucun ID de module"
+
+#: core/edd-sl-updater.php:516
+#: v4/includes/libraries/EDD_licensing/EDD_SL_Plugin_Updater.php:519
+msgid "You do not have permission to install plugin updates"
+msgstr "Vous n’avez pas les droits suffisants pour installer les mises à jour de l’extension"
+
+#: v4/includes/admin.php:136 core/js/dist/admin.js:37
+msgid "Documentation"
+msgstr "Documentation"
+
+#: v4/includes/admin-help.php:226
+msgid "Attachments"
+msgstr "Pièces jointes"
+
+#: v4/includes/admin-help.php:203
+msgid "Replies will be sent to this email address."
+msgstr "Les réponses seront envoyées à cette adresse."
+
+#: v4/includes/admin-options-legacy.php:32
+msgid "Show authors"
+msgstr "Afficher les auteurs"
+
+#: v4/includes/admin-options-legacy.php:62
+msgid "Show source"
+msgstr "Afficher la source"
+
+#: v4/includes/admin-options-legacy.php:80
+msgid "Show date"
+msgstr "Afficher la date"
+
+#: v4/includes/admin-options.php:31 core/js/dist/admin.js:38
+#: core/js/dist/admin.js:108
+msgid "General"
+msgstr "Général"
+
+#: v4/includes/admin-options.php:49
+msgid "Licenses"
+msgstr "Licences"
+
+#: core/src/V4/V4SettingsMigrator.php:51
+#: v4/includes/admin-options-legacy.php:274 v4/includes/update.php:131
+msgid "New window"
+msgstr "Nouvelle fenêtre"
+
+#: v4/includes/admin-options.php:879
+msgid "%s month"
+msgid_plural "%s months"
+msgstr[0] "%s mois"
+msgstr[1] "%s mois"
+
+#: v4/src/Modules/FeedSourcesModule.php:169
+msgid "Feed Source"
+msgstr "Source du flux"
+
+#: core/modules/feedItems.php:86 v4/includes/opml-importer.php:202
+#: v4/includes/opml-importer.php:233 core/js/dist/admin.js:37
+msgid "Title"
+msgstr "Titre"
+
+#: v4/includes/Aventura/Wprss/Core/Model/AdminAjaxNotice/ServiceProvider.php:224
+msgid "Invalid file or file size too big."
+msgstr "Fichier incorrect ou taille du fichier trop grande."
+
+#: v4/includes/admin-metaboxes.php:15
+msgid "Save Feed Source"
+msgstr "Enregistrer la source du flux"
+
+#: v4/includes/admin-metaboxes.php:33
+msgid "Feed Preview"
+msgstr "Prévisualiser le flux"
+
+#: v4/includes/admin-metaboxes.php:42
+msgid "Feed Processing"
+msgstr "Traitement du flux"
+
+#: v4/includes/admin-metaboxes.php:62
+msgid "Feed Source Details"
+msgstr "Détails de la source du flux"
+
+#: v4/includes/admin-metaboxes.php:89
+msgid "Limit"
+msgstr "Limite"
+
+#: v4/includes/admin-metaboxes.php:106 core/js/dist/admin.js:108
+msgid "Link to enclosure"
+msgstr "Lien à utiliser"
+
+#: v4/includes/admin-metaboxes.php:547 v4/includes/scripts.php:58
+msgid "ago"
+msgstr "il y a"
+
+#: v4/includes/admin-metaboxes.php:500
+msgid "No feed URL defined yet"
+msgstr "Encore aucune URL de flux de définie"
+
+#: v4/includes/admin-metaboxes.php:633 core/js/dist/admin.js:108
+msgid "Active"
+msgstr "Actif"
+
+#: v4/includes/admin-metaboxes.php:820
+msgid "Give it a 5 star rating on WordPress.org"
+msgstr "Donnez-lui 5 étoiles sur WordPress.org."
+
+#: v4/includes/admin-options.php:264
+msgid "Styles"
+msgstr "Styles"
+
+#: v4/includes/admin-options.php:172
+msgid "Limit feed items stored"
+msgstr "La limite d’éléments de flux stockée"
+
+#: v4/includes/admin-metaboxes.php:113 v4/includes/admin-options-legacy.php:70
+msgid "Link source"
+msgstr "Lier la source"
+
+#: v4/includes/admin-options-legacy.php:24 core/js/dist/admin.js:37
+msgid "Link title"
+msgstr "Titre du lien"
+
+#: v4/includes/admin-options-legacy.php:36
+msgid "For video feed items use"
+msgstr "Pour l'utilisation d'éléments de flux vidéo"
+
+#: v4/includes/admin-options-legacy.php:52
+msgid "Set links as nofollow"
+msgstr "Mettre les liens en nofollow"
+
+#: v4/includes/admin-options-legacy.php:88
+msgid "Date format"
+msgstr "Format de date"
+
+#: v4/includes/admin-options-legacy.php:92
+msgid "Time ago format"
+msgstr "Format du temps"
+
+#: v4/includes/admin-options-legacy.php:44
+msgid "Feed display limit"
+msgstr "Limite d'affichage des flux"
+
+#: v4/includes/admin-options.php:68 v4/includes/admin.php:29
+msgid "WP RSS Aggregator Settings"
+msgstr "Réglages de WP RSS Aggregator"
+
+#: v4/includes/admin-options.php:140
+msgid "Save Settings"
+msgstr "Enregistrer les réglages"
+
+#: v4/includes/admin-options.php:449 core/js/dist/admin.js:38
+msgid "If you would like to disable all styles used in this plugin, tick the checkbox."
+msgstr "Si vous voulez désactiver tous les styles utilisés dans l'extension, cochez la case."
+
+#: v4/includes/admin-options-legacy.php:215
+#: v4/src/Modules/FeedTemplatesModule.php:536
+msgid "Original page link"
+msgstr "Lien vers la page d'origine"
+
+#: v4/includes/admin-options-legacy.php:216
+#: v4/src/Modules/FeedTemplatesModule.php:537
+msgid "Embedded video player link"
+msgstr "Lien du lecteur vidéo embarqué"
+
+#: core/src/V4/V4SettingsMigrator.php:55
+#: v4/includes/admin-options-legacy.php:275 v4/includes/update.php:135
+msgid "Self"
+msgstr "Self"
+
+#: v4/includes/admin-options.php:881
+msgid "%s day"
+msgid_plural "%s days"
+msgstr[0] "%s jour"
+msgstr[1] "%s jours"
+
+#: v4/includes/admin-options.php:882
+msgid "%s hour"
+msgid_plural "%s hours"
+msgstr[0] "%s heure"
+msgstr[1] "%s heures"
+
+#: v4/includes/admin-options.php:883
+msgid "%s minute"
+msgid_plural "%s minutes"
+msgstr[0] "%s minute"
+msgstr[1] "%s minutes"
+
+#: v4/includes/admin-options.php:884
+msgid "%s second"
+msgid_plural "%s seconds"
+msgstr[0] "%s seconde"
+msgstr[1] "%s secondes"
+
+#: v4/includes/admin-options.php:888
+msgid "now"
+msgstr "maintenant"
+
+#: v4/src/Modules/FeedSourcesModule.php:172
+msgid "Add New Feed Source"
+msgstr "Ajouter une nouvelle source de flux"
+
+#: v4/src/Modules/FeedSourcesModule.php:173
+msgid "Edit Feed Source"
+msgstr "Modifier la source du flux"
+
+#: v4/src/Modules/FeedSourcesModule.php:174
+msgid "New Feed Source"
+msgstr "Nouvelle source de flux"
+
+#: v4/src/Modules/FeedSourcesModule.php:175
+msgid "View Feed Source"
+msgstr "Afficher la source du flux"
+
+#: v4/src/Modules/FeedSourcesModule.php:176
+#: v4/src/Modules/FeedTemplatesModule.php:138
+msgid "Search Feeds"
+msgstr "Rechercher des flux"
+
+#: v4/src/Modules/FeedSourcesModule.php:177
+msgid "No Feed Sources Found"
+msgstr "Aucune source de flux trouvée"
+
+#: v4/src/Modules/FeedSourcesModule.php:179
+msgid "RSS Aggregator"
+msgstr "RSS Aggregator"
+
+#: core/src/Display/LayoutTrait.php:249 v4/includes/legacy-feed-display.php:425
+msgid "No feed items found."
+msgstr "Aucun élément de flux trouvé."
+
+#: v4/includes/admin-help.php:40
+msgid "Frequently Asked Questions (FAQ)"
+msgstr "Foire Aux Questions (FAQ)"
+
+#: v4/includes/admin-help.php:181
+msgid "From: "
+msgstr "De&nbsp;:"
+
+#: v4/includes/admin-help.php:244
+msgid "Send Message"
+msgstr "Envoyez le message"
+
+#: v4/includes/admin-help.php:258
+msgid "Support Forums"
+msgstr "Forums de support"
+
+#: v4/includes/admin-options-legacy.php:40
+msgid "Pagination type"
+msgstr "Type de pagination "
+
+#: v4/includes/admin-options-legacy.php:48 core/js/dist/admin.js:37
+msgid "Open links behaviour"
+msgstr "Comportement pour l'ouverture des liens"
+
+#: v4/includes/admin-options.php:517 v4/includes/admin-options.php:690
+msgid "No Limit"
+msgstr "Illimité"
+
+#: core/src/Renderer.php:364 v4/includes/legacy-feed-display.php:479
+msgid "Older posts"
+msgstr "Articles plus anciens"
+
+#: core/src/Renderer.php:375 v4/includes/legacy-feed-display.php:483
+msgid "Newer posts"
+msgstr "Articles plus récents"
+
+#: v4/includes/admin-metaboxes.php:594
+msgid "Force the feed"
+msgstr "Forcer le flux"
+
+#: v4/includes/admin-metaboxes.php:548
+msgid "No Date"
+msgstr "Pas de date"
+
+#: v4/includes/admin-options-legacy.php:177 v4/includes/admin-options.php:466
+#: core/js/dist/admin.js:37 core/js/dist/admin.js:108
+msgid "No limit"
+msgstr "Pas de limitation"
+
+#: v4/includes/admin-help.php:231
+msgid "WP RSS Aggregator log file"
+msgstr "Fichier de log WP RSS Aggregator "
+
+#: v4/includes/feed-blacklist.php:187
+msgid "Delete Permanently & Blacklist"
+msgstr "Supprimer définitivement et Blacklister"
+
+#: v4/includes/admin-metaboxes.php:95 v4/includes/admin-options.php:156
+msgid "Unique titles only"
+msgstr "Titres uniques seulement"
+
+#: v4/includes/feed-blacklist.php:96
+msgid "The item you are trying to blacklist does not exist"
+msgstr "L'article que vous souhaitez Blacklister n'existe pas."
+
+#: v4/includes/admin-options-legacy.php:239
+msgid "\"Older posts\" and \"Newer posts\" links"
+msgstr "Liens \"Articles plus anciens\" et \"Articles plus récents\""
+
+#: v4/includes/admin-options-legacy.php:240
+msgid "Page numbers with \"Next\" and \"Previous\" page links"
+msgstr "Numéros de page avec liens \"Suivants\" et \"Précédents\""
+
+#: v4/includes/admin-metaboxes.php:81 v4/includes/opml-importer.php:203
+#: v4/includes/opml-importer.php:234 v4/src/Ui/BlacklistTable.php:74
+#: core/js/dist/admin.js:38
+msgid "URL"
+msgstr "Adresse web"
+
+#: v4/includes/admin-metaboxes.php:99 v4/includes/admin-metaboxes.php:278
+#: v4/includes/admin-metaboxes.php:638 v4/includes/admin-metaboxes.php:774
+#: v4/includes/admin-options.php:655 v4/includes/admin-options.php:761
+#: v4/includes/admin-options.php:874 v4/includes/feed-access.php:275
+#: v4/src/Modules/FeedTemplatesModule.php:390 core/js/dist/admin.js:38
+msgid "Default"
+msgstr "Par défaut"
+
+#: v4/includes/admin-options.php:187
+msgid "Custom feed URL"
+msgstr "URL du flux personnalisé"
+
+#: v4/includes/admin-options.php:195
+msgid "Custom feed limit"
+msgstr "Limite du flux personnalisé"
+
+#: v4/includes/admin-options-legacy.php:84
+msgid "Text preceding date"
+msgstr "Le texte devant la date"
+
+#: v4/includes/admin-options.php:878
+msgid "%s year"
+msgid_plural "%s years"
+msgstr[0] "%s an"
+msgstr[1] "%s ans"
+
+#: v4/includes/admin-options.php:880
+msgid "%s week"
+msgid_plural "%s weeks"
+msgstr[0] "%s semaine"
+msgstr[1] "%s semaines"
+
+#: v4/src/Modules/FeedSourcesModule.php:170
+#: v4/src/Modules/FeedTemplatesModule.php:132
+msgid "Add New"
+msgstr "Ajouter"
+
+#: v4/includes/admin-help.php:173
+msgid "Email Support"
+msgstr "Contacter le support"
+
+#: v4/includes/admin-help.php:312
+msgid "Please enter a valid email address."
+msgstr "Veuillez saisir une adresse e-mail valide."
+
+#: v4/includes/admin-options-legacy.php:136
+msgid "Options that control how the feed item's date is displayed."
+msgstr "Options qui régissent l&rsquo;affichage de la date de l'article"
+
+#: core/modules/admin.php:122 v4/includes/admin.php:30
+#: v4/includes/admin.php:130 core/js/dist/admin.js:37 core/js/dist/admin.js:38
+#: core/js/dist/admin.js:114
+msgid "Settings"
+msgstr "Réglages"
+
+#: core/modules/feedItems.php:33 v4/src/Modules/FeedItemsModule.php:153
+msgid "Feed Item"
+msgstr "Elément du flux"
+
+#: core/modules/feedItems.php:32 core/modules/feedItems.php:34
+#: v4/src/Modules/FeedItemsModule.php:152
+#: v4/src/Modules/FeedItemsModule.php:154
+msgid "Feed Items"
+msgstr "Eléments du flux "
+
+#: v4/includes/admin-options.php:239
+msgid "Import Settings"
+msgstr "Importation des réglages"
+
+#: v4/includes/admin-options-legacy.php:224
+msgid "This will not affect already imported feed items."
+msgstr "Cela n'affectera pas les éléments de flux déjà importés"
+
+#: core/modules/feedItems.php:40 v4/src/Modules/FeedItemsModule.php:155
+msgid "View Feed Items"
+msgstr "Voir les éléments du flux"
+
+#: core/modules/feedItems.php:41 v4/src/Modules/FeedItemsModule.php:156
+msgid "Search Feed Items"
+msgstr "Chercher parmi les éléments"
+
+#: v4/src/Modules/FeedItemsModule.php:157
+msgid "No Feed Items Found"
+msgstr "Aucun élément de flux trouvé"
+
+#: v4/src/Modules/FeedSourcesModule.php:178
+msgid "No Feed Sources Found In Trash"
+msgstr "Aucune source de flux trouvée dans la corbeille"
+
+#: v4/includes/Aventura/Wprss/Core/Model/AdminAjaxNotice/ServiceProvider.php:180
+msgid "Successfully imported <code>%1$s</code> feed sources."
+msgstr "Importation des sources <code>%1$s</code> réussit."
+
+#: v4/src/Modules/FeedItemsModule.php:158
+msgid "No Feed Items Found In Trash"
+msgstr "Aucun article trouvé dans la Corbeille"
+
+#: v4/includes/feed-blacklist.php:101
+msgid "The item you are trying to blacklist is not valid!"
+msgstr "L'article que vous tentez de Blacklister n’est pas valide. "
+
+#: v4/includes/feed-blacklist.php:193
+msgid "The item will be deleted permanently, and its permalink will be recorded in the blacklist"
+msgstr "L’article sera définitivement supprimé et son permalien inscrit sur la Blacklist"
+
+#: v4/includes/admin-help.php:303
+msgid "Please fill out all the fields in the form, including the <strong>%s</strong> field."
+msgstr "Veuillez remplir tous les champs du formulaire, en incluant le champ <strong>%s</strong>."
+
+#: v4/includes/admin-options-legacy.php:110
+msgid "In this section you can find some general options that control how the feed items are displayed."
+msgstr "Dans cette section vous pouvez trouver quelques options générales qui contre la façon dont les éléments de flux sont affichés."
+
+#: v4/src/Modules/BlacklistToolModule.php:33 v4/src/Ui/BlacklistTable.php:37
+#: v4/src/Ui/BlacklistTable.php:38
+msgid "Blacklist"
+msgstr "Liste de blocage"
+
+#: v4/includes/admin-options-legacy.php:421
+msgid "PHP Date Format Reference"
+msgstr "Référence au format de date PHP"
+
+#: v4/includes/admin-help.php:1113
+msgid "Could not enqueue tooltip content: the queue method is not a valid callable."
+msgstr "Impossible de mettre en file d’attente le contenu de l’infobulle : la méthode de mise en file d’attente n’est pas un appelable valide."
+
+#: core/src/V4/V4SettingsMigrator.php:53
+#: v4/includes/admin-options-legacy.php:273 v4/includes/update.php:133
+msgid "Lightbox"
+msgstr "Visionneuse"
+
+#: v4/includes/admin-options-legacy.php:66
+msgid "Text preceding source"
+msgstr "Le texte devant la source"
+
+#: v4/includes/admin-options-legacy.php:28
+msgid "Title maximum length"
+msgstr "Longueur max. du titre"
+
+#: v4/includes/admin-options-legacy.php:123
+msgid "Options that control how the feed item's source is displayed."
+msgstr "Options qui régissent l&rsquo;affichage de la source"
+
+#: v4/includes/admin-display.php:41 core/js/dist/admin.js:108
+msgid "Updates"
+msgstr "Mises à jour"
+
+#: v4/includes/admin-display.php:111 v4/includes/admin-heartbeat.php:38
+msgid "None"
+msgstr "Aucun"
+
+#: v4/includes/admin-metaboxes.php:634 core/js/dist/admin.js:108
+msgid "Paused"
+msgstr "En pause"
+
+#: v4/includes/admin-display.php:36 v4/includes/admin-display.php:299
+#: v4/includes/admin-help.php:187 v4/src/Ui/BlacklistTable.php:73
+#: core/js/dist/admin.js:37 core/js/dist/admin.js:108
+msgid "Name"
+msgstr "Nom"
+
+#: v4/includes/admin-editor.php:134
+msgid "All feed sources"
+msgstr "Toutes les sources"
+
+#: v4/includes/admin-help.php:25 v4/includes/admin.php:40
+#: v4/includes/admin.php:41
+msgid "Help & Support"
+msgstr "Aide & support"
+
+#: v4/includes/admin-intro-page.php:29 v4/includes/admin-intro-page.php:30
+msgid "Welcome to WP RSS Aggregator"
+msgstr "Bienvenue dans WP RSS Aggregator"
+
+#: v4/includes/admin-display.php:301
+msgid "Date published"
+msgstr "Date de publication"
+
+#: v4/includes/admin-display.php:398
+msgid "Feed source updated. "
+msgstr "Source du flux mise à jour."
+
+#: v4/includes/admin-display.php:399
+msgid "Custom field updated."
+msgstr "Champ personnalisé mis à jour."
+
+#: v4/includes/admin-display.php:400
+msgid "Custom field deleted."
+msgstr "Champ personnalisé supprimé."
+
+#: v4/includes/admin-display.php:401 v4/includes/admin-display.php:407
+msgid "Feed source updated."
+msgstr "Source du flux mise à jour."
+
+#: v4/includes/admin-display.php:403 v4/includes/admin-display.php:404
+msgid "Feed source saved."
+msgstr "Source du flux sauvegardée."
+
+#: v4/includes/admin-display.php:405
+msgid "Feed source submitted."
+msgstr "Source du flux envoyée."
+
+#: v4/includes/scripts.php:52 core/js/dist/admin.js:37 core/js/dist/admin.js:38
+#: core/js/dist/admin.js:108 core/js/dist/admin.js:112
+#: core/js/dist/admin.js:114
+msgid "Activate"
+msgstr "Activer"
+
+#: v4/includes/admin-editor.php:222
+msgid "Add shortcode"
+msgstr "Ajouter un code court"
+
+#: v4/includes/admin-help-settings.php:173
+#: v4/src/Modules/FeedTemplatesModule.php:474
+msgid "Enable this to show the feed item's date."
+msgstr "Activer cette option pour afficher la date de l'article"
+
+#: v4/includes/admin-metaboxes.php:331
+msgid "Updating feed source"
+msgstr "Mise à jour des sources du flux"
+
+#: v4/includes/Aventura/Wprss/Core/Model/AdminAjaxNotice/ServiceProvider.php:244
+msgid "Feeds are being updated in the background."
+msgstr "Les flux sont mis à jour en arrière-plan"
+
+#: core/modules/debugInfo.php:37 v4/includes/admin-display.php:33
+#: core/js/dist/admin.js:108
+msgid "State"
+msgstr "&Eacute;tat"
+
+#: v4/includes/admin-display.php:300
+msgid "Permalink"
+msgstr "Permalien"
+
+#: core/modules/feedItems.php:88 v4/includes/admin-display.php:302
+#: core/js/dist/admin.js:37
+msgid "Source"
+msgstr "Source"
+
+#: v4/src/Modules/FeedSourcesModule.php:168
+#: v4/src/Modules/FeedSourcesModule.php:171
+msgid "Feed Sources"
+msgstr "Source du flux"
+
+#: v4/includes/admin-display.php:137
+msgid "%1$s ago"
+msgstr "Il y a %1$s"
+
+#: v4/includes/admin-display.php:431
+msgid "ID: %1$s"
+msgstr "ID&nbsp;: %1$s"
+
+#: v4/includes/admin-display.php:731
+msgid "View Items"
+msgstr "Afficher les élélments"
+
+#: v4/includes/admin-help-settings.php:112
+#: v4/src/Modules/FeedTemplatesModule.php:466
+msgid "Check this box to make the feed item titles link to the original article."
+msgstr "Cochez si vous souhaitez que le titre de l’article pointe vers l’original"
+
+#: v4/includes/admin-help-settings.php:121
+#: v4/src/Modules/FeedTemplatesModule.php:472
+msgid "Check this box to show the author for each feed item, if it is available."
+msgstr "Cochez pour afficher l’auteur de chaque article, si disponible"
+
+#: v4/includes/admin-help-settings.php:105
+msgid "The maximum number of feed items in the custom feed."
+msgstr "Le nombre maximum d’éléments dans le flux personnalisé."
+
+#: v4/includes/admin-help-settings.php:167
+#: v4/src/Modules/FeedTemplatesModule.php:471
+msgid "Enable this option to link the feed source name to the RSS feed's source site."
+msgstr "Activez cette option pour lier le nom de la source au Flux RSS du site source."
+
+#: v4/includes/admin-help-settings.php:175
+#: v4/src/Modules/FeedTemplatesModule.php:475
+msgid "Enter the text that you want to show before the feed item date. A space is automatically added between this text and the date."
+msgstr "Saisissez le texte à afficher avant la date de l’article. Un espace est automatiquement inséré entre le texte et la date."
+
+#: v4/includes/admin-help-settings.php:180
+#: v4/src/Modules/FeedTemplatesModule.php:476
+msgid "The format to use for the feed item dates, as a PHP date format."
+msgstr "Format PHP à utiliser pour les dates d’articles."
+
+#: v4/includes/admin-help-settings.php:162
+#: v4/src/Modules/FeedTemplatesModule.php:470
+msgid "Enter the text that you want to show before the source name. A space is automatically added between this text and the feed source name."
+msgstr "Saisissez le texte à afficher avant le nom de la. Un espace est automatiquement inséré entre le texte et le nom de la source."
+
+#: v4/includes/admin-ajax-notice.php:474
+msgid "Dismiss this notification"
+msgstr "Retirer cette notification"
+
+#: v4/includes/admin-help-settings.php:160
+#: v4/src/Modules/FeedTemplatesModule.php:469
+msgid "Enable this option to show the feed source name for each feed item."
+msgstr "Activez cette option pour afficher le nom de la source du flux pour chaque élément de flux."
+
+#: v4/includes/admin-help-settings.php:144
+#: v4/src/Modules/FeedTemplatesModule.php:478
+msgid "Choose how you want links to be opened. This applies to the feed item title and the source link."
+msgstr "Choisissez comment vous souhaitez que les liens soient ouverts. Cela s’applique au titre de l’élément du flux et au lien source."
+
+#: v4/includes/Aventura/Wprss/Core/Model/AdminAjaxNotice/ServiceProvider.php:304
+#: v4/src/Modules/ResetToolModule.php:101
+msgid "The plugin settings have been reset to default."
+msgstr "Les réglages de l’extension ont été réinitialisés aux valeurs par défaut."
+
+#: v4/includes/Aventura/Wprss/Core/Model/AdminAjaxNotice/ServiceProvider.php:284
+msgid "The error log has been cleared."
+msgstr "Le journal des erreurs a été effacé."
+
+#: v4/includes/Aventura/Wprss/Core/Model/AdminAjaxNotice/ServiceProvider.php:264
+msgid "Feeds deleted and are being re-imported in the background."
+msgstr "Les flux ont été supprimés et sont en cours de réimportation en arrière-plan."

@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604091100PR_NEWS_USPR_____CL30713</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260409T110000-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260409</DateId>
+        <NewsItemId>CL30713</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260409:CL30713:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260409T110000-0400</FirstCreated>
+      <ThisRevisionCreated>20260409T110000-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>Contour Airlines Announces Return of Baltimore Service and Flight Expansion to Fort Lauderdale from Macon, GA</HeadLine>
+        <DateLine>SMYRNA, Tenn., April 9, 2026</DateLine>
+        <SlugLine>CONTOUR-Macon-flights</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604091100PR_NEWS_USPR_____CL30713.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="Contour Airlines" />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="Contour Airlines" />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="TRA" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="AIR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="PDT" Scheme="SubjectCode" />
+        </SubjectCode>
+        <Property FormalName="CompanyName" Value="Contour Airlines" />
+        <Property FormalName="GeographyCode" Value="Tennessee" />
+        <Property FormalName="GeographyCode" Value="Georgia" />
+        <Property FormalName="GeographyCode" Value="Maryland" />
+        <Property FormalName="GeographyCode" Value="Florida" />
+        <Property FormalName="Contact" Value="For customer inquiries or travel assistance, please contact us at (888) 332-6686." />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/813045/Contour_Logo.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>Contour Airlines Announces Return of Baltimore Service and Flight Expansion to Fort Lauderdale from Macon, GA</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">Contour Airlines Announces Return of Baltimore Service and Flight Expansion to Fort Lauderdale from Macon, GA</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">SMYRNA, Tenn., April 9, 2026</p>
+              </div>
+              <div class="xn-content">
+<p><span class="legendSpanClass">SMYRNA, Tenn.</span>, <span class="legendSpanClass">April 9, 2026</span> /PRNewswire/ -- Contour Airlines is proud to announce two exciting updates for travelers in Middle Georgia, including the return of nonstop service to Baltimore and the launch of a brand-new route to South Florida.</p>
+    <div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder1">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/813045/Contour_Logo.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/813045/Contour_Logo.jpg" title="Contour Logo (PRNewsfoto/Contour Airlines)" alt="Contour Logo (PRNewsfoto/Contour Airlines)" />
+                        </a>
+                </p>
+    </div>
+<p>Beginning June 9, 2026, Contour Airlines will reinstate nonstop service between Middle Georgia Regional Airport (MCN) and Baltimore/Washington International Thurgood Marshall Airport (BWI). The return to Baltimore marks a highly anticipated move for the Macon community, reconnecting travelers with a popular and convenient gateway to the Mid-Atlantic region. Contour previously operated service to Baltimore and is thrilled to bring this route back in response to strong local interest.</p><p>In addition to the return of Baltimore service, Contour is expanding its footprint in Macon with the introduction of new nonstop flights to Fort Lauderdale-Hollywood International Airport (FLL) in Fort Lauderdale, Florida, also set to begin June 9, 2026. This new route comes as a direct response to community demand for convenient access to Florida's beaches and cruise ports.</p><p>"Contour Airlines is committed to growing alongside the communities we serve," said Ben Munson, President of Contour Airlines. "We've heard from travelers across Middle Georgia who have been asking for the return of Baltimore service, as well as new options to Florida. We're proud to deliver on both. These additions not only restore a valuable connection to Baltimore, but also open the door to one of the country's most popular leisure destinations. This is a meaningful step forward in our continued investment in Macon."</p><p>Local leaders also welcomed the announcement and the expanded connectivity for the region.</p><p>"We're excited to see Contour Airlines continue to invest in Macon with the addition of Fort Lauderdale service," said Heather Hillstrom Lowe, Deputy Director of Aviation, Macon-Bibb County. "The updated schedule, including the return to Baltimore, is designed to optimize aircraft utilization and support this expansion—ultimately strengthening the overall network available to our community."</p><p>Mayor Lester Miller highlighted the impact for both leisure and business travelers: "If you want to tour the nation's capital or visit the sunny beaches of Florida or catch a cruise, you'll soon be able to do it all from here in Macon. The flights to our nation's capital from Macon have been very popular since they began, and I'm glad Contour is continually listening to its passengers to provide the service that best fits their needs."</p><p>Flights to Baltimore will operate daily, with a second flight added on Monday, Wednesday, and Friday, giving travelers even more options throughout the week.</p><p><b>Baltimore Morning Service (3x weekly):</b></p><ul type="disc"><li>MCN to BWI: <i>7:15 AM – 9:10 AM</i></li><li>BWI to MCN: <i>9:45 AM – 11:45 AM</i></li><li>Days operated: Monday, Wednesday, Friday</li></ul><p><b>Baltimore Afternoon Service (Daily):</b></p><ul type="disc"><li>MCN to BWI: <i>2:35 PM – 4:30 PM</i></li><li>BWI to MCN: <i>5:05 PM – 7:15 PM</i></li><li>Days operated: Daily</li></ul><p>The new Fort Lauderdale flights will operate four times a week on Tuesday, Thursday, Saturday, and Sunday, offering travelers flexible scheduling options.</p><p><b>Fort Lauderdale Morning Service (4x weekly):</b></p><ul type="disc"><li>MCN to FLL: <i>9:40 AM – 11:25 AM</i></li><li>FLL to MCN: <i>12:00 PM – 1:45 PM</i></li><li>Days operated: Tuesday, Thursday, Saturday, Sunday</li></ul><p>Contour Airlines will operate service using its 30-seat regional jet, delivering a comfortable and reliable travel experience. Each flight features leather seating with extra legroom, along with complimentary snacks and beverage service for every passenger.</p><p>For more information, please visit <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4660767-1&amp;h=3470558994&amp;u=http%3A%2F%2Fwww.contourairlines.com%2F&amp;a=www.contourairlines.com" target="_blank" rel="nofollow">www.contourairlines.com</a>.</p><p><b><i>About Contour:<br /></i></b><i>Contour Airlines offers a premium airline product that includes a complimentary snack and beverage service on all flights. Contour operates a growing fleet of regional jets featuring leather seating with expanded legroom in every row. Tickets are available for purchase on Contour's website at</i> <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4660767-1&amp;h=3480251476&amp;u=https%3A%2F%2Fnam12.safelinks.protection.outlook.com%2F%3Furl%3Dhttps%25253A%25252F%25252Fc212.net%25252Fc%25252Flink%25252F%25253Ft%25253D0%252526l%25253Den%252526o%25253D4419512-1%252526h%25253D1344803071%252526u%25253Dhttp%2525253A%2525252F%2525252Fcontourairlines.com%2525252F%252526a%25253Dcontourairlines.com%26data%3D05%25257C02%25257Criley.musial%252540flycontour.com%25257Ccf5ad1e96b5d481d680e08dd8f087386%25257C076fa5dfa6d04d83b6a4df477ba27f7a%25257C0%25257C0%25257C638823988635714478%25257CUnknown%25257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%25253D%25253D%25257C0%25257C%25257C%25257C%26sdata%3DR%25252B6eAapwBhtbSkX0iWCIMEym8JjMW7mDrt%25252BjVq18oe8%25253D%26reserved%3D0%2522%2520%255Ct%2520%2522_blank%2522%2520%255Co%2520%2522https%3A%2F%2Fnam12.safelinks.protection.outlook.com%2F%3Furl%3Dhttps%25253A%25252F%25252Fc212.net%25252Fc%25252Flink%25252F%25253Ft%25253D0%252526l%25253Den%252526o%25253D4419512-1%252526h%25253D1344803071%252526u%25253Dhttp%2525253A%2525252F%2525252Fcontourairlines.com%2525252F%252526a%25253Dcontourairlines.com%26data%3D05%25257C02%25257Criley.musial%252540flycontour.com%2525&amp;a=contourairlines.com" target="_blank" rel="nofollow"><b><i>contourairlines.com</i></b></a><i>, by calling the Contour call center at (888) 332-6686, and through local and online travel agencies. Travelers can also book seamless connections with Contour's interline partners;</i> <i>Alaska, American, JetBlue, and United Airlines.</i></p>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=CL30713&amp;sd=2026-04-09" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/contour-airlines-announces-return-of-baltimore-service-and-flight-expansion-to-fort-lauderdale-from-macon-ga-302738356.html" target="_blank">https://www.prnewswire.com/news-releases/contour-airlines-announces-return-of-baltimore-service-and-flight-expansion-to-fort-lauderdale-from-macon-ga-302738356.html</a></p><p>SOURCE Contour Airlines</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=CL30713&amp;Transmission_Id=202604091100PR_NEWS_USPR_____CL30713&amp;DateId=20260409" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>

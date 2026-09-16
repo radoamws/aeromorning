@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewsML Version="1.2">
+  <Catalog Href="http://www.prnewswire.com/newsml/catalog.xml" />
+  <NewsEnvelope>
+    <TransmissionId>202604091205PR_NEWS_USPR_____PH30811</TransmissionId>
+    <SentFrom>
+      <Party FormalName="PR Newswire" />
+    </SentFrom>
+    <DateAndTime>20260409T120500-0400</DateAndTime>
+    <NewsProduct FormalName="Public" Scheme="Routing" />
+    <Priority FormalName="4" />
+  </NewsEnvelope>
+  <NewsItem xml:lang="en-US">
+    <Identification>
+      <NewsIdentifier>
+        <ProviderId>prnewswire.com</ProviderId>
+        <DateId>20260409</DateId>
+        <NewsItemId>PH30811</NewsItemId>
+        <RevisionId PreviousRevision="0" Update="N">1</RevisionId>
+        <PublicIdentifier>urn:newsml:prnewswire.com:20260409:PH30811:1</PublicIdentifier>
+      </NewsIdentifier>
+    </Identification>
+    <NewsManagement>
+      <NewsItemType FormalName="Press Release" />
+      <FirstCreated>20260409T120500-0400</FirstCreated>
+      <ThisRevisionCreated>20260409T120500-0400</ThisRevisionCreated>
+      <Status FormalName="Usable" />
+    </NewsManagement>
+    <NewsComponent Essential="yes" EquivalentsList="yes">
+      <Role FormalName="Main" />
+      <BasisForChoice>MimeType/@FormalName</BasisForChoice>
+      <NewsLines>
+        <HeadLine>CoVar Awarded Direct-to-Phase II DARPA SBIR Contract for Predictive Psychological Architectures for Decision-Making (PPADM)</HeadLine>
+        <DateLine>MCLEAN, Va., April 9, 2026</DateLine>
+        <SlugLine>CoVAR-SBIR-PPADM</SlugLine>
+      </NewsLines>
+      <AdministrativeMetadata>
+        <FileName>202604091205PR_NEWS_USPR_____PH30811.xml</FileName>
+        <Provider>
+          <Party FormalName="PR Newswire" />
+        </Provider>
+        <Creator>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="CoVar" />
+          </Party>
+          <Contribution FormalName="Supplier" />
+        </Creator>
+        <Contributor>
+          <Party FormalName="Name">
+            <Property FormalName="Name" Value="PR" />
+          </Party>
+          <Contribution FormalName="Editor" />
+        </Contributor>
+        <Property FormalName="Source" Value="CoVar" />
+      </AdministrativeMetadata>
+      <DescriptiveMetadata>
+        <Language FormalName="en-US" />
+        <Genre FormalName="Press Release" />
+        <SubjectCode>
+          <Subject FormalName="CPR" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="AFI" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="ARO" Scheme="IndustryCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="CON" Scheme="SubjectCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="SBS" Scheme="SubjectCode" />
+        </SubjectCode>
+        <SubjectCode>
+          <Subject FormalName="PDT" Scheme="SubjectCode" />
+        </SubjectCode>
+        <Property FormalName="CompanyName" Value="CoVar" />
+        <Property FormalName="GeographyCode" Value="Virginia" />
+        <Property FormalName="Photo" Value="https://mma.prnewswire.com/media/2953214/CoVar___Logo.jpg" />
+      </DescriptiveMetadata>
+      <ContentItem>
+        <MimeType FormalName="application/xhtml+xml" />
+        <DataContent>
+          <html xmlns:xn="http://www.xmlnews.org/ns/" xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+              <title>CoVar Awarded Direct-to-Phase II DARPA SBIR Contract for Predictive Psychological Architectures for Decision-Making (PPADM)</title>
+              <style type="text/css">
+/* Style Definitions */
+span.prnews_span
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+a.prnews_a
+{
+color:blue;
+}
+li.prnews_li
+{
+font-size:8pt;
+font-family:"Arial";
+color:black;
+}
+p.prnews_p
+{
+font-size:0.62em;
+font-family:"Arial";
+color:black;
+margin:0in;
+}
+
+</style>
+            </head>
+            <body>
+              <div class="xn-newslines">
+                <h1 class="xn-hedline">CoVar Awarded Direct-to-Phase II DARPA SBIR Contract for Predictive Psychological Architectures for Decision-Making (PPADM)</h1>
+                <p class="xn-distributor">PR Newswire</p>
+                <p class="xn-dateline">MCLEAN, Va., April 9, 2026</p>
+              </div>
+              <div class="xn-content">
+<p><span class="legendSpanClass">MCLEAN, Va.</span>, <span class="legendSpanClass">April 9, 2026</span> /PRNewswire/ -- CoVar, a small business specializing in advanced artificial intelligence and machine learning solutions for the U.S. Department of Defense, today announced it has been awarded a Direct-to-Phase II Small Business Innovation Research (SBIR) contract by the Defense Advanced Research Projects Agency (DARPA). The award supports a DARPA effort titled Predictive Psychological Architectures for Decision-Making (PPADM).</p>
+    <div class="PRN_ImbeddedAssetReference" id="DivAssetPlaceHolder1">
+                <p>
+                        <a href="https://mma.prnewswire.com/media/2953214/CoVar___Logo.html" target="_blank" rel="nofollow">
+                    <img src="https://mma.prnewswire.com/media/2953214/CoVar___Logo.jpg" title="CoVar Logo" alt="CoVar Logo" />
+                        </a>
+                </p>
+    </div>
+<p>The PPADM program aims to advance the scientific understanding of how individual decision-maker characteristics influence behavior, with the goal of improving both human and algorithmic decision-making, delegation, and trust. Focus will be placed on decision-making in difficult domains with high uncertainty, time and/or resource constrained scenarios, and circumstances in which decision-makers disagree or have conflicting values.</p><p>CoVar will be responsible for developing VectoredAI, a dynamic human-AI teaming model that leverages probabilistic key decision-maker attributes (KDMAs) and latent semantic steering. VectoredAI is intended to provide a plug-in capability to help align AI solutions with personalities and considerations for critical decision makers.</p><p>CoVar has teamed with Dr. Jim Neidhoefer to bring complimentary expertise in developing VectoredAI. CoVar's GEARS software, developed under DARPA's ASIMOV program, enables users to design world scenarios and evaluate dilemmas in terms of tensions and conflicts, supporting automated testing of both algorithmic and human decision making. Dr. Neidhoefer has developed statistical methods for quantifying and aggregating hard-to-measure subjective factors (like KDMAs) in addition to a methodology for aligning human and algorithmic decision making.</p><p>"Barriers to AI adoption in mission critical and safety critical systems remains high due to lack of human trust," said Dr. Pete Torrione, CTO at CoVar. "Our proposed VectoredAI solution to PPADM will expand on what is already known about human decision making to identify key trust-building factors that reduce friction in human-AI interactions and humans' willingness to delegate difficult decisions to AI."</p><p>The Direct-to-Phase II award represents CoVar's continued leadership in building trusted and responsible AI/ML solutions for the Department of Defense; ultimately leading to more rapid adoption of AI for mission critical systems.</p><p>For more information on CoVar's work, please visit <a href="https://edge.prnewswire.com/c/link/?t=0&amp;l=en&amp;o=4660864-1&amp;h=2782375235&amp;u=https%3A%2F%2Fwww.covar.com.%2F&amp;a=www.covar.com." target="_blank" rel="nofollow">www.covar.com.</a> For ASIMOV specific inquiries, please contact DARPA Public Affairs, <a href="mailto:outreach@darpa.mil" target="_blank" rel="nofollow">outreach@darpa.mil</a>.</p>
+
+
+
+<p id="PURL"><img title="Cision" width="12" height="12" alt="Cision" src="https://edge.prnewswire.com/c/img/favicon.png?sn=PH30811&amp;sd=2026-04-09" /> View original content to download multimedia:<a id="PRNURL" rel="nofollow" href="https://www.prnewswire.com/news-releases/covar-awarded-direct-to-phase-ii-darpa-sbir-contract-for-predictive-psychological-architectures-for-decision-making-ppadm-302738479.html" target="_blank">https://www.prnewswire.com/news-releases/covar-awarded-direct-to-phase-ii-darpa-sbir-contract-for-predictive-psychological-architectures-for-decision-making-ppadm-302738479.html</a></p><p>SOURCE CoVar</p></div>
+              <img alt="" src="https://rt.prnewswire.com/rt.gif?NewsItemId=PH30811&amp;Transmission_Id=202604091205PR_NEWS_USPR_____PH30811&amp;DateId=20260409" style="border:0px; width:1px; height:1px;" />
+            </body>
+          </html>
+        </DataContent>
+      </ContentItem>
+    </NewsComponent>
+  </NewsItem>
+</NewsML>
