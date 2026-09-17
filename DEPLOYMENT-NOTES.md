@@ -102,3 +102,30 @@ La migration d'URL `aeromorning.com` → `localhost/aeromorning` faite en base l
 - `extract_news/api/app/Console/Commands/LinkHreflangCommand.php` (nouveau fichier)
 - `extract_news/api/database/migrations/2026_09_17_000001_add_wp_link_and_hreflang_to_t_news_table.php`
 - **+ lancer `extract_news/add_wp_link_and_hreflang_columns.sql` (ou `php artisan migrate --force`) sur la BDD prod `extract_news` avant de mettre en ligne le code Laravel ci-dessus** (sinon `WordPressPostingService` plantera en écrivant sur des colonnes qui n'existent pas encore).
+
+### 2026-09-17 (suite) — CI/CD GitHub Actions vers PlanetHoster
+
+**Objectif :** automatiser ce qui, jusqu'ici, se faisait manuellement (upload FTP/SSH). Une fois actif, la section "Fichiers à uploader en prod" ci-dessus devient obsolète pour tout ce qui touche ces 3 répertoires — un `git push` sur `main` suffit.
+
+**Topologie serveur** (confirmée par l'utilisateur, PlanetHoster World, cPanel, PHP 8.4) — 3 racines sœurs sous `/home/aeromorning/` :
+| Repo (source) | Serveur (cible) | Domaine |
+|---|---|---|
+| racine du repo, sauf `extract_news/` | `/home/aeromorning/public_html` | `aeromorning.com` |
+| `extract_news/api/` | `/home/aeromorning/api` | `api.aeromorning.com` |
+| `extract_news/gestion-news/` (build statique) | `/home/aeromorning/news` | `news.aeromorning.com` |
+
+**Fichier :** `.github/workflows/deploy.yml`. 3 jobs indépendants (parallèles), déclenchés sur push vers `main` + déclenchement manuel (`workflow_dispatch`) :
+1. **deploy-wordpress** : `rsync -az --delete` de la racine du repo vers `public_html`, avec une longue liste d'`--exclude` (essentielle : c'est elle qui empêche `--delete` d'effacer côté serveur tout ce qui n'est pas dans git mais doit y rester — `wp-config.php`, `.htaccess`, `wp-content/uploads/`, les caches LiteSpeed/EWWW générés en prod, etc.). Sans ces excludes, `--delete` détruirait le site en un push.
+2. **deploy-laravel-api** : `rsync --delete` de `extract_news/api/` vers `/home/aeromorning/api` (exclut `.env`, `vendor/`, `storage/`, le symlink `public/storage`), puis `composer install --no-dev` + `php artisan migrate --force` par SSH. **Décision retenue** : les migrations passent par `php artisan migrate --force` (pas par les scripts `.sql` bruts) parce que ça tient à jour la table `migrations` de Laravel automatiquement — les `.sql` (`add_wp_link_and_hreflang_columns.sql`, `ignored_emails_add_columns.sql`) restent des références/fallback manuels, pas le mécanisme de prod.
+3. **deploy-nuxt** : build (`npm ci && npm run generate`, avec `NUXT_PUBLIC_API_BASE_URL=https://api.aeromorning.com/api` injecté au build comme documenté dans `extract_news/DEPLOYMENT.md`) fait sur le runner GitHub (Node pas nécessaire côté serveur, confirmé : `nuxt.config.ts` a `ssr: false`), puis `rsync --delete` du dossier `.output/public/` vers `/home/aeromorning/news` — celui-ci est un site 100% statique généré, donc `--delete` sans exclude particulier est sûr (rien côté serveur à préserver là-dedans).
+
+**Secrets GitHub requis** (`Settings → Secrets and variables → Actions`, jamais donnés à l'agent) : `SSH_HOST`, `SSH_PORT`, `SSH_USER`, `SSH_PRIVATE_KEY` (clé dédiée au CI/CD, différente de la clé perso de l'utilisateur — la clé publique correspondante doit être dans `~/.ssh/authorized_keys` sur le serveur, déjà fait par l'utilisateur).
+
+**Cron jobs** (`news:process-emails`, `news:publish`, ...) : déjà configurés côté cPanel, **volontairement non gérés par ce pipeline** — n'y touche pas.
+
+**⚠️ Pas encore poussé sur `main` volontairement.** Le déclencheur choisi est "auto-deploy à chaque push sur `main`" — donc merger cette branche déclenchera un déploiement réel immédiat vers la prod. Committé sur une branche à part (`ci/deploy-planethoster`) pour que l'utilisateur garde la main sur le moment exact du premier déclenchement, après avoir vérifié que les 4 secrets sont bien renseignés dans GitHub. Une fois les secrets en place et la branche mergée, tout push futur sur `main` déploiera automatiquement.
+
+**Zones d'incertitude à vérifier au premier run réel** (pas de moyen de les tester sans accès direct au serveur) :
+- `rsync` disponible en SSH sur PlanetHoster World — l'utilisateur n'était pas sûr ("je ne sais pas"). Si absent, remplacer le mécanisme de transfert par `scp`/`sftp` (moins pratique pour les suppressions, mais fonctionne partout).
+- Que `composer` et `php` (8.4) en SSH pointent bien vers les bons binaires par défaut — pas de chemin absolu spécifique configuré dans le workflow pour l'instant, `composer install`/`php artisan migrate` utilisent le PATH par défaut du SSH.
+- Si le premier run échoue sur un de ces deux points, ajuster `deploy-laravel-api` avec le chemin exact (ex: un secret `PHP_BIN` ou `COMPOSER_BIN`) plutôt que de deviner davantage ici.
