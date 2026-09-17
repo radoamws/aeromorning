@@ -11,6 +11,8 @@ wp-content/upgrade/
 wp-content/upgrade-temp-backup/
 wp-content/cache/
 wp-content/gallery/*/cache/
+wp-content/litespeed/
+wp-content/ewww/
 wp-content/debug.log
 *.log
 

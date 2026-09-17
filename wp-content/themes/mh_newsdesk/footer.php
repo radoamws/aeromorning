@@ -32,7 +32,7 @@
 			<?php } ?>
 			<div class="copyright-wrap">
 				<p class="copyright"><?php echo empty($mh_newsdesk_options['copyright']) ? sprintf(__('Copyright %1$s | MH Newsdesk by %2$s', 'mh-newsdesk'), date("Y"), '<a href="' . esc_url('http://www.mhthemes.com/') . '" title="Premium Magazine WordPress Themes" rel="nofollow">MH Themes</a>') : $mh_newsdesk_options['copyright']; ?> |
-<a href="http://www.aeromorning.com/mentions-legales/"> Mentions légales</a></p>
+<a href="<?php echo esc_url( get_home_url( 1, '/mentions-legales/' ) ); ?>"> Mentions légales</a></p>
 			</div>
 		</div>
 

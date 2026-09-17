@@ -8,9 +8,9 @@
 <link rel="pingback" href="<?php bloginfo('pingback_url'); ?>" />
 <?php wp_head(); ?>
 
-<link rel="alternate" hreflang="fr" href="https://aeromorning.com/" />
-<link rel="alternate" hreflang="en" href="https://aeromorning.com/en/" />
-<link rel="alternate" hreflang="x-default" href="https://aeromorning.com/en/" />
+<link rel="alternate" hreflang="fr" href="<?php echo esc_url( get_home_url( 1, '/' ) ); ?>" />
+<link rel="alternate" hreflang="en" href="<?php echo esc_url( get_home_url( 2, '/' ) ); ?>" />
+<link rel="alternate" hreflang="x-default" href="<?php echo esc_url( get_home_url( 2, '/' ) ); ?>" />
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-S5ED39PCB0"></script>
 <script>
@@ -48,9 +48,9 @@
 		<div class="mh-col mh-1-3<?php echo $logo_class; ?>">
 			<?php mh_newsdesk_logo(); ?>
 			<div class="langue">
-<a href="/"><img class="alignleft wp-image-1352" title="Langue Francaise" src="https://aeromorning.com/wp-content/uploads/2015/11/francais.jpg" alt="Langue Francaise" width="20" height="15" /></a>
+<a href="/"><img class="alignleft wp-image-1352" title="Langue Francaise" src="<?php echo esc_url( get_home_url( 1, '/wp-content/uploads/2015/11/francais.jpg' ) ); ?>" alt="Langue Francaise" width="20" height="15" /></a>
 
-<a href="/en"><img class="alignleft wp-image-1353" title="English language" src="https://aeromorning.com/wp-content/uploads/2015/11/anglais.jpg" alt="English language" width="20" height="15" /></a>
+<a href="/en"><img class="alignleft wp-image-1353" title="English language" src="<?php echo esc_url( get_home_url( 1, '/wp-content/uploads/2015/11/anglais.jpg' ) ); ?>" alt="English language" width="20" height="15" /></a>
 </div>
 		</div>
 		
