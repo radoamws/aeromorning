@@ -1,0 +1,2074 @@
+<?php
+
+namespace App\Services;
+
+use OpenAI\Client;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use GuzzleHttp\Client as GuzzleClient;
+
+class OpenAIService
+{
+    private Client $client;
+
+    private const WP_JSON_KEYS = [
+        'titleFR',
+        'shorttitleFR',
+        'titleEN',
+        'shorttitleEN',
+        'FR',
+        'EN',
+        'metadescriptionFR',
+        'metadescriptionEN',
+        'focuskeyphraseFR',
+        'focuskeyphraseEN',
+    ];
+
+    public function __construct()
+    {
+        $apiKey = (string) env('OPENAI_API_KEY');
+
+        $httpClient = new GuzzleClient([
+            'timeout' => (float) env('OPENAI_HTTP_TIMEOUT', 120),
+            'connect_timeout' => (float) env('OPENAI_HTTP_CONNECT_TIMEOUT', 20),
+        ]);
+
+        $this->client = \OpenAI::factory()
+            ->withApiKey($apiKey)
+            ->withHttpClient($httpClient)
+            ->make();
+    }
+
+    /**
+     * Extract both FR and EN news payloads for WordPress from a forwarded email.
+     *
+     * IMPORTANT: We append the email content (json-encoded) at the end of the prompt.
+     * To avoid token overflows, we strip image tags / base64 image blobs from html_body before sending to OpenAI.
+     * No PHP-side cleaning/formatting is performed on the returned payload.
+     */
+    public function extractWordPressNewsJson(array $emailContent, int $maxRetries = 3): ?array
+    {
+        // Limite haute : 30 000 chars pour ne jamais tronquer un article long.
+        // L'objectif est de passer le contenu EN INTÉGRALITÉ à OpenAI.
+        // Si content_filter se déclenche (sur l'OUTPUT, pas l'input), on réessaie
+        // avec 4 000 chars + prompt concis dans le fallback ci-dessous.
+        $emailContentForAi = $this->sanitizeEmailContentForOpenAI($emailContent, 30000);
+        $emailJson = json_encode($emailContentForAi, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if (!is_string($emailJson) || trim($emailJson) === '') {
+            return null;
+        }
+
+        $basePrompt = $this->buildWordPressExtractionPrompt($emailJson);
+        $lastRaw = null;
+        $lastErrors = [];
+        $contentFilterHit = false; // true si au moins un appel a rencontré content_filter
+
+        for ($attempt = 1; $attempt <= max(1, $maxRetries); $attempt++) {
+            $prompt = ($attempt === 1 || $lastRaw === null)
+                ? $basePrompt
+                : $this->buildWordPressRepairPrompt($emailJson, (string) $lastRaw, $lastErrors);
+
+            $raw = $this->callOpenAI(
+                $prompt,
+                12000,
+                0.0,
+                ['type' => 'json_object'],
+                ['disable_fast_fallback' => true]
+            );
+            $lastRaw = $raw;
+
+            if ($raw === null) {
+                // callOpenAI retourne null soit sur erreur réseau/API, soit sur content_filter.
+                // On marque content_filter pour adapter la stratégie de fallback.
+                $lastErrors = ['openai_call_failed'];
+                $contentFilterHit = true; // on ne peut pas distinguer sans changer l'API de callOpenAI
+                continue;
+            }
+
+            $decoded = $this->decodeJsonObject($raw);
+            if (!is_array($decoded)) {
+                $trimmed = trim((string) $raw);
+                if (str_starts_with($trimmed, '{') && !str_ends_with($trimmed, '}')) {
+                    $lastErrors = ['truncated_json'];
+                } else {
+                    $lastErrors = ['invalid_json'];
+                }
+                continue;
+            }
+
+            $errors = $this->validateWordPressNewsPayload($decoded);
+            if (empty($errors)) {
+                return $decoded;
+            }
+
+            $lastErrors = $errors;
+        }
+
+        // ── Fallback final : modèle stable + contenu réduit si content_filter ────
+        // Si le modèle principal (ex. gpt-5) a épuisé ses retries sans produire
+        // un JSON valide, on tente une dernière fois.
+        //
+        // Stratégie :
+        //   a) gpt-4o-mini avec le même contenu (8 000 chars) → couvre les cas où
+        //      gpt-5 tronque ou rate la validation sur de longs emails.
+        //   b) Si on suspecte un content_filter (tous les appels ont retourné null),
+        //      on re-sanitize avec 4 000 chars pour éliminer le boilerplate d'entreprise
+        //      qui peut déclencher le filtre (disclaimers "forward-looking statements",
+        //      sections "About", références financières...).
+        $primaryModel   = (string) env('OPENAI_MODEL', 'gpt-5-mini');
+        $fallbackModel  = trim((string) env('OPENAI_FALLBACK_MODEL', 'gpt-4o-mini'));
+        $primaryLower   = strtolower(trim($primaryModel));
+        $fallbackLower  = strtolower(trim($fallbackModel));
+
+        if ($fallbackModel !== '' && $fallbackLower !== $primaryLower) {
+            // a) Tentative gpt-4o-mini avec le contenu standard (8 000 chars)
+            Log::info('OpenAI: bascule sur le modèle de secours pour l\'extraction WordPress', [
+                'primary'            => $primaryModel,
+                'fallback'           => $fallbackModel,
+                'errors'             => $lastErrors,
+                'content_filter_hit' => $contentFilterHit,
+            ]);
+
+            $raw = $this->callOpenAI(
+                $basePrompt,
+                12000,
+                0.0,
+                ['type' => 'json_object'],
+                ['model' => $fallbackModel]
+            );
+
+            if ($raw !== null) {
+                $decoded = $this->decodeJsonObject($raw);
+                if (is_array($decoded)) {
+                    $errors = $this->validateWordPressNewsPayload($decoded);
+                    if (empty($errors)) {
+                        return $decoded;
+                    }
+                    $lastErrors = $errors;
+                }
+            }
+
+            // b) content_filter probable → on re-essaie avec contenu réduit + prompt concis.
+            // Le content_filter se déclenche dans l'OUTPUT (pas l'input) quand le JSON
+            // billingue FR+EN dépasse ~5 000 chars. Le prompt concis demande ≤ 350 mots
+            // par langue, ce qui maintient l'output sous le seuil du filtre.
+            if ($contentFilterHit && $raw === null) {
+                Log::info('OpenAI: content_filter détecté → re-tentative avec contenu réduit à 4 000 chars + prompt concis', [
+                    'fallback' => $fallbackModel,
+                ]);
+
+                $shortContent = $this->sanitizeEmailContentForOpenAI($emailContent, 4000);
+                $shortJson    = json_encode($shortContent, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                if (is_string($shortJson) && trim($shortJson) !== '') {
+                    // Prompt concis : demande un contenu court (≤ 350 mots/langue)
+                    // pour passer sous le seuil du content_filter d'OpenAI.
+                    $concisePrompt = $this->buildWordPressExtractionPromptConcise($shortJson);
+                    $raw = $this->callOpenAI(
+                        $concisePrompt,
+                        6000,   // 6 000 tokens max : ~4 500 chars, bien sous le seuil
+                        0.0,
+                        ['type' => 'json_object'],
+                        ['model' => $fallbackModel]
+                    );
+
+                    if ($raw !== null) {
+                        $decoded = $this->decodeJsonObject($raw);
+                        if (is_array($decoded)) {
+                            $errors = $this->validateWordPressNewsPayload($decoded);
+                            if (empty($errors)) {
+                                return $decoded;
+                            }
+                            $lastErrors = $errors;
+                        }
+                    }
+                }
+            }
+        }
+
+        Log::warning('OpenAI extractWordPressNewsJson failed validation', [
+            'errors' => $lastErrors,
+            'raw_excerpt' => is_string($lastRaw) ? mb_substr($lastRaw, 0, 1200) : null,
+        ]);
+
+        return null;
+    }
+
+    private function sanitizeEmailContentForOpenAI(array $emailContent, int $maxBodyChars = 8000): array
+    {
+        $sanitized = $emailContent;
+
+        // Attachments are processed in PHP (image selection/download). They only add noise/tokens for OpenAI.
+        if (array_key_exists('attachments', $sanitized)) {
+            unset($sanitized['attachments']);
+        }
+
+        if (array_key_exists('html_body', $sanitized) && is_string($sanitized['html_body'])) {
+            $html = $this->extractMessageBodyHtmlForOpenAI($sanitized['html_body']);
+            $html = $this->stripImagesFromHtmlForOpenAI($html);
+
+                // Limite la taille du corps (garde-fou contre les emails extrêmement volumineux).
+            // IMPORTANT : ne pas couper le contenu utile — les articles longs doivent passer
+            // en intégralité. La limite ici est très haute (sécurité uniquement).
+            // Le fallback content_filter (4 000 chars) est appliqué séparément si nécessaire.
+            if ($maxBodyChars > 0 && mb_strlen($html) > $maxBodyChars) {
+                $html = mb_substr($html, 0, $maxBodyChars) . '…[tronqué]';
+            }
+
+            $sanitized['html_body'] = $html;
+        }
+
+        // Pareil pour plain_body / text_body s'ils existent
+        foreach (['plain_body', 'text_body', 'body'] as $key) {
+            if (array_key_exists($key, $sanitized) && is_string($sanitized[$key])) {
+                if ($maxBodyChars > 0 && mb_strlen($sanitized[$key]) > $maxBodyChars) {
+                    $sanitized[$key] = mb_substr($sanitized[$key], 0, $maxBodyChars) . '…[tronqué]';
+                }
+            }
+        }
+
+        return $sanitized;
+    }
+
+    private function extractMessageBodyHtmlForOpenAI(string $html): string
+    {
+        $source = (string) $html;
+        if (trim($source) === '') {
+            return '';
+        }
+
+        // Fast path: if the container name isn't present at all, keep original.
+        // (Some emails use variations like id=messagebody without quotes or different casing.)
+        if (stripos($source, 'messagebody') === false) {
+            return $source;
+        }
+
+        if (!class_exists(\DOMDocument::class)) {
+            return $source;
+        }
+
+        $previousUseErrors = libxml_use_internal_errors(true);
+
+        try {
+            $dom = new \DOMDocument();
+            $wrapped = '<!doctype html><html><head><meta charset="utf-8"></head><body>' . $source . '</body></html>';
+
+            // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+            if (!@$dom->loadHTML($wrapped, LIBXML_NOWARNING | LIBXML_NOERROR)) {
+                return $source;
+            }
+
+            $xpath = new \DOMXPath($dom);
+            $nodes = $xpath->query('//*[@id="messagebody"]');
+            if (!$nodes || $nodes->length < 1) {
+                return $source;
+            }
+
+            $messageBody = $nodes->item(0);
+            if (!$messageBody instanceof \DOMElement) {
+                return $source;
+            }
+
+            // Remove obvious attachment blocks inside messagebody (best-effort).
+            $attachmentNodes = $xpath->query(
+                './/*[contains(translate(@class, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "attachment")
+                    or contains(translate(@class, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "attachement")
+                    or contains(translate(@class, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "attachments")
+                    or contains(translate(@id, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "attachment")
+                    or contains(translate(@id, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "attachement")
+                    or contains(translate(@id, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "attachments")
+                ]',
+                $messageBody
+            );
+
+            if ($attachmentNodes && $attachmentNodes->length > 0) {
+                for ($i = $attachmentNodes->length - 1; $i >= 0; $i--) {
+                    $n = $attachmentNodes->item($i);
+                    if ($n && $n->parentNode) {
+                        $n->parentNode->removeChild($n);
+                    }
+                }
+            }
+
+            $out = '';
+            foreach ($messageBody->childNodes as $child) {
+                $out .= $dom->saveHTML($child);
+            }
+
+            $out = trim($out);
+            if ($out === '') {
+                return $source;
+            }
+
+            // Extra token reduction: strip scripts/styles/comments from the extracted subtree.
+            $out = preg_replace('/<script\b[^>]*>.*?<\/script>/is', ' ', $out) ?? $out;
+            $out = preg_replace('/<style\b[^>]*>.*?<\/style>/is', ' ', $out) ?? $out;
+            $out = preg_replace('/<!--.*?-->/s', ' ', $out) ?? $out;
+
+            return $out;
+        } catch (\Throwable $_) {
+            return $source;
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previousUseErrors);
+        }
+    }
+
+    private function stripImagesFromHtmlForOpenAI(string $html): string
+    {
+        $text = (string) $html;
+        if (trim($text) === '') {
+            return '';
+        }
+
+        // ── 1. Blocs VML/MSO conditionnels ──────────────────────────────────
+        // Les mails Outlook/Yahoo embarquent des blocs <!--[if gte vml 1]>...
+        // <v:imagedata src="file:///C:/Users/..."> ...<![endif]--> qui contiennent
+        // des chemins Windows locaux (file:///) et des blob: URLs. Ces patterns
+        // déclenchent systématiquement le content_filter d'OpenAI.
+        // On retire tous les commentaires conditionnels MSO avant tout le reste.
+        $text = preg_replace('/<!--\[if[^\]]*\]>.*?<!\[endif\]-->/is', ' ', $text) ?? $text;
+
+        // ── 2. Balises VML (<v:*>) résiduelles ──────────────────────────────
+        $text = preg_replace('/<v:[a-z]+\b[^>]*>.*?<\/v:[a-z]+>/is', ' ', $text) ?? $text;
+        $text = preg_replace('/<v:[a-z]+\b[^>]*\/>/i', ' ', $text) ?? $text;
+        $text = preg_replace('/<o:[a-z]+\b[^>]*>.*?<\/o:[a-z]+>/is', ' ', $text) ?? $text;
+
+        // ── 3. Commentaires HTML restants ────────────────────────────────────
+        $text = preg_replace('/<!--.*?-->/s', ' ', $text) ?? $text;
+
+        // ── 4. Blocs <picture> et <img> ─────────────────────────────────────
+        $text = preg_replace('/<picture\b[^>]*>.*?<\/picture>/is', ' ', $text) ?? $text;
+        $text = preg_replace('/<img\b[^>]*>/i', ' ', $text) ?? $text;
+
+        // ── 5. URLs potentiellement problématiques ───────────────────────────
+        // base64, blob:, file:// → peuvent déclencher des faux positifs du filtre
+        $text = preg_replace('/data:image\/[a-z0-9.+-]+;base64,[a-z0-9\/+\r\n=]+/i', '[image-removed]', $text) ?? $text;
+        $text = preg_replace('/blob:[^\s"\'<>]+/i', '[blob-url-removed]', $text) ?? $text;
+        $text = preg_replace('/file:\/\/\/[^\s"\'<>]+/i', '[local-path-removed]', $text) ?? $text;
+
+        return $text;
+    }
+
+    private function buildWordPressExtractionPrompt(string $emailJson): string
+    {
+        return "L'idée est de lire, analyser le contenu d'un mail en HTML et retourner les informations dans la description suivante pour être ajouter automatiquement dans wordpress.\n"
+            . "Voici les descriptions:\n"
+            . " - Voici un extraction de mail transféré en html qui contient des actualités aéronautique et spatial en version française et anglaise. Il peut contenir des html du header, footer, forwarder, ... que tu ne doit pas prendre en compte.\n"
+            . " - Analyse bien le contenu du mail selon les textes.\n"
+            . " - Prépare un JSON avec les clés \"titleFR\", \"shorttitleFR\", \"titleEN\", \"shorttitleEN\",\"FR\",\"EN\", \"metadescriptionFR\", \"metadescriptionEN\", \"focuskeyphraseFR\" et \"focuskeyphraseEN\".\n"
+            . " - Après analyse, Fait une extraction du titre de la section française et met dans le JSON \"titleFR\" en texte brut sans HTML. Faire pareil pour la version EN mais a mettre dans \"titleEN\".\n"
+            . " - si le \"titleFR\" dépasse les 62 caractères, reformule la phrase pour que ça soit moins de 62 caractères pour le SEO et met dans le json \"shorttitleFR\". Sinon, met directement le \"titleFR\" dans \"shorttitleFR\". Faire pareil pour la version EN mais a mettre dans la clé \"shorttitleEN\" du JSON.\n"
+            . " - Fait un extraction du contenu de la version française tout en gardant les balises html pour la mise en page. (gras, saut de ligne, puce (ul, li, ...), italique, ...). Bien enlever tout ce qui ne concerne pas la news (actualité), mais garde la description de la société (A propos ...). Si la source de l'article n'est pas mentionné dans le contenu, ajoute à la fin ce format avec la source identifié \"Source: <le_nom_de_la_source>\" (la source peu être la société concerné ou aeromorning même si c'est mentionné). Encode-le dans la valeur de la clé FR du JSON. Si le \"titleFR\" dessus a dépassé les 62 caractères, modifie dans ce contenu HTML FR le titre complet \"titleFR\" pour que ça soit dans une balise h2, sinon l'enlever du contenu. Faire pareil pour la version EN mais a mettre dans le clé EN du JSON.\n"
+            . " - Génère un metadescription selon le contenu FR qui doit strictement faire entre 107 et 142 caractères et le mettre dans le JSON \"metadescriptionFR\". Faire pareil pour la version EN mais a mettre dans \"metadescriptionEN\" du JSON.\n"
+            . " - Génère un FocusKeyPhrase depuis le contenu FR qui ne doit strictement pas avoir une virgule et le mettre dans \"focuskeyphraseFR\". Faire pareil pour la version EN mais a mettre dans \"focuskeyphraseEN\" du JSON.\n"
+            . " - Me retourner le JSON bien échappé car ça sera utilisé dans PHP.\n\n"
+            . "RÈGLE ABSOLUE — VERBATIM :\n"
+            . "Tu dois extraire le contenu TEL QUEL, mot pour mot, sans JAMAIS :\n"
+            . " • couper, raccourcir ou tronquer une section ou un paragraphe ;\n"
+            . " • reformuler, paraphraser, résumer ou réécrire un passage ;\n"
+            . " • ajouter des informations non présentes dans le mail ;\n"
+            . " • supprimer des sections entières même si elles te semblent secondaires.\n"
+            . "Reproduis l'intégralité du contenu de chaque version (FR et EN) exactement comme il apparaît dans l'email. La seule modification autorisée est la correction des erreurs d'encodage évidentes (ex : apostrophes cassées, tirets remplacés par des codes hex).\n\n"
+            . "IMPORTANT: Tu dois retourner uniquement le JSON brut (pas de Markdown, pas de ```). Le JSON doit être valide et parseable par json_decode en PHP. Les champs FR/EN contiennent du HTML avec de vraies balises (pas de &lt;p&gt;).\n\n"
+            . "Voici le contenu du mail:\n\n"
+            . $emailJson;
+    }
+
+    /**
+     * Prompt concis : utilisé quand le prompt standard déclenche le content_filter OpenAI.
+     * Demande un résumé court (≤ 400 mots par langue) pour garder l'output < 4 000 chars
+     * et passer sous le seuil du filtre de sécurité.
+     */
+    private function buildWordPressExtractionPromptConcise(string $emailJson): string
+    {
+        return "Extract aviation news from this forwarded email for WordPress (bilingual FR/EN).\n\n"
+            . "Return ONLY a raw JSON object (no Markdown, no ```) with these exact keys:\n"
+            . "titleFR, shorttitleFR, titleEN, shorttitleEN, FR, EN, "
+            . "metadescriptionFR, metadescriptionEN, focuskeyphraseFR, focuskeyphraseEN\n\n"
+            . "Rules:\n"
+            . "- titleFR / titleEN: plain text, no HTML.\n"
+            . "- shorttitleFR / shorttitleEN: ≤ 62 chars (rephrase if needed).\n"
+            . "- FR / EN: concise HTML article (≤ 350 words each). Keep only essential news facts. "
+            . "Use <p>, <b>, <i>, <ul>/<li> as needed. Add '<p><b>Source: X</b></p>' at end if source not mentioned.\n"
+            . "- metadescriptionFR / metadescriptionEN: exactly 107–142 chars.\n"
+            . "- focuskeyphraseFR / focuskeyphraseEN: no comma.\n"
+            . "- The JSON values must be properly escaped for PHP json_decode.\n\n"
+            . "Email content:\n\n"
+            . $emailJson;
+    }
+
+    private function buildWordPressRepairPrompt(string $emailJson, string $previousRaw, array $errors): string
+    {
+        $errorsText = implode(', ', $errors);
+
+        return "Tu as retourné une réponse invalide/non conforme pour json_decode().\n"
+            . "Corrige ta réponse et retourne UNIQUEMENT un JSON valide (pas de Markdown, pas de ```).\n"
+            . "Le JSON doit contenir exactement les clés suivantes: " . implode(', ', self::WP_JSON_KEYS) . ".\n"
+            . "Erreurs à corriger: {$errorsText}.\n\n"
+            . "RÉPONSE PRÉCÉDENTE (à corriger):\n"
+            . mb_substr($previousRaw, 0, 8000)
+            . "\n\nVoici le contenu du mail:\n\n"
+            . $emailJson;
+    }
+
+    private function decodeJsonObject(?string $raw): ?array
+    {
+        if (!is_string($raw)) {
+            return null;
+        }
+
+        $raw = trim($raw);
+        if ($raw === '') {
+            return null;
+        }
+
+        // Strip common wrappers.
+        $raw = preg_replace('/^```(?:json)?\s*/i', '', $raw) ?? $raw;
+        $raw = preg_replace('/\s*```\s*$/', '', $raw) ?? $raw;
+
+        $decoded = json_decode($raw, true);
+        if (is_array($decoded)) {
+            return $decoded;
+        }
+
+        // If it looks like a cut-off JSON object, bail early (repair prompt will be used).
+        if (str_starts_with($raw, '{') && !str_ends_with($raw, '}')) {
+            return null;
+        }
+
+        // Try to extract first JSON object.
+        if (preg_match('/\{.*\}/s', $raw, $matches) === 1) {
+            $decoded = json_decode($matches[0], true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return null;
+    }
+
+    private function validateWordPressNewsPayload(array $payload): array
+    {
+        $errors = [];
+
+        foreach (self::WP_JSON_KEYS as $key) {
+            if (!array_key_exists($key, $payload)) {
+                $errors[] = 'missing_' . $key;
+            }
+        }
+
+        // Prevent accepting empty SEO fields (this was causing Yoast meta to be updated with blank strings).
+        foreach (['metadescriptionFR', 'metadescriptionEN', 'focuskeyphraseFR', 'focuskeyphraseEN'] as $key) {
+            if (!array_key_exists($key, $payload)) {
+                continue;
+            }
+
+            $value = $payload[$key];
+            if (!is_string($value) || trim($value) === '') {
+                $errors[] = 'empty_' . $key;
+            }
+        }
+
+        // We intentionally do NOT enforce SEO lengths or strip/trim anything in PHP.
+        // Only the presence of the required keys is validated here.
+
+        return array_values(array_unique($errors));
+    }
+
+    /**
+     * Generate French title
+     */
+    public function generateFrenchTitle(string $emailContent): ?string
+    {
+        return $this->generateTitlePayload($emailContent, $this->extractFallbackTitleFromContent($emailContent, 'FR'), 'FR')['optimized'];
+    }
+
+    public function generateFrenchTitlePayload(string $emailContent, string $originalTitle): array
+    {
+        return $this->generateTitlePayload($emailContent, $originalTitle, 'FR');
+    }
+
+    /**
+     * Generate English title
+     */
+    public function generateEnglishTitle(string $emailContent): ?string
+    {
+        return $this->generateTitlePayload($emailContent, $this->extractFallbackTitleFromContent($emailContent, 'EN'), 'EN')['optimized'];
+    }
+
+    public function generateEnglishTitlePayload(string $emailContent, string $originalTitle): array
+    {
+        return $this->generateTitlePayload($emailContent, $originalTitle, 'EN');
+    }
+
+    /**
+     * Generate French content
+     */
+    public function generateFrenchContent(string $emailContent, string $titleFr, ?string $originalTitleFr = null): ?string
+    {
+        $prompt = $this->buildContentPrompt($emailContent, $titleFr, $originalTitleFr, 'FR');
+        $displayTitle = $this->resolveContentH2Title($titleFr, $originalTitleFr);
+        return $this->sanitizeHtmlArticle($this->callOpenAI($prompt, 1400), $emailContent, $displayTitle, 'FR');
+    }
+
+    /**
+     * Generate English content
+     */
+    public function generateEnglishContent(string $emailContent, string $titleEn, ?string $originalTitleEn = null): ?string
+    {
+        $prompt = $this->buildContentPrompt($emailContent, $titleEn, $originalTitleEn, 'EN');
+        $displayTitle = $this->resolveContentH2Title($titleEn, $originalTitleEn);
+        return $this->sanitizeHtmlArticle($this->callOpenAI($prompt, 1400), $emailContent, $displayTitle, 'EN');
+    }
+
+    /**
+     * Generate French meta description
+     */
+    public function generateFrenchMetaDescription(string $contentFr): ?string
+    {
+        $prompt = $this->buildMetaDescriptionPrompt($contentFr, 'FR');
+        return $this->sanitizeMetaDescription($this->callOpenAI($prompt, 120), $contentFr, 'FR');
+    }
+
+    /**
+     * Generate English meta description
+     */
+    public function generateEnglishMetaDescription(string $contentEn): ?string
+    {
+        $prompt = $this->buildMetaDescriptionPrompt($contentEn, 'EN');
+        return $this->sanitizeMetaDescription($this->callOpenAI($prompt, 120), $contentEn, 'EN');
+    }
+
+    /**
+     * Generate French focus keyphrase
+     */
+    public function generateFrenchKeyphrase(string $contentFr): ?string
+    {
+        $prompt = $this->buildKeyphrasePrompt($contentFr, 'FR');
+        return $this->sanitizeKeyphrase($this->callOpenAI($prompt, 40), $contentFr, 'FR');
+    }
+
+    /**
+     * Generate English focus keyphrase
+     */
+    public function generateEnglishKeyphrase(string $contentEn): ?string
+    {
+        $prompt = $this->buildKeyphrasePrompt($contentEn, 'EN');
+        return $this->sanitizeKeyphrase($this->callOpenAI($prompt, 40), $contentEn, 'EN');
+    }
+
+    /**
+     * Classify news into categories
+     */
+    public function classifyCategories(string $newsContent, array $categories, string $lang = 'FR'): ?string
+    {
+        if (empty($categories)) {
+            return '';
+        }
+
+        $categoriesList = implode("\n", array_map(function ($cat) {
+            return "- ID: {$cat['wp_id']}, Name: {$cat['categ_name']}";
+        }, $categories));
+
+        $prompt = "ROLE :
+Tu es un classificateur editorial specialise en aeronautique et transport aerien.
+
+CONTENU DE LA NEWS:
+$newsContent
+
+LISTE DES CATEGORIES:
+$categoriesList
+
+--------------------------------------------------
+
+DETECTION PRIORITAIRE - HEADER AEROMORNING :
+Cherche dans le contenu une ligne qui mentionne la categorie de l'article (qui sera après la categorie News)
+ou toute variation (Defence, Spatial, MRO, etc.).
+Si tu en trouves une, extrais la categorie secondaire (le mot apres le slash : Industry, Industrie, Defence, MRO, Spatial, etc.)
+et cherche-la dans la LISTE DES CATEGORIES. Si elle y est, ajoute son wp_id en second (apres News).
+
+REGLE FIXE :
+La categorie \"News\" est TOUJOURS en premiere position. Son wp_id doit etre le premier retourne.
+
+CRITERES DE SELECTION :
+Selectionne au MAXIMUM 3 categories.
+Une categorie est pertinente UNIQUEMENT si elle decrit directement le secteur ou l'activite principale de la news.
+
+FORMAT DE SORTIE :
+Retourne uniquement les wp_id separes par des virgules. Le wp_id de \"News\" en premier.
+Aucun texte supplementaire.
+
+EXEMPLE VALIDE :
+1,5";
+
+        return $this->sanitizeIdList($this->callOpenAI($prompt, 80), $categories, $newsContent, true, 'categ_name');
+    }
+
+    /**
+     * Classify news into tags
+     */
+    public function classifyTags(string $newsContent, array $tags, string $lang = 'FR'): ?string
+    {
+        if (empty($tags)) {
+            return '';
+        }
+
+        $tagsList = implode("\n", array_map(function ($tag) {
+            return "- ID: {$tag['wp_id']}, Name: {$tag['tag_name']}";
+        }, $tags));
+
+        $prompt = "ROLE :
+Tu es un classificateur editorial expert en aeronautique, aviation civile et industrie aérospatiale.
+
+CONTENU DE LA NEWS:
+$newsContent
+
+LISTE DES TAGS DISPONIBLES:
+$tagsList
+
+========================
+ETAPE 1 - DETECTION DU HEADER AEROMORNING (PRIORITE ABSOLUE)
+========================
+Cherche dans le contenu une ligne qui mentionne la catégorie de l'article
+ou toute variation (Defence, Spatial, MRO, Airline, etc.).
+
+Si tu en trouves une :
+1. Cherche dans la liste le tag dont le nom de la société ou du secteur concerné
+2. Extrais la categorie apres le slash (Industry, Industrie, Defence, MRO, etc.)
+   Cherche ce mot dans la liste des tags disponibles -> tag prioritaire 2
+3. Cherche ensuite dans le contenu l’entite aeronautique, spatiale ou défense principale (nom de societe, d’avion ou de programme)
+   Si elle est dans la liste -> tag prioritaire 3 (uniquement si la pertinence est certaine)
+4. Retourne ces 2 ou 3 tags uniquement. Limite stricte : 3 tags maximum.
+
+Si tu n’en trouves pas -> applique l’ETAPE 2.
+
+========================
+FILTRE D’EXCLUSION ABSOLU - AUCUNE EXCEPTION POSSIBLE
+========================
+REJETTE TOUJOURS, meme si le tag est dans une liste explicite du contenu :
+- Tout tag qui est une ANNEE ou contient une annee : 2023, 2024, 2025, 2026, 2027, ...
+- Tout tag qui est un MOIS : jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec
+- Tout tag de periode : Q1, Q2, Q3, Q4, H1, H2
+- Tout acronyme generique non identifie comme entite aviation connue (ex: ACH, ACI, ACS, AERO sans contexte precis)
+- Tout tag de temporalite : today, breaking, recent, update, this week
+
+========================
+REGLE ANTI-SUBSTITUTION (TRES IMPORTANT)
+========================
+Si une entite mentionnee dans le contenu (societe, compagnie aerienne, programme)
+n’existe PAS dans la liste des tags disponibles, NE LA REMPLACE PAS par une entite similaire.
+Exemple : si le contenu parle de \"Loong Air\" et que ce tag n’existe pas dans la liste,
+ne pas prendre \"SkyWest Airlines\" ou toute autre compagnie a la place.
+Prefere simplement ne pas ajouter ce tag.
+
+========================
+ETAPE 2 - ANALYSE NORMALE (si pas de header AeroMorning detecte)
+========================
+1. Identifie l’entite aeronautique principale (societe, avion, compagnie, programme) mentionnee dans le contenu
+   Verifie qu’elle existe EXACTEMENT dans la liste des tags -> priorite 1
+2. Identifie une seconde entite pertinente si elle existe exactement dans la liste -> priorite 2
+3. N’ajoute un 3eme tag que si sa pertinence est CERTAINE et l’entite existe dans la liste
+Limite stricte : 3 tags maximum. Moins de tags vaut mieux que des tags faux.
+
+========================
+LIMITE ABSOLUE
+========================
+- Maximum 3 tags au total
+- Si moins de 3 tags sont certains, retourne-en moins
+- Ne jamais substituer une entite absente de la liste par une entite similaire
+- Ne jamais inclure de dates ou annees
+
+========================
+FORMAT DE SORTIE
+========================
+- Retourne UNIQUEMENT les wp_id separes par des virgules
+- Aucun texte, aucun espace
+- Si aucun tag pertinent -> retourne vide
+
+EXEMPLE VALIDE :
+1,3,7";
+
+        return $this->sanitizeIdList(
+            $this->callOpenAI($prompt, 80),
+            $tags,
+            $newsContent,
+            false,
+            'tag_name'
+        );
+    }
+
+    public function isAviationRelevant(string $content): bool
+    {
+        $plainContent = $this->sanitizePlainText($content);
+        if ($plainContent === '') {
+            return false;
+        }
+
+        $excerpt = mb_substr($plainContent, 0, 4000);
+
+        $prompt = "You are filtering incoming emails for an aviation and aerospace news publication workflow.\n"
+            . "Answer YES if the email contains any real news, article, press release, announcement, nomination, robotics or editorial content related to ANY of the following topics:\n"
+            . "aviation, aerospace, airline, airport, aircraft, flight operations, air transport, cargo, freight, defense (military aviation, naval aviation, defense industry), drone / UAV, eVTOL / urban air mobility, satellite, space, rocket, orbital, helicopter, engine, MRO, certification (EASA, FAA, TCCA, ANAC), safety, regulation, environment / sustainability / emissions / SAF, innovation, technology, digitalization, artificial intelligence in aviation, cybersecurity in aviation, industry news, nominations / appointments / leadership changes in aviation companies, aviation jobs / employment, aviation competitions / awards, industry events / airshows.\n"
+            . "Answer NO only if the email is clearly spam, a transactional notification (Airtable, Jira, Slack, billing, SaaS tool alerts), a personal/private exchange with no news content, a purely administrative or legal notice, or marketing completely unrelated to aviation or aerospace.\n"
+            . "When in doubt, answer YES.\n"
+            . "Return only one word: YES or NO.\n\n"
+            . $excerpt;
+
+        $response = mb_strtoupper(trim((string) $this->callOpenAI($prompt, 64)));
+        if ($response === 'YES') {
+            return true;
+        }
+
+        if ($response === 'NO') {
+            return false;
+        }
+
+        return $this->matchesAviationHeuristic($plainContent);
+    }
+
+    public function extractNewsSections(string $content): array
+    {
+        //$structuredContent = $this->prepareStructuredPromptHtml($content);
+        $structuredContent = $content;
+        $structuredPlain = $this->prepareStructuredPromptText($content);
+
+        if ($structuredContent === '') {
+            return ['FR' => '', 'EN' => ''];
+        }
+
+        /*$prompt = "You are extracting aviation news sections from a forwarded email.\n"
+            . "Return a strict JSON object with exactly two keys: FR and EN.\n"
+            . "Each value must contain ONLY the relevant article section in that language, as HTML.\n"
+            . "If a language is absent, return an empty string for that key.\n"
+            . "Ignore forwarded-email boilerplate, webmail headers/footers, signatures, confidentiality notices, menus, related articles, top/bottom of form markers, comment blocks, duplicated translated headers, and About / À propos corporate boilerplate blocks.\n"
+            . "IMPORTANT HTML RULES:\n"
+            . "- The input is the raw HTML email body (lightly cleaned only to remove unsafe blocks).\n"
+            . "- You MUST keep real HTML tags like <p>, <br>, <strong>, <em>, <ul>, <ol>, <li>, <a>, <h2>, <h3>, <blockquote>, <div>, <span> when they appear in the relevant section.\n"
+            . "- Do NOT return escaped tags like &lt;p&gt;. Return real HTML.\n"
+            . "- Do NOT add <html>, <head>, <body>, <style>, <script>, tables, or office markup.\n"
+            . "- Do NOT translate. Do NOT summarize.\n"
+            . "Return JSON only (double quotes, properly escaped).\n\n"
+            . mb_substr($structuredContent, 0, 12000);*/
+        $prompt = "";
+
+        $response = trim((string) $this->callOpenAI($prompt, 900));
+        $decoded = json_decode($response, true);
+
+        if (!is_array($decoded) && preg_match('/\{.*\}/s', $response, $matches) === 1) {
+            $decoded = json_decode($matches[0], true);
+        }
+
+        if (!is_array($decoded)) {
+            return $this->splitSectionsHeuristically($structuredPlain !== '' ? $structuredPlain : strip_tags($structuredContent));
+        }
+
+        $sections = [
+            'FR' => $this->sanitizeExtractedSection((string) ($decoded['FR'] ?? '')),
+            'EN' => $this->sanitizeExtractedSection((string) ($decoded['EN'] ?? '')),
+        ];
+
+        if (($sections['FR'] === '') && ($sections['EN'] === '')) {
+            return $this->splitSectionsHeuristically($structuredPlain !== '' ? $structuredPlain : strip_tags($structuredContent));
+        }
+        
+            // If the email clearly contains explicit bilingual markers (Version UK / Version F/FR),
+            // prefer a deterministic split to avoid any title/image/header noise.
+            if ($this->looksLikeVersionBilingualEmail($structuredPlain !== '' ? $structuredPlain : strip_tags($structuredContent))) {
+                $sections = $this->splitSectionsHeuristically($structuredPlain !== '' ? $structuredPlain : strip_tags($structuredContent));
+                if (trim($sections['FR']) !== '' || trim($sections['EN']) !== '') {
+                    return $sections;
+                }
+            }
+
+        return $sections;
+    }
+
+    private function prepareStructuredPromptHtml(string $content): string
+    {
+        $html = trim((string) $content);
+        if ($html === '') {
+            return '';
+        }
+
+        $html = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // Remove unsafe/noisy blocks.
+        $html = preg_replace('/<style\b[^>]*>.*?<\/style>/is', ' ', $html) ?? $html;
+        $html = preg_replace('/<script\b[^>]*>.*?<\/script>/is', ' ', $html) ?? $html;
+        $html = preg_replace('/<head\b[^>]*>.*?<\/head>/is', ' ', $html) ?? $html;
+        $html = preg_replace('/<!--.*?-->/s', ' ', $html) ?? $html;
+        $html = preg_replace('/<(meta|link|xml|o:p)\b[^>]*>.*?<\/\1>/is', ' ', $html) ?? $html;
+        $html = preg_replace('/<(meta|link)\b[^>]*\/?>(\s*)/is', ' ', $html) ?? $html;
+
+        // Remove inline images from the content fed to section extraction.
+        $html = preg_replace('/<img\b[^>]*>/i', ' ', $html) ?? $html;
+
+        // Cleanup whitespace.
+        $html = preg_replace('/[ \t]+/', ' ', $html) ?? $html;
+        $html = preg_replace('/\s*\n\s*/', "\n", $html) ?? $html;
+        $html = preg_replace('/\n{3,}/', "\n\n", $html) ?? $html;
+
+        return trim($html);
+    }
+
+    public function extractOriginalArticleTitle(string $sectionContent, string $lang, string $subject = ''): string
+    {
+        $plainSection = $this->prepareStructuredPromptText($sectionContent);
+        if ($plainSection === '') {
+            return $this->normalizeTitleCandidate($subject);
+        }
+
+        $language = $lang === 'FR' ? 'FRENCH' : 'ENGLISH';
+        $prompt = "You are identifying the original article headline from an aviation news section.\n"
+            . "Language: {$language}.\n"
+            . "Return the original article title exactly as supported by the first meaningful lines of the section.\n"
+            . "Usually it is the first full headline sentence.\n"
+            . "Reject labels such as Version UK, Version FR, News, Industry, Bottom of Form, Top of Form, Related Articles, About, Source.\n"
+            . "Return only the title, no quotes, no prefix, no explanation.\n\n"
+            . mb_substr($plainSection, 0, 4000);
+
+        $candidate = $this->normalizeTitleCandidate((string) $this->callOpenAI($prompt, 80));
+
+        if ($candidate !== '' && !$this->isForbiddenTitleCandidate($candidate) && $this->isTitleRelatedToContent($candidate, $plainSection)) {
+            if ($this->isDescriptiveTitle($candidate)) {
+                return $candidate;
+            }
+        }
+
+        $derivedTitle = $this->buildTitleFromLeadingLines($plainSection);
+        if ($derivedTitle !== '' && !$this->isForbiddenTitleCandidate($derivedTitle)) {
+            return $derivedTitle;
+        }
+
+        return $this->extractFallbackTitleFromContent($plainSection, $lang);
+    }
+
+    public function chooseRelevantImageUrl(string $content, array $imageCandidates): ?string
+    {
+        $imageCandidates = array_values(array_unique(array_filter(array_map('trim', $imageCandidates), static fn ($url) => $url !== '')));
+        if (empty($imageCandidates)) {
+            return null;
+        }
+
+        if (count($imageCandidates) === 1) {
+            return $imageCandidates[0];
+        }
+
+        $candidateList = implode("\n", array_map(static fn (string $url, int $index) => ($index + 1) . '. ' . $url, $imageCandidates, array_keys($imageCandidates)));
+        $prompt = "You are selecting the featured image for an aviation news article extracted from a forwarded email.\n"
+            . "Choose the single image URL that is most likely the main article image.\n"
+            . "Reject logos, banners, sponsor images, signatures, social icons, webmail assets, headers, footers, and decorative graphics.\n"
+            . "Never choose the AMWS email signature banner (blue 'Endless possibilities', 'Constellation', or anything linked to 'amws.space').\n"
+            . "Return only one exact URL from the candidate list below. If none is suitable, return NONE.\n\n"
+            . "ARTICLE EXCERPT:\n" . mb_substr($this->prepareStructuredPromptText($content), 0, 2500) . "\n\n"
+            . "IMAGE CANDIDATES:\n{$candidateList}";
+
+        $response = trim((string) $this->callOpenAI($prompt, 40));
+        if ($response === '' || mb_strtoupper($response) === 'NONE') {
+            return null;
+        }
+
+        foreach ($imageCandidates as $url) {
+            if (trim($response) === $url) {
+                return $url;
+            }
+        }
+
+        return null;
+    }
+
+    private function buildTitlePrompt(string $content, string $originalTitle, string $lang): string
+    {
+        $language = $lang === 'FR' ? 'FRENCH' : 'ENGLISH';
+
+        $cleanOriginalTitle = $this->sanitizePlainText($originalTitle);
+
+        return "You are an aviation editor.\n"
+            . "Write ONE compelling SEO news title in {$language} from the article text below.\n"
+            . "ORIGINAL SOURCE TITLE: {$cleanOriginalTitle}\n"
+            . "Rules:\n"
+            . "- Use only the {$language} article section.\n"
+            . "- Ignore email chrome, confidentiality notices, styles, signatures, reply chains and bilingual sections in the other language.\n"
+            . "- Ignore transfer/page boilerplate such as Top of Form, Bottom of Form, Related Articles, Leave a comment, Topics, Flash News.\n"
+            . "- The title must be clear, specific, attractive and newsworthy.\n"
+            . "- Strict maximum: 62 characters (including spaces).\n"
+            . "- The title must be a short descriptive phrase, not a single entity or keyword.\n"
+            . "- Minimum target: 4 words when possible. Never return only 1 or 2 words.\n"
+            . "- The title must be directly supported by the first meaningful lines of the article content.\n"
+            . "- IMPORTANT: You are NOT allowed to truncate, crop, clip, or cut the title.\n"
+            . "- If the original source title is already clear and 62 characters or fewer, keep its meaning and wording as close as possible.\n"
+            . "- If the original source title exceeds 62 characters, you MUST fully REWRITE it into a shorter SEO headline.\n"
+            . "- The rewrite must preserve the exact news meaning and the main aviation entities.\n"
+            . "- Prefer reformulation, compression, and stronger wording instead of shortening.\n"
+            . "- Never output incomplete phrases or cut sentences under any circumstances.\n"
+            . "- Never end with conjunctions (and, or), prepositions (to, for, of, in), or unfinished ideas.\n"
+            . "- The output must always be a complete grammatical sentence fragment suitable as a headline.\n"
+            . "- Do not use ellipsis (...) or any form of shortening marker.\n"
+            . "- No HTML. No quotes. No prefix like RE/FW/TR.\n"
+            . "- Return only the final title.\n\n"
+            . $content;
+    }
+
+    private function buildContentPrompt(string $content, string $title, ?string $originalTitle, string $lang): string
+    {
+        $language = $lang === 'FR' ? 'FRENCH' : 'ENGLISH';
+        $originalTitle = $this->sanitizePlainText($originalTitle ?? $title);
+        $optimizedTitle = $this->sanitizePlainText($title);
+        $h2Title = $this->resolveContentH2Title($optimizedTitle, $originalTitle);
+
+        return "You are an aviation news extractor.\n"
+            . "Extract ONLY the main {$language} news article from the text below.\n"
+            . "Rules:\n"
+            . "- Keep only the {$language} version.\n"
+            . "- Exclude confidentiality notices, style blocks, signatures, contacts, reply chains, headers, footers and unrelated boilerplate.\n"
+            . "- Exclude About / À propos sections and company boilerplate unless it is essential to understand the news.\n"
+            . "- Return clean semantic HTML only (REAL TAGS, not escaped).\n"
+            . "- The input may contain <div>/<span> and inline styles; convert formatting into semantic tags (<p>, <br>, <strong>, <em>, lists).\n"
+            . "- Preserve emphasis (bold/italic) and line breaks from the source when relevant.\n"
+            . "- Preserve and rebuild the editorial structure with meaningful headings and lists.\n"
+            . "- Convert bullet points into proper <ul><li>...</li></ul>.\n"
+            . "- Convert numbered lists into proper <ol><li>...</li></ol>.\n"
+            . "- Use <h2> for main sections and <h3> for subsections when the source structure justifies it.\n"
+            . "- Use <p>, <ul>, <ol>, <li>, <a>, <strong>, <em>, <blockquote>, <h2>, <h3> only when relevant.\n"
+            . "- Do not include CSS, <style>, <script>, <head>, <body>, <html>, tables, or office markup.\n"
+            . "- Keep factual content only.\n"
+            . "- Never return plain text: always wrap paragraphs in <p> and use <br> for line breaks when needed.\n"
+            . "- Return HTML only.\n\n"
+
+            . "TITLE HANDLING RULE (VERY IMPORTANT):\n"
+            . "- OPTIMIZED SEO TITLE: {$optimizedTitle}\n"
+            . "- ORIGINAL SOURCE TITLE: {$originalTitle}\n"
+            . "- REQUIRED H2 TITLE: {$h2Title}\n"
+            . "- You MUST render exactly <h2>{$h2Title}</h2> at the start.\n"
+            . "- Never alter, shorten, paraphrase, or replace the H2 title.\n"
+            . "- The content must always start immediately after the <h2> title with no extra text.\n\n"
+
+            . "CONTENT STRUCTURE RULE:\n"
+            . "- After the <h2> title, immediately output the article content.\n"
+            . "- Do not insert any commentary or extra text between title and content.\n\n"
+
+            . $content;
+    }
+
+    private function buildMetaDescriptionPrompt(string $content, string $lang): string
+    {
+        $language = $lang === 'FR' ? 'FRENCH' : 'ENGLISH';
+
+        return "Write one plain-text SEO meta description in {$language}.\n"
+            . "Rules:\n"
+            . "- Strictly between 107 and 142 characters, spaces included.\n"
+            . "- Plain text only, no HTML, no CSS, no quotes.\n"
+            . "- Mention the core aviation topic and one key fact.\n"
+            . "- Make it attractive for SEO / SEA / GEO and natural for readers.\n"
+            . "- Reformulate if needed to stay inside the character range.\n"
+            . "- Return only the meta description.\n\n"
+            . strip_tags($content);
+    }
+
+    private function buildKeyphrasePrompt(string $content, string $lang): string
+    {
+        $language = $lang === 'FR' ? 'FRENCH' : 'ENGLISH';
+
+        return "Write one SEO focus keyphrase in {$language}.\n"
+            . "Rules:\n"
+            . "- 2 to 5 words.\n"
+            . "- Must identify the central aviation subject.\n"
+            . "- Prefer company, aircraft, airport, program or route names when present.\n"
+            . "- No comma anywhere.\n"
+            . "- No sentence, no punctuation at the end, no HTML.\n"
+            . "- Reformulate if needed to remove separators and keep the phrase SEO-friendly.\n"
+            . "- Return only the keyphrase.\n\n"
+            . strip_tags($content);
+    }
+
+    private function sanitizeTitle(?string $title, string $originalTitle, string $fallbackContent, string $lang): ?string
+    {
+        $fallbackTitle = $this->extractFallbackTitleFromContent($fallbackContent, $lang);
+        $normalizedOriginalTitle = $this->normalizeTitleCandidate($originalTitle);
+        $candidate = $this->normalizeTitleCandidate($title ?? '');
+
+        if ($normalizedOriginalTitle !== '' && mb_strlen($normalizedOriginalTitle) <= 62 && $this->isValidOptimizedTitle($normalizedOriginalTitle) && $this->isTitleRelatedToContent($normalizedOriginalTitle, $fallbackContent)) {
+            return $normalizedOriginalTitle;
+        }
+
+        if ($candidate !== '' && $this->isValidOptimizedTitle($candidate) && $this->isTitleRelatedToContent($candidate, $fallbackContent)) {
+            return $candidate;
+        }
+
+        $rewriteSource = $candidate !== '' ? $candidate : ($normalizedOriginalTitle !== '' ? $normalizedOriginalTitle : $fallbackTitle);
+        $rewritten = $this->rewriteTitleToFit($rewriteSource, $fallbackContent, $lang);
+        if ($rewritten !== '') {
+            return $rewritten;
+        }
+
+        return $this->buildTitleFallbackWithoutTruncation($normalizedOriginalTitle !== '' ? $normalizedOriginalTitle : $fallbackTitle, $lang);
+    }
+
+    private function sanitizeHtmlArticle(?string $html, string $fallbackContent, string $title, string $lang): ?string
+    {
+        $candidate = trim((string) $html);
+
+        if ($candidate !== '' && strpos($candidate, '<') !== false) {
+            // Minimal safety cleanup only (avoid destructive tag stripping which breaks email HTML).
+            $candidate = html_entity_decode($candidate, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $candidate = preg_replace('/<script\b[^>]*>.*?<\/script>/is', ' ', $candidate) ?? $candidate;
+            $candidate = preg_replace('/<style\b[^>]*>.*?<\/style>/is', ' ', $candidate) ?? $candidate;
+            $candidate = preg_replace('/<(html|head|body|table|tbody|thead|tfoot|tr|td|th)[^>]*>/i', '', $candidate) ?? $candidate;
+            $candidate = preg_replace('/<\/(html|head|body|table|tbody|thead|tfoot|tr|td|th)>/i', '', $candidate) ?? $candidate;
+        }
+
+        $text = trim(strip_tags($candidate));
+        if ($text === '' || mb_strlen($text) < 120) {
+            $repaired = $this->repairHtmlArticleViaOpenAI($fallbackContent, $title, $lang);
+            if ($repaired !== '' && strpos($repaired, '<') !== false && mb_strlen(trim(strip_tags($repaired))) >= 120) {
+                $candidate = $repaired;
+            } else {
+                $candidate = '<h2>' . e($title) . '</h2><p>' . nl2br(e(trim(strip_tags($fallbackContent)))) . '</p>';
+            }
+        }
+
+        return trim($candidate);
+    }
+
+    private function repairHtmlArticleViaOpenAI(string $fallbackContent, string $title, string $lang): string
+    {
+        $language = $lang === 'FR' ? 'FRENCH' : 'ENGLISH';
+
+        $prompt = "You are fixing an HTML extraction for an aviation news workflow.\n"
+            . "Language: {$language}.\n"
+            . "Goal: return clean semantic HTML for publication while preserving the original formatting meaning (bold/italic/line breaks/lists).\n"
+            . "Rules:\n"
+            . "- Output MUST be valid HTML with real tags, not escaped.\n"
+            . "- Start exactly with <h2>{$title}</h2> and never change that H2 text.\n"
+            . "- After the H2, use <p>, <br>, <strong>, <em>, <ul>, <ol>, <li>, <a>, <blockquote>, <h3> only as needed.\n"
+            . "- Do not include <html>, <head>, <body>, <style>, <script>, tables, or office markup.\n"
+            . "- Do not translate, do not summarize, do not invent facts.\n"
+            . "- Remove signatures, confidentiality notices, menus, and unrelated boilerplate.\n"
+            . "Return HTML only.\n\n"
+            . $fallbackContent;
+
+        return trim((string) $this->callOpenAI($prompt, 1400));
+    }
+
+    private function sanitizeMetaDescription(?string $value, string $content, string $lang): ?string
+    {
+        $candidate = $this->sanitizePlainText($value ?? '');
+        if ($candidate !== '') {
+            $candidate = $this->fitMetaDescriptionLength($candidate, $lang);
+            if ($this->isMetaDescriptionLengthValid($candidate)) {
+                return $candidate;
+            }
+        }
+
+        $text = $this->extractMetaSourceText($content);
+        if ($text === '') {
+            $text = $this->sanitizePlainText(strip_tags($content));
+        }
+
+        return $this->fitMetaDescriptionLength($text, $lang);
+    }
+
+    private function sanitizeKeyphrase(?string $value, string $content, string $lang): ?string
+    {
+        $text = $this->sanitizePlainText($value ?? '');
+        if ($text === '') {
+            $title = $this->extractFallbackTitleFromContent($content, $lang);
+            $text = $this->extractKeyphraseFromContent($title !== '' ? $title : $content, $lang);
+        }
+
+        return $this->fitKeyphrase($text, $content, $lang);
+    }
+
+    private function isMetaDescriptionLengthValid(string $text): bool
+    {
+        $length = mb_strlen(trim($text));
+        return $length >= 107 && $length <= 142;
+    }
+
+    private function fitMetaDescriptionLength(string $text, string $lang): string
+    {
+        $text = $this->sanitizePlainText($text);
+        $text = preg_replace('/\bsource\s*:\s*.+$/i', '', $text) ?? $text;
+        $text = trim($text, " ,;:-");
+
+        if (mb_strlen($text) > 142) {
+            $text = $this->smartLimit($text, 142);
+        }
+
+        if (mb_strlen($text) < 107) {
+            $suffix = $lang === 'FR'
+                ? ' Les enjeux du secteur sont a suivre.'
+                : ' The broader aviation impact is worth watching.';
+
+            if (!str_ends_with($text, '.')) {
+                $text .= '.';
+            }
+
+            if (mb_strlen($text . $suffix) <= 142) {
+                $text .= $suffix;
+            }
+        }
+
+        if (mb_strlen($text) < 107) {
+            $baseWords = preg_split('/\s+/', $this->sanitizePlainText($text)) ?: [];
+            while (mb_strlen($text) < 107 && !empty($baseWords)) {
+                $text .= ' ' . end($baseWords);
+            }
+        }
+
+        if (mb_strlen($text) > 142) {
+            $text = $this->smartLimit($text, 142);
+        }
+
+        return trim($text, " ,;:-");
+    }
+
+    private function fitKeyphrase(string $text, string $content, string $lang): string
+    {
+        $text = str_replace(',', ' ', $text);
+        $text = preg_replace('/[;:.!?\/\\|]+/', ' ', $text) ?? $text;
+        $text = preg_replace('/\s+/', ' ', trim($text)) ?? trim($text);
+
+        $words = array_values(array_filter(
+            preg_split('/\s+/', $text) ?: [],
+            static fn ($word) => $word !== ''
+        ));
+
+        if (count($words) < 2) {
+            $fallback = preg_split('/\s+/', $this->extractKeyphraseFromContent($content, $lang)) ?: [];
+            $words = array_values(array_filter(array_merge($words, $fallback), static fn ($word) => $word !== ''));
+        }
+
+        $words = array_slice($words, 0, 5);
+
+        if (count($words) < 2) {
+            $words = $lang === 'FR' ? ['actualite', 'aviation'] : ['aviation', 'news'];
+        }
+
+        return implode(' ', $words);
+    }
+
+    private function sanitizeIdList(?string $value, array $items, string $content, bool $includeNewsDefault, string $nameField): string
+    {
+        // Tags/categories that are dates or years must NEVER be selected.
+        $isDateItem = static function (string $name): bool {
+            return (bool) preg_match(
+                '/^\s*(20\d{2}|19\d{2}|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|q[1-4]|h[12])\s*$/i',
+                $name
+            );
+        };
+
+        $allowedIds = array_map(static fn ($item) => (string) $item['wp_id'], $items);
+
+        // Build wp_id -> name lookup for date filtering.
+        $idToName = [];
+        foreach ($items as $item) {
+            $idToName[(string) $item['wp_id']] = mb_strtolower((string) $item[$nameField]);
+        }
+
+        // Parse AI-returned IDs, applying date exclusion even on AI-selected items.
+        $parts = preg_split('/[^0-9]+/', (string) $value) ?: [];
+        $ids = [];
+        foreach ($parts as $part) {
+            if ($part === '' || !in_array($part, $allowedIds, true) || in_array($part, $ids, true)) {
+                continue;
+            }
+            if ($isDateItem($idToName[$part] ?? '')) {
+                continue;
+            }
+            $ids[] = $part;
+        }
+
+        // "News" category is mandatory when classifying categories — always first.
+        if ($includeNewsDefault) {
+            foreach ($items as $item) {
+                if (mb_strtolower((string) $item[$nameField]) === 'news') {
+                    $newsId = (string) $item['wp_id'];
+                    // Remove from wherever it might be and push to front.
+                    $ids = array_values(array_filter($ids, static fn ($id) => $id !== $newsId));
+                    array_unshift($ids, $newsId);
+                    break;
+                }
+            }
+        }
+
+        // Content-based fallback: only for categories, and only to fill remaining slots.
+        // For tags we trust the AI; the content scan adds noise (short acronyms, years, etc.).
+        $limit = $includeNewsDefault ? 3 : 3;
+        if ($includeNewsDefault && count($ids) < $limit) {
+            $contentText = mb_strtolower($this->sanitizePlainText(strip_tags($content)));
+            foreach ($items as $item) {
+                if (count($ids) >= $limit) {
+                    break;
+                }
+                $name = mb_strtolower((string) $item[$nameField]);
+                if ($name === '' || in_array((string) $item['wp_id'], $ids, true) || $isDateItem($name)) {
+                    continue;
+                }
+                if (str_contains($contentText, $name)) {
+                    $ids[] = (string) $item['wp_id'];
+                }
+            }
+        }
+
+        return implode(',', array_slice($ids, 0, $limit));
+    }
+
+    private function sanitizePlainText(string $text): string
+    {
+        $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = preg_replace('/\s+/', ' ', $text) ?? $text;
+        $text = trim($text, " \t\n\r\0\x0B\"'");
+        return trim($text);
+    }
+
+    private function sanitizeExtractedSection(string $text): string
+    {
+        $text = str_replace(["\r\n", "\r"], "\n", trim($text));
+
+        // If the model already returned HTML, avoid line-based filtering that can break tags.
+        if ($text !== '' && strpos($text, '<') !== false) {
+            return $text;
+        }
+
+        $lines = preg_split('/\n+/', $text) ?: [];
+        $filtered = [];
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '' || $this->isForbiddenTitleCandidate($line)) {
+                continue;
+            } 
+
+            if (preg_match('/^(top|bottom) of form|related articles|leave a comment|additional links|flash news|posted by\s*:|topics\s*:|about\s*:|(?:\d+\s*[–-]\s*)?version\s*(uk|en|english|fr|f|fran[cç]aise?)$/iu', $line) === 1) {
+                continue;
+            }
+
+            $filtered[] = $line;
+        }
+
+        return trim(implode("\n", $filtered));
+    }
+
+    private function buildTitleFromLeadingLines(string $content): string
+    {
+        $lines = preg_split('/\n+/', trim($content)) ?: [];
+        $titleParts = [];
+
+        foreach ($lines as $line) {
+            $line = $this->normalizeTitleCandidate($line);
+            if ($line === '' || $this->isForbiddenTitleCandidate($line)) {
+                continue;
+            }
+
+            if (preg_match('/^[A-Z][a-z]+\s+[–-]\s+[A-Z][a-z]+\s+\d{1,2},\s+\d{4}/u', $line) === 1) {
+                break;
+            }
+
+            if (preg_match('/^[A-Z][A-Za-z\s.-]+\s+[–-]\s+[A-Z][a-z]+\s+\d{1,2},\s+\d{4}/u', $line) === 1) {
+                break;
+            }
+
+            $titleParts[] = $line;
+
+            if (count($titleParts) >= 3) {
+                break;
+            }
+
+            if (mb_strlen(implode(' ', $titleParts)) >= 90) {
+                break;
+            }
+        }
+
+        $title = trim(implode(' ', $titleParts));
+        $title = preg_replace('/\s+/', ' ', $title) ?? $title;
+
+        return trim((string) $title, " ,;:-");
+    }
+
+    private function prepareStructuredPromptText(string $content): string
+    {
+        $text = html_entity_decode($content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = preg_replace('/<\s*br\s*\/?>/i', "\n", $text) ?? $text;
+        $text = preg_replace('/<\/(p|div|h1|h2|h3|h4|li|ul|ol|blockquote)>/i', "\n", $text) ?? $text;
+        $text = preg_replace('/<(li)[^>]*>/i', '- ', $text) ?? $text;
+        $text = strip_tags($text);
+        $text = str_replace(["\r\n", "\r"], "\n", $text);
+        $text = preg_replace('/[ \t]+/', ' ', $text) ?? $text;
+        $text = preg_replace('/\n{3,}/', "\n\n", $text) ?? $text;
+
+        $lines = preg_split('/\n/', $text) ?: [];
+        $filtered = [];
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                if (!empty($filtered) && end($filtered) !== '') {
+                    $filtered[] = '';
+                }
+                continue;
+            }
+
+            if ($this->isForbiddenTitleCandidate($line)) {
+                continue;
+            }
+
+            $filtered[] = $line;
+        }
+
+        return trim(implode("\n", $filtered));
+    }
+
+    private function splitSectionsHeuristically(string $content): array
+    {
+        $normalized = str_replace(["\r\n", "\r"], "\n", $content);
+
+        $enPatterns = [
+            '/(^|\n)\s*(?:1\s*[–-]\s*)?version\s*(uk|en|english)\b/iu',
+            '/(^|\n)\s*1\s*[–-]\s*version\s*(uk|en|english)\b/iu',
+        ];
+        $frPatterns = [
+            '/(^|\n)\s*(?:2\s*[–-]\s*)?version\s*(fr|f|fran[cç]aise?)\b/iu',
+            '/(^|\n)\s*2\s*[–-]\s*version\s*(fr|f|fran[cç]aise?)\b/iu',
+        ];
+
+        $enStart = $this->findFirstPatternOffset($normalized, $enPatterns);
+        $frStart = $this->findFirstPatternOffset($normalized, $frPatterns);
+
+        $sections = ['FR' => '', 'EN' => ''];
+
+        if ($enStart !== null) {
+            $enContent = substr($normalized, (int) $enStart);
+            if ($frStart !== null && $frStart > $enStart) {
+                $enContent = substr($normalized, (int) $enStart, (int) ($frStart - $enStart));
+            }
+            $sections['EN'] = $this->sanitizeExtractedSection($enContent);
+        }
+
+        if ($frStart !== null) {
+            $frContent = substr($normalized, (int) $frStart);
+            if ($enStart !== null && $enStart > $frStart) {
+                $frContent = substr($normalized, (int) $frStart, (int) ($enStart - $frStart));
+            }
+            $sections['FR'] = $this->sanitizeExtractedSection($frContent);
+        }
+
+        return $sections;
+    }
+
+    private function findFirstPatternOffset(string $content, array $patterns): ?int
+    {
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $content, $matches, PREG_OFFSET_CAPTURE)) {
+                return $matches[0][1] + strlen($matches[0][0] ?? '');
+            }
+        }
+
+        return null;
+    }
+
+    private function generateTitlePayload(string $emailContent, string $originalTitle, string $lang): array
+    {
+        $cleanOriginalTitle = $this->normalizeTitleCandidate($originalTitle);
+        if ($cleanOriginalTitle === '') {
+            $cleanOriginalTitle = $this->extractFallbackTitleFromContent($emailContent, $lang);
+        }
+
+        $prompt = $this->buildTitlePrompt($emailContent, $cleanOriginalTitle, $lang);
+        $optimizedTitle = $this->sanitizeTitle($this->callOpenAI($prompt, 80), $cleanOriginalTitle, $emailContent, $lang);
+
+        if (!$optimizedTitle) {
+            $optimizedTitle = $this->buildTitleFallbackWithoutTruncation($cleanOriginalTitle, $lang);
+        }
+
+        return [
+            'original' => $cleanOriginalTitle,
+            'optimized' => $optimizedTitle,
+            'use_original_in_h2' => mb_strlen($cleanOriginalTitle) > 62,
+        ];
+    }
+
+    private function resolveContentH2Title(string $optimizedTitle, ?string $originalTitle): string
+    {
+        $cleanOriginalTitle = $this->normalizeTitleCandidate($originalTitle ?? '');
+        if ($cleanOriginalTitle !== '' && mb_strlen($cleanOriginalTitle) > 62) {
+            return $cleanOriginalTitle;
+        }
+
+        return $this->normalizeTitleCandidate($optimizedTitle);
+    }
+
+    public function rewriteTitleToFitPublic(string $sourceTitle, string $content, string $lang): string
+    {
+        return $this->rewriteTitleToFit($sourceTitle, $content, $lang);
+    }
+
+    private function normalizeTitleCandidate(string $title): string
+    {
+        $title = $this->sanitizePlainText($title);
+        $title = preg_replace('/^(RE|FW|FWD|TR|CP)\s*:\s*/i', '', $title) ?? $title;
+        $title = preg_replace('/\s*[-|:]\s*(version|v)\s*\d+$/i', '', $title) ?? $title;
+        return trim($title, " ,;:-");
+    }
+
+    private function isValidOptimizedTitle(string $title): bool
+    {
+        if ($title === '' || mb_strlen($title) > 62) {
+            return false;
+        }
+
+        if ($this->startsWithSuspiciousLowercaseFragment($title)) {
+            return false;
+        }
+
+        if (preg_match('/\.\.\.|…$/u', $title) === 1) {
+            return false;
+        }
+
+        if ($this->endsWithDanglingTitleWord($title)) {
+            return false;
+        }
+
+        return $this->isDescriptiveTitle($title);
+    }
+
+    private function startsWithSuspiciousLowercaseFragment(string $title): bool
+    {
+        $title = trim($title);
+        if ($title === '') {
+            return false;
+        }
+
+        $firstWord = (string) preg_replace('/\s.*$/u', '', $title);
+        if ($firstWord === '') {
+            return false;
+        }
+
+        $firstChar = mb_substr($firstWord, 0, 1);
+        // If it doesn't start with a lowercase letter, we're fine.
+        if (preg_match('/^[a-zàâçéèêëîïôûùüÿñæœ]$/u', $firstChar) !== 1) {
+            return false;
+        }
+
+        // Allow patterns like eVTOL / iPhone / xAI where uppercase appears immediately.
+        $prefix = mb_substr($firstWord, 0, 4);
+        if (preg_match('/[A-Z]/', $prefix) === 1) {
+            return false;
+        }
+
+        // Allow e-commerce like patterns.
+        if (preg_match('/^[a-z]\-/u', $firstWord) === 1) {
+            return false;
+        }
+
+        // Otherwise, likely a clipped fragment (e.g. 'ceives a ...').
+        return true;
+    }
+
+    private function isDescriptiveTitle(string $title): bool
+    {
+        $words = array_values(array_filter(
+            preg_split('/\s+/', trim($title)) ?: [],
+            static fn ($word) => $word !== ''
+        ));
+
+        if (count($words) <= 2) {
+            return false;
+        }
+
+        return mb_strlen(trim($title)) >= 16;
+    }
+
+    private function endsWithDanglingTitleWord(string $title): bool
+    {
+        $lastWord = mb_strtolower((string) preg_replace('/^.*\s/u', '', trim($title)));
+
+        $danglingWords = [
+            'and', 'or', 'to', 'for', 'of', 'in', 'on', 'with', 'without', 'from', 'by',
+            'et', 'ou', 'de', 'du', 'des', 'dans', 'sur', 'pour', 'avec', 'sans', 'chez',
+        ];
+
+        return in_array($lastWord, $danglingWords, true);
+    }
+
+    private function rewriteTitleToFit(string $sourceTitle, string $content, string $lang): string
+    {
+        $language = $lang === 'FR' ? 'FRENCH' : 'ENGLISH';
+        $prompt = "Rewrite this aviation news title in {$language}.\n"
+            . "SOURCE TITLE: " . $this->normalizeTitleCandidate($sourceTitle) . "\n"
+            . "Rules:\n"
+            . "- Maximum 62 characters including spaces.\n"
+            . "- Minimum 3 words.\n"
+            . "- Must be a descriptive phrase summarizing the article.\n"
+            . "- Never return only a city, company, country or program name.\n"
+            . "- Preserve the exact meaning and the key aviation entities.\n"
+            . "- Do not truncate, crop, or end on an incomplete word.\n"
+            . "- Do not use ellipsis.\n"
+            . "- Return only the rewritten title.\n\n"
+            . $content;
+
+        $rewritten = $this->normalizeTitleCandidate($this->callOpenAI($prompt, 60) ?? '');
+        if ($this->isValidOptimizedTitle($rewritten) && $this->isTitleRelatedToContent($rewritten, $content)) {
+            return $rewritten;
+        }
+
+        return '';
+    }
+
+    private function buildTitleFallbackWithoutTruncation(string $sourceTitle, string $lang): string
+    {
+        $sourceTitle = $this->normalizeTitleCandidate($sourceTitle);
+        if ($this->isValidOptimizedTitle($sourceTitle) && !$this->isForbiddenTitleCandidate($sourceTitle)) {
+            return $sourceTitle;
+        }
+
+        foreach ([' : ', ' – ', ' - ', ' | ', ' — ', '; '] as $separator) {
+            $parts = array_values(array_filter(array_map('trim', explode($separator, $sourceTitle)), static fn ($part) => $part !== ''));
+            foreach ($parts as $part) {
+                if ($this->isValidOptimizedTitle($part) && !$this->isForbiddenTitleCandidate($part)) {
+                    return $part;
+                }
+            }
+        }
+
+        $words = preg_split('/\s+/', $sourceTitle) ?: [];
+        $compressed = [];
+        foreach ($words as $word) {
+            $candidate = trim(implode(' ', [...$compressed, $word]));
+            if (mb_strlen($candidate) > 62) {
+                break;
+            }
+            $compressed[] = $word;
+        }
+
+        $fallback = trim(implode(' ', $compressed));
+        while ($fallback !== '' && $this->endsWithDanglingTitleWord($fallback)) {
+            $segments = preg_split('/\s+/', $fallback) ?: [];
+            array_pop($segments);
+            $fallback = trim(implode(' ', $segments));
+        }
+
+        if ($this->isValidOptimizedTitle($fallback) && !$this->isForbiddenTitleCandidate($fallback)) {
+            return $fallback;
+        }
+
+        return $sourceTitle;
+    }
+
+    private function smartLimit(string $text, int $maxLength): string
+    {
+        $text = trim($text);
+        if (mb_strlen($text) <= $maxLength) {
+            return $text;
+        }
+
+        $short = trim(mb_substr($text, 0, $maxLength + 1));
+        $lastSpace = mb_strrpos($short, ' ');
+        if ($lastSpace !== false && $lastSpace >= (int) floor($maxLength * 0.6)) {
+            return rtrim(mb_substr($short, 0, $lastSpace), " ,;:-");
+        }
+
+        return rtrim(mb_substr($text, 0, $maxLength), " ,;:-");
+    }
+
+    private function extractFallbackTitleFromContent(string $content, string $lang): string
+    {
+        $text = $this->sanitizePlainText($content);
+        $lines = preg_split('/\n+/', trim((string) $content)) ?: [];
+
+        foreach ($lines as $line) {
+            $line = $this->sanitizePlainText((string) $line);
+            if (
+                $line !== ''
+                && mb_strlen($line) >= 12
+                && mb_strlen($line) <= 160
+                && !str_starts_with($line, '•')
+                && !preg_match('/^aeromorning\b/i', $line)
+                && !preg_match('/^[0-9]+[.)]/', $line)
+                && !$this->isForbiddenTitleCandidate($line)
+            ) {
+                $candidate = $this->normalizeTitleCandidate($line);
+                if ($candidate !== '' && !$this->isForbiddenTitleCandidate($candidate)) {
+                    return $candidate;
+                }
+            }
+        }
+
+        $sentences = preg_split('/(?<=[.!?])\s+/', $text) ?: [];
+        foreach ($sentences as $sentence) {
+            $sentence = trim((string) $sentence);
+            if (mb_strlen($sentence) >= 20) {
+                $candidate = $this->normalizeTitleCandidate($sentence);
+                if ($candidate !== '' && !$this->isForbiddenTitleCandidate($candidate)) {
+                    return $this->smartLimit($candidate, 120);
+                }
+            }
+        }
+
+        return $this->normalizeTitleCandidate($text);
+    }
+
+    private function looksLikeAddressLine(string $line): bool
+    {
+        if (preg_match('/\b\d{3,}\b/', $line) === 1) {
+            return true;
+        }
+
+        if (preg_match('/\b(route|rue|avenue|street|road|pointe|maurice|ile|island|po box)\b/i', $line) === 1) {
+            return true;
+        }
+
+        $parts = array_filter(array_map('trim', explode(',', $line)), static fn ($part) => $part !== '');
+        return count($parts) >= 3;
+    }
+
+    private function isForbiddenTitleCandidate(string $title): bool
+    {
+        $title = mb_strtolower(trim($title));
+        if ($title === '') {
+            return true;
+        }
+
+        // Reject category-like strings and menu separators that are not real titles.
+        if (str_contains($title, ' / ') && preg_match('/\b(news|industry|industrie|services)\b/i', $title) === 1) {
+            return true;
+        }
+
+        if (substr_count($title, ',') >= 2 && preg_match('/\b(aeronautique|aéronautique|industrie|industry|environnement|environment|helicopteres?|hélicoptères|news|services)\b/i', $title) === 1) {
+            return true;
+        }
+
+        $forbiddenPatterns = [
+            '/^(top|bottom) of form$/i',
+            '/^related articles$/i',
+            '/^leave a comment$/i',
+            '/^additional links$/i',
+            '/^topics\s*:/i',
+            '/^flash news$/i',
+            '/^posted by\s*:/i',
+            '/^source\s*:/i',
+            '/^about\s*:/i',
+            '/^à propos\s*:/i',
+            '/^ou\s*f\s*news$/i',
+            '/^industry$/i',
+            '/^ou\s*industrie$/i',
+            '/^industry\s*ou\s*industrie$/i',
+            '/^ou\s*f\s*news\s*\/\s*industry\s*ou\s*industrie$/i',
+        ];
+
+        foreach ($forbiddenPatterns as $pattern) {
+            if (preg_match($pattern, $title) === 1) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function isTitleRelatedToContent(string $title, string $content): bool
+    {
+        if ($this->isForbiddenTitleCandidate($title)) {
+            return false;
+        }
+
+        $normalizedContent = mb_strtolower($this->sanitizePlainText($content));
+        if ($normalizedContent === '') {
+            return true;
+        }
+
+        $titleWords = preg_split('/\s+/', mb_strtolower($this->sanitizePlainText($title))) ?: [];
+        $titleWords = array_values(array_filter($titleWords, static function (string $word): bool {
+            return mb_strlen($word) >= 4 && !in_array($word, [
+                'avec', 'pour', 'dans', 'from', 'with', 'this', 'that', 'les', 'des', 'une', 'the', 'over', 'into', 'renforce'
+            ], true);
+        }));
+
+        if (empty($titleWords)) {
+            return false;
+        }
+
+        $matches = 0;
+        foreach ($titleWords as $word) {
+            if (str_contains($normalizedContent, $word)) {
+                $matches++;
+            }
+        }
+
+        return $matches >= min(2, count($titleWords));
+    }
+
+    private function extractKeyphraseFromContent(string $content, string $lang): string
+    {
+        preg_match_all('/\b[A-Z][A-Za-z0-9\-]{2,}(?:\s+[A-Z0-9][A-Za-z0-9\-]{1,}){0,3}\b/u', strip_tags($content), $matches);
+        $phrases = array_values(array_filter($matches[0] ?? [], static fn ($value) => mb_strlen(trim($value)) >= 4));
+
+        if (!empty($phrases)) {
+            return trim($phrases[0]);
+        }
+
+        $words = preg_split('/\s+/', $this->sanitizePlainText(strip_tags($content))) ?: [];
+        return implode(' ', array_slice(array_filter($words), 0, 4));
+    }
+
+    private function looksRepeated(string $text): bool
+    {
+        if (mb_strlen($text) < 40) {
+            return false;
+        }
+
+        $prefix = mb_substr($text, 0, 30);
+        return mb_substr_count($text, $prefix) > 1;
+    }
+
+    private function extractMetaSourceText(string $content): string
+    {
+        $lines = preg_split('/\n+/', trim(strip_tags($content))) ?: [];
+        $usable = [];
+
+        foreach ($lines as $line) {
+            $line = $this->sanitizePlainText($line);
+            if (
+                $line === ''
+                || preg_match('/^aeromorning\b/i', $line)
+                || preg_match('/^[0-9]+[.)]/', $line)
+            ) {
+                continue;
+            }
+            
+            if (preg_match('/^aeromorning\b.*\bversion\b/iu', $line) === 1) {
+                continue;
+            }
+
+            $usable[] = $line;
+        }
+
+        if (count($usable) > 1) {
+            array_shift($usable);
+        }
+
+        return $this->sanitizePlainText(implode(' ', array_slice($usable, 0, 3)));
+    }
+
+    private function extractLeadingHeadlineLine(string $plainSection, string $lang): string
+    {
+        $lines = preg_split('/\n+/', trim($plainSection)) ?: [];
+        foreach ($lines as $line) {
+            $line = trim((string) $line);
+            if ($line === '') {
+                continue;
+            }
+
+            // Skip version markers and known boilerplate.
+            if (preg_match('/^(?:\d+\s*[–-]\s*)?version\s*(uk|en|english|fr|f|fran[cç]aise?)\b/iu', $line) === 1) {
+                continue;
+            }
+            if (preg_match('/^aeromorning\b/iu', $line) === 1) {
+                continue;
+            }
+
+            $candidate = $this->normalizeTitleCandidate($line);
+            if ($candidate === '' || $this->isForbiddenTitleCandidate($candidate)) {
+                continue;
+            }
+
+            // Avoid clipped fragments like "ceives ...".
+            if ($this->startsWithSuspiciousLowercaseFragment($candidate)) {
+                continue;
+            }
+
+            // Require at least 3 words to look like a headline.
+            $words = array_values(array_filter(preg_split('/\s+/', $candidate) ?: [], static fn ($w) => $w !== ''));
+            if (count($words) < 3) {
+                continue;
+            }
+
+            return $candidate;
+        }
+
+        return '';
+    }
+
+    private function matchesAviationHeuristic(string $content): bool
+    {
+        $content = mb_strtolower($content);
+
+        $keywords = [
+            // Core aviation
+            'aviation', 'aeronaut', 'aerosp', 'airline', 'airport', 'aircraft', 'flight', 'fleet',
+            // OEMs & regulators
+            'boeing', 'airbus', 'embraer', 'atr', 'safran', 'rolls-royce', 'pratt', 'ge aviation',
+            'engine', 'faa', 'easa', 'iata', 'icao', 'dgac',
+            // Space
+            'nasa', 'spacex', 'satellite', 'rocket', 'launch', 'orbital', 'lunar', 'spatial', 'espace',
+            // Rotary & urban air
+            'helicopter', 'helicoptere', 'hélicoptère', 'evtol', 'vtol', 'urban air',
+            // Cargo & transport
+            'air cargo', 'fret aerien', 'fret aérien', 'cargo', 'freight',
+            // French aviation terms
+            'transport aerien', 'transport aérien', 'compagnie aerienne', 'compagnie aérienne',
+            'aeroport', 'aéroport', 'avion', 'vol ',
+            // Defense & naval
+            'defense', 'défense', 'militaire', 'naval', 'armée de l\'air', 'air force',
+            // Drone
+            'drone', 'uav', 'uas',
+            // Technology & innovation
+            'technolog', 'innovation', 'innovant', 'numérique', 'digital', 'intelligence artificielle',
+            'artificial intelligence', 'cybersecur', 'industrie 4',
+            // Environment & sustainability
+            'durabilit', 'sustainability', 'saf ', 'carburant durable', 'émission', 'emission',
+            'environnement', 'décarbonation', 'net zero',
+            // Industry & certification
+            'certif', 'homologat', 'mro', 'maintenance', 'industrie aeronautique', 'industrie aéronautique',
+            // People & events
+            'nomination', 'nommé', 'nommée', 'directeur général', 'ceo', 'président',
+            'emploi', 'recrutement', 'hiring', 'concours', 'award', 'airshow', 'salon du bourget', 'paris air',
+        ];
+
+        $score = 0;
+        foreach ($keywords as $keyword) {
+            if (str_contains($content, $keyword)) {
+                $score++;
+            }
+        }
+
+        return $score >= 1;
+    }
+
+    /**
+     * Call OpenAI API
+     */
+    private function callOpenAI(
+        string $prompt,
+        int $maxTokens = 500,
+        float $temperature = 0.3,
+        ?array $responseFormat = null,
+        array $options = []
+    ): ?string
+    {
+        $model = (string) env('OPENAI_MODEL', 'gpt-5-mini');
+        $fallbackModel = trim((string) env('OPENAI_FALLBACK_MODEL', 'gpt-4o-mini'));
+
+        // Permet de forcer un modèle spécifique (ex: dernier recours gpt-4o-mini)
+        if (isset($options['model']) && is_string($options['model']) && $options['model'] !== '') {
+            $model = $options['model'];
+        }
+
+        $disableFastFallback = (bool) ($options['disable_fast_fallback'] ?? false);
+
+        $useFastFallbackForGpt5 = !$disableFastFallback
+            && filter_var(env('OPENAI_GPT5_FAST_FALLBACK', true), FILTER_VALIDATE_BOOL);
+        if ($useFastFallbackForGpt5
+            && $fallbackModel !== ''
+            && strtolower(trim($fallbackModel)) !== strtolower(trim($model))
+            && str_starts_with(strtolower(trim($model)), 'gpt-5')
+        ) {
+            if (config('app.debug')) {
+                Log::warning('OpenAI fast fallback enabled for gpt-5', [
+                    'primary_model' => $model,
+                    'fallback_model' => $fallbackModel,
+                ]);
+            }
+            $model = $fallbackModel;
+        }
+
+        // Reasoning-style models can consume output budget internally and return empty strings
+        // if max_completion_tokens is too small.
+        if ($this->shouldUseMaxCompletionTokens($model)) {
+            $maxTokens = max($maxTokens, (int) env('OPENAI_MIN_COMPLETION_TOKENS', 256));
+        }
+
+        $payload = $this->buildChatPayload($model, $prompt, $maxTokens, $temperature, $responseFormat);
+
+        $attempts = 0;
+        while ($attempts < 2) {
+            $attempts++;
+            try {
+                if (config('app.debug')) {
+                    Log::debug('OpenAI request', [
+                        'model' => $model,
+                        'has_temperature' => array_key_exists('temperature', $payload),
+                        'uses_max_completion_tokens' => array_key_exists('max_completion_tokens', $payload),
+                        'max_tokens' => $maxTokens,
+                    ]);
+                }
+
+                $response = $this->client->chat()->create($payload);
+                $choice = $response->choices[0] ?? null;
+                $message = $choice?->message ?? null;
+                $content = $message?->content ?? null;
+
+                $contentText = '';
+                if (is_string($content)) {
+                    $contentText = trim($content);
+                } elseif (is_array($content)) {
+                    $parts = [];
+                    foreach ($content as $part) {
+                        if (is_string($part)) {
+                            $parts[] = $part;
+                            continue;
+                        }
+                        if (is_array($part) && isset($part['text']) && is_string($part['text'])) {
+                            $parts[] = $part['text'];
+                            continue;
+                        }
+                        if (is_object($part) && isset($part->text) && is_string($part->text)) {
+                            $parts[] = $part->text;
+                            continue;
+                        }
+                    }
+                    $contentText = trim(implode('', $parts));
+                }
+
+                if ($contentText === '' && config('app.debug')) {
+                    Log::debug('OpenAI empty content', [
+                        'model' => $model,
+                        'has_message' => $message !== null,
+                        'content_type' => gettype($content),
+                        'finish_reason' => is_object($choice) && isset($choice->finishReason) ? $choice->finishReason : null,
+                    ]);
+                }
+
+                if ($contentText !== '') {
+                    $finishReason = null;
+                    if (is_object($choice) && isset($choice->finishReason)) {
+                        $finishReason = $choice->finishReason;
+                    } elseif (is_object($choice) && isset($choice->finish_reason)) {
+                        $finishReason = $choice->finish_reason;
+                    } elseif (is_array($choice) && isset($choice['finish_reason'])) {
+                        $finishReason = $choice['finish_reason'];
+                    }
+
+                    if (config('app.debug')) {
+                        Log::debug('OpenAI response', [
+                            'model' => $model,
+                            'finish_reason' => $finishReason,
+                            'output_chars' => mb_strlen($contentText),
+                        ]);
+                    }
+
+                    // content_filter : OpenAI a tronqué la réponse (filtre de sécurité déclenché
+                    // par le contenu de l'email ou de la réponse générée — disclaimers financiers,
+                    // "forward-looking statements", boilerplate légal...). La réponse partielle est
+                    // inutilisable (JSON tronqué). On retourne null pour que le layer supérieur
+                    // décide de réessayer avec un contenu plus court.
+                    if ($finishReason === 'content_filter') {
+                        Log::warning('OpenAI content_filter: réponse tronquée par le filtre de sécurité', [
+                            'model'        => $model,
+                            'output_chars' => mb_strlen($contentText),
+                        ]);
+                        return null;
+                    }
+
+                    return $contentText;
+                }
+
+                // If the primary model returns empty output (seen with some models/SDK combos),
+                // fall back to a chat-stable model.
+                if (
+                    $fallbackModel !== ''
+                    && strtolower(trim($fallbackModel)) !== strtolower(trim($model))
+                    && $this->shouldUseMaxCompletionTokens($model)
+                ) {
+                    if (config('app.debug')) {
+                        Log::warning('OpenAI fallback model used', [
+                            'primary_model' => $model,
+                            'fallback_model' => $fallbackModel,
+                        ]);
+                    }
+
+                    $fallbackPayload = $this->buildChatPayload($fallbackModel, $prompt, $maxTokens, $temperature, $responseFormat);
+                    $fallbackResponse = $this->client->chat()->create($fallbackPayload);
+                    $fallbackChoice = $fallbackResponse->choices[0] ?? null;
+                    $fallbackMessage = $fallbackChoice?->message ?? null;
+                    $fallbackContent = $fallbackMessage?->content ?? null;
+
+                    $fallbackText = is_string($fallbackContent) ? trim($fallbackContent) : '';
+                    return $fallbackText !== '' ? $fallbackText : null;
+                }
+
+                return null;
+            } catch (\Throwable $e) {
+                $message = $e->getMessage();
+                Log::error('OpenAI API error: ' . $message);
+
+                // Some models/APIs don't support response_format; retry once without it.
+                if (
+                    $responseFormat !== null
+                    && preg_match('/response_format|unknown parameter|unrecognized request argument|unsupported/i', $message) === 1
+                ) {
+                    $responseFormat = null;
+                    $payload = $this->buildChatPayload($model, $prompt, $maxTokens, $temperature, null);
+                    continue;
+                }
+
+                // Retry once on transient/timeout-like failures.
+                if ($attempts < 2 && preg_match('/timeout|timed out|cURL error 28/i', $message) === 1) {
+                    continue;
+                }
+
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    private function buildChatPayload(
+        string $model,
+        string $prompt,
+        int $maxTokens,
+        float $temperature,
+        ?array $responseFormat = null
+    ): array
+    {
+        $payload = [
+            'model' => $model,
+            'messages' => [
+                [
+                    'role' => 'user',
+                    'content' => $prompt,
+                ],
+            ],
+        ];
+
+        if (is_array($responseFormat)) {
+            $payload['response_format'] = $responseFormat;
+        }
+
+        // Some models only support the default temperature. For those, omit the parameter.
+        if (!$this->shouldOmitTemperature($model)) {
+            $payload['temperature'] = $temperature;
+        }
+
+        // Some newer models reject `max_tokens` and require `max_completion_tokens`.
+        if ($this->shouldUseMaxCompletionTokens($model)) {
+            $payload['max_completion_tokens'] = $maxTokens;
+        } else {
+            $cap = (int) env('OPENAI_MAX_TOKENS', 4096);
+            if ($cap > 0) {
+                $maxTokens = min($maxTokens, $cap);
+            }
+            $payload['max_tokens'] = $maxTokens;
+        }
+
+        return $payload;
+    }
+
+    private function shouldUseMaxCompletionTokens(string $model): bool
+    {
+        $model = strtolower(trim($model));
+        // Keep this intentionally simple and conservative.
+        return str_starts_with($model, 'gpt-5')
+            || str_starts_with($model, 'o1')
+            || str_starts_with($model, 'o3')
+            || str_starts_with($model, 'gpt-4.1');
+    }
+
+    private function shouldOmitTemperature(string $model): bool
+    {
+        $model = strtolower(trim($model));
+        return str_starts_with($model, 'gpt-5')
+            || str_starts_with($model, 'o1')
+            || str_starts_with($model, 'o3')
+            || str_starts_with($model, 'o4');
+    }
+}

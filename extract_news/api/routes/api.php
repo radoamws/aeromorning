@@ -1,0 +1,69 @@
+<?php
+
+use App\Http\Controllers\NewsController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CloudflareCacheController;
+use App\Http\Controllers\ProcessLogController;
+use App\Http\Controllers\LinkedInController;
+use App\Http\Controllers\WordPressPostingController;
+use Illuminate\Support\Facades\Route;
+
+Route::post('/auth/login', [AuthController::class, 'login']);
+
+// Cloudflare cache purge — cron-accessible, protected by CLOUDFLARE_PURGE_CRON_SECRET
+Route::post('/cloudflare/purge-homepage-cron', [CloudflareCacheController::class, 'purgeHomepageCron']);
+
+// LinkedIn OAuth callback — appelé par les serveurs LinkedIn (sans token Sanctum)
+Route::get('/linkedin/callback', [LinkedInController::class, 'handleCallback']);
+
+// WordPress synchronization
+Route::middleware('auth:sanctum')->group(function () {
+	Route::get('/auth/me', [AuthController::class, 'me']);
+	Route::post('/auth/logout', [AuthController::class, 'logout']);
+
+	// WordPress synchronization
+	Route::post('/sync-wordpress', [NewsController::class, 'syncWordPressData']);
+
+	// Email processing
+	Route::post('/process-emails', [NewsController::class, 'processEmails']);
+
+	// News management
+	Route::get('/news', [NewsController::class, 'getNewsList']);
+	Route::get('/news/pending', [NewsController::class, 'getPendingNews']);
+	Route::get('/news/{id}', [NewsController::class, 'getNewsById']);
+	Route::patch('/news/{id}/status/{status}', [NewsController::class, 'updateNewsStatus']);
+	Route::patch('/news/bulk/status/{status}', [NewsController::class, 'bulkUpdateNewsStatus']);
+
+	// Ignored emails
+	Route::get('/ignored-emails', [NewsController::class, 'getIgnoredEmails']);
+	Route::post('/ignored-emails/{id}/force-publish', [NewsController::class, 'forcePublishIgnoredEmail']);
+
+	// WordPress posting
+	Route::post('/news/{id}/post-to-wordpress', [WordPressPostingController::class, 'postNews']);
+	Route::post('/news/bulk-post-to-wordpress', [WordPressPostingController::class, 'bulkPostNews']);
+	Route::post('/publish-pending', [WordPressPostingController::class, 'publishPendingNews']);
+	Route::post('/repush-seo-meta', [WordPressPostingController::class, 'repushAllSeoMeta']);
+	Route::get('/repush-seo-meta/status', [WordPressPostingController::class, 'repushSeoMetaStatus']);
+	Route::post('/reindex-yoast-scores', [WordPressPostingController::class, 'reindexYoastScores']);
+	Route::get('/reindex-yoast-scores/status', [WordPressPostingController::class, 'reindexYoastScoresStatus']);
+	Route::get('/news/{id}/preview', [WordPressPostingController::class, 'previewNews']);
+
+	// Statistics
+	Route::get('/stats', [WordPressPostingController::class, 'newsStats']);
+
+	// Process logs
+	Route::get('/process-logs', [ProcessLogController::class, 'index']);
+	Route::get('/process-logs/{id}', [ProcessLogController::class, 'show']);
+
+	// Cloudflare cache purge (dashboard button)
+	Route::post('/cloudflare/purge-homepage', [CloudflareCacheController::class, 'purgeHomepage']);
+	// Diagnostic: check if the Cloudflare API token is still valid
+	Route::get('/cloudflare/verify-token', [CloudflareCacheController::class, 'verifyToken']);
+
+	// LinkedIn publishing & configuration
+	Route::post('/news/{id}/post-to-linkedin', [LinkedInController::class, 'postNews']);
+	Route::get('/linkedin/auth', [LinkedInController::class, 'getAuthUrl']);
+	Route::get('/linkedin/auth-info', [LinkedInController::class, 'getAuthInfo']);
+	Route::get('/linkedin/settings', [LinkedInController::class, 'getSettings']);
+	Route::post('/linkedin/save-urn', [LinkedInController::class, 'saveUrn']);
+});
