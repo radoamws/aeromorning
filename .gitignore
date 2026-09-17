@@ -1,6 +1,7 @@
 # Environment / secrets (per-environment, differs between local and prod)
 wp-config.php
 .htaccess
+.htaccess.bk
 .user.ini
 php.ini
 .ftpquota

@@ -48,9 +48,9 @@
 		<div class="mh-col mh-1-3<?php echo $logo_class; ?>">
 			<?php mh_newsdesk_logo(); ?>
 			<div class="langue">
-<a href="/"><img class="alignleft wp-image-1352" title="Langue Francaise" src="<?php echo esc_url( get_home_url( 1, '/wp-content/uploads/2015/11/francais.jpg' ) ); ?>" alt="Langue Francaise" width="20" height="15" /></a>
+<a href="<?php echo esc_url( get_home_url( 1, '/' ) ); ?>"><img class="alignleft wp-image-1352" title="Langue Francaise" src="<?php echo esc_url( get_home_url( 1, '/wp-content/uploads/2015/11/francais.jpg' ) ); ?>" alt="Langue Francaise" width="20" height="15" /></a>
 
-<a href="/en"><img class="alignleft wp-image-1353" title="English language" src="<?php echo esc_url( get_home_url( 1, '/wp-content/uploads/2015/11/anglais.jpg' ) ); ?>" alt="English language" width="20" height="15" /></a>
+<a href="<?php echo esc_url( get_home_url( 2, '/' ) ); ?>"><img class="alignleft wp-image-1353" title="English language" src="<?php echo esc_url( get_home_url( 1, '/wp-content/uploads/2015/11/anglais.jpg' ) ); ?>" alt="English language" width="20" height="15" /></a>
 </div>
 		</div>
 		
