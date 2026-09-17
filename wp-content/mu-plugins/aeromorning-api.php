@@ -14,7 +14,98 @@ add_action('rest_api_init', function () {
             ],
         ],
     ]);
+
+    register_rest_route('aeromorning/v1', '/hreflang/(?P<id>\d+)', [
+        'methods'             => 'POST',
+        'callback'            => 'aeromorning_update_hreflang_partner',
+        'permission_callback' => function () {
+            return current_user_can('edit_posts');
+        },
+        'args' => [
+            'id' => [
+                'validate_callback' => fn($v) => is_numeric($v),
+                'sanitize_callback' => 'absint',
+            ],
+        ],
+    ]);
 });
+
+// ─── FR/EN hreflang linking (news:publish pipeline) ────────────────────────
+//
+// extract_news publishes each incoming email as two independent posts (one
+// per site: FR at the network root, EN under /en/). Once both sides of a
+// pair exist, it POSTs the partner's permalink to this endpoint — once per
+// side — so each post knows its own translation. We store only the partner
+// URL; a post's own language and permalink are always derived live from
+// get_current_blog_id() / get_permalink(), so there's nothing to keep in
+// sync besides this one meta value per post.
+const AEROMORNING_HREFLANG_META_KEY = '_aeromorning_hreflang_partner_url';
+
+function aeromorning_update_hreflang_partner(WP_REST_Request $request): WP_REST_Response {
+    $post_id = (int) $request->get_param('id');
+    $body    = $request->get_json_params();
+
+    if (! get_post($post_id)) {
+        return new WP_REST_Response(['error' => 'post_not_found'], 404);
+    }
+
+    $partner_url = isset($body['url']) ? sanitize_url((string) $body['url']) : '';
+    if ($partner_url === '') {
+        return new WP_REST_Response(['error' => 'missing_url'], 400);
+    }
+
+    update_post_meta($post_id, AEROMORNING_HREFLANG_META_KEY, $partner_url);
+
+    return new WP_REST_Response([
+        'success' => true,
+        'post_id' => $post_id,
+        'partner_url' => $partner_url,
+    ], 200);
+}
+
+/**
+ * Output hreflang tags in <head>.
+ *
+ * On a singular post that has a known translation partner (set via the
+ * endpoint above), link to the two actual articles. Everywhere else
+ * (archives, the homepage, or a post whose translation hasn't been
+ * published/linked yet), fall back to the two network homepages — same
+ * behaviour as before this per-post linking existed.
+ *
+ * Cost per page load: on singular posts, one cached get_post_meta() call
+ * (already primed by the main query, no extra DB round-trip) plus one
+ * get_permalink() call when a partner is found. Zero extra queries on
+ * every other page type.
+ */
+add_action('wp_head', function () {
+    $fr_url = null;
+    $en_url = null;
+
+    if (is_singular('post')) {
+        $post_id     = get_queried_object_id();
+        $partner_url = get_post_meta($post_id, AEROMORNING_HREFLANG_META_KEY, true);
+
+        if ($partner_url !== '') {
+            $self_url = get_permalink($post_id);
+            if ($self_url) {
+                $self_is_en = (get_current_blog_id() === 2);
+                $fr_url = $self_is_en ? $partner_url : $self_url;
+                $en_url = $self_is_en ? $self_url : $partner_url;
+            }
+        }
+    }
+
+    // Fallback: network homepages (unchanged from the previous hardcoded
+    // theme markup, moved here so there is a single place hreflang comes from).
+    if ($fr_url === null || $en_url === null) {
+        $fr_url = get_home_url(1, '/');
+        $en_url = get_home_url(2, '/');
+    }
+
+    printf('<link rel="alternate" hreflang="fr" href="%s" />' . "\n", esc_url($fr_url));
+    printf('<link rel="alternate" hreflang="en" href="%s" />' . "\n", esc_url($en_url));
+    printf('<link rel="alternate" hreflang="x-default" href="%s" />' . "\n", esc_url($en_url));
+}, 1);
 
 /**
  * Return true if every word of $phrase appears somewhere in $text.

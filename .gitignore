@@ -5,6 +5,7 @@ wp-config.php
 .user.ini
 php.ini
 .ftpquota
+wp-content/mu-plugins/local-dev-overrides.php
 
 # WordPress runtime / generated data (not source, regenerated automatically)
 wp-content/uploads/

@@ -8,9 +8,9 @@
 <link rel="pingback" href="<?php bloginfo('pingback_url'); ?>" />
 <?php wp_head(); ?>
 
-<link rel="alternate" hreflang="fr" href="<?php echo esc_url( get_home_url( 1, '/' ) ); ?>" />
-<link rel="alternate" hreflang="en" href="<?php echo esc_url( get_home_url( 2, '/' ) ); ?>" />
-<link rel="alternate" hreflang="x-default" href="<?php echo esc_url( get_home_url( 2, '/' ) ); ?>" />
+<!-- hreflang tags are now output by the aeromorning-api mu-plugin (wp_head hook),
+     which links to the actual translated article when one exists instead of
+     always pointing at the two homepages. See wp-content/mu-plugins/aeromorning-api.php -->
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-S5ED39PCB0"></script>
 <script>
