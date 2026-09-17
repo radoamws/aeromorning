@@ -30,10 +30,10 @@ Ce document recense tout ce qui diffère entre cet environnement local (XAMPP) e
 Ces changements sont des vrais bugs (indépendants de l'environnement), commités dans le dépôt git local. **À reporter manuellement sur le serveur de prod** (ce dépôt git n'est pas encore relié à la prod).
 
 - **2026-09-17** — `wp-content/themes/mh_newsdesk/header.php` et `footer.php` : les liens hreflang, le lien/l'image des drapeaux FR/EN, et le lien "Mentions légales" étaient codés en dur vers `https://aeromorning.com` / `/en` au lieu d'utiliser `get_home_url()`. Corrigé pour utiliser `get_home_url(1, ...)` / `get_home_url(2, ...)`. Sans impact visuel en prod (même URL produite), mais rend le thème correct sur n'importe quel environnement. Commits `4b845b9c`, `5eeeee77`.
-- **2026-09-17 (non commité, en attente de ta validation)** — Liaison hreflang FR/EN par article (voir détail dans l'historique ci-dessous). Concerne :
+- **2026-09-17** — Liaison hreflang FR/EN par article (voir détail dans l'historique ci-dessous). Commit `173d01bb` (validé et commité par l'utilisateur directement). Concerne :
   - `wp-content/mu-plugins/aeromorning-api.php` (endpoint REST + sortie hreflang)
   - `wp-content/themes/mh_newsdesk/header.php` (retrait des 3 lignes hreflang codées en dur, remplacées par le hook du mu-plugin)
-  - `extract_news/api/database/migrations/2026_09_17_000001_add_wp_link_and_hreflang_to_t_news_table.php` (migration à exécuter en prod : `php artisan migrate --force`)
+  - `extract_news/api/database/migrations/2026_09_17_000001_add_wp_link_and_hreflang_to_t_news_table.php` (migration à exécuter en prod : `php artisan migrate --force`, déjà commitée avec le reste d'`extract_news/`, commit `2b5d879a`)
   - `extract_news/api/app/Models/News.php`, `app/Services/WordPressPostingService.php`, `app/Console/Commands/PublishNewsCommand.php`, `app/Console/Commands/LinkHreflangCommand.php` (nouvelle commande)
 
 ## 3. Scripts SQL à exécuter en prod
@@ -84,7 +84,7 @@ La migration d'URL `aeromorning.com` → `localhost/aeromorning` faite en base l
 
 **Découverte technique associée :** WordPress core exige HTTPS pour les Application Passwords (`wp_is_application_passwords_available()` teste `is_ssl()`). Comme l'admin local tourne en http (`FORCE_SSL_ADMIN=false`, voir plus haut), toute authentification par Application Password échouait en 401 — pas seulement pour ce nouvel endpoint, pour **toute** l'API REST utilisée par `extract_news` (création de post, upload média, Yoast...). Forcé à `true` via `wp-content/mu-plugins/local-dev-overrides.php` (nouveau mu-plugin séparé, gitignoré — inutile de le mettre dans `aeromorning-api.php` qui, lui, part en prod).
 
-**Statut au 2026-09-17 :** `extract_news/` a été ajouté à git (commit `2b5d879a`, voir section suivante) à la demande de l'utilisateur. **Restent non commités**, toujours en attente de relecture : `wp-content/mu-plugins/aeromorning-api.php`, `wp-content/themes/mh_newsdesk/header.php`, et l'entrée `local-dev-overrides.php` dans le `.gitignore` racine. Migration Laravel déjà exécutée en local (`php artisan migrate --force`) pour permettre les tests — elle, elle EST commitée (fait partie du code applicatif normal d'`extract_news`, pas du hreflang WordPress en attente).
+**Statut au 2026-09-17 :** `extract_news/` a été ajouté à git (commit `2b5d879a`) à la demande de l'utilisateur, puis les fichiers WordPress du hreflang (`aeromorning-api.php`, `header.php`, `.gitignore`) ont été validés et commités directement par l'utilisateur (commit `173d01bb`). **Tout est maintenant commité et cohérent sur `main`** — plus rien en attente pour cette fonctionnalité.
 
 ### 2026-09-17 (suite) — Ajout d'`extract_news/` à git
 
@@ -93,7 +93,7 @@ La migration d'URL `aeromorning.com` → `localhost/aeromorning` faite en base l
 - **Secrets déjà bien gérés** avant même cet ajout : `extract_news/.gitignore`, `api/.gitignore`, `api_custom_backup/.gitignore`, `api_prev_incomplete/.gitignore` excluaient déjà tous les `.env` (et `gestion-news/.env`), tout `vendor/`/`node_modules/`, les dossiers `storage/` Laravel (chacun avec son propre `.gitignore` imbriqué standard). Rien à ajouter de ce côté.
 - `extract_news/aeromorning-api.php` (copie de référence, tenue à jour à côté de l'appli) resynchronisée avec `wp-content/mu-plugins/aeromorning-api.php` — elle avait divergé (lui manquait l'ajout hreflang) avant ce commit.
 
-**Fichiers à uploader en prod pour cette session** (une fois le hreflang validé et commité) :
+**Fichiers à uploader en prod pour cette session** (tout est maintenant commité — voir aussi le CI/CD ci-dessous qui automatisera cet upload) :
 - `wp-content/mu-plugins/aeromorning-api.php` (ou `extract_news/aeromorning-api.php`, identiques)
 - `wp-content/themes/mh_newsdesk/header.php`
 - `extract_news/api/app/Models/News.php`
