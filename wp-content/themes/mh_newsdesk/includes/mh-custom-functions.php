@@ -20,11 +20,17 @@ if (!function_exists('mh_newsdesk_logo')) {
 				echo '</style>' . "\n";
 			}
 			echo '<div class="logo">' . "\n";
+			// Only the front page should have the site name as its single <h1>;
+			// every other page already has its own <h1> (article title, page
+			// title, archive title via mh_newsdesk_page_title()/entry-title),
+			// so the logo drops to a <div>/<p> there to avoid two <h1>s per page.
+			$logo_title_tag = is_front_page() ? 'h1' : 'div';
+			$logo_desc_tag  = is_front_page() ? 'h2' : 'p';
 			if ($header_title) {
-				echo '<h1 class="logo-title">' . esc_attr($header_title) . '</h1>' . "\n";
+				echo '<' . $logo_title_tag . ' class="logo-title">' . esc_attr($header_title) . '</' . $logo_title_tag . '>' . "\n";
 			}
 			if ($header_desc) {
-				echo '<h2 class="logo-tagline">' . esc_attr($header_desc) . '</h2>' . "\n";
+				echo '<' . $logo_desc_tag . ' class="logo-tagline">' . esc_attr($header_desc) . '</' . $logo_desc_tag . '>' . "\n";
 			}
 			echo '</div>' . "\n";
 		}

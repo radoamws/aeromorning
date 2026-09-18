@@ -18,6 +18,11 @@ wp-content/ewww/
 wp-content/debug.log
 *.log
 
+# Generated at request time by wp-content/plugins/llm-txt (never written as a
+# static file anymore — see that plugin's comment for why a static file per
+# multisite blog can't work here).
+/llm.txt
+
 # Private stats tool (contains .htpasswd)
 /stat/
 
@@ -27,3 +32,4 @@ prompt
 # OS junk
 Thumbs.db
 .DS_Store
+.env

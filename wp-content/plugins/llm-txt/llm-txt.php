@@ -103,95 +103,20 @@ function amweb_generate_llm_content($blog_id = null) {
 
 /*
 |--------------------------------------------------------------------------
-| Génération du fichier physique
+| Rendu — /llm.txt est toujours généré à la volée (voir template_redirect
+| plus bas), jamais écrit comme fichier statique.
+|--------------------------------------------------------------------------
+|
+| Un fichier statique à ABSPATH . 'llm.txt' ne peut pas fonctionner sur ce
+| multisite : switch_to_blog() ne change que le contexte de requête WP, pas
+| ABSPATH (le même dossier disque pour tous les sites). Le site traité en
+| dernier écrasait donc systématiquement le fichier des autres sites, et
+| Apache servait ensuite ce fichier statique en priorité sur la route
+| dynamique ci-dessous — /llm.txt du site FR affichait le contenu du site EN.
+| Générer le contenu à la demande (une poignée de catégories + 20 posts,
+| requêtes déjà rapides) évite le problème sans perte de fraîcheur.
 |--------------------------------------------------------------------------
 */
-
-function amweb_write_llm_file($blog_id = null) {
-
-    if ($blog_id) {
-        switch_to_blog($blog_id);
-    }
-
-    $content = amweb_generate_llm_content();
-
-    $path = ABSPATH . 'llm.txt';
-
-    file_put_contents($path, $content);
-
-    if ($blog_id) {
-        restore_current_blog();
-    }
-}
-
-/*
-|--------------------------------------------------------------------------
-| Génération multisite
-|--------------------------------------------------------------------------
-*/
-
-function amweb_generate_all_llm_files() {
-
-    if (is_multisite()) {
-
-        $sites = get_sites();
-
-        foreach ($sites as $site) {
-
-            switch_to_blog($site->blog_id);
-
-            $content = amweb_generate_llm_content();
-
-            $upload_dir = wp_upload_dir();
-
-            $path = ABSPATH;
-
-            file_put_contents($path . 'llm.txt', $content);
-
-            restore_current_blog();
-        }
-
-    } else {
-
-        amweb_write_llm_file();
-    }
-}
-
-/*
-|--------------------------------------------------------------------------
-| CRON toutes les heures
-|--------------------------------------------------------------------------
-*/
-
-register_activation_hook(__FILE__, function () {
-
-    if (!wp_next_scheduled('amweb_generate_llm_cron')) {
-
-        wp_schedule_event(time(), 'hourly', 'amweb_generate_llm_cron');
-    }
-
-    amweb_generate_all_llm_files();
-});
-
-register_deactivation_hook(__FILE__, function () {
-
-    wp_clear_scheduled_hook('amweb_generate_llm_cron');
-});
-
-add_action('amweb_generate_llm_cron', 'amweb_generate_all_llm_files');
-
-/*
-|--------------------------------------------------------------------------
-| Regénération après publication
-|--------------------------------------------------------------------------
-*/
-
-add_action('save_post', function () {
-
-    amweb_generate_all_llm_files();
-
-});
-
 
 /* multisite */
 add_action('init', function () {
@@ -209,6 +134,19 @@ add_filter('query_vars', function($vars) {
     $vars[] = 'amweb_llm';
 
     return $vars;
+});
+
+// Without this, WordPress's canonical redirect appends a trailing slash
+// (llm.txt -> llm.txt/), which no longer matches the ^llm\.txt$ rewrite
+// rule above and 404s. Same fix commonly used for ads.txt/humans.txt-style
+// flat-file rewrite endpoints.
+add_filter('redirect_canonical', function ($redirect_url) {
+
+    if (get_query_var('amweb_llm')) {
+        return false;
+    }
+
+    return $redirect_url;
 });
 
 add_action('template_redirect', function () {
