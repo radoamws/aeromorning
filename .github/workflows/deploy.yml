@@ -89,22 +89,31 @@ jobs:
             --exclude='/storage/' \
             --exclude='/public/storage' \
             --exclude='/bootstrap/cache/*.php' \
+            --exclude='/composer.phar' \
             extract_news/api/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/aeromorning/api/"
 
       - name: composer install & migrate
-        # bash -lc forces a login shell on the remote end, so it sources the
-        # same profile (.bashrc/.bash_profile) cPanel uses to put composer
-        # and the selected PHP version on PATH — a plain `ssh host 'cmd'`
-        # does not source it, hence "composer: command not found".
+        # `bash -l` (login shell, via a heredoc piped over stdin rather than
+        # a quoted -c string — avoids nested-quoting headaches) still didn't
+        # put `composer` on PATH on this host, so this self-installs
+        # composer.phar into the project dir when the global command isn't
+        # found, instead of guessing at a server-specific install path.
         run: |
-          ssh -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" '
-            bash -lc "
-              set -e
-              cd /home/aeromorning/api
+          ssh -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" bash -l <<'REMOTE'
+            set -e
+            cd /home/aeromorning/api
+
+            if command -v composer >/dev/null 2>&1; then
               composer install --no-dev --optimize-autoloader --no-interaction
-              php artisan migrate --force
-            "
-          '
+            else
+              php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+              php composer-setup.php --quiet
+              rm -f composer-setup.php
+              php composer.phar install --no-dev --optimize-autoloader --no-interaction
+            fi
+
+            php artisan migrate --force
+          REMOTE
 
   deploy-nuxt:
     name: Build & Deploy Nuxt (static) -> news.aeromorning.com
