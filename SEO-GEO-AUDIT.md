@@ -20,17 +20,17 @@ Il n'existe pas de mécanisme pour "forcer" Google à relire un hreflang instant
 
 ## 1. 🔴 Bugs trouvés — à corriger en priorité
 
-### 1.1 `llm.txt` du site FR affiche le contenu du site EN (bug confirmé)
+### ✅ 1.1 `llm.txt` du site FR affiche le contenu du site EN (corrigé le 2026-09-18)
 **Le fichier `/llm.txt` (utilisé par les moteurs IA — ChatGPT, Perplexity, etc. — pour comprendre le site) sert en ce moment le contenu **anglais** même sur le domaine racine FR.**
 
 Cause : `wp-content/plugins/llm-txt/llm-txt.php`, fonction `amweb_generate_all_llm_files()` — elle boucle sur les deux sites du multisite et écrit à chaque fois dans `ABSPATH . 'llm.txt'`. Or `ABSPATH` est le **même dossier physique** pour les deux sites (ce n'est pas parce qu'on `switch_to_blog()` que le chemin disque change) — donc le site traité en second (EN) écrase systématiquement le fichier du premier (FR). Le plugin a *aussi* un mécanisme dynamique correct (`template_redirect` qui génère le contenu à la volée selon le site demandé) — mais comme le fichier statique existe physiquement sur le disque, Apache le sert directement et ne laisse jamais WordPress générer la version dynamique.
 
-**Correctif recommandé** : supprimer la génération de fichier statique (`amweb_write_llm_file()`, les appels `file_put_contents()` dans `amweb_generate_all_llm_files()`, le cron horaire, et le hook `save_post` qui régénère le fichier), ne garder que le rendu dynamique via `template_redirect` qui, lui, fonctionne déjà correctement par site. Puis supprimer le fichier `llm.txt` physique existant sur le serveur (FR et EN) pour laisser la route dynamique répondre.
+**Correctif appliqué** : suppression complète de la génération de fichier statique (cron, hook `save_post`, `file_put_contents`) ; ne reste que le rendu dynamique via `template_redirect`. Ce rendu dynamique avait en fait **son propre bug caché** : WordPress ajoutait automatiquement un `/` final à `/llm.txt` (redirection canonique), ce qui ne correspondait plus à la règle de réécriture `^llm\.txt$` — la route dynamique n'avait donc jamais fonctionné, masquée jusqu'ici par le fichier statique bugué. Corrigé avec un filtre `redirect_canonical` (même technique que pour `ads.txt`/`humans.txt`). Testé en local : FR et EN servent chacun leur propre contenu (`Content-Type: text/plain`, 200). Commits `7551cece`, `401e0807`. **Fichier `llm.txt` physique supprimé du dépôt et ignoré** — le prochain déploiement CI/CD le supprimera aussi du serveur.
 
-### 1.2 Deux balises `<h1>` par page (thème)
+### ✅ 1.2 Deux balises `<h1>` par page (corrigé le 2026-09-18)
 Chaque page a **2 H1** : le logo du site (`<h1 class="logo-title">`, dans `wp-content/themes/mh_newsdesk/includes/mh-custom-functions.php` ligne 24) **et** le titre de l'article (`<h1 class="entry-title">`). Un seul H1 par page est la bonne pratique SEO — avoir deux dilue le signal sémantique pour les moteurs de recherche.
 
-**Correctif recommandé** : changer le logo en `<div class="logo-title">` (ou `<p>`) sur les pages qui ont déjà un H1 propre à elles (articles, pages, catégories) ; le garder en H1 uniquement sur la page d'accueil si rien d'autre n'y joue ce rôle.
+**Correctif appliqué** : le logo passe en `<div>`/`<p>` partout sauf sur la page d'accueil (`is_front_page()`, même logique déjà utilisée par `mh_newsdesk_page_title()` pour le titre de page). Aucun impact visuel — le CSS cible les classes `.logo-title`/`.logo-tagline`, pas la balise. Vérifié en local : accueil = 1 H1 (`logo-title`), page d'article = 1 H1 (`entry-title`). Commit `401e0807`.
 
 ---
 
