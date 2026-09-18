@@ -1,0 +1,133 @@
+name: Deploy to PlanetHoster
+
+# Auto-deploy on every push to main, or trigger manually from the Actions tab.
+# Three independent targets on the same server (siblings under /home/aeromorning/):
+#   - WordPress (repo root, minus extract_news/)        -> /home/aeromorning/public_html  (aeromorning.com)
+#   - Laravel API (extract_news/api/)                   -> /home/aeromorning/api           (api.aeromorning.com)
+#   - Nuxt static build (extract_news/gestion-news/)     -> /home/aeromorning/news          (news.aeromorning.com)
+#
+# Required repo secrets (Settings -> Secrets and variables -> Actions):
+#   SSH_HOST, SSH_PORT, SSH_USER, SSH_PRIVATE_KEY
+#
+# Never touched by this workflow (already live on the server, not in git):
+#   wp-config.php, .htaccess, wp-content/uploads/, extract_news/api/.env,
+#   extract_news/api/storage/, extract_news/gestion-news/.env
+# Cron jobs on the server are left untouched — they already exist and are
+# out of scope for this pipeline.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy-wordpress:
+    name: Deploy WordPress -> public_html
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Trust host key
+        run: ssh-keyscan -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Rsync WordPress files
+        run: |
+          rsync -az --delete \
+            -e "ssh -p ${{ secrets.SSH_PORT }}" \
+            --exclude='/.git/' \
+            --exclude='/.github/' \
+            --exclude='/extract_news/' \
+            --exclude='/wp-config.php' \
+            --exclude='/.htaccess' \
+            --exclude='/.htaccess.bk' \
+            --exclude='/.user.ini' \
+            --exclude='/php.ini' \
+            --exclude='/.ftpquota' \
+            --exclude='/wp-content/uploads/' \
+            --exclude='/wp-content/upgrade/' \
+            --exclude='/wp-content/upgrade-temp-backup/' \
+            --exclude='/wp-content/cache/' \
+            --exclude='/wp-content/litespeed/' \
+            --exclude='/wp-content/ewww/' \
+            --exclude='/wp-content/gallery/*/cache/' \
+            --exclude='/wp-content/mu-plugins/local-dev-overrides.php' \
+            --exclude='/wp-content/debug.log' \
+            --exclude='*.log' \
+            --exclude='/prompt' \
+            --exclude='/stat/' \
+            ./ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/aeromorning/public_html/"
+
+  deploy-laravel-api:
+    name: Deploy Laravel API -> api.aeromorning.com
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Trust host key
+        run: ssh-keyscan -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Rsync Laravel files
+        run: |
+          rsync -az --delete \
+            -e "ssh -p ${{ secrets.SSH_PORT }}" \
+            --exclude='/.env' \
+            --exclude='/vendor/' \
+            --exclude='/storage/' \
+            --exclude='/public/storage' \
+            --exclude='/bootstrap/cache/*.php' \
+            extract_news/api/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/aeromorning/api/"
+
+      - name: composer install & migrate
+        run: |
+          ssh -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" '
+            set -e
+            cd /home/aeromorning/api
+            composer install --no-dev --optimize-autoloader --no-interaction
+            php artisan migrate --force
+          '
+
+  deploy-nuxt:
+    name: Build & Deploy Nuxt (static) -> news.aeromorning.com
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps & generate static build
+        working-directory: extract_news/gestion-news
+        env:
+          NUXT_PUBLIC_API_BASE_URL: https://api.aeromorning.com/api
+        run: |
+          npm ci
+          npm run generate
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Trust host key
+        run: ssh-keyscan -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Rsync static build
+        run: |
+          rsync -az --delete \
+            -e "ssh -p ${{ secrets.SSH_PORT }}" \
+            extract_news/gestion-news/.output/public/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/aeromorning/news/"

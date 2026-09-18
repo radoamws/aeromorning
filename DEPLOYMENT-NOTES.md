@@ -30,10 +30,10 @@ Ce document recense tout ce qui diffère entre cet environnement local (XAMPP) e
 Ces changements sont des vrais bugs (indépendants de l'environnement), commités dans le dépôt git local. **À reporter manuellement sur le serveur de prod** (ce dépôt git n'est pas encore relié à la prod).
 
 - **2026-09-17** — `wp-content/themes/mh_newsdesk/header.php` et `footer.php` : les liens hreflang, le lien/l'image des drapeaux FR/EN, et le lien "Mentions légales" étaient codés en dur vers `https://aeromorning.com` / `/en` au lieu d'utiliser `get_home_url()`. Corrigé pour utiliser `get_home_url(1, ...)` / `get_home_url(2, ...)`. Sans impact visuel en prod (même URL produite), mais rend le thème correct sur n'importe quel environnement. Commits `4b845b9c`, `5eeeee77`.
-- **2026-09-17 (non commité, en attente de ta validation)** — Liaison hreflang FR/EN par article (voir détail dans l'historique ci-dessous). Concerne :
+- **2026-09-17** — Liaison hreflang FR/EN par article (voir détail dans l'historique ci-dessous). Commit `173d01bb` (validé et commité par l'utilisateur directement). Concerne :
   - `wp-content/mu-plugins/aeromorning-api.php` (endpoint REST + sortie hreflang)
   - `wp-content/themes/mh_newsdesk/header.php` (retrait des 3 lignes hreflang codées en dur, remplacées par le hook du mu-plugin)
-  - `extract_news/api/database/migrations/2026_09_17_000001_add_wp_link_and_hreflang_to_t_news_table.php` (migration à exécuter en prod : `php artisan migrate --force`)
+  - `extract_news/api/database/migrations/2026_09_17_000001_add_wp_link_and_hreflang_to_t_news_table.php` (migration à exécuter en prod : `php artisan migrate --force`, déjà commitée avec le reste d'`extract_news/`, commit `2b5d879a`)
   - `extract_news/api/app/Models/News.php`, `app/Services/WordPressPostingService.php`, `app/Console/Commands/PublishNewsCommand.php`, `app/Console/Commands/LinkHreflangCommand.php` (nouvelle commande)
 
 ## 3. Scripts SQL à exécuter en prod
@@ -84,7 +84,7 @@ La migration d'URL `aeromorning.com` → `localhost/aeromorning` faite en base l
 
 **Découverte technique associée :** WordPress core exige HTTPS pour les Application Passwords (`wp_is_application_passwords_available()` teste `is_ssl()`). Comme l'admin local tourne en http (`FORCE_SSL_ADMIN=false`, voir plus haut), toute authentification par Application Password échouait en 401 — pas seulement pour ce nouvel endpoint, pour **toute** l'API REST utilisée par `extract_news` (création de post, upload média, Yoast...). Forcé à `true` via `wp-content/mu-plugins/local-dev-overrides.php` (nouveau mu-plugin séparé, gitignoré — inutile de le mettre dans `aeromorning-api.php` qui, lui, part en prod).
 
-**Statut au 2026-09-17 :** `extract_news/` a été ajouté à git (commit `2b5d879a`, voir section suivante) à la demande de l'utilisateur. **Restent non commités**, toujours en attente de relecture : `wp-content/mu-plugins/aeromorning-api.php`, `wp-content/themes/mh_newsdesk/header.php`, et l'entrée `local-dev-overrides.php` dans le `.gitignore` racine. Migration Laravel déjà exécutée en local (`php artisan migrate --force`) pour permettre les tests — elle, elle EST commitée (fait partie du code applicatif normal d'`extract_news`, pas du hreflang WordPress en attente).
+**Statut au 2026-09-17 :** `extract_news/` a été ajouté à git (commit `2b5d879a`) à la demande de l'utilisateur, puis les fichiers WordPress du hreflang (`aeromorning-api.php`, `header.php`, `.gitignore`) ont été validés et commités directement par l'utilisateur (commit `173d01bb`). **Tout est maintenant commité et cohérent sur `main`** — plus rien en attente pour cette fonctionnalité.
 
 ### 2026-09-17 (suite) — Ajout d'`extract_news/` à git
 
@@ -93,7 +93,7 @@ La migration d'URL `aeromorning.com` → `localhost/aeromorning` faite en base l
 - **Secrets déjà bien gérés** avant même cet ajout : `extract_news/.gitignore`, `api/.gitignore`, `api_custom_backup/.gitignore`, `api_prev_incomplete/.gitignore` excluaient déjà tous les `.env` (et `gestion-news/.env`), tout `vendor/`/`node_modules/`, les dossiers `storage/` Laravel (chacun avec son propre `.gitignore` imbriqué standard). Rien à ajouter de ce côté.
 - `extract_news/aeromorning-api.php` (copie de référence, tenue à jour à côté de l'appli) resynchronisée avec `wp-content/mu-plugins/aeromorning-api.php` — elle avait divergé (lui manquait l'ajout hreflang) avant ce commit.
 
-**Fichiers à uploader en prod pour cette session** (une fois le hreflang validé et commité) :
+**Fichiers à uploader en prod pour cette session** (tout est maintenant commité — voir aussi le CI/CD ci-dessous qui automatisera cet upload) :
 - `wp-content/mu-plugins/aeromorning-api.php` (ou `extract_news/aeromorning-api.php`, identiques)
 - `wp-content/themes/mh_newsdesk/header.php`
 - `extract_news/api/app/Models/News.php`
@@ -102,3 +102,30 @@ La migration d'URL `aeromorning.com` → `localhost/aeromorning` faite en base l
 - `extract_news/api/app/Console/Commands/LinkHreflangCommand.php` (nouveau fichier)
 - `extract_news/api/database/migrations/2026_09_17_000001_add_wp_link_and_hreflang_to_t_news_table.php`
 - **+ lancer `extract_news/add_wp_link_and_hreflang_columns.sql` (ou `php artisan migrate --force`) sur la BDD prod `extract_news` avant de mettre en ligne le code Laravel ci-dessus** (sinon `WordPressPostingService` plantera en écrivant sur des colonnes qui n'existent pas encore).
+
+### 2026-09-17 (suite) — CI/CD GitHub Actions vers PlanetHoster
+
+**Objectif :** automatiser ce qui, jusqu'ici, se faisait manuellement (upload FTP/SSH). Une fois actif, la section "Fichiers à uploader en prod" ci-dessus devient obsolète pour tout ce qui touche ces 3 répertoires — un `git push` sur `main` suffit.
+
+**Topologie serveur** (confirmée par l'utilisateur, PlanetHoster World, cPanel, PHP 8.4) — 3 racines sœurs sous `/home/aeromorning/` :
+| Repo (source) | Serveur (cible) | Domaine |
+|---|---|---|
+| racine du repo, sauf `extract_news/` | `/home/aeromorning/public_html` | `aeromorning.com` |
+| `extract_news/api/` | `/home/aeromorning/api` | `api.aeromorning.com` |
+| `extract_news/gestion-news/` (build statique) | `/home/aeromorning/news` | `news.aeromorning.com` |
+
+**Fichier :** `.github/workflows/deploy.yml`. 3 jobs indépendants (parallèles), déclenchés sur push vers `main` + déclenchement manuel (`workflow_dispatch`) :
+1. **deploy-wordpress** : `rsync -az --delete` de la racine du repo vers `public_html`, avec une longue liste d'`--exclude` (essentielle : c'est elle qui empêche `--delete` d'effacer côté serveur tout ce qui n'est pas dans git mais doit y rester — `wp-config.php`, `.htaccess`, `wp-content/uploads/`, les caches LiteSpeed/EWWW générés en prod, etc.). Sans ces excludes, `--delete` détruirait le site en un push.
+2. **deploy-laravel-api** : `rsync --delete` de `extract_news/api/` vers `/home/aeromorning/api` (exclut `.env`, `vendor/`, `storage/`, le symlink `public/storage`), puis `composer install --no-dev` + `php artisan migrate --force` par SSH. **Décision retenue** : les migrations passent par `php artisan migrate --force` (pas par les scripts `.sql` bruts) parce que ça tient à jour la table `migrations` de Laravel automatiquement — les `.sql` (`add_wp_link_and_hreflang_columns.sql`, `ignored_emails_add_columns.sql`) restent des références/fallback manuels, pas le mécanisme de prod.
+3. **deploy-nuxt** : build (`npm ci && npm run generate`, avec `NUXT_PUBLIC_API_BASE_URL=https://api.aeromorning.com/api` injecté au build comme documenté dans `extract_news/DEPLOYMENT.md`) fait sur le runner GitHub (Node pas nécessaire côté serveur, confirmé : `nuxt.config.ts` a `ssr: false`), puis `rsync --delete` du dossier `.output/public/` vers `/home/aeromorning/news` — celui-ci est un site 100% statique généré, donc `--delete` sans exclude particulier est sûr (rien côté serveur à préserver là-dedans).
+
+**Secrets GitHub requis** (`Settings → Secrets and variables → Actions`, jamais donnés à l'agent) : `SSH_HOST`, `SSH_PORT`, `SSH_USER`, `SSH_PRIVATE_KEY` (clé dédiée au CI/CD, différente de la clé perso de l'utilisateur — la clé publique correspondante doit être dans `~/.ssh/authorized_keys` sur le serveur, déjà fait par l'utilisateur).
+
+**Cron jobs** (`news:process-emails`, `news:publish`, ...) : déjà configurés côté cPanel, **volontairement non gérés par ce pipeline** — n'y touche pas.
+
+**⚠️ Pas encore poussé sur `main` volontairement.** Le déclencheur choisi est "auto-deploy à chaque push sur `main`" — donc merger cette branche déclenchera un déploiement réel immédiat vers la prod. Committé sur une branche à part (`ci/deploy-planethoster`) pour que l'utilisateur garde la main sur le moment exact du premier déclenchement, après avoir vérifié que les 4 secrets sont bien renseignés dans GitHub. Une fois les secrets en place et la branche mergée, tout push futur sur `main` déploiera automatiquement.
+
+**Zones d'incertitude à vérifier au premier run réel** (pas de moyen de les tester sans accès direct au serveur) :
+- `rsync` disponible en SSH sur PlanetHoster World — l'utilisateur n'était pas sûr ("je ne sais pas"). Si absent, remplacer le mécanisme de transfert par `scp`/`sftp` (moins pratique pour les suppressions, mais fonctionne partout).
+- Que `composer` et `php` (8.4) en SSH pointent bien vers les bons binaires par défaut — pas de chemin absolu spécifique configuré dans le workflow pour l'instant, `composer install`/`php artisan migrate` utilisent le PATH par défaut du SSH.
+- Si le premier run échoue sur un de ces deux points, ajuster `deploy-laravel-api` avec le chemin exact (ex: un secret `PHP_BIN` ou `COMPOSER_BIN`) plutôt que de deviner davantage ici.

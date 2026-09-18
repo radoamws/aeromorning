@@ -11,6 +11,7 @@
 <!-- hreflang tags are now output by the aeromorning-api mu-plugin (wp_head hook),
      which links to the actual translated article when one exists instead of
      always pointing at the two homepages. See wp-content/mu-plugins/aeromorning-api.php -->
+<!-- CI/CD from local -->
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-S5ED39PCB0"></script>
 <script>
