@@ -92,12 +92,18 @@ jobs:
             extract_news/api/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/aeromorning/api/"
 
       - name: composer install & migrate
+        # bash -lc forces a login shell on the remote end, so it sources the
+        # same profile (.bashrc/.bash_profile) cPanel uses to put composer
+        # and the selected PHP version on PATH — a plain `ssh host 'cmd'`
+        # does not source it, hence "composer: command not found".
         run: |
           ssh -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" '
-            set -e
-            cd /home/aeromorning/api
-            composer install --no-dev --optimize-autoloader --no-interaction
-            php artisan migrate --force
+            bash -lc "
+              set -e
+              cd /home/aeromorning/api
+              composer install --no-dev --optimize-autoloader --no-interaction
+              php artisan migrate --force
+            "
           '
 
   deploy-nuxt:
