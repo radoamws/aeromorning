@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Mail;
 class WordPressPostingController extends Controller
 {
     /**
-     * Post news to WordPress
+     * Post news to WordPress CI/CD from local
      */
     public function postNews(Request $request, $id): JsonResponse
     {
