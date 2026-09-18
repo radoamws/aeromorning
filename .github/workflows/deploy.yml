@@ -112,6 +112,7 @@ jobs:
               php composer.phar install --no-dev --optimize-autoloader --no-interaction
             fi
 
+            php artisan config:clear
             php artisan migrate --force
           REMOTE
 
