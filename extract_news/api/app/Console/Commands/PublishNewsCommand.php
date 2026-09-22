@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\News;
+use App\Services\CloudflareService;
 use App\Services\ProcessLogService;
 use App\Services\WordPressPostingService;
 use Illuminate\Console\Command;
@@ -54,6 +55,7 @@ class PublishNewsCommand extends Command
             'success' => [],   // published (status 2)
         'failed'  => [],   // failed (reverted back to status 0)
         ];
+        $publishedUrls = [];
 
             foreach ($pendingNews as $news) {
                 $this->line("Processing news #{$news->id} [{$news->lang}]: {$news->title}");
@@ -89,6 +91,10 @@ class PublishNewsCommand extends Command
                         'title'      => $news->title,
                         'wp_post_id' => $result['wp_post_id'],
                     ];
+
+                    if (!empty($result['wp_link'])) {
+                        $publishedUrls[] = $result['wp_link'];
+                    }
 
                     $this->info("  ✓ Publié — WP post ID: {$result['wp_post_id']}");
                 } else {
@@ -126,6 +132,31 @@ class PublishNewsCommand extends Command
                 $this->error("  ✗ Exception: " . $e->getMessage());
             }
         }
+
+            // Purge Cloudflare right away so freshly published articles show up
+            // on the homepage/feeds immediately instead of waiting for the daily
+            // cache:purge-cloudflare cron. Never blocks the run — a purge
+            // failure is logged and the publish results are still reported.
+            if (!empty($publishedUrls)) {
+                try {
+                    /** @var CloudflareService $cf */
+                    $cf = app(CloudflareService::class);
+                    $homeResult = $cf->purgeHomepage();
+                    $articlesResult = $cf->purgeArticles($publishedUrls);
+
+                    $homeOk = ($homeResult['success'] ?? false) || ($homeResult['skipped'] ?? false);
+                    $articlesOk = ($articlesResult['success'] ?? false) || ($articlesResult['skipped'] ?? false);
+
+                    if ($homeOk && $articlesOk) {
+                        $this->info('✓ Cache Cloudflare purgé (accueil + ' . count($publishedUrls) . ' article(s))');
+                    } else {
+                        $this->warn('⚠ Purge Cloudflare partiellement en échec — voir storage/logs/laravel.log');
+                    }
+                } catch (\Throwable $e) {
+                    Log::error('Cloudflare purge failed after news:publish run: ' . $e->getMessage());
+                    $this->warn('⚠ Purge Cloudflare en échec: ' . $e->getMessage());
+                }
+            }
 
             $this->sendSummaryEmail($results);
 
