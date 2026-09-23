@@ -60,7 +60,11 @@ class OpenAIService
         // L'objectif est de passer le contenu EN INTÉGRALITÉ à OpenAI.
         // Si content_filter se déclenche (sur l'OUTPUT, pas l'input), on réessaie
         // avec 4 000 chars + prompt concis dans le fallback ci-dessous.
-        $emailContentForAi = $this->sanitizeEmailContentForOpenAI($emailContent, 30000);
+        // 60000 (était 30000) : un email source de 41 135 caractères de html_body
+        // se faisait déjà couper à l'entrée, avant même d'atteindre OpenAI — la
+        // vraie fin de l'article (dernier paragraphe) tombait après la limite.
+        // Trouvé en reproduisant le bug sur t_news id 1194.
+        $emailContentForAi = $this->sanitizeEmailContentForOpenAI($emailContent, 60000);
         $emailJson = json_encode($emailContentForAi, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         if (!is_string($emailJson) || trim($emailJson) === '') {
             return null;
