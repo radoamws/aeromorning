@@ -11,6 +11,14 @@ class OpenAIService
 {
     private Client $client;
 
+    /**
+     * Set by callOpenAI() right before it returns null, so the caller can tell
+     * WHY (content_filter vs length vs something else) instead of guessing.
+     * See extractWordPressNewsJson() for why this distinction matters: a
+     * 'length' cutoff must never be treated like a content_filter block.
+     */
+    private ?string $lastFailureReason = null;
+
     private const WP_JSON_KEYS = [
         'titleFR',
         'shorttitleFR',
@@ -61,7 +69,16 @@ class OpenAIService
         $basePrompt = $this->buildWordPressExtractionPrompt($emailJson);
         $lastRaw = null;
         $lastErrors = [];
-        $contentFilterHit = false; // true si au moins un appel a rencontré content_filter
+        $contentFilterHit = false; // true si au moins un appel a rencontré un vrai content_filter
+        $lengthHit = false;        // true si au moins un appel a été coupé par max_tokens (article trop long)
+
+        // 24000 (était 12000) : un article FR+EN professionnel long dépassait régulièrement
+        // l'ancienne limite, ce qui déclenchait finish_reason=length. callOpenAI() traitait ça
+        // comme une réponse valide (bug — voir callOpenAI), donc l'article publié était en
+        // réalité coupé en plein milieu (ex: t_news id 1194, ~66k caractères source réduits à
+        // ~5k). Toujours pas illimité : on veut échouer proprement plutôt que de laisser
+        // l'appel tourner indéfiniment sur un email anormalement volumineux.
+        $maxTokensForExtraction = 24000;
 
         for ($attempt = 1; $attempt <= max(1, $maxRetries); $attempt++) {
             $prompt = ($attempt === 1 || $lastRaw === null)
@@ -70,7 +87,7 @@ class OpenAIService
 
             $raw = $this->callOpenAI(
                 $prompt,
-                12000,
+                $maxTokensForExtraction,
                 0.0,
                 ['type' => 'json_object'],
                 ['disable_fast_fallback' => true]
@@ -78,10 +95,16 @@ class OpenAIService
             $lastRaw = $raw;
 
             if ($raw === null) {
-                // callOpenAI retourne null soit sur erreur réseau/API, soit sur content_filter.
-                // On marque content_filter pour adapter la stratégie de fallback.
-                $lastErrors = ['openai_call_failed'];
-                $contentFilterHit = true; // on ne peut pas distinguer sans changer l'API de callOpenAI
+                $reason = $this->lastFailureReason();
+                if ($reason === 'length') {
+                    $lastErrors = ['length'];
+                    $lengthHit = true;
+                } elseif ($reason === 'content_filter') {
+                    $lastErrors = ['content_filter'];
+                    $contentFilterHit = true;
+                } else {
+                    $lastErrors = ['openai_call_failed'];
+                }
                 continue;
             }
 
@@ -89,7 +112,11 @@ class OpenAIService
             if (!is_array($decoded)) {
                 $trimmed = trim((string) $raw);
                 if (str_starts_with($trimmed, '{') && !str_ends_with($trimmed, '}')) {
+                    // Same signal as finish_reason=length even when callOpenAI() didn't
+                    // catch it directly — a dangling, unclosed JSON object is a cutoff,
+                    // never a legitimate content_filter response.
                     $lastErrors = ['truncated_json'];
+                    $lengthHit = true;
                 } else {
                     $lastErrors = ['invalid_json'];
                 }
@@ -131,7 +158,7 @@ class OpenAIService
 
             $raw = $this->callOpenAI(
                 $basePrompt,
-                12000,
+                $maxTokensForExtraction,
                 0.0,
                 ['type' => 'json_object'],
                 ['model' => $fallbackModel]
@@ -146,13 +173,28 @@ class OpenAIService
                     }
                     $lastErrors = $errors;
                 }
+            } else {
+                $reason = $this->lastFailureReason();
+                if ($reason === 'length') {
+                    $lengthHit = true;
+                } elseif ($reason === 'content_filter') {
+                    $contentFilterHit = true;
+                }
             }
 
             // b) content_filter probable → on re-essaie avec contenu réduit + prompt concis.
             // Le content_filter se déclenche dans l'OUTPUT (pas l'input) quand le JSON
             // billingue FR+EN dépasse ~5 000 chars. Le prompt concis demande ≤ 350 mots
             // par langue, ce qui maintient l'output sous le seuil du filtre.
-            if ($contentFilterHit && $raw === null) {
+            //
+            // IMPORTANT : on ne fait JAMAIS ce résumé agressif si un cutoff par longueur
+            // (length / JSON tronqué) a été observé — un article juste long n'est pas un
+            // problème de contenu, et le résumer viole la consigne "verbatim" du prompt
+            // (c'est exactement le bug qui a produit des articles publiés amputés de leur
+            // seconde moitié, ex: t_news id 1194). Dans ce cas on préfère échouer
+            // proprement (return null, l'article reste en attente) plutôt que publier un
+            // résumé de 350 mots à la place de l'article intégral vendu par le journaliste.
+            if ($contentFilterHit && !$lengthHit && $raw === null) {
                 Log::info('OpenAI: content_filter détecté → re-tentative avec contenu réduit à 4 000 chars + prompt concis', [
                     'fallback' => $fallbackModel,
                 ]);
@@ -187,6 +229,8 @@ class OpenAIService
 
         Log::warning('OpenAI extractWordPressNewsJson failed validation', [
             'errors' => $lastErrors,
+            'content_filter_hit' => $contentFilterHit,
+            'length_hit' => $lengthHit,
             'raw_excerpt' => is_string($lastRaw) ? mb_substr($lastRaw, 0, 1200) : null,
         ]);
 
@@ -1836,6 +1880,15 @@ EXEMPLE VALIDE :
     /**
      * Call OpenAI API
      */
+    /**
+     * Why the most recent callOpenAI() call returned null: 'content_filter',
+     * 'length', or null (empty output / API error / not applicable).
+     */
+    private function lastFailureReason(): ?string
+    {
+        return $this->lastFailureReason;
+    }
+
     private function callOpenAI(
         string $prompt,
         int $maxTokens = 500,
@@ -1844,6 +1897,8 @@ EXEMPLE VALIDE :
         array $options = []
     ): ?string
     {
+        $this->lastFailureReason = null;
+
         $model = (string) env('OPENAI_MODEL', 'gpt-5-mini');
         $fallbackModel = trim((string) env('OPENAI_FALLBACK_MODEL', 'gpt-4o-mini'));
 
@@ -1951,6 +2006,7 @@ EXEMPLE VALIDE :
                     // inutilisable (JSON tronqué). On retourne null pour que le layer supérieur
                     // décide de réessayer avec un contenu plus court.
                     if ($finishReason === 'content_filter') {
+                        $this->lastFailureReason = 'content_filter';
                         Log::warning('OpenAI content_filter: réponse tronquée par le filtre de sécurité', [
                             'model'        => $model,
                             'output_chars' => mb_strlen($contentText),
@@ -1958,6 +2014,25 @@ EXEMPLE VALIDE :
                         return null;
                     }
 
+                    // length : la réponse a été coupée par max_tokens/max_completion_tokens,
+                    // pas par le filtre de sécurité. $contentText n'est qu'un fragment (souvent
+                    // du JSON invalide, mais pas toujours détectable comme tel) — le retourner
+                    // tel quel a longtemps fait passer des articles tronqués pour des articles
+                    // complets (ex: t_news id 1194, coupé de ~66k caractères sources à ~5k).
+                    // On retourne null ici aussi ; l'appelant doit le distinguer de
+                    // content_filter via lastFailureReason() pour ne PAS résumer un article
+                    // juste trop long — il doit réessayer avec plus de budget à la place.
+                    if ($finishReason === 'length') {
+                        $this->lastFailureReason = 'length';
+                        Log::warning('OpenAI length: réponse coupée par max_tokens (pas un content_filter)', [
+                            'model'        => $model,
+                            'max_tokens'   => $maxTokens,
+                            'output_chars' => mb_strlen($contentText),
+                        ]);
+                        return null;
+                    }
+
+                    $this->lastFailureReason = null;
                     return $contentText;
                 }
 

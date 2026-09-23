@@ -419,6 +419,9 @@ class EmailService
         // All-letter pairs like 'ce', 'ea', 'ef', 'ca', 'cb', etc. are indistinguishable from
         // normal English letter sequences (e.g. "ICEYE", "leader", "Chief", "officer") and must
         // NOT be included — they cause false-positive corruption on English-language emails.
+        // 'ca' and 'ea' were present here and violated this exact rule: "American" (Ameri-CA-n)
+        // was being corrupted to "AmeriÊn", and "réseau"/"network" (rés-EA-u) to "résêu" — found
+        // in production content (t_news id 1194, 1198). Removed 2026-09-23.
         $map = [
             // lower — digit-containing pairs only (safe: won't match English letter sequences)
             'e0' => 'à',
@@ -426,7 +429,6 @@ class EmailService
             'e7' => 'ç',
             'e8' => 'è',
             'e9' => 'é',
-            'ea' => 'ê',
             'f4' => 'ô',
             'f9' => 'ù',
             'a0' => ' ',
@@ -436,7 +438,6 @@ class EmailService
             'c7' => 'Ç',
             'c8' => 'È',
             'c9' => 'É',
-            'ca' => 'Ê',
             'd4' => 'Ô',
             'd9' => 'Ù',
             // Heuristic: some feeds/emails yield b9 in place of apostrophes.
