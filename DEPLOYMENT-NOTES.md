@@ -172,3 +172,25 @@ L'utilisateur a signalé que le CORS échouait toujours sur `news.aeromorning.co
 (remplace juste `0 0 * * *` par `0 * * * *` sur l'entrée existante — pas besoin d'en ajouter une nouvelle). Aucun autre cron à ajouter : `news:publish` (déjà à `*/5 * * * *`) couvre maintenant le cas normal.
 
 **Décision en attente :** réinstaller ou non le plugin WordPress "WP Cloudflare Super Page Cache" — probablement pas nécessaire vu que `news:publish` couvre maintenant le cas d'usage, mais à confirmer si ce plugin faisait autre chose (mise en cache de pages côté origine, par exemple) au-delà de la purge. LiteSpeed Cache (actif en prod) fait déjà de la mise en cache de pages, donc la redondance est probablement sans conséquence.
+
+### 2026-09-25 — Nouveau signalement client (24/09) : TTL LiteSpeed à 7 jours propagé jusqu'au navigateur
+
+**Signalé par l'utilisateur :** le 24/09, le client s'est de nouveau plaint de ne pas voir les news de la veille en front (visibles en wp-admin). L'utilisateur a donné carte blanche pour reconfigurer tout le cache Cloudflare, en gardant un niveau de cache correct pour ne pas dégrader PageSpeed.
+
+**Diagnostic (SSH direct + `laravel.log`) :**
+- Le mécanisme corrigé le 22/09 fonctionne bien : chaque batch `news:publish` du 24/09 (News #1211–1220) a bien déclenché les purges Cloudflare (accueil + flux + URLs d'articles), confirmé dans les logs.
+- L'origine (LiteSpeed) sert bien du contenu frais dès qu'on la requête directement (testé en contournant Cloudflare via `Host: aeromorning.com` → `127.0.0.1`).
+- Cause réelle trouvée : les TTL LiteSpeed (`cache-ttl_pub`, `cache-ttl_frontpage`, `cache-ttl_feed`) étaient à **604800s (7 jours)**. Cette valeur part directement dans le header `Cache-Control: public, max-age=604800` renvoyé par l'origine, que Cloudflare relaie tel quel jusqu'au navigateur du visiteur. Résultat : un visiteur qui revient sur le site peut se voir servir une page vieille d'une semaine **directement depuis son propre cache navigateur**, sans même refaire de requête réseau — indépendamment du fait que la purge côté serveur (Cloudflare + LiteSpeed) fonctionne parfaitement.
+- Vérification du token API Cloudflare présent dans `extract_news/api/.env` (`CLOUDFLARE_API_TOKEN`) : il est scopé **purge uniquement** (`purge_cache`). Toute tentative de lecture/écriture des réglages de zone (`cache_level`, `browser_cache_ttl`, Automatic Platform Optimization, Page Rules, Cache Rules/rulesets) renvoie `null` ou une erreur d'authentification explicite (code 10000). **Impossible avec ce token d'auditer ou modifier ces réglages côté Cloudflare.**
+
+**Correctif appliqué (config runtime prod uniquement, via `wp litespeed-option set` en SSH — rien à committer/déployer côté code) :**
+- `cache-ttl_pub` : 604800 → **3600** (1h) — pages/articles individuels.
+- `cache-ttl_frontpage` : 604800 → **1800** (30 min) — page d'accueil.
+- `cache-ttl_feed` : 604800 → **1800** (30 min) — flux RSS.
+- Les flags `purge-post_*` (accueil/home/terme/type de contenu/auteur/archive mensuelle purgés à la publication) étaient déjà tous actifs — non modifiés.
+- Vérifié après coup via requête directe contournant Cloudflare (`curl` avec `Host` + `Cache-Control: no-cache`) sur une page d'article fraîchement mise en cache : `x-litespeed-cache-control: public,max-age=3600` confirmé (contre 604800 avant).
+- `wp litespeed-purge all` a échoué avec un timeout cURL (10s) en tentant de s'auto-appeler via `admin-ajax.php` — anomalie mineure non bloquante, la purge ciblée par `PublishNewsCommand` fonctionne toujours normalement ; les anciennes entrées de cache expirent de toute façon naturellement sous 1h/30min maximum désormais.
+
+**Reste bloqué — décision utilisateur nécessaire :** les réglages **côté Cloudflare** (Browser Cache TTL, Cache Level, APO, Page/Cache Rules) n'ont pas pu être audités ni ajustés, faute de scope sur le token API actuel. Si Cloudflare a son propre "Browser Cache TTL" configuré à une valeur indépendante des headers d'origine, il pourrait encore imposer sa propre durée de cache navigateur, potentiellement plus longue que les nouveaux TTL LiteSpeed. Deux options :
+1. Fournir un token Cloudflare avec un scope plus large (`Zone Settings: Read+Edit`, `Page Rules: Read+Edit`) pour auditer/ajuster directement ces réglages.
+2. Vérifier/ajuster manuellement dans le dashboard Cloudflare (Caching → Configuration) — réglages précis à vérifier : "Browser Cache TTL" (idéalement "Respect Existing Headers" pour laisser les TTL LiteSpeed faire foi), "Caching Level" (Standard suffit), APO (si activé, a son propre TTL par défaut qui peut aussi ignorer l'origine).
