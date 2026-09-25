@@ -224,3 +224,25 @@ L'utilisateur a signalé que le CORS échouait toujours sur `news.aeromorning.co
 - **`internal-links`** — scanne le contenu en temps réel pour poser des liens internes, coût CPU par rendu non caché.
 - 711 révisions d'articles cumulées (358 FR + 353 EN) — mineur, hygiène de routine (envisager `WP_POST_REVISIONS` limité).
 - `max_connections` MySQL non vérifiable (pas d'accès root DB depuis ce compte) — à vérifier côté support PlanetHoster si le problème persiste après ces correctifs.
+
+### 2026-09-25 (suite) — Allègement Events Calendar : ⚠️ VALIDÉ EN LOCAL UNIQUEMENT, PAS ENCORE EN PROD
+
+**Contexte :** parmi les facteurs de charge identifiés ci-dessus, la suite "The Events Calendar Pro" + "Event Tickets" a été investiguée plus en détail à la demande de l'utilisateur (remplacement par un plugin plus léger type Sugar Calendar Lite, avec migration des données).
+
+**Constat avant toute action (base locale) :** aucune fonctionnalité payante n'est réellement utilisée :
+- `event-tickets` : **0 ticket/RSVP en base** (recherche `post_type LIKE '%ticket%'`/`%rsvp%'`/`%attendee%'` → aucun résultat), malgré le plugin actif.
+- Récurrence (`_EventRecurrence`) : **0 événement** sur 229 (FR) / 170 (EN) ne l'utilise.
+- Ce qui EST utilisé : dates/heures, tout-la-journée, lieu (152 FR / 120 EN, CPT `tribe_venue`), organisateur (144 FR / 167 EN, CPT `tribe_organizer`), coût (texte), catégories (`tribe_events_cat`), image mise en avant — **tous nativement supportés par "The Events Calendar" gratuit**, sans Pro ni Event Tickets.
+
+**Découverte annexe (hors sujet mais notée) :** une base locale `scrap_events` (app Laravel séparée, avec IA/enrichissement, structure proche d'`extract_news`) existe pour scraper des événements externes et les pousser vers WordPress — à l'état de prototype (1 seul événement test, `WORDPRESS_CREATE_FAILED`/HTTP 403, dernière activité mi-août 2026). Pas de code source trouvé en local (`htdocs`), probablement un projet distinct pas encore cloné ici. Pas de dépendance active sur Pro/Event Tickets détectée (le préfixe de meta `wpea_` trouvé dans `tribe_events` est lui aussi un reliquat mort, plugin non actif ni localement ni en prod). À reprendre avec l'utilisateur si besoin, hors scope de ce fix.
+
+**Alternatives évaluées** (Sugar Calendar Lite proposé par l'utilisateur, Events Manager) : les deux versions gratuites **perdent la structure lieu/organisateur en entités réutilisables** (Pro-only chez Sugar Calendar ; Events Manager n'a pas d'organisateur natif) — migration aurait été avec perte de structure sur 150+ lieux et 150+ organisateurs par site.
+
+**Décision validée avec l'utilisateur :** pas de changement de plugin. Simplement désactiver `events-calendar-pro` et `event-tickets` (réseau), garder `the-events-calendar` (gratuit) qui gère déjà 100% des champs utilisés. **Zéro migration, zéro risque de perte de données** (les CPT/meta `tribe_events`/`tribe_venue`/`tribe_organizer` ne sont pas touchés, seul le code qui les affichait pour les fonctions Pro/Tickets s'arrête).
+
+**Fait en LOCAL (2026-09-25) :**
+- `wp plugin deactivate events-calendar-pro --network`
+- `wp plugin deactivate event-tickets --network`
+- Vérifié : page événement individuel (ID 40047, "MRO Middle East 2026") affiche toujours lieu/organisateur/coût correctement (`tribe-events-meta-group`, `tribe-events-cost` présents dans le HTML) ; page archive `/events/` (200, pas d'erreur) ; `wp post list --post_type=tribe_events` fonctionne ; aucune nouvelle erreur dans `debug.log` liée à ce changement.
+
+**⚠️ PAS DÉPLOYÉ EN PROD — en attente de validation client** (demande explicite de l'utilisateur : "ne pas pousser en prod d'abord car je dois valider avec le client en local"). Quand validé : reproduire les deux mêmes commandes `wp plugin deactivate ... --network` en prod (aucun fichier git à déployer, c'est un changement d'état de plugin stocké en base `wp_sitemeta`). Les plugins `events-calendar-pro`/`event-tickets` resteront installés sur le disque (juste désactivés) au cas où il faudrait les réactiver.
