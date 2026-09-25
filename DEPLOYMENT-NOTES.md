@@ -225,7 +225,7 @@ L'utilisateur a signalé que le CORS échouait toujours sur `news.aeromorning.co
 - 711 révisions d'articles cumulées (358 FR + 353 EN) — mineur, hygiène de routine (envisager `WP_POST_REVISIONS` limité).
 - `max_connections` MySQL non vérifiable (pas d'accès root DB depuis ce compte) — à vérifier côté support PlanetHoster si le problème persiste après ces correctifs.
 
-### 2026-09-25 (suite) — Allègement Events Calendar : ⚠️ VALIDÉ EN LOCAL UNIQUEMENT, PAS ENCORE EN PROD
+### 2026-09-25 (suite) — Allègement Events Calendar : ✅ DÉPLOYÉ EN PROD
 
 **Contexte :** parmi les facteurs de charge identifiés ci-dessus, la suite "The Events Calendar Pro" + "Event Tickets" a été investiguée plus en détail à la demande de l'utilisateur (remplacement par un plugin plus léger type Sugar Calendar Lite, avec migration des données).
 
@@ -245,4 +245,4 @@ L'utilisateur a signalé que le CORS échouait toujours sur `news.aeromorning.co
 - `wp plugin deactivate event-tickets --network`
 - Vérifié : page événement individuel (ID 40047, "MRO Middle East 2026") affiche toujours lieu/organisateur/coût correctement (`tribe-events-meta-group`, `tribe-events-cost` présents dans le HTML) ; page archive `/events/` (200, pas d'erreur) ; `wp post list --post_type=tribe_events` fonctionne ; aucune nouvelle erreur dans `debug.log` liée à ce changement.
 
-**⚠️ PAS DÉPLOYÉ EN PROD — en attente de validation client** (demande explicite de l'utilisateur : "ne pas pousser en prod d'abord car je dois valider avec le client en local"). Quand validé : reproduire les deux mêmes commandes `wp plugin deactivate ... --network` en prod (aucun fichier git à déployer, c'est un changement d'état de plugin stocké en base `wp_sitemeta`). Les plugins `events-calendar-pro`/`event-tickets` resteront installés sur le disque (juste désactivés) au cas où il faudrait les réactiver.
+**Déployé en prod (2026-09-25), validation client OK, aucune régression signalée.** Reproduit les deux mêmes commandes `wp plugin deactivate events-calendar-pro --network` / `wp plugin deactivate event-tickets --network` directement en prod (aucun fichier git à déployer, changement d'état de plugin stocké en base `wp_sitemeta`). Vérifié après coup sur un événement réel publié (`aerospace-test-development-show-2026`) en contournant Cloudflare : page 200, blocs lieu/organisateur toujours rendus correctement (`tribe-events-meta-group`) ; page archive `/events/` et accueil FR toujours 200. Cache Cloudflare purgé (accueil + flux FR/EN) après coup. Les plugins `events-calendar-pro`/`event-tickets` restent installés sur le disque (juste désactivés) au cas où il faudrait les réactiver.
