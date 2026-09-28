@@ -246,3 +246,25 @@ L'utilisateur a signalé que le CORS échouait toujours sur `news.aeromorning.co
 - Vérifié : page événement individuel (ID 40047, "MRO Middle East 2026") affiche toujours lieu/organisateur/coût correctement (`tribe-events-meta-group`, `tribe-events-cost` présents dans le HTML) ; page archive `/events/` (200, pas d'erreur) ; `wp post list --post_type=tribe_events` fonctionne ; aucune nouvelle erreur dans `debug.log` liée à ce changement.
 
 **Déployé en prod (2026-09-25), validation client OK, aucune régression signalée.** Reproduit les deux mêmes commandes `wp plugin deactivate events-calendar-pro --network` / `wp plugin deactivate event-tickets --network` directement en prod (aucun fichier git à déployer, changement d'état de plugin stocké en base `wp_sitemeta`). Vérifié après coup sur un événement réel publié (`aerospace-test-development-show-2026`) en contournant Cloudflare : page 200, blocs lieu/organisateur toujours rendus correctement (`tribe-events-meta-group`) ; page archive `/events/` et accueil FR toujours 200. Cache Cloudflare purgé (accueil + flux FR/EN) après coup. Les plugins `events-calendar-pro`/`event-tickets` restent installés sur le disque (juste désactivés) au cas où il faudrait les réactiver.
+
+### 2026-09-26 — Nouveau signalement client : news de la veille invisibles depuis la France (pas depuis Maurice)
+
+**Signalé par l'utilisateur :** le client en France ne voit pas les news d'hier, alors que l'utilisateur (Maurice) les voit bien, mobile et ordinateur. Question : souci Cloudflare non purgé côté France ?
+
+**Diagnostic :**
+- Logs `laravel.log` (24/09 20h → 26/09 18h) : purge Cloudflare **systématique et fiable** à chaque publication (accueil+flux+URLs d'articles) et via le cron horaire — un seul raté (timeout DNS transitoire le 25/09 22h17), retenté avec succès 18 min plus tard. Le mécanisme de purge lui-même n'est pas en cause.
+- **Limitation technique notée :** les commandes SSH/curl exécutées par l'agent tournent sur la machine locale de l'utilisateur (Maurice) — impossible de reproduire une requête "depuis la France" pour comparer directement (confirmé via le header `CF-RAY: ...-MRU` systématiquement).
+
+**Actions effectuées (remédiation immédiate, sans changement de config permanent) :**
+- `purge_cache` avec `purge_everything: true` (one-shot, comme le 22/09 — pas une pratique à automatiser, voir plus bas).
+- `wp litespeed-purge all` (cache d'origine — note : ce cache n'est pas géolocalisé, un seul serveur d'origine, donc ne peut pas expliquer un écart par pays, mais fait par précaution).
+- Vérifié après coup : accueil FR fraîchement recaché (`Age: 42s`), tous les derniers articles présents dans le HTML.
+
+**Hypothèse la plus probable : cache navigateur du client, pas un problème serveur.** Le fix du 25/09 (TTL LiteSpeed 7j→1h/30min) ne s'applique qu'aux nouvelles entrées de cache à partir de son application — un navigateur ayant chargé une page **avant** ce fix peut légitimement la garder en cache jusqu'à 7 jours après ce chargement, indépendamment de toute correction serveur ultérieure. Recommandé à l'utilisateur : faire tester au client un rafraîchissement forcé (Ctrl+F5) ou la navigation privée pour confirmer/infirmer cette piste avant d'chercher plus loin côté serveur.
+
+**Sur la suggestion de rendre le cron horaire `purge_everything` systématique : déconseillé et non appliqué.** Ça viderait le cache pour tous les visiteurs de tous les pays à chaque passage (toutes les heures), causant un pic de charge origine + une dégradation PageSpeed pour une partie du trafic à chaque purge — contraire à la contrainte explicite "sans casser la performance". Le système actuel (purge ciblée par publication + purge globale horaire en filet de sécurité) reste le bon compromis.
+
+**Audit des Cache Rules Cloudflare (2026-09-28) — dernière zone d'ombre de l'audit du 25/09, maintenant fermée.** L'utilisateur a élargi le token API (`Zone WAF`/Rulesets). Rulesets `http_request_cache_settings` inspecté en entier :
+- Règles **actives** (3) : `escape events` (bypass cache pour `events.aeromorning.com` + sitemaps news, sans rapport), `Bypass admin` (wp-admin/wp-login), `Bypass staging` (staging.aeromorning.com). Aucune ne concerne le cache HTML du site principal.
+- Règles **désactivées** (5, aucun impact) : un reliquat `[DO NOT EDIT] WP Super Page Cache Plugin` confirme le plugin disparu identifié le 22/09 ; 4 brouillons/templates jamais activés (`Cache Everything`, `cache all`, `Bypass Cache for Everything`, `Cache HTML visiteurs`).
+- **Conclusion : aucune Cache Rule active ne force un TTL custom sur le HTML du site principal.** La mise en cache HTML observée (`cf-cache-status: HIT`) vient bien d'APO (Automatic Platform Optimization, confirmé actif le 25/09), pas d'une Cache Rule mal configurée. Rien ici n'explique un écart géographique — referme définitivement ce point, aucune action nécessaire côté Cache Rules. Reliquats désactivés laissés en place (inertes, nettoyage cosmétique optionnel non fait).
