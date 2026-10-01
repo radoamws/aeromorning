@@ -13,6 +13,7 @@ class WordPressPostingService
     private string $authToken;
     private string $yoastAuthToken;
     private bool $allowTitleFallback;
+    private string $defaultImageUrl;
 
     public function __construct(string $lang = 'FR')
     {
@@ -27,6 +28,7 @@ class WordPressPostingService
         }
 
         $this->allowTitleFallback = (bool) config('services.wordpress.allow_title_fallback', false);
+        $this->defaultImageUrl = (string) config('services.wordpress.default_image_url', '');
     }
 
     // -------------------------------------------------------------------------
@@ -55,11 +57,14 @@ class WordPressPostingService
         ];
 
         try {
-            // Step 1 — upload featured image
+            // Step 1 — upload featured image (fall back to the default
+            // Aeromorning visual when the extracted email had no image).
             $imageId = null;
-            if (!empty($news->image_url)) {
-                $upload = $this->uploadImageMultipartDetailed($news->image_url);
+            $imageUrlToUpload = $news->image_url ?: $this->defaultImageUrl;
+            if (!empty($imageUrlToUpload)) {
+                $upload = $this->uploadImageMultipartDetailed($imageUrlToUpload);
                 $imageId = $upload['media_id'];
+                $upload['used_default_image'] = empty($news->image_url);
                 $details['steps']['media_upload'] = $upload;
             } else {
                 $details['steps']['media_upload'] = [
@@ -67,7 +72,7 @@ class WordPressPostingService
                     'media_id' => null,
                     'http_status' => null,
                     'response_excerpt' => null,
-                    'note' => 'No image_url on news',
+                    'note' => 'No image_url on news and no default image configured',
                 ];
             }
 
@@ -880,10 +885,11 @@ class WordPressPostingService
                 $postData['tags'] = $news->getTagsArray();
             }
 
-            // Add featured image if available
-            if ($news->image_url && strpos($news->image_url, 'http') === false) {
-                // Upload image first
-                $imageId = $this->uploadImage($news->image_url, $username, $password);
+            // Add featured image, falling back to the default Aeromorning
+            // visual when this news item has none.
+            $imageUrlToUpload = $news->image_url ?: $this->defaultImageUrl;
+            if ($imageUrlToUpload && strpos($imageUrlToUpload, 'http') === false) {
+                $imageId = $this->uploadImage($imageUrlToUpload, $username, $password);
                 if ($imageId) {
                     $postData['featured_media'] = $imageId;
                 }

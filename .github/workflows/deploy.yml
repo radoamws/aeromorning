@@ -92,6 +92,18 @@ jobs:
             --exclude='/composer.phar' \
             extract_news/api/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/aeromorning/api/"
 
+      - name: Sync default news image
+        # storage/ is excluded above (it's runtime content: logs, cache,
+        # per-article images), but this one file is a permanent site asset
+        # (fallback featured image when an extracted email has none) and
+        # must survive deploys, so it's synced explicitly, outside that
+        # exclude.
+        run: |
+          rsync -az \
+            -e "ssh -p ${{ secrets.SSH_PORT }}" \
+            extract_news/api/storage/app/public/images/visuel-news-aeromorning.jpg \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/aeromorning/api/storage/app/public/images/visuel-news-aeromorning.jpg"
+
       - name: composer install & migrate
         # `bash -l` (login shell, via a heredoc piped over stdin rather than
         # a quoted -c string — avoids nested-quoting headaches) still didn't
