@@ -301,3 +301,24 @@ L'utilisateur a signalé que le CORS échouait toujours sur `news.aeromorning.co
 **Note en passant (hors scope, pas touché) :** pendant les tests locaux, retombé sur le bug préexistant déjà loggé les 18/09 et 25/09 (`Maximum execution time of 240 seconds exceeded` dans `mh-google-webfonts.php` via la chaîne de `require_once` de `functions.php:136`) — intermittent, local uniquement (probablement lié à `WP_HTTP_BLOCK_EXTERNAL`), se résout de lui-même au retry. Pas d'impact sur ce fix, mais à garder en tête si le site local semble bloqué sans raison apparente.
 
 **À vérifier après déploiement prod :** inspection visuelle rapide de la page carrousel (accueil + un article) pour confirmer que `aspect-ratio:5/1` ne laisse pas un espace vide disgracieux une fois le JS chargé, et un nouveau passage PageSpeed/Search Console dans quelques jours (le CLS de Search Console est une moyenne glissante sur ~28 jours, pas instantané).
+
+### 2026-10-05 (suite) — Le vrai gros coupable trouvé : `wp-content/fonts/oswald.ttf` en 404 sur prod
+
+**Signalé par l'utilisateur :** nouveau passage PageSpeed après le fix ci-dessus, toujours mauvais (47/100 mobile, LCP 4.5s, CLS 0.399). Rapport détaillé fourni (render-blocking, layout shift culprits, LCP breakdown, network dependency tree).
+
+**Diagnostic — l'essentiel du rapport pointait vers un seul vrai problème :**
+- `…fonts/oswald.ttf(aeromorning.com)` : **4 151 ms** dans l'arbre de dépendances réseau, et **"Maximum critical path latency: 4 289 ms"** porté par `fontawesome-webfont.woff2` (en réalité pris dans le même embouteillage). Le LCP ("Safran : repenser l'économie des moteurs d'avions", `<h3 class="content-lead-title">`) a un "Element render delay" de **3 280 ms** — presque tout le LCP est perdu à attendre cette police.
+- Test direct (`curl` sur `https://aeromorning.com/wp-content/fonts/oswald.ttf`) : **HTTP 404**, réponse de 204 Ko (= la page 404 complète de WordPress, pas un 404 léger) en 1-2s. Le fichier référencé dans le HTML (`/wp-content/fonts/oswald.ttf`, hors du thème — fichier à la racine de `wp-content/fonts/`) **n'existait pas sur le serveur prod**, alors qu'il est suivi par git **depuis le tout premier commit** (`48c0cb1d`, confirmé présent en local avec le même contenu, 26800 octets).
+- Cause exacte de sa disparition sur prod non élucidée avec certitude (le fichier n'est exclu par aucune règle du rsync WordPress dans `deploy.yml`, donc chaque déploiement CI/CD aurait dû le redéployer) — mais le déploiement du jour (commit `0b333333`, 07:42) l'a bien remis en place sur le disque prod. Le 404 persistait néanmoins après coup : **réponse 404 mise en cache** (LiteSpeed origine + possible reliquat Cloudflare) datant d'avant que le fichier existe.
+
+**Corrigé :**
+- Purge ciblée Cloudflare sur `https://aeromorning.com/wp-content/fonts/oswald.ttf` (`purge_cache` par URL).
+- `wp litespeed-purge all` (cache d'origine).
+- Vérifié après coup : `HTTP 200`, `Content-Type: font/ttf`, 26800 octets — identique au fichier local. Accueil re-testé : régénération fraîche en **1,86s** (contre 19-22s observés plus tôt dans la session pour la même page) — confirme que ce 404 plombait fortement les temps de rendu, bien au-delà du seul LCP/CLS mesuré par Lighthouse.
+
+**Restant à améliorer (signalé par le rapport, pas corrigé — effort/risque plus élevé pour un gain plus faible) :**
+- Image de bannière Smart Slider (`W4S-BANNIERE_optimized.jpg.webp`) servie en 1870×438 alors qu'affichée en 668×152 — 79 Ko gaspillés. Nécessiterait une image responsive (`srcset`) dédiée à cette bannière ou une version Smart Slider Pro qui les génère automatiquement.
+- jQuery (31,8 Ko) et le CSS combiné (31,2 Ko) restent bloquants pour le rendu (~230ms). jQuery est **volontairement exclu** du defer JS de LiteSpeed Cache (`optm-js_exc`/`optm-js_defer_exc = jquery.js`) — un choix de prudence déjà en place, beaucoup de plugins WP supposent jQuery disponible tôt ; à ne changer qu'avec des tests poussés, risque de casser des fonctionnalités JS du site.
+- Script `beacon.min.js` de Cloudflare (polyfills `Array.prototype.at`/`findLast`, 10,7 Ko) — hors de notre contrôle, c'est le script analytics propre à Cloudflare.
+
+**Leçon à retenir :** avant de chasser des optimisations fines (critical CSS, async fonts...), toujours vérifier qu'aucune ressource référencée dans le HTML ne renvoie une erreur — un seul asset cassé peut à lui seul dominer le LCP et fausser complètement le diagnostic des optimisations plus subtiles.
