@@ -322,3 +322,25 @@ L'utilisateur a signalé que le CORS échouait toujours sur `news.aeromorning.co
 - Script `beacon.min.js` de Cloudflare (polyfills `Array.prototype.at`/`findLast`, 10,7 Ko) — hors de notre contrôle, c'est le script analytics propre à Cloudflare.
 
 **Leçon à retenir :** avant de chasser des optimisations fines (critical CSS, async fonts...), toujours vérifier qu'aucune ressource référencée dans le HTML ne renvoie une erreur — un seul asset cassé peut à lui seul dominer le LCP et fausser complètement le diagnostic des optimisations plus subtiles.
+
+### 2026-10-05 (suite) — Tests poussés : toujours 57%/58% après le fix oswald.ttf
+
+**Signalé par l'utilisateur :** nouveau rapport PageSpeed Insights (lien direct), toujours 57% mobile / 58% desktop malgré le fix précédent. Demande explicite de tests plus poussés.
+
+**Investigation méthodique (audit systématique de chaque ressource de l'accueil, pas seulement les diagnostics Lighthouse) :**
+- Testé le statut HTTP et le timing de **chaque ressource locale liée sur l'accueil** (CSS, JS, images, fonts) individuellement — tout renvoie 200, aucun autre 404 caché comme `oswald.ttf`.
+- Deux fausses pistes écartées après vérification du contexte HTML réel (ne pas se fier au simple nom de fichier) :
+  - `css3-mediaqueries.js` : encapsulé dans un commentaire conditionnel `<!--[if lt IE 9]>` — ne se charge **jamais** dans un navigateur moderne, poids réel nul malgré sa présence dans le HTML brut.
+  - `recaptcha/api.js` (plugin `name-directory`) : déjà chargé en `async defer`, non bloquant.
+- Vérifié la compression : le CSS combiné LiteSpeed (183 Ko brut) est servi en **Brotli**, poids réel sur le réseau ~31 Ko seulement — pas la priorité qu'il semblait être à première vue.
+- **`optm-ucss` (suppression CSS inutilisée, activé le 05/10) ne produisait encore rien** : dossier `wp-content/litespeed/ucss/1/` vide. Cause trouvée : le crawler LiteSpeed (`crawler`) était **désactivé** (`0`), et sa liste d'URLs à parcourir était vide (`crawler-sitemap` non configuré). Corrigé : `crawler=1` et `crawler-sitemap=https://aeromorning.com/sitemap_index.xml` (sitemap Yoast, confirmé 200). Le déclenchement manuel (`wp litespeed-crawler run`) n'a pas suffi à peupler la queue immédiatement (nécessite probablement un cycle cron complet, `crawler-crawl_interval` = 84h) — **à vérifier dans quelques jours** que le dossier `ucss/` se remplit effectivement.
+- **Vraie trouvaille confirmée et corrigée :** la bannière publicitaire "NEXTSPACE 2026" (`W4S-BANNIERE_optimized.jpg` FR + `W4S-BANNIERE-EN-big.jpg` EN, dans le carrousel Smart Slider) était stockée en 1920×438 et livrée telle quelle (137 Ko chacune) alors qu'affichée à seulement ~668×152 sur la page — correspond exactement aux "79 Ko d'économie estimée" du rapport Lighthouse.
+
+**Corrigé :**
+- Redimensionnement des deux bannières (FR et EN) à 1336×305 (≈2x la taille affichée, pour les écrans retina), JPEG qualité 82 : 137 Ko → 80 Ko chacune. Originaux sauvegardés sur le serveur (`.bak-20261005`) avant remplacement.
+- Régénération des variantes `.webp` correspondantes (qui étaient sinon restées à l'ancienne taille/qualité et auraient pu continuer à être servies à la place du JPEG) : 92 Ko → 55 Ko (FR), nouvelle création 53 Ko (EN, n'en avait pas).
+- Fichiers remplacés **directement sur le serveur prod** (pas via git — `wp-content/uploads/` est délibérément gitignored et exclu du rsync CI/CD, c'est le bon endroit pour du contenu média géré hors version control). Cache Cloudflare + LiteSpeed purgés pour ces URLs précises. Vérifié : la nouvelle taille (79 940 octets) est bien servie en live, image inspectée visuellement — toujours nette, texte lisible, aucune dégradation visible.
+
+**Non résolu / à suivre :**
+- Impact réel du fix UCSS/crawler sur le poids CSS — dépend du prochain cycle crawler, pas vérifiable immédiatement.
+- D'autres bannières du même carrousel (`thales-aeromorning-banniere-2025.jpg`, ~20 Ko) n'ont pas montré le même sur-dimensionnement lors du test et n'ont pas été touchées.
