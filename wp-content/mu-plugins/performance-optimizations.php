@@ -57,3 +57,46 @@ add_action('wp_enqueue_scripts', function () {
 add_action('wp_head', function () {
     echo '<style id="aeromorning-cls-fix">.n2-ss-align{aspect-ratio:5/1;min-height:60px;}</style>' . "\n";
 }, 1);
+
+/**
+ * The "name-directory" plugin (shortcode.php: name_directory_add_frontend_assets)
+ * unconditionally enqueues Google reCAPTCHA (~247KB unused JS per PageSpeed)
+ * on every single front-end page whenever reCAPTCHA is enabled in its
+ * settings — it never checks whether the current page actually has its
+ * form. Only [namedirectory] (not the read-only _random/_single variants)
+ * renders the form + recaptcha widget, and only 5 pages site-wide use it
+ * (confirmed via wp_posts/wp_2_posts). Drop the script everywhere else.
+ */
+add_action('wp_enqueue_scripts', function () {
+    if (!wp_script_is('name-directory-recaptcha', 'enqueued')) {
+        return;
+    }
+
+    $needs_recaptcha = false;
+    if (is_singular()) {
+        $post = get_queried_object();
+        if ($post instanceof WP_Post && has_shortcode($post->post_content, 'namedirectory')) {
+            $needs_recaptcha = true;
+        }
+    }
+
+    if (!$needs_recaptcha) {
+        wp_dequeue_script('name-directory-recaptcha');
+        wp_deregister_script('name-directory-recaptcha');
+    }
+}, 20);
+
+/**
+ * oswald.ttf (theme heading font) and fontawesome-webfont.woff2 are both
+ * referenced only via @font-face inside CSS that LiteSpeed loads async —
+ * so the browser doesn't discover either font file until that CSS has
+ * already downloaded and parsed, making them the longest links in the
+ * critical path (PageSpeed: ~1.8-2s each) despite being small files that
+ * serve fast on their own. Preloading lets the browser fetch them in
+ * parallel with everything else, right from the start of the page.
+ */
+add_action('wp_head', function () {
+    $theme_uri = get_template_directory_uri();
+    echo '<link rel="preload" as="font" type="font/ttf" href="' . esc_url(content_url('fonts/oswald.ttf')) . '" crossorigin>' . "\n";
+    echo '<link rel="preload" as="font" type="font/woff2" href="' . esc_url($theme_uri . '/fonts/fontawesome-webfont.woff2?v=4.4.0') . '" crossorigin>' . "\n";
+}, 1);

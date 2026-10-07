@@ -12,17 +12,6 @@
      which links to the actual translated article when one exists instead of
      always pointing at the two homepages. See wp-content/mu-plugins/aeromorning-api.php -->
 <!-- CI/CD from local -->
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-S5ED39PCB0"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-S5ED39PCB0');
-</script>
-
-
 </head>
 <body <?php body_class(); ?>>
 
