@@ -449,3 +449,23 @@ L'utilisateur a signalé que le CORS échouait toujours sur `news.aeromorning.co
 **Action prise en attendant :** `security_level` passé temporairement de `medium` à **`under_attack`** (mode le plus restrictif de Cloudflare — interstitiel JS de 5s pour tous les visiteurs) par précaution, pour minimiser toute charge au moment où le serveur redeviendra accessible. **⚠️ À repasser en `medium` une fois le serveur confirmé stable** — ce mode dégrade l'expérience de tous les visiteurs légitimes et n'est pas fait pour rester actif en permanence.
 
 **Recommandation urgente transmise à l'utilisateur :** vérifier/redémarrer les services directement via le panneau d'hébergement PlanetHoster (ou contacter leur support), car ni HTTP ni SSH ne répondent — situation hors du périmètre d'action possible via l'API Cloudflare seule.
+
+### 2026-10-14 (suite) — Serveur redémarré, nouvelle analyse Singapour + mise en place d'alertes automatiques
+
+**Serveur de retour :** SSH de nouveau accessible, `uptime` montre un redémarrage récent (`up 4:49`), `load average` normal (2.13). `security_level` repassé de `under_attack` à `medium` comme prévu.
+
+**1. Nouvelle analyse du trafic Singapour (143 utilisateurs simultanés signalés dans GA) :**
+- Volumes et IPs obtenus via l'API GraphQL Analytics Cloudflare (voir détail complet transmis à l'utilisateur dans la conversation — IPs dans les plages `195.40.0.0/13`, `154.196.0.0/14`, `43.119.0.0/16`, `47.82.0.0/16` notamment).
+- **Piste trouvée via le `referer`** : 417 requêtes/20min référencées depuis `/agenda/`, et plusieurs depuis des pages `tag/singapore-airshow` avec des paramètres `tribe-bar-date` pointant vers **février/mars 2027** (plus d'un an dans le futur). Fort indice d'un **nouveau piège à crawler, cette fois sur la pagination par date du calendrier d'événements (Events Calendar)** — même catégorie de problème que le piège AERO 2025 du 14/10 matin, mais sur une page différente. **Pas corrigé cette fois** (l'utilisateur a demandé une analyse, pas un correctif) — à traiter si ça persiste ou si le serveur montre à nouveau des signes de charge, avec la même méthode (limiter la plage de dates navigable du calendrier, ou bloquer les `tribe-bar-date` trop éloignés dans le futur via une règle Cloudflare).
+- Conclusion : ce trafic ne porte aucune signature d'attaque (pas de scan wp-login/xmlrpc, pas d'injection) — très probablement un bot explorant la pagination du calendrier, pas du hacking/phishing intentionnel contre le site.
+
+**2. Mise en place d'un système d'alerte automatique :**
+- Le token API n'a pas l'accès niveau **compte** nécessaire pour les notifications natives Cloudflare (`/accounts` renvoie une liste vide) — alternative construite côté application à la place.
+- Nouvelle commande Laravel `php artisan security:monitor` (`app/Console/Commands/SecurityMonitorCommand.php`) + nouvelle méthode `CloudflareService::getThreatSummary()` (requête GraphQL) :
+  - Vérifie le `load average` serveur (seuil : 8, calibré sur l'incident du jour : ~2 normal, ~20 pendant le crash).
+  - Vérifie le volume de requêtes Cloudflare sur 5 min (seuil : 1000/min, soit ~60k/h, calibré sur l'incident : ~18-20k/h normal, ~107k/h pendant le pic) et la part de trafic bloqué/challengé par Cloudflare (seuil : >50%).
+  - Si un seuil est dépassé : email à `NOTIFY_EMAIL` avec le détail (top pays, top chemins), avec un **cooldown d'1h** (cache Laravel) pour ne pas spammer si l'anomalie persiste.
+  - **Repli automatique** : si l'envoi SMTP (Gmail, configuré dans `.env`) échoue, tentative via `mail()` (MTA local du serveur) pour ne jamais perdre une alerte silencieusement.
+  - Testé en direct sur la prod : a correctement détecté l'anomalie de trafic encore en cours (point 1 ci-dessus, ~84 000 req/h) et envoyé l'email avec succès (confirmé : aucune erreur dans `laravel.log`, chemin SMTP principal a fonctionné).
+  - **Ajouté au crontab prod** : `*/5 * * * * ... php artisan security:monitor >> storage/logs/cron-security.log 2>&1`.
+- **Correction d'une fausse piste en cours de route** : un test initial en local avait échoué avec une erreur d'authentification SMTP Gmail, laissant penser à un bug email cassé depuis fin août — **erreur de diagnostic corrigée** : ce test tournait depuis la machine locale de l'agent (probablement un blocage réseau/pare-feu local vers le port SMTP), pas depuis la prod. La prod envoie ses emails normalement (confirmé par les envois réussis réguliers dans ses propres logs). Aucun bug email réel sur la prod.
