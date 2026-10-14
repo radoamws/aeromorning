@@ -75,6 +75,79 @@ class CloudflareService
     }
 
     /**
+     * Security snapshot over the last N minutes: total requests, how many
+     * were blocked/challenged by Cloudflare (WAF, bot fight, custom rules,
+     * rate limiting), and the top offending country + path. Used by
+     * security:monitor to decide whether to alert.
+     */
+    public function getThreatSummary(int $minutes = 5): array
+    {
+        if ($this->zoneId === '' || $this->apiToken === '') {
+            return ['success' => false, 'message' => 'Missing Cloudflare credentials'];
+        }
+
+        $now = gmdate('Y-m-d\TH:i:s\Z');
+        $since = gmdate('Y-m-d\TH:i:s\Z', time() - ($minutes * 60));
+
+        $query = <<<GQL
+        query {
+          viewer {
+            zones(filter: {zoneTag: "{$this->zoneId}"}) {
+              totals: httpRequestsAdaptiveGroups(limit: 1, filter: {datetime_geq: "{$since}", datetime_leq: "{$now}"}) {
+                count
+              }
+              byAction: firewallEventsAdaptiveGroups(limit: 10, filter: {datetime_geq: "{$since}", datetime_leq: "{$now}"}, orderBy: [count_DESC]) {
+                count
+                dimensions { action }
+              }
+              topCountry: httpRequestsAdaptiveGroups(limit: 5, filter: {datetime_geq: "{$since}", datetime_leq: "{$now}"}, orderBy: [count_DESC]) {
+                count
+                dimensions { clientCountryName }
+              }
+              topPath: httpRequestsAdaptiveGroups(limit: 5, filter: {datetime_geq: "{$since}", datetime_leq: "{$now}"}, orderBy: [count_DESC]) {
+                count
+                dimensions { clientRequestPath }
+              }
+            }
+          }
+        }
+        GQL;
+
+        try {
+            $response = Http::withToken($this->apiToken)
+                ->timeout(15)
+                ->post('https://api.cloudflare.com/client/v4/graphql', ['query' => $query]);
+
+            $body = $response->json();
+            $zone = $body['data']['viewer']['zones'][0] ?? null;
+
+            if (!$response->ok() || $zone === null) {
+                return ['success' => false, 'message' => 'GraphQL query failed: ' . json_encode($body['errors'] ?? $body)];
+            }
+
+            $totalRequests = $zone['totals'][0]['count'] ?? 0;
+            $mitigated = 0;
+            foreach ($zone['byAction'] ?? [] as $row) {
+                if (($row['dimensions']['action'] ?? '') !== 'allow') {
+                    $mitigated += $row['count'];
+                }
+            }
+
+            return [
+                'success' => true,
+                'minutes' => $minutes,
+                'total_requests' => $totalRequests,
+                'mitigated_requests' => $mitigated,
+                'by_action' => $zone['byAction'] ?? [],
+                'top_countries' => $zone['topCountry'] ?? [],
+                'top_paths' => $zone['topPath'] ?? [],
+            ];
+        } catch (\Throwable $e) {
+            return ['success' => false, 'message' => 'Exception: ' . $e->getMessage()];
+        }
+    }
+
+    /**
      * Diagnostic: verify that the Cloudflare credentials are valid.
      * Returns ['success' => bool, 'status' => int, 'message' => string].
      */
