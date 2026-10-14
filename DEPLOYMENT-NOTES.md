@@ -469,3 +469,21 @@ L'utilisateur a signalé que le CORS échouait toujours sur `news.aeromorning.co
   - Testé en direct sur la prod : a correctement détecté l'anomalie de trafic encore en cours (point 1 ci-dessus, ~84 000 req/h) et envoyé l'email avec succès (confirmé : aucune erreur dans `laravel.log`, chemin SMTP principal a fonctionné).
   - **Ajouté au crontab prod** : `*/5 * * * * ... php artisan security:monitor >> storage/logs/cron-security.log 2>&1`.
 - **Correction d'une fausse piste en cours de route** : un test initial en local avait échoué avec une erreur d'authentification SMTP Gmail, laissant penser à un bug email cassé depuis fin août — **erreur de diagnostic corrigée** : ce test tournait depuis la machine locale de l'agent (probablement un blocage réseau/pare-feu local vers le port SMTP), pas depuis la prod. La prod envoie ses emails normalement (confirmé par les envois réussis réguliers dans ses propres logs). Aucun bug email réel sur la prod.
+
+### 2026-10-14 (suite) — Limite automatique de la plage de dates du calendrier
+
+**Demandé par l'utilisateur** suite à l'analyse ci-dessus : "limite la plage de dates navigable du calendrier en automatique".
+
+**⚠️ Correction importante avant implémentation :** en testant la logique de date, erreur de calcul trouvée dans l'analyse précédente — les dates `tribe-bar-date=2027-02/03` observées dans l'incident Singapour ne sont qu'à **~5 mois** d'aujourd'hui (14/10/2026), pas "plus d'un an" comme écrit précédemment. Vérification en base : le plus lointain **vrai** événement publié sur le site est le **2027-07-15** (~9 mois) — confirmant que des événements annoncés loin à l'avance sont normaux dans ce secteur (salons/conférences aéronautiques). **Donc les dates de l'incident Singapour sont probablement dans la plage légitime, pas une preuve de piège à crawler** contrairement au cas AERO 2025 (qui avait une preuve formelle : un seul lien cassé générant une chaîne `/page/N/` grandissante).
+
+**Implémenté quand même, en tant que durcissement préventif raisonnable** (faible risque, ne bloque aucun contenu réel) : `wp-content/mu-plugins/performance-optimizations.php`, hook `template_redirect` (priorité 5, avant que la requête coûteuse d'Events Calendar ne s'exécute) :
+- Lit le paramètre réel sous-jacent `eventDate` (confirmé dans `the-events-calendar/src/Tribe/Rewrite.php` — c'est la variable WP utilisée aussi bien par les URLs "jolies" `/events/month/YYYY-MM/` que par `?tribe-bar-date=YYYY-MM-DD`), avec repli sur `tribe-bar-date`/`eventDate` en paramètre GET brut.
+- Fenêtre : **-3 mois / +15 mois** à partir de "maintenant" à chaque requête (donc jamais besoin de mise à jour manuelle). Le plafond de 15 mois laisse une marge confortable au-delà du plus lointain vrai événement (9 mois).
+- Hors de cette fenêtre → 404 immédiat (`$wp_query->set_404()`), avant que la requête Events Calendar ne s'exécute.
+
+**Testé et vérifié en direct sur la prod après déploiement :**
+- `/events/month/2026-11/` (proche, réel) → 200 ✅
+- `/en/events/tag/singapore-airshow/list/?tribe-bar-date=2027-03-10` (date exacte de l'incident) → **200, toujours accessible** (confirme qu'elle est dans la plage légitime, comme prévu par l'analyse corrigée)
+- `/events/month/2030-01/` (extrême, 2030) → **404** ✅
+
+**Bilan honnête :** ce correctif bloque maintenant les dates vraiment extrêmes (années dans le futur), ce qui est une bonne pratique de durcissement en soi. **Mais il ne bloque PAS les dates précises observées dans l'incident Singapour du 14/10** (elles restent légitimement accessibles). Si le volume de trafic anormal depuis Singapour persiste, **ne pas supposer que le calendrier était la cause** — reprendre l'investigation depuis zéro (repartir de l'analyse par referer/IP/user-agent via l'API GraphQL Cloudflare, même méthode que précédemment) plutôt que de considérer ce point comme clos. Le système d'alerte `security:monitor` mis en place le même jour permettra de détecter si ça se reproduit.
