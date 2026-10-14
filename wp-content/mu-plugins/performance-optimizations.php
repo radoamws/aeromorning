@@ -100,3 +100,67 @@ add_action('wp_head', function () {
     echo '<link rel="preload" as="font" type="font/ttf" href="' . esc_url(content_url('fonts/oswald.ttf')) . '" crossorigin>' . "\n";
     echo '<link rel="preload" as="font" type="font/woff2" href="' . esc_url($theme_uri . '/fonts/fontawesome-webfont.woff2?v=4.4.0') . '" crossorigin>' . "\n";
 }, 1);
+
+/**
+ * The Events Calendar's date-based pagination (/events/month/YYYY-MM/,
+ * /events/.../list/?tribe-bar-date=YYYY-MM-DD, etc. — the real WP query
+ * var underneath both pretty-URL and query-string forms is `eventDate`,
+ * confirmed in the plugin's own Rewrite.php) has no cap on how far a
+ * requester can navigate. A crawler endlessly clicking "next month" (or
+ * directly requesting far-future URLs) generates effectively unlimited
+ * distinct, never-cached pages — a second crawler trap found 2026-10-14
+ * (first one was the broken AERO 2025 link; this one needed no broken
+ * content, just the calendar's own unlimited navigation), responsible
+ * for the "143 simultaneous Singapore users" GA anomaly that same day
+ * (referer analysis: /agenda/ and tag/singapore-airshow pages with
+ * tribe-bar-date values in Feb/March 2027).
+ *
+ * Short-circuits to a plain 404 — before Tribe's own (expensive) event
+ * query runs — for any request whose date is more than ~3 months in the
+ * past or ~15 months in the future. The 15-month ceiling was checked
+ * against real data, not guessed: the furthest genuinely published event
+ * in the DB is 2027-07-15 (~9 months out as of 2026-10), so this leaves
+ * real content a comfortable margin while still rejecting requests for
+ * dates far beyond anything the site will plausibly ever publish.
+ *
+ * IMPORTANT CALIBRATION NOTE: unlike the AERO 2025 link (a confirmed,
+ * provable trap — one malformed URL that grew a new /page/N/ segment on
+ * every bot visit), the evidence that calendar-date browsing was THE
+ * cause of the 2026-10-14 Singapore traffic anomaly is weak. The
+ * Feb/March 2027 dates seen in that incident's referers are only ~5
+ * months out — well within the range of genuine events this industry
+ * announces that far ahead (real events on this site go out to 9
+ * months) — so this is precautionary hardening against truly extreme
+ * abuse (years-out requests), not a confirmed fix for that specific
+ * incident. If Singapore/anomalous traffic recurs after this deploys,
+ * don't assume the calendar was the cause — re-investigate from
+ * scratch (referer + IP/UA breakdown via Cloudflare GraphQL, same
+ * method as before).
+ */
+add_action('template_redirect', function () {
+    $raw_date = get_query_var('eventDate');
+    if ($raw_date === '' || $raw_date === false) {
+        $raw_date = $_GET['tribe-bar-date'] ?? ($_GET['eventDate'] ?? '');
+    }
+    if (!is_string($raw_date) || $raw_date === '') {
+        return;
+    }
+
+    $requested = DateTime::createFromFormat('Y-m-d', substr($raw_date, 0, 10));
+    if (!$requested) {
+        $requested = DateTime::createFromFormat('Y-m', substr($raw_date, 0, 7));
+    }
+    if (!$requested) {
+        return; // Unrecognized format — don't block something we can't parse.
+    }
+
+    $earliest = (new DateTime('now'))->modify('-3 months');
+    $latest = (new DateTime('now'))->modify('+15 months');
+
+    if ($requested < $earliest || $requested > $latest) {
+        global $wp_query;
+        $wp_query->set_404();
+        status_header(404);
+        nocache_headers();
+    }
+}, 5);
