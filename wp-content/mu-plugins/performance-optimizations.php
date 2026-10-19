@@ -164,3 +164,21 @@ add_action('template_redirect', function () {
         nocache_headers();
     }
 }, 5);
+
+/**
+ * EWWW Image Optimizer's own lazy-load feature was found enabled on the
+ * EN site (blog_id 2) but not FR (blog_id 1) -- an inconsistent, almost
+ * certainly accidental per-site setting (confirmed 2026-10-19: EN's
+ * homepage served only 2/17 images through EWWW's Picture-WebP
+ * rewriting vs FR's 19/21). When this option is on, EWWW defers the
+ * real <img src> behind a base64 placeholder + data-src and only swaps
+ * in the full-size JPG via its own JS once the image scrolls into
+ * view -- its Picture-WebP rewriter doesn't process that deferred
+ * markup, so those images silently never get a WebP version, on top of
+ * the extra JS/placeholder overhead lazy-load adds on a site that's
+ * already behind a CDN (Cloudflare) and a page cache (LiteSpeed).
+ * FR works correctly without it, so this forces the same off
+ * everywhere rather than just flipping the EN value once in the DB --
+ * a DB toggle could silently drift again later, this can't.
+ */
+add_filter('pre_option_ewww_image_optimizer_lazy_load', '__return_empty_string');
