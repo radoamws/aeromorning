@@ -487,3 +487,25 @@ L'utilisateur a signalé que le CORS échouait toujours sur `news.aeromorning.co
 - `/events/month/2030-01/` (extrême, 2030) → **404** ✅
 
 **Bilan honnête :** ce correctif bloque maintenant les dates vraiment extrêmes (années dans le futur), ce qui est une bonne pratique de durcissement en soi. **Mais il ne bloque PAS les dates précises observées dans l'incident Singapour du 14/10** (elles restent légitimement accessibles). Si le volume de trafic anormal depuis Singapour persiste, **ne pas supposer que le calendrier était la cause** — reprendre l'investigation depuis zéro (repartir de l'analyse par referer/IP/user-agent via l'API GraphQL Cloudflare, même méthode que précédemment) plutôt que de considérer ce point comme clos. Le système d'alerte `security:monitor` mis en place le même jour permettra de détecter si ça se reproduit.
+
+### 2026-10-19 — Signalement mémoire serveur à 92 % : analyse site/serveur/Cloudflare, conclusion "artefact d'hébergement mutualisé", pas une attaque
+
+**Signalé par l'utilisateur :** "la memoire serveur est de 92 % alors que d'habitude, cela ne dépasse pas les 40 %" — demande d'analyse sur les 3 volets site/serveur/Cloudflare.
+
+**Serveur — rien d'anormal côté compte aeromorning :**
+- `uptime` : load average 1.3–2.1 (sain, très loin du seuil de crash ~20 observé le 14/10).
+- `ps aux --sort=-%mem` : aucun process individuel anormal (`redis-server` 66 Mo, `lsphp` 52 Mo max), total RSS visible par ce compte ≈ **760 Mo seulement** — ne peut absolument pas expliquer un système à ~6,9 Go "utilisés".
+- `free -m` : `total=7697 Mo`, `available≈700-820 Mo` → calcul `(total-available)/total ≈ 89-91 %`, cohérent avec les 92 % signalés par le panel d'hébergement.
+- Redis (nouvelle découverte, non documentée avant : socket `/home/aeromorning/.redis/redis.sock`) vérifié : 61 Mo utilisés, à son pic — écarté comme cause.
+- `/dev/shm` vide (0 % utilisé) — écarte aussi l'hypothèse mémoire partagée applicative classique.
+
+**Cause probable identifiée — architecture d'hébergement, pas un problème propre au site :**
+- `/proc/self/cgroup` révèle que ce compte tourne dans une **LVE CloudLinux** dédiée (`8:memory:/lve1004`) sous CageFS (`/run/cagefs` monté) — confirmation d'un hébergement mutualisé avec isolation par compte au niveau CPU/IO/process, mais **`free -m` exécuté dans le shell du compte continue de lire les vraies stats mémoire du serveur physique hôte** (comportement documenté de CloudLinux/CageFS), pas un chiffre isolé à ce compte. Aucun outil d'accès aux stats LVE isolées (`lveps`, `lvetop`, `/sys/fs/cgroup/memory/lve1004/*`, `/proc/user_beancounters`) n'est accessible depuis le compte — seul le panel cPanel "Resource Usage" (ou PlanetHoster en direct) a la vraie vue isolée.
+- Cette suspicion existait déjà dans la mémoire du 2026-09-25 ("7.7GB total visible via free -m, plan-stated figure may be a soft/LVE cap not directly readable from the account") — **confirmée aujourd'hui** par la découverte du cgroup LVE.
+- **Conclusion : le chiffre de 92 % reflète très probablement l'usage mémoire agrégé du serveur physique partagé (tous locataires confondus), pas une consommation spécifique à aeromorning.** Rien dans l'empreinte propre au compte (charge, process, trafic) n'indique une dégradation réelle ni un nouveau problème côté site.
+
+**Constat secondaire (disque, pas mémoire — a priori sans lien direct) :** la partition `/dev/sdb1` (qui porte `/tmp` **et** `/home/aeromorning`) est à **91 % pleine (55 Go / 60 Go)**. `/tmp` lui-même est en mode privé par compte (`drwx------`, confirmé appartenant uniquement à `aeromorning`) et ne contient que ~5 Mo — donc les 55 Go sont légitimement dans `/home/aeromorning` (uploads, cache EWWW, logs, stockage extract_news, etc.), pas un mélange avec d'autres locataires. Détail par sous-dossier non obtenu (commande `du` trop longue sur ce volume via SSH, abandonnée). **À surveiller** : si la partition se remplit complètement, ça peut un jour causer de vrais échecs (uploads, sessions PHP, logs) — recommandé de vérifier via l'outil visuel "Disk Usage" du cPanel plutôt qu'en CLI.
+
+**Cloudflare — rien d'anormal :** trafic des 90 dernières minutes ≈ 300-500 req/min (≈18-30k/h), dans la plage normale documentée (vs 107k/h lors de l'incident du 14/10). La règle de blocage `a_href=` (créée le 14/10) continue de bloquer ~1400 requêtes/90min de bots résiduels — normal, bloqué à l'edge, sans impact sur l'origine.
+
+**Aucun correctif appliqué** — ce n'est pas un bug du site/code, c'est un comportement d'infrastructure d'hébergement mutualisé. Recommandation transmise à l'utilisateur : vérifier le panel cPanel "Resource Usage"/LVE directement (vue isolée, privilégiée) pour confirmer que le compte lui-même n'approche aucune vraie limite, et si le signalement persiste ou s'aggrave, contacter PlanetHoster en mentionnant une possible contention mémoire au niveau du nœud physique partagé.
