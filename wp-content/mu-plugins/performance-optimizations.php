@@ -194,6 +194,10 @@ add_filter('pre_option_ewww_image_optimizer_lazy_load', '__return_empty_string')
  * drifted between FR and EN. Turned off everywhere; EWWW keeps its normal
  * compression on upload.
  */
-foreach (['ewww_image_optimizer_webp', 'ewww_image_optimizer_picture_webp', 'ewww_image_optimizer_webp_for_cdn'] as $ewww_webp_option) {
+// EWWW is network-activated with per-site override allowed, so it reads site
+// options -- but falls back to the network ones (lazy_load is '1' there) if
+// that override is ever switched off. Pin both levels.
+foreach (['ewww_image_optimizer_webp', 'ewww_image_optimizer_picture_webp', 'ewww_image_optimizer_webp_for_cdn', 'ewww_image_optimizer_lazy_load'] as $ewww_webp_option) {
     add_filter('pre_option_' . $ewww_webp_option, '__return_empty_string');
+    add_filter('pre_site_option_' . $ewww_webp_option, '__return_empty_string');
 }
