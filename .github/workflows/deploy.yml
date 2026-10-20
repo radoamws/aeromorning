@@ -64,7 +64,18 @@ jobs:
             --exclude='*.log' \
             --exclude='/prompt' \
             --exclude='/stat/' \
+            --exclude='/*.md' \
+            --exclude='/.gitignore' \
             ./ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/aeromorning/public_html/"
+
+      - name: Remove internal docs from the webroot
+        # Repo-root notes (DEPLOYMENT-NOTES.md etc.) describe the security
+        # setup and must never be web-readable. They're excluded above, but
+        # rsync --delete leaves excluded files that are already on the
+        # server, so remove those explicitly. Webroot top level only.
+        run: |
+          ssh -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "find /home/aeromorning/public_html -maxdepth 1 -type f \( -name '*.md' -o -name '.gitignore' \) -print -delete"
 
   deploy-laravel-api:
     name: Deploy Laravel API -> api.aeromorning.com

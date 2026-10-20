@@ -574,3 +574,9 @@ L'utilisateur a signalé que le CORS échouait toujours sur `news.aeromorning.co
 **Constat PHP (cPanel, à corriger manuellement) :** le `.htaccess` déclare le handler `ea-php80` (PHP 8.0, plus maintenu depuis fin 2023) avec `memory_limit 2048M` et `max_execution_time 3000` (50 min) par requête — une requête bloquée peut monopoliser un processus 50 min, ce qui alimente directement les « erreurs CPU/processus » signalées par l'hébergeur. Bloc généré par cPanel : à changer dans cPanel (version PHP 8.3, `memory_limit 512M`, `max_execution_time 300`), pas à la main.
 
 **Aussi déployé :** traductions `fr_FR` de WordPress 7.1.3 (`wp-content/languages`), oubliées dans le commit de montée de version → la prod tournait en 7.1.3 avec les traductions 7.0.
+
+### 2026-10-20 (suite) — Documentation interne lisible publiquement : corrigé
+
+Le pipeline copiait tout le dépôt dans `public_html`, y compris `DEPLOYMENT-NOTES.md`, `SEO-GEO-AUDIT.md`, `COMPETITIVE-ANALYSIS.md` et `.gitignore` : `https://aeromorning.com/DEPLOYMENT-NOTES.md` répondait 200 à travers Cloudflare (112 Ko). Aucun mot de passe, clé ni jeton dedans, mais exposition de l'architecture de sécurité : port SSH, IP serveur autorisée dans le pare-feu, règles Cloudflare, et chemins des fichiers suspects de `uploads` encore exécutables avant application du nouveau `.htaccess`. Depuis combien de temps c'était lisible : depuis la mise en place du CI (2026-09-17/18).
+
+**Corrigé dans `.github/workflows/deploy.yml` :** `--exclude='/*.md'` et `--exclude='/.gitignore'` sur le rsync WordPress, plus une étape qui supprime ces fichiers de la racine de `public_html` à chaque déploiement (`rsync --delete` ne supprime pas des fichiers exclus déjà présents). Règle à garder : toute note interne va à la racine du dépôt en `.md`, jamais dans un sous-dossier déployé.
