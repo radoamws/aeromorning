@@ -1,15 +1,19 @@
-# Translation of WordPress - 7.0.x - Development - Administration - Network Admin in French (France)
-# This file is distributed under the same license as the WordPress - 7.0.x - Development - Administration - Network Admin package.
+# Translation of WordPress - 7.1.x - Development - Administration - Network Admin in French (France)
+# This file is distributed under the same license as the WordPress - 7.1.x - Development - Administration - Network Admin package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-11-16 07:42:27+0000\n"
+"PO-Revision-Date: 2026-08-20 09:47:35+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: GlotPress/4.0.3\n"
+"X-Generator: GlotPress/4.1.0\n"
 "Language: fr\n"
-"Project-Id-Version: WordPress - 7.0.x - Development - Administration - Network Admin\n"
+"Project-Id-Version: WordPress - 7.1.x - Development - Administration - Network Admin\n"
+
+#: wp-admin/network/users.php:343
+msgid "No users were deleted because no user was selected for content reassignment."
+msgstr "Aucun compte n’a été supprimé car aucun compte n’a été sélectionné pour la réassignation des contenus."
 
 #: wp-admin/network/sites.php:361
 msgid "Site flagged for deletion."
@@ -675,7 +679,7 @@ msgstr "Chemin "
 msgid "Domain"
 msgstr "Domaine"
 
-#: wp-admin/network/user-new.php:29 wp-admin/network/users.php:270
+#: wp-admin/network/user-new.php:29 wp-admin/network/users.php:297
 msgid "<a href=\"https://codex.wordpress.org/Network_Admin_Users_Screen\">Documentation on Network Users</a>"
 msgstr "<a href=\"https://wordpress.org/support/article/network-admin/#users\">Documentation sur les comptes du réseau (en anglais)</a>."
 
@@ -743,7 +747,7 @@ msgstr "Ajoutez les règles suivantes à votre fichier %1$s, dans le dossier %2$
 msgid "Confirm your action"
 msgstr "Confirmez cette action"
 
-#: wp-admin/network/users.php:260
+#: wp-admin/network/users.php:287
 msgid "Hover over any user on the list to make the edit links appear. The Edit link on the left will take you to their Edit User profile page; the Edit link on the right by any site name goes to an Edit Site screen for that site."
 msgstr "Survolez n’importe quel compte de la liste pour faire apparaître les liens de modification. Le lien Modifier à gauche ouvrira la page de modification du profil du compte ; le lien Modifier à droite de n’importe quel nom de site ouvrira l’écran de modification de ce site."
 
@@ -1098,8 +1102,8 @@ msgid "The choice of subdirectory sites is disabled if this setup is more than a
 msgstr "Le choix d’avoir des sites en mode sous-répertoire est désactivé si le réseau a été installé il y a un mois ou plus, afin de pallier les problèmes de permaliens avec l’ajout de «  /blog/ » sur les adresses du site principal. Cette limitation sera corrigée dans une prochaine version."
 
 #: wp-admin/network.php:65
-msgid "Once you add this code and refresh your browser, multisite should be enabled. This screen, now in the Network Admin navigation menu, will keep an archive of the added code. You can toggle between Network Admin and Site Admin by clicking on the Network Admin or an individual site name under the My Sites dropdown in the Toolbar."
-msgstr "Une fois que vous aurez ajouté ce code et rafraîchi la page dans votre navigateur, le mode multisite devrait être activé. Cet écran, désormais placé dans le menu de navigation Admin du Réseau, conservera une archive du code ajouté. Vous pouvez basculer de l’administration du réseau à l’administration du site en cliquant sur « Admin du réseau », ou en cliquant sur le nom d’un site individuel dans le menu déroulant « Mes Sites » de la barre d’outils."
+msgid "Once you add this code and refresh your browser, multisite should be enabled. This screen, now in the Network Admin navigation menu, will keep an archive of the added code. You can switch between Network Admin and Site Admin by clicking on the Network Admin or an individual site name under the My Sites dropdown in the Toolbar."
+msgstr "Une fois que vous aurez ajouté ce code et rafraîchi la page dans votre navigateur, le mode multisite devrait être activé. Cet écran, désormais placé dans le menu de navigation Administration du réseau, conservera une archive du code ajouté. Vous pouvez basculer de l’administration du réseau à l’administration du site en cliquant sur « Administration du réseau », ou en cliquant sur le nom d’un site individuel dans le menu déroulant « Mes sites » de la barre d’outils."
 
 #: wp-admin/network.php:63
 msgid "The next screen for Network Setup will give you individually-generated lines of code to add to your wp-config.php and .htaccess files. Make sure the settings of your FTP client make files starting with a dot visible, so that you can find .htaccess; you may have to create this file if it really is not there. Make backup copies of those two files."
@@ -1122,7 +1126,7 @@ msgid "The Network creation panel is not for WordPress MU networks."
 msgstr "Le panneau de création de réseau n’est pas conçu pour les réseaux WordPress MU."
 
 #. translators: %s: User login.
-#: wp-admin/network/users.php:87 wp-admin/network/users.php:126
+#: wp-admin/network/users.php:88 wp-admin/network/users.php:127
 msgid "Warning! User cannot be modified. The user %s is a network administrator."
 msgstr "Avertissement ! Le compte %s ne peut être modifié car c’est un administrateur ou une administratrice du réseau."
 
@@ -1142,11 +1146,11 @@ msgstr "Survoler chaque site avec la souris révèle sept options (trois pour le
 msgid "Operational settings has fields for the network&#8217;s name and admin email."
 msgstr "Les réglages de fonctionnement permettent de modifier le nom du réseau, et l’adresse e-mail de l’administrateur ou de l’administratrice."
 
-#: wp-admin/network/users.php:263
+#: wp-admin/network/users.php:290
 msgid "The bulk action will permanently delete selected users, or mark/unmark those selected as spam. Spam users will have posts removed and will be unable to sign up again with the same email addresses."
 msgstr "Le menu « Actions groupées » permet de supprimer définitivement plusieurs comptes d’un coup, ou de les marquer comme indésirables ou non. Les comptes indésirables verront leurs articles supprimés, et ne pourront plus se connecter avec leur adresse e-mail."
 
-#: wp-admin/network/users.php:261
+#: wp-admin/network/users.php:288
 msgid "You can also go to the user&#8217;s profile page by clicking on the individual username."
 msgstr "Vous pouvez également aller sur la page de profil d’un compte en cliquant sur son identifiant."
 
@@ -1154,7 +1158,7 @@ msgstr "Vous pouvez également aller sur la page de profil d’un compte en cliq
 msgid "Upload settings control the size of the uploaded files and the amount of available upload space for each site. You can change the default value for specific sites when you edit a particular site. Allowed file types are also listed (space separated only)."
 msgstr "Les réglages d’envoi des fichiers permettent de limiter la taille des fichiers téléversés et l’espace disponible pour chaque site. Vous pouvez préciser la valeur pour chaque site individuellement. Vous pouvez également préciser les types de fichiers acceptés (séparés par des espaces)."
 
-#: wp-admin/network/users.php:264
+#: wp-admin/network/users.php:291
 msgid "You can make an existing user an additional super admin by going to the Edit User profile page and checking the box to grant that privilege."
 msgstr "Vous pouvez promouvoir un compte existant en super-admin en allant sur leur page de profil, et en cochant la case correspondante."
 
@@ -1162,11 +1166,11 @@ msgstr "Vous pouvez promouvoir un compte existant en super-admin en allant sur l
 msgid "Users who are signed up to the network without a site are added as subscribers to the main or primary dashboard site, giving them profile pages to manage their accounts. These users will only see Dashboard and My Sites in the main navigation until a site is created for them."
 msgstr "Les comptes qui se sont inscrits sur le réseau sans créer de site deviennent abonnés du site d’accueil. Celui-ci leur permet d’accéder à leur compte. Ces comptes ne voient dans la navigation principale que les options « Tableau de bord » et « Mes sites », jusqu’à ce qu’un site leur soit créé."
 
-#: wp-admin/network/users.php:262
+#: wp-admin/network/users.php:289
 msgid "You can sort the table by clicking on any of the table headings and switch between list and excerpt views by using the icons above the users list."
 msgstr "Un clic sur le titre d’une colonne permet de changer le tri du tableau. Les icônes en haut à droite permettent d’afficher des extraits ou non."
 
-#: wp-admin/network/users.php:259
+#: wp-admin/network/users.php:286
 msgid "This table shows all users across the network and the sites to which they are assigned."
 msgstr "Ce tableau affiche tous les comptes appartenant au réseau, et les sites auxquels ils sont assignés."
 
@@ -1223,7 +1227,7 @@ msgstr "Si vous souhaitez interdire la création de site aux personnes dont l’
 msgid "If you want to limit site registrations to certain domains. One domain per line."
 msgstr "Si vous souhaitez que les seules personnes habilitées à créer un site soient celles disposant d’une adresse e-mail liée à certains noms de domaines. Un domaine par ligne."
 
-#: wp-admin/network/users.php:294
+#: wp-admin/network/users.php:321
 msgid "Users removed from spam."
 msgstr "Comptes retirés de la liste de comptes indésirables."
 
@@ -1243,11 +1247,11 @@ msgstr "Sites marqués comme indésirables."
 msgid "Sites removed from spam."
 msgstr "Sites retirés des indésirables."
 
-#: wp-admin/network/users.php:297
+#: wp-admin/network/users.php:324
 msgid "Users deleted."
 msgstr "Comptes supprimés."
 
-#: wp-admin/network/users.php:291
+#: wp-admin/network/users.php:318
 msgid "Users marked as spam."
 msgstr "Comptes marqués comme indésirables."
 
