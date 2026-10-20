@@ -182,3 +182,18 @@ add_action('template_redirect', function () {
  * a DB toggle could silently drift again later, this can't.
  */
 add_filter('pre_option_ewww_image_optimizer_lazy_load', '__return_empty_string');
+
+/**
+ * WebP delivery is handled by Cloudflare Polish (Pro plan, "lossy" + WebP
+ * on): it converts every JPG/PNG to WebP at the edge for browsers that
+ * accept it, on both sites, regardless of the URL in the HTML (verified
+ * 2026-10-20: EN .jpg thumbnails served as image/webp, cf-polished: ok,
+ * 15-26% smaller). EWWW's own WebP conversion duplicated that work on the
+ * origin -- extra CPU on every upload (one cwebp run per thumbnail size),
+ * ~25k extra files on disk, <picture> markup in every page -- and had
+ * drifted between FR and EN. Turned off everywhere; EWWW keeps its normal
+ * compression on upload.
+ */
+foreach (['ewww_image_optimizer_webp', 'ewww_image_optimizer_picture_webp', 'ewww_image_optimizer_webp_for_cdn'] as $ewww_webp_option) {
+    add_filter('pre_option_' . $ewww_webp_option, '__return_empty_string');
+}
