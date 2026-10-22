@@ -642,3 +642,17 @@ Appliqué par l'utilisateur (sauvegarde `.htaccess.bak-20261020` sur le serveur)
 **Vérifié :** retraitement des e-mails n° 1058 et 1059 → images extraites, recadrées 700×400 et importées sur les deux sites (FR `uploads/2026/10/`, EN `uploads/sites/2/2026/10/`) ; contrôle visuel : A350F devant le hangar et détecteur SO-114, identiques aux photos des e-mails.
 
 **Incident pendant l'enquête :** mes connexions IMAP de test répétées ont déclenché un blocage temporaire anti-force-brute du serveur de messagerie pour l'IP du poste local (levé après quelques minutes, vérifié par une simple sonde TCP sans authentification). En prod, une seule connexion toutes les 30 min : pas de risque, mais limiter les tests locaux répétés.
+
+### 2026-10-22 (suite) — Bascule en production du plugin aeromorning-news-pipeline : FAITE
+
+Commit `4bdc1ea0` déployé par CI, puis, à la demande de l'utilisateur (« aucun mail non lu actuellement ») :
+1. **Sauvegardes** sur le serveur : `~/public_html/wp-config.php.bak-amnp-20261022-1507` et `~/crontab.bak-amnp-20261022-1507`.
+2. **Crons extract_news retirés** du compte principal (4 lignes `/home/aeromorning/api … artisan` : emails:process, news:publish, cache:purge-cloudflare, security:monitor). Les 2 crons `xml-news-feed` sont conservés.
+3. **Configuration** : bloc `AMNP_*` inséré dans `wp-config.php` de prod (avant « That's all, stop editing! »), valeurs secrètes lues côté serveur dans `/home/aeromorning/api/.env` sans transiter ni être affichées. `AMNP_LINKEDIN_MODE = live`, publication directe, e-mails marqués lus, purge Cloudflare active. Syntaxe vérifiée, site 200.
+4. **Activation réseau** → tables `wp_amnp_news`, `wp_amnp_ignored_emails`, `wp_amnp_process_logs` créées dans `aeromorning_2026`. `check` tout vert (IMAP, OpenAI, Buffer, auteur `dev` = ID 13). Cache LinkedIn importé depuis le `linkedin.json` de prod : **175 URN, 160 noms**.
+5. **Premier passage manuel** : 0 e-mail non lu (attendu), 0 news à publier ; `security-monitor` mesure bien la charge du serveur WordPress (1,99).
+6. **Crons ajoutés** (WP-CLI `/usr/local/bin/wp`, logs dans `/home/aeromorning/logs/amnp-*.log`) : `process-emails` à 0 et 30, `publish` et `security-monitor` toutes les 5 min, `purge-raw` à 3 h 15. Premier passage automatique vérifié à 15 h 10 UTC.
+
+**Restant côté utilisateur :** couper les crons de l'instance séparée `news.aeromorning.com` (compte non accessible d'ici) ; décider du sort des news extraites mais jamais publiées par extract_news (`t_news` status 0 dans `aeromorning_news`) ; après quelques jours stables, supprimer `/home/aeromorning/api` et `/home/aeromorning/news`, archiver la base `aeromorning_news`, retirer de Cloudflare les règles d'autorisation liées à l'IP `146.88.232.167` pour l'API.
+
+**Retour arrière si besoin :** `wp plugin deactivate aeromorning-news-pipeline --network`, `crontab ~/crontab.bak-amnp-20261022-1507`, et restaurer `wp-config.php.bak-amnp-20261022-1507`.
