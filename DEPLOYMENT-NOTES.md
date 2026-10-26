@@ -687,3 +687,17 @@ Le LCP ordinateur restant est le temps d'initialisation JS de Smart Slider (le s
 **Trouvé mais NON appliqué (écriture prod refusée par le garde-fou de l'outil) — à faire manuellement :** le **Mode invité de LiteSpeed est activé au niveau réseau** (`litespeed.conf.guest` = 1 en option réseau ; vide au niveau des sites). `guest.vary.php` renvoie « reload » : **chaque nouveau visiteur charge chaque page deux fois** (rechargement à ~1,3 s). C'était masqué jusqu'au 13/10 parce que Cloudflare bloquait `guest.vary.php` (règle levée ce jour-là, voir plus haut). Le site n'a aucune variante de cache (devise, géo…) qui justifie ce mode → le désactiver : *Admin réseau → LiteSpeed Cache → Général → Mode invité : OFF*, enregistrer, puis *Purger tout*. Retour arrière : le remettre à ON.
 
 **À faire côté utilisateur :** désactiver le Mode invité (ci-dessus) ; dans Search Console → Signaux Web essentiels, ouvrir chaque problème (CLS ordinateur, LCP mobile) et cliquer « Valider la correction » ; les données terrain (CrUX) portent sur 28 jours glissants, l'amélioration apparaît progressivement sur ~4 semaines.
+
+### 2026-10-26 (suite) — Search Console : 262 k URL « Autre page avec balise canonique correcte »
+
+**Diagnostic :** ce statut n'est pas une erreur (Google a trouvé l'URL, lu la canonique et indexé la bonne page à la place), mais chaque visite coûtait un rendu complet hors cache (chaîne de requête unique = miss LiteSpeed). Aucune de ces URL n'est liée par le site, sauf les vues « jour » du calendrier :
+- `?amp=1`, `?noamp=mobile` : restes de l'ancien plugin AMP (désinstallé) ;
+- `?blackhole=…`, `/page/63/?roy2/…?product=…`, `/page/3/?post_type=tribe_organizer&eventDisplay=list&…` : liens externes parasites/spam ;
+- `/events/tag/<tag>/day/<date>/` : la vue jour de The Events Calendar lie le jour précédent/suivant à l'infini, pour chaque étiquette.
+
+**Corrections** (`wp-content/mu-plugins/security-hardening.php`, commit `f8bea2c9`) :
+- redirection 301 vers l'URL propre, dès `plugins_loaded` (avant toute requête WordPress ; sur `init`, The Events Calendar répondait déjà lui-même à certaines combinaisons) : suppression de `amp`, `noamp`, `blackhole` partout, et de tout paramètre sauf `?s=` sur les paginations `/page/N/`. Visiteurs connectés, admin, AJAX et cron exclus. Vérifié en prod : les URL d'exemple de la Search Console répondent 301 ; recherche paginée, `utm_*`, accueil, agenda inchangés (200).
+- `robots.txt` : `Disallow: /*/day/2` (vues jour du calendrier).
+- Cache LiteSpeed purgé (il contenait d'anciennes copies 200 de ces URL à paramètres).
+
+**Évolution attendue :** au fil des recrawls (plusieurs semaines à quelques mois vu le volume), ces URL passent en « Page avec redirection » (paramètres) ou « Bloquée par le fichier robots.txt » (vues jour), deux statuts informatifs eux aussi, puis disparaissent progressivement. Il n'y a rien à « valider » pour ce statut dans la Search Console.
