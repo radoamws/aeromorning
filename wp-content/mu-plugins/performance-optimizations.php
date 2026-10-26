@@ -33,30 +33,15 @@ add_filter('style_loader_tag', function ($tag, $handle) {
     return $tag;
 }, 10, 2);
 
-add_action('wp_enqueue_scripts', function () {
-    wp_enqueue_style(
-        'aeromorning-mailpoet-font-cairo',
-        'https://fonts.googleapis.com/css?family=Cairo:400,400i,700,700i&display=swap',
-        [],
-        null
-    );
-});
+// Cairo itself is self-hosted below (aeromorning_font_faces), no enqueue needed.
 
-/**
- * The Smart Slider 3 banner-ad strip (used site-wide, different numeric
- * instance ID per page/site but always wrapped in .n2-ss-align) has no
- * width/height reserved in the server-rendered HTML — its box only gets
- * its real size once the slider's JS runs, which is the direct cause of
- * the CLS flagged by Search Console (0.35-0.48, "Poor") on both the
- * homepage and article pages. The banner creatives are wide strips
- * (~600x100 to ~1920x438) with no single fixed size, so this reserves an
- * approximate ratio rather than exact pixels — enough to remove the vast
- * majority of the shift. Visually verify after deploy and adjust the
- * ratio if a given placement looks off.
- */
-add_action('wp_head', function () {
-    echo '<style id="aeromorning-cls-fix">.n2-ss-align{aspect-ratio:5/1;min-height:60px;}</style>' . "\n";
-}, 1);
+// No size reservation is needed for the Smart Slider banners: Smart Slider's
+// own CSS already reserves the exact height without JS, through an inline
+// <svg class="n2-ss-preserve-size" viewBox="0 0 1920 438"> (the slider's real
+// ratio) displayed at width:100%. The ".n2-ss-align{aspect-ratio:5/1}" rule
+// that used to live here (2026-10-05) reserved *less* than that for the
+// 1920x438 Thales strip, so the banner overflowed its box by ~36px and
+// covered the category line of the first article (removed 2026-10-26).
 
 /**
  * The "name-directory" plugin (shortcode.php: name_directory_add_frontend_assets)
@@ -87,19 +72,107 @@ add_action('wp_enqueue_scripts', function () {
 }, 20);
 
 /**
- * oswald.ttf (theme heading font) and fontawesome-webfont.woff2 are both
- * referenced only via @font-face inside CSS that LiteSpeed loads async —
- * so the browser doesn't discover either font file until that CSS has
- * already downloaded and parsed, making them the longest links in the
- * critical path (PageSpeed: ~1.8-2s each) despite being small files that
- * serve fast on their own. Preloading lets the browser fetch them in
- * parallel with everything else, right from the start of the page.
+ * Self-hosted web fonts — the main cause of the desktop CLS (0.27-0.35) and
+ * of the late LCP flagged by Search Console in 2026-10. Measured with
+ * Lighthouse on prod before this change, three font sources were fighting:
+ *  - the theme's Google Fonts (Oswald + PT Serif) and the MailPoet Cairo
+ *    font, which LiteSpeed's "Load Google Fonts Asynchronously" option
+ *    turns into a webfontloader *script* — so they started downloading
+ *    only after JS ran (~3s desktop, ~8-12s simulated mobile) and every
+ *    heading/paragraph re-rendered (and shifted) when they arrived;
+ *  - an extra Oswald 300 @font-face pointing to /wp-content/fonts/oswald.ttf
+ *    in the Customizer "Additional CSS" of both sites;
+ *  - a preload of that TTF built with content_url(), which on the EN site
+ *    resolves under /en/wp-content/ — a different URL than the CSS one, so
+ *    the font (and FontAwesome, same issue) was downloaded twice.
+ * Now: the latin subsets (woff2, from Google Fonts) live in
+ * wp-content/fonts/, are declared here with a single main-site URL shared
+ * by both sites, and the two fonts used above the fold are preloaded.
+ * Fallback faces with metric overrides (computed from the fonts' real
+ * metrics with @capsizecss/metrics) keep text the same size while the web
+ * font loads, so the swap barely moves anything.
  */
+function aeromorning_fonts_url($file) {
+    return network_site_url('/wp-content/fonts/' . $file);
+}
+
+add_action('wp_enqueue_scripts', function () {
+    wp_dequeue_style('mh-google-fonts');
+}, 20);
+
+// The old @font-face lives in the DB (custom_css posts of both sites);
+// filtering it out keeps the DB untouched and the fix in version control.
+add_filter('wp_get_custom_css', function ($css) {
+    return preg_replace('/@font-face\s*\{[^}]*oswald\.ttf[^}]*\}/i', '', $css);
+});
+
 add_action('wp_head', function () {
-    $theme_uri = get_template_directory_uri();
-    echo '<link rel="preload" as="font" type="font/ttf" href="' . esc_url(content_url('fonts/oswald.ttf')) . '" crossorigin>' . "\n";
-    echo '<link rel="preload" as="font" type="font/woff2" href="' . esc_url($theme_uri . '/fonts/fontawesome-webfont.woff2?v=4.4.0') . '" crossorigin>' . "\n";
+    echo '<link rel="preload" as="font" type="font/woff2" href="' . esc_url(aeromorning_fonts_url('oswald-latin.woff2')) . '" crossorigin>' . "\n";
+    echo '<link rel="preload" as="font" type="font/woff2" href="' . esc_url(aeromorning_fonts_url('pt-serif-400-latin.woff2')) . '" crossorigin>' . "\n";
+    // Same root-relative URL font-awesome.min.css uses, on both sites.
+    echo '<link rel="preload" as="font" type="font/woff2" href="' . esc_url(network_site_url('/wp-content/themes/mh_newsdesk/fonts/fontawesome-webfont.woff2?v=4.4.0')) . '" crossorigin>' . "\n";
+
+    $faces = [
+        ['Oswald', 'normal', '300 700', 'oswald-latin.woff2'],
+        ['PT Serif', 'normal', '400', 'pt-serif-400-latin.woff2'],
+        ['PT Serif', 'italic', '400', 'pt-serif-400i-latin.woff2'],
+        ['PT Serif', 'normal', '700', 'pt-serif-700-latin.woff2'],
+        ['PT Serif', 'italic', '700', 'pt-serif-700i-latin.woff2'],
+        ['Cairo', 'normal', '400 700', 'cairo-latin.woff2'],
+    ];
+    $css = '';
+    foreach ($faces as [$family, $style, $weight, $file]) {
+        $css .= "@font-face{font-family:'$family';font-style:$style;font-weight:$weight;font-display:swap;src:url(" . esc_url(aeromorning_fonts_url($file)) . ") format('woff2')}";
+    }
+    $css .= "@font-face{font-family:'Oswald Fallback';src:local('Arial');size-adjust:81.43%;ascent-override:146.51%;descent-override:35.49%;line-gap-override:0%}"
+        . "@font-face{font-family:'PT Serif Fallback';src:local('Georgia');size-adjust:100.49%;ascent-override:103.39%;descent-override:28.46%;line-gap-override:0%}"
+        . "@font-face{font-family:'PT Serif Fallback Times';src:local('Times New Roman');size-adjust:110.28%;ascent-override:94.22%;descent-override:25.93%;line-gap-override:0%}";
+    echo '<style id="aeromorning-fonts">' . $css . '</style>' . "\n";
 }, 1);
+
+// Insert the fallback faces into the theme's own stacks (style.css lines 43,
+// 87 and 591). Printed after the theme CSS and the Additional CSS (priority
+// 101) so these same-specificity rules win.
+add_action('wp_head', function () {
+    echo '<style id="aeromorning-font-stacks">'
+        . 'body{font-family:"PT Serif","PT Serif Fallback","PT Serif Fallback Times",Georgia,Times,"Times New Roman",serif}'
+        . '.header-nav,.header-sub,h1,h2,h3,h4,h5,h6,.breadcrumb,.footer-bottom,.widget-list li,.cat-item,.page_item,.menu-item,.button,.commentlist .vcard,.pagination,.mh-share-buttons,'
+        . '#block-14 .wp-widget-group__inner-blocks .wp-block-rss li.wp-block-rss__item .wp-block-rss__item-title a'
+        . '{font-family:"Oswald","Oswald Fallback",Helvetica,Arial,sans-serif}'
+        . '</style>' . "\n";
+}, 102);
+
+/**
+ * LCP on desktop is the first slide of the Smart Slider banner strip
+ * (Thales 1920x438, data-first="1" — the first slide is fixed, not random).
+ * Smart Slider prints every slide image with loading="lazy" and only flips
+ * the visible one to eager from its JS, so the browser couldn't start the
+ * LCP image until scripts ran (Lighthouse: ~1.6-2s "load delay"). Make the
+ * first slide's image of each slider eager + high priority in the HTML so
+ * the preload scanner fetches it immediately.
+ */
+add_action('template_redirect', function () {
+    if (is_admin() || is_feed() || is_robots() || wp_doing_ajax()) {
+        return;
+    }
+    ob_start(function ($html) {
+        // Slide images are printed in "background" blocks ahead of the
+        // slides themselves; data-public-id="1" is the data-first slide's.
+        $marker = 'class="n2-ss-slide-background" data-public-id="1"';
+        $offset = 0;
+        while (($start = strpos($html, $marker, $offset)) !== false) {
+            $offset = $start + strlen($marker);
+            $next = strpos($html, 'class="n2-ss-slide-background"', $offset);
+            if (!preg_match('/<img\b[^>]*\sloading="lazy"[^>]*>/', $html, $m, PREG_OFFSET_CAPTURE, $start)
+                || ($next !== false && $m[0][1] > $next)) {
+                continue;
+            }
+            $img = str_replace(' loading="lazy"', ' loading="eager" fetchpriority="high"', $m[0][0]);
+            $html = substr_replace($html, $img, $m[0][1], strlen($m[0][0]));
+        }
+        return $html;
+    });
+}, 0);
 
 /**
  * The Events Calendar's date-based pagination (/events/month/YYYY-MM/,
