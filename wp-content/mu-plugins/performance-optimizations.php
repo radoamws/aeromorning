@@ -143,6 +143,21 @@ add_action('wp_head', function () {
 }, 102);
 
 /**
+ * Mobile CLS (0.14-0.16 per page, found 2026-10-26 once the font shifts
+ * were gone): the theme hides the desktop menu below 980px with
+ * ".js .main-nav{display:none}", but the "js" class is only set by
+ * Modernizr inside js/scripts.js, which LiteSpeed defers. Until it runs,
+ * the full ~250px menu is painted, then collapses to SlickNav's 42px bar,
+ * moving the whole page up and down again. Set the class right away (kept
+ * out of LiteSpeed's defer) and stand in for the bar with a same-size,
+ * same-colour block until SlickNav prepends the real one.
+ */
+add_action('wp_head', function () {
+    echo '<script data-no-optimize="1" data-no-defer="1">document.documentElement.className=document.documentElement.className.replace(/(^|\s)no-js(\s|$)/,"$1js$2");</script>' . "\n";
+    echo '<style id="aeromorning-mobile-nav">@media only screen and (max-width:980px){.js .header-menu:not(:has(.slicknav_menu))::before{content:"";display:block;height:41px;background:rgba(0,0,0,.55);border-bottom:1px solid #fff}}</style>' . "\n";
+}, 0);
+
+/**
  * LCP on desktop is the first slide of the Smart Slider banner strip
  * (Thales 1920x438, data-first="1" — the first slide is fixed, not random).
  * Smart Slider prints every slide image with loading="lazy" and only flips
