@@ -656,3 +656,34 @@ Commit `4bdc1ea0` déployé par CI, puis, à la demande de l'utilisateur (« auc
 **Restant côté utilisateur :** couper les crons de l'instance séparée `news.aeromorning.com` (compte non accessible d'ici) ; décider du sort des news extraites mais jamais publiées par extract_news (`t_news` status 0 dans `aeromorning_news`) ; après quelques jours stables, supprimer `/home/aeromorning/api` et `/home/aeromorning/news`, archiver la base `aeromorning_news`, retirer de Cloudflare les règles d'autorisation liées à l'IP `146.88.232.167` pour l'API.
 
 **Retour arrière si besoin :** `wp plugin deactivate aeromorning-news-pipeline --network`, `crontab ~/crontab.bak-amnp-20261022-1507`, et restaurer `wp-config.php.bak-amnp-20261022-1507`.
+
+### 2026-10-26 — Core Web Vitals : polices auto-hébergées, CLS mobile du menu, bannière LCP
+
+**Contexte :** Search Console signale en ordinateur 0 URL « bonne » depuis ~17/09 (CLS 0,35 sur les articles EN, 0,27 sur l'accueil FR) et en mobile 2 106 URL « à améliorer » (LCP 2,7 s). Le PSI public étant en quota, mesures faites avec Lighthouse 12 en local (Chrome) sur la prod.
+
+**Causes trouvées :**
+1. **Polices chargées trois fois et trop tard.** Les Google Fonts du thème (Oswald, PT Serif) et Cairo (MailPoet) étaient transformées par LiteSpeed (« Google Fonts asynchrones ») en script *webfontloader* → téléchargées seulement après le JS (~3 s en ordinateur, 8-12 s en mobile simulé), d'où le re-rendu et le décalage de tout le texte. En plus, le « CSS additionnel » des deux sites déclarait un second Oswald (`/wp-content/fonts/oswald.ttf`), et son préchargement était généré avec `content_url()` qui, sur le site EN, donne `/en/wp-content/...` ≠ URL utilisée par le CSS → police (et FontAwesome) téléchargées deux fois.
+2. **Menu mobile :** sous 980 px, le thème masque le menu complet via `.js .main-nav`, mais la classe `js` n'est posée que par Modernizr dans `scripts.js`, différé par LiteSpeed → le menu complet (~250 px) s'affichait puis se repliait en barre SlickNav de 42 px, décalant toute la page (CLS mobile 0,14-0,16 par page).
+3. **Bannière LCP (Thales) :** Smart Slider imprime toutes les images en `loading="lazy"` et ne passe la visible en *eager* qu'en JS → ~2 s de « load delay ».
+4. **Règle `.n2-ss-align{aspect-ratio:5/1}` (05/10) :** inutile (Smart Slider réserve déjà la hauteur exacte via un `<svg viewBox>` à son ratio réel) et nuisible : la bannière 1920×438 débordait de ~36 px sur la ligne de catégories du premier article.
+
+**Corrections** (`wp-content/mu-plugins/performance-optimizations.php`, commits `d7cc0ec5` et `0decdf73`) :
+- Sous-ensembles latin en woff2 dans `wp-content/fonts/` (Oswald et Cairo variables, PT Serif 400/400i/700/700i), `@font-face` + préchargement d'Oswald et PT Serif sur une URL unique du site principal pour FR et EN ; `mh-google-fonts` retiré ; ancien `@font-face oswald.ttf` filtré hors du CSS additionnel (sans toucher la base) ; polices de repli à métriques ajustées (Arial/Georgia/Times) pour que le texte garde la même taille pendant le chargement.
+- Classe `js` posée par un script inline exclu de l'optimisation LiteSpeed + bloc de 42 px de la couleur de la barre jusqu'à l'insertion de SlickNav.
+- Première image de chaque slider en `loading="eager" fetchpriority="high"`.
+- Suppression de la règle 5/1 (vérifié visuellement : plus de chevauchement, en-tête plus compact de ~30 px sous la bannière Liebherr).
+
+**Résultats Lighthouse (prod, avant → après) :**
+
+| Page | Score | LCP | CLS |
+|---|---|---|---|
+| Article EN, mobile | 49 → 81-84 | 5,6 s → 4,1-4,5 s | 0,712 → **0** |
+| Accueil FR, mobile | 62 → 85 | 12,7 s → 3,9 s | 0,066 → **0** |
+| Article EN, ordinateur | 57 → 75-90 | 3,8 s → 2,0-3,7 s | 0,179 → **0** |
+| Accueil FR, ordinateur | 83 → 78 | 1,8 s → 3,2 s (simulé ; observé 1,1 s) | 0,19 → **0** |
+
+Le LCP ordinateur restant est le temps d'initialisation JS de Smart Slider (le slider reste masqué jusque-là) ; la bannière elle-même est chargée dès 50 ms.
+
+**Trouvé mais NON appliqué (écriture prod refusée par le garde-fou de l'outil) — à faire manuellement :** le **Mode invité de LiteSpeed est activé au niveau réseau** (`litespeed.conf.guest` = 1 en option réseau ; vide au niveau des sites). `guest.vary.php` renvoie « reload » : **chaque nouveau visiteur charge chaque page deux fois** (rechargement à ~1,3 s). C'était masqué jusqu'au 13/10 parce que Cloudflare bloquait `guest.vary.php` (règle levée ce jour-là, voir plus haut). Le site n'a aucune variante de cache (devise, géo…) qui justifie ce mode → le désactiver : *Admin réseau → LiteSpeed Cache → Général → Mode invité : OFF*, enregistrer, puis *Purger tout*. Retour arrière : le remettre à ON.
+
+**À faire côté utilisateur :** désactiver le Mode invité (ci-dessus) ; dans Search Console → Signaux Web essentiels, ouvrir chaque problème (CLS ordinateur, LCP mobile) et cliquer « Valider la correction » ; les données terrain (CrUX) portent sur 28 jours glissants, l'amélioration apparaît progressivement sur ~4 semaines.
