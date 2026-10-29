@@ -701,3 +701,20 @@ Le LCP ordinateur restant est le temps d'initialisation JS de Smart Slider (le s
 - Cache LiteSpeed purgé (il contenait d'anciennes copies 200 de ces URL à paramètres).
 
 **Évolution attendue :** au fil des recrawls (plusieurs semaines à quelques mois vu le volume), ces URL passent en « Page avec redirection » (paramètres) ou « Bloquée par le fichier robots.txt » (vues jour), deux statuts informatifs eux aussi, puis disparaissent progressivement. Il n'y a rien à « valider » pour ce statut dans la Search Console.
+
+### 2026-10-29 — Plugin news : mise en page cassée et accents corrompus
+
+**Signalé :** articles affichés sur la moitié gauche de la zone de contenu (ex. « US TransMedics selects Gogo Galileo HDX ») et accents illisibles (Exail, Pegasus). Corrigés à la main en prod par l'utilisateur ; aucun article republié ici.
+
+**Causes (vérifiées sur les 58 news de `wp_amnp_news` et les révisions WordPress) :**
+1. **Mise en page :** OpenAI recopie le HTML de l'e-mail presque tel quel, y compris les retours à la ligne du texte coupé à ~70 colonnes et le balisage Outlook/Yahoo (`class="ydp…MsoNormal"`, `style`, `<span lang>`, tableaux de mise en page `cellspacing`). `wpautop` transforme chaque retour à la ligne en `<br>` → colonne étroite. 17 news sur 58 avaient des attributs hérités.
+2. **Encodage :** invité à rendre un « JSON bien échappé », le modèle échappait parfois les accents octet par octet (`d\u0000e9voile`, `\u0000e2\u000080\u000093` pour « – ») ; `json_decode` en faisait un octet NUL + l'hexadécimal. 14 news sur 58 touchées. L'e-mail brut était correct.
+
+**Corrections (plugin `aeromorning-news-pipeline`) :**
+- nouvelle classe `AMNP_Content` : réassemble les octets (UTF-8, sinon Latin-1) et les `\uXXXX` restés en texte ; reconstruit le HTML à partir d'une liste blanche (p, h2-h6, strong/em/u/s, sup/sub, listes, blockquote, tableaux avec colspan/rowspan, liens http/https/mailto), sans aucun attribut de style, `div`/`span`/`font` déballés, lignes recollées, un bloc par ligne ;
+- appliquée à l'enregistrement (titre, contenu, méta-description, expression clé) et de nouveau à la publication (rattrape les news déjà en file) ;
+- prompt : caractères UTF-8 écrits tels quels, jamais de `\uXXXX`/`\u0000`, balises simples sans attributs, un paragraphe par ligne.
+
+**Tests :** les 58 contenus de prod passés au nettoyage : texte identique au mot près (seuls des espaces entre blocs diffèrent), plus aucun NUL/attribut/div/span, nettoyage idempotent.
+
+La news « Japan Airlines Selects Embraer E190-E2 » n'existe ni dans `wp_amnp_news` ni dans les e-mails ignorés : elle n'a pas été traitée par le plugin (probablement saisie à la main ou par l'ancienne instance news.aeromorning.com).

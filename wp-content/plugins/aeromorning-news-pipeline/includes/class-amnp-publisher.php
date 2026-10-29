@@ -144,6 +144,13 @@ final class AMNP_Publisher
 
     private function publishOne(array $news, string $status, int $authorId): array
     {
+        // Already done when the news is stored; repeated for rows queued before
+        // AMNP_Content existed (idempotent).
+        $news['content'] = AMNP_Content::cleanHtml((string) $news['content']);
+        foreach (['title', 'metadescription', 'focuskeyphrase'] as $field) {
+            $news[$field] = AMNP_Content::cleanText((string) $news[$field]);
+        }
+
         switch_to_blog(AMNP_Config::blogForLang($news['lang']));
 
         try {

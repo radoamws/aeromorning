@@ -45,7 +45,7 @@ function amnp_load_pipeline(): void
     $loaded = true;
 
     require_once AMNP_DIR . '/vendor/autoload.php';
-    foreach (['mailbox', 'openai', 'image', 'cloudflare', 'notifier', 'linkedin', 'security', 'processor', 'publisher'] as $part) {
+    foreach (['content', 'mailbox', 'openai', 'image', 'cloudflare', 'notifier', 'linkedin', 'security', 'processor', 'publisher'] as $part) {
         require_once AMNP_DIR . "/includes/class-amnp-{$part}.php";
     }
 }
