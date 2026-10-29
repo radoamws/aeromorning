@@ -31,7 +31,8 @@ add_action('Yoast\WP\SEO\register_robots_rules', function ($robots) {
         '/*a_href=',
         // The Events Calendar day view links to the previous/next day forever,
         // once per tag (/events/tag/<tag>/day/2026-10-18/): endless crawl.
-        '/*/day/2',
+        // The FR site's slugs are translated (/events/etiquette/<tag>/jour/...).
+        '/*/day/2', '/*/jour/2',
     ] as $path) {
         $robots->add_disallow('*', $path);
     }

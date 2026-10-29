@@ -718,3 +718,19 @@ Le LCP ordinateur restant est le temps d'initialisation JS de Smart Slider (le s
 **Tests :** les 58 contenus de prod passés au nettoyage : texte identique au mot près (seuls des espaces entre blocs diffèrent), plus aucun NUL/attribut/div/span, nettoyage idempotent.
 
 La news « Japan Airlines Selects Embraer E190-E2 » n'existe ni dans `wp_amnp_news` ni dans les e-mails ignorés : elle n'a pas été traitée par le plugin (probablement saisie à la main ou par l'ancienne instance news.aeromorning.com).
+
+### 2026-10-29 — Cloudflare : analyse des « attaques » du 27/10 et remplacement du mode Under Attack
+
+**Les 4 exemples fournis :** `95.217.144.244` = SentiBot (Hetzner), robot de veille « compatible Googlebot », 13 k requêtes/jour ; `66.249.65.170` = vrai Googlebot (AS15169) — à ne jamais bloquer ; `2a04:c44:…` (Akenes) = exploit `/..%0d/server-status`, déjà bloqué par les règles managées ; `146.88.232.167` = **l'IP de notre propre serveur** (cron MailPoet, appels WordPress) et la requête montrée (73.177.137.17, Comcast) un visiteur normal.
+
+**Trafic du 27/10 (GraphQL) :** 20-42 k req/h (pic d'incident du 14/10 : 107 k/h). Les 110 k « 504 » sont des lectures internes du cache *Early Hints* de Cloudflare (`requestSource=earlyHintsCache`, origine jamais contactée) — sans impact. Les règles managées ont bien bloqué les exploits (CVE, path traversal, divulgation de fichiers). **Pas d'attaque justifiant Under Attack.**
+
+**Vrais problèmes trouvés dans les règles :**
+1. La règle « allow sitemaps - verified bots » laisse passer *tous* les robots vérifiés (125 k req/jour) avant « AI Crawl Control » : robots IA (meta-externalagent, OpenAI, Exa, Amazon…) et SentiBot n'étaient jamais filtrés. On ne peut pas simplement remonter « AI Crawl Control » : sa liste contient Googlebot et bingbot.
+2. « Bloquer les outils de scraping » était sensible à la casse (`httpclient` ≠ `Apache HttpClient`, `python` ≠ `Python-urllib`).
+3. Limitation de débit « gnowit.com » : testait `http.host` (toujours aeromorning.com) → ne s'appliquait jamais.
+4. robots.txt : la vue jour du calendrier FR (`/events/etiquette/<tag>/jour/<date>/`) n'était pas couverte par `/*/day/2`.
+
+**Appliqué (API, réversible) :** nouvelle règle « Usurpation Googlebot/Bingbot » (block : UA Googlebot hors robot vérifié AS15169, UA bingbot hors AS8075) et « Robots IA et crawlers gourmands (meme verifies) » (managed challenge : liste AI Crawl Control sans Googlebot/bingbot + règle Applebot/FacebookBot/… + ExaSearchBot, Amzn-SearchBot, SentiBot), toutes deux placées avant le laissez-passer des robots vérifiés ; règle anti-scraping en `lower()` + go-http-client, okhttp, headlesschrome. Vérifié en direct : SentiBot et faux Googlebot bloqués, robots IA challengés, vrai Googlebot en 200. robots.txt : ajout de `/*/jour/2` (security-hardening.php).
+
+**Non appliqué (écriture refusée par le garde-fou de l'outil) — à faire par l'utilisateur :** remettre le niveau de sécurité de *Under Attack* à *Medium* ; corriger la limitation de débit « gnowit.com » (le plan Pro n'accepte ni IP ni user-agent dans l'expression ; utiliser des chemins uniquement).
