@@ -734,3 +734,27 @@ La news « Japan Airlines Selects Embraer E190-E2 » n'existe ni dans `wp_amnp_n
 **Appliqué (API, réversible) :** nouvelle règle « Usurpation Googlebot/Bingbot » (block : UA Googlebot hors robot vérifié AS15169, UA bingbot hors AS8075) et « Robots IA et crawlers gourmands (meme verifies) » (managed challenge : liste AI Crawl Control sans Googlebot/bingbot + règle Applebot/FacebookBot/… + ExaSearchBot, Amzn-SearchBot, SentiBot), toutes deux placées avant le laissez-passer des robots vérifiés ; règle anti-scraping en `lower()` + go-http-client, okhttp, headlesschrome. Vérifié en direct : SentiBot et faux Googlebot bloqués, robots IA challengés, vrai Googlebot en 200. robots.txt : ajout de `/*/jour/2` (security-hardening.php).
 
 **Non appliqué (écriture refusée par le garde-fou de l'outil) — à faire par l'utilisateur :** remettre le niveau de sécurité de *Under Attack* à *Medium* ; corriger la limitation de débit « gnowit.com » (le plan Pro n'accepte ni IP ni user-agent dans l'expression ; utiliser des chemins uniquement).
+
+### 2026-11-04 — Admin « Statistiques » (audience GA4 pour les annonceurs)
+
+**Contexte :** demande de stats FR/UK (visiteurs uniques, visites, pages vues, pays, villes) pour le renouvellement Liebherr. L'ancien outil `/stat/` ne peut pas servir :
+- ses tables `stat`/`stat2`/`stat3` ont été en partie **remplies de lignes aléatoires** par `insertion_stat.php` (07/2023 → 02/2024 : ~1 500/mois contre 5-20 réels) ;
+- elles n'enregistrent plus rien depuis 02/2025 ;
+- `/stat/stat.php` est vulnérable aux injections SQL, sans authentification réelle.
+
+**Nouveau :** mu-plugin `aeromorning-stats` (Admin > Statistiques, capacité `manage_options`) qui lit les deux propriétés GA4 : FR 405884692, UK 472994712.
+- Filtres : version, mois ou dates libres, comparaison (année précédente / période précédente), classement, pays, exclusion de pays et de villes, domaine annonceur.
+- Détection du trafic robot (beaucoup de visiteurs, presque aucune visite engagée) avec un bouton « Exclure ce trafic ».
+- Affichage : chiffres clés, tableau par version, graphique, pays, villes, clics sortants.
+- Impression / PDF pour le client, export CSV (Excel).
+
+**Charge serveur :**
+- rien n'est chargé sur le front (`is_admin()` uniquement) ;
+- 1 appel `batchRunReports` par propriété et par combinaison de filtres, à l'ouverture de la page ;
+- réponses en transient réseau : 1 h si la période touche les 48 dernières heures, 24 h sinon. Jeton OAuth en cache 55 min.
+
+**À faire en prod (une fois) :**
+1. Déposer la clé JSON du compte de service `aeromorning-stat@aeromorning-513714.iam.gserviceaccount.com` **hors de `public_html`**, par ex. `/home/aeromorning/ga-service-account.json`, droits 600. Pas à la racine du site : elle y serait lisible depuis le web, et le `rsync --delete` du déploiement la supprimerait.
+2. Ajouter dans le `wp-config.php` de prod :
+   `define( 'AEROMORNING_GA_KEY_FILE', '/home/aeromorning/ga-service-account.json' );`
+3. Ne pas ajouter `WP_ACCESSIBLE_HOSTS` en prod : c'est le `wp-config.php` local qui bloque les appels externes et autorise `oauth2.googleapis.com` / `analyticsdata.googleapis.com`.
