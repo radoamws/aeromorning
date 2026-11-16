@@ -1,17 +1,16 @@
 name: Deploy to PlanetHoster
 
 # Auto-deploy on every push to main, or trigger manually from the Actions tab.
-# Three independent targets on the same server (siblings under /home/aeromorning/):
-#   - WordPress (repo root, minus extract_news/)        -> /home/aeromorning/public_html  (aeromorning.com)
-#   - Laravel API (extract_news/api/)                   -> /home/aeromorning/api           (api.aeromorning.com)
-#   - Nuxt static build (extract_news/gestion-news/)     -> /home/aeromorning/news          (news.aeromorning.com)
+# Single target: WordPress (repo root, minus extract_news/) -> /home/aeromorning/public_html
+# (aeromorning.com). The former extract_news apps (api.aeromorning.com and
+# news.aeromorning.com) were replaced by the aeromorning-news-pipeline plugin;
+# their domains and directories no longer exist, so they are not deployed.
 #
 # Required repo secrets (Settings -> Secrets and variables -> Actions):
 #   SSH_HOST, SSH_PORT, SSH_USER, SSH_PRIVATE_KEY
 #
 # Never touched by this workflow (already live on the server, not in git):
-#   wp-config.php, .htaccess, wp-content/uploads/, extract_news/api/.env,
-#   extract_news/api/storage/, extract_news/gestion-news/.env
+#   wp-config.php, .htaccess, wp-content/uploads/
 # Cron jobs on the server are left untouched — they already exist and are
 # out of scope for this pipeline.
 
@@ -76,97 +75,3 @@ jobs:
         run: |
           ssh -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
             "find /home/aeromorning/public_html -maxdepth 1 -type f \( -name '*.md' -o -name '.gitignore' \) -print -delete"
-
-  deploy-laravel-api:
-    name: Deploy Laravel API -> api.aeromorning.com
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Trust host key
-        run: ssh-keyscan -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
-
-      - name: Rsync Laravel files
-        run: |
-          rsync -az --delete \
-            -e "ssh -p ${{ secrets.SSH_PORT }}" \
-            --exclude='/.env' \
-            --exclude='/vendor/' \
-            --exclude='/storage/' \
-            --exclude='/public/storage' \
-            --exclude='/bootstrap/cache/*.php' \
-            --exclude='/composer.phar' \
-            extract_news/api/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/aeromorning/api/"
-
-      - name: Sync default news image
-        # storage/ is excluded above (it's runtime content: logs, cache,
-        # per-article images), but this one file is a permanent site asset
-        # (fallback featured image when an extracted email has none) and
-        # must survive deploys, so it's synced explicitly, outside that
-        # exclude.
-        run: |
-          rsync -az \
-            -e "ssh -p ${{ secrets.SSH_PORT }}" \
-            extract_news/api/storage/app/public/images/visuel-news-aeromorning.jpg \
-            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/aeromorning/api/storage/app/public/images/visuel-news-aeromorning.jpg"
-
-      - name: composer install & migrate
-        # `bash -l` (login shell, via a heredoc piped over stdin rather than
-        # a quoted -c string — avoids nested-quoting headaches) still didn't
-        # put `composer` on PATH on this host, so this self-installs
-        # composer.phar into the project dir when the global command isn't
-        # found, instead of guessing at a server-specific install path.
-        run: |
-          ssh -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" bash -l <<'REMOTE'
-            set -e
-            cd /home/aeromorning/api
-
-            if command -v composer >/dev/null 2>&1; then
-              composer install --no-dev --optimize-autoloader --no-interaction
-            else
-              php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-              php composer-setup.php --quiet
-              rm -f composer-setup.php
-              php composer.phar install --no-dev --optimize-autoloader --no-interaction
-            fi
-
-            php artisan config:clear
-            php artisan migrate --force
-          REMOTE
-
-  deploy-nuxt:
-    name: Build & Deploy Nuxt (static) -> news.aeromorning.com
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install deps & generate static build
-        working-directory: extract_news/gestion-news
-        env:
-          NUXT_PUBLIC_API_BASE_URL: https://api.aeromorning.com/api
-        run: |
-          npm ci
-          npm run generate
-
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Trust host key
-        run: ssh-keyscan -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
-
-      - name: Rsync static build
-        run: |
-          rsync -az --delete \
-            -e "ssh -p ${{ secrets.SSH_PORT }}" \
-            extract_news/gestion-news/.output/public/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/aeromorning/news/"

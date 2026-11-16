@@ -765,3 +765,7 @@ La news « Japan Airlines Selects Embraer E190-E2 » n'existe ni dans `wp_amnp_n
 - Correctif immédiat : purge Cloudflare des accueils FR/EN et des flux pour les 3 types d'appareil (en-tête `CF-Device-Type`).
 - Correctif durable : `AMNP_Cloudflare::purgeUrls()` envoie chaque URL 3 fois (desktop, mobile, tablet) avec l'en-tête `CF-Device-Type`.
 - Pour une purge manuelle depuis le tableau de bord Cloudflare (purge par URL), cocher/ajouter l'en-tête `CF-Device-Type: mobile` (et `tablet`), sinon seul l'ordinateur est rafraîchi.
+
+### 2026-11-16 — CI/CD : fin des déploiements extract_news
+- Les jobs `deploy-laravel-api` (→ `/home/aeromorning/api`, api.aeromorning.com) et `deploy-nuxt` (→ `/home/aeromorning/news`, news.aeromorning.com) sont retirés de `.github/workflows/deploy.yml` : domaines et répertoires supprimés, remplacés par le plugin `aeromorning-news-pipeline`. Sans ce retrait, leur `rsync` aurait recréé ces répertoires sur le serveur.
+- L'exclusion `/extract_news/` du rsync WordPress est conservée : le dossier est encore dans le dépôt et ne doit jamais arriver dans `public_html`.
