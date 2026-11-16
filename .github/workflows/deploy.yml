@@ -1,10 +1,10 @@
 name: Deploy to PlanetHoster
 
 # Auto-deploy on every push to main, or trigger manually from the Actions tab.
-# Single target: WordPress (repo root, minus extract_news/) -> /home/aeromorning/public_html
+# Single target: WordPress (repo root) -> /home/aeromorning/public_html
 # (aeromorning.com). The former extract_news apps (api.aeromorning.com and
-# news.aeromorning.com) were replaced by the aeromorning-news-pipeline plugin;
-# their domains and directories no longer exist, so they are not deployed.
+# news.aeromorning.com) were replaced by the aeromorning-news-pipeline plugin
+# and removed from the repository.
 #
 # Required repo secrets (Settings -> Secrets and variables -> Actions):
 #   SSH_HOST, SSH_PORT, SSH_USER, SSH_PRIVATE_KEY
@@ -44,7 +44,6 @@ jobs:
             -e "ssh -p ${{ secrets.SSH_PORT }}" \
             --exclude='/.git/' \
             --exclude='/.github/' \
-            --exclude='/extract_news/' \
             --exclude='/wp-config.php' \
             --exclude='/.htaccess' \
             --exclude='/.htaccess.bk' \

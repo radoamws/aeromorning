@@ -769,3 +769,8 @@ La news « Japan Airlines Selects Embraer E190-E2 » n'existe ni dans `wp_amnp_n
 ### 2026-11-16 — CI/CD : fin des déploiements extract_news
 - Les jobs `deploy-laravel-api` (→ `/home/aeromorning/api`, api.aeromorning.com) et `deploy-nuxt` (→ `/home/aeromorning/news`, news.aeromorning.com) sont retirés de `.github/workflows/deploy.yml` : domaines et répertoires supprimés, remplacés par le plugin `aeromorning-news-pipeline`. Sans ce retrait, leur `rsync` aurait recréé ces répertoires sur le serveur.
 - L'exclusion `/extract_news/` du rsync WordPress est conservée : le dossier est encore dans le dépôt et ne doit jamais arriver dans `public_html`.
+
+### 2026-11-16 — Suppression de `extract_news/` du dépôt
+- Les 149 fichiers suivis de `extract_news/` (API Laravel + Nuxt) sont retirés du dépôt ; ils restent récupérables dans l'historique git (dernier commit les contenant : `74f102ac`).
+- Les fichiers locaux non versionnés (`.env` avec les secrets prod, `vendor/`, `node_modules/`, `storage/`) ont été déplacés hors du webroot local dans `C:\xampp8\archives\extract_news-2026-11-16`.
+- L'exclusion `/extract_news/` est retirée du rsync WordPress (le dossier n'existe plus).
