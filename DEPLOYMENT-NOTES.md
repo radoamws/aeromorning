@@ -758,3 +758,10 @@ La news « Japan Airlines Selects Embraer E190-E2 » n'existe ni dans `wp_amnp_n
 2. Ajouter dans le `wp-config.php` de prod :
    `define( 'AEROMORNING_GA_KEY_FILE', '/home/aeromorning/ga-service-account.json' );`
 3. Ne pas ajouter `WP_ACCESSIBLE_HOSTS` en prod : c'est le `wp-config.php` local qui bloque les appels externes et autorise `oauth2.googleapis.com` / `analyticsdata.googleapis.com`.
+
+### 2026-11-16 — Mobile : la page d'accueil ne montrait plus les dernières news
+- Symptôme : sur un vrai téléphone (Android/iPhone), le bloc des 8 dernières news de l'accueil n'affichait pas les articles récents ; sur ordinateur, tout était à jour.
+- Cause : Cloudflare APO a « cache by device type » activé, donc une copie par type d'appareil (desktop / mobile / tablet). La purge du plugin `aeromorning-news-pipeline` envoyait les URL nues, ce qui n'évince **que la copie desktop**. Les copies mobile/tablette restaient indéfiniment (accueil mobile figé au 12/11). L'origine LiteSpeed, elle, servait bien la version à jour.
+- Correctif immédiat : purge Cloudflare des accueils FR/EN et des flux pour les 3 types d'appareil (en-tête `CF-Device-Type`).
+- Correctif durable : `AMNP_Cloudflare::purgeUrls()` envoie chaque URL 3 fois (desktop, mobile, tablet) avec l'en-tête `CF-Device-Type`.
+- Pour une purge manuelle depuis le tableau de bord Cloudflare (purge par URL), cocher/ajouter l'en-tête `CF-Device-Type: mobile` (et `tablet`), sinon seul l'ordinateur est rafraîchi.

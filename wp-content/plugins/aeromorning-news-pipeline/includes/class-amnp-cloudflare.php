@@ -88,9 +88,18 @@ final class AMNP_Cloudflare
             return ['skipped' => true, 'reason' => 'Missing Cloudflare credentials'];
         }
 
+        // APO caches one copy per device type ("cache by device type"): a bare
+        // URL only evicts the desktop copy, so phones kept stale homepages.
+        $files = [];
+        foreach ($urls as $url) {
+            foreach (['desktop', 'mobile', 'tablet'] as $device) {
+                $files[] = ['url' => $url, 'headers' => ['CF-Device-Type' => $device]];
+            }
+        }
+
         $results = [];
         // Cloudflare accepts at most 30 URLs per purge call.
-        foreach (array_chunk($urls, 30) as $chunk) {
+        foreach (array_chunk($files, 30) as $chunk) {
             $response = wp_remote_post("https://api.cloudflare.com/client/v4/zones/{$zoneId}/purge_cache", [
                 'timeout' => 15,
                 'headers' => ['Authorization' => 'Bearer ' . $token, 'Content-Type' => 'application/json'],
