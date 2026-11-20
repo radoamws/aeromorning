@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<wpml-config>
+    <custom-types>
+        <custom-type translate="1">ilj_customlinks</custom-type>
+    </custom-types>
+
+    <custom-fields>
+        <custom-field action="translate">ilj_blacklistdefinition</custom-field>
+        <custom-field action="copy">ilj_custom_link_option_new_window</custom-field>
+        <custom-field action="copy">ilj_custom_link_option_nofollow</custom-field>
+        <custom-field action="copy">ilj_limitincominglinks</custom-field>
+        <custom-field action="copy">ilj_limitlinksperparagraph</custom-field>
+        <custom-field action="copy">ilj_limitoutgoinglinks</custom-field>
+        <custom-field action="copy">ilj_linksperparagraph</custom-field>
+        <custom-field action="translate">ilj_linkdefinition</custom-field>
+        <custom-field action="copy">ilj_maxincominglinks</custom-field>
+        <custom-field action="copy">ilj_maxoutgoinglinks</custom-field>
+    </custom-fields>
+
+    <custom-term-fields>
+        <custom-term-field action="translate">ilj_blacklistdefinition</custom-term-field>
+        <custom-term-field action="copy">ilj_limitincominglinks</custom-term-field>
+        <custom-term-field action="copy">ilj_limitlinksperparagraph</custom-term-field>
+        <custom-term-field action="copy">ilj_limitoutgoinglinks</custom-term-field>
+        <custom-term-field action="translate">ilj_linkdefinition</custom-term-field>
+        <custom-term-field action="copy">ilj_linksperparagraph</custom-term-field>
+        <custom-term-field action="copy">ilj_maxincominglinks</custom-term-field>
+        <custom-term-field action="copy">ilj_maxoutgoinglinks</custom-term-field>
+    </custom-term-fields>
+</wpml-config>

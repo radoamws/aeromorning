@@ -11,20 +11,20 @@ use MailPoetVendor\Doctrine\ORM\Query\SqlWalker;
 use MailPoetVendor\Doctrine\ORM\Query\TokenType;
 class LengthFunction extends FunctionNode implements TypedExpression
 {
- public $stringPrimary;
- public function getSql(SqlWalker $sqlWalker)
- {
- return $sqlWalker->getConnection()->getDatabasePlatform()->getLengthExpression($sqlWalker->walkSimpleArithmeticExpression($this->stringPrimary));
- }
- public function parse(Parser $parser)
- {
- $parser->match(TokenType::T_IDENTIFIER);
- $parser->match(TokenType::T_OPEN_PARENTHESIS);
- $this->stringPrimary = $parser->StringPrimary();
- $parser->match(TokenType::T_CLOSE_PARENTHESIS);
- }
- public function getReturnType() : Type
- {
- return Type::getType(Types::INTEGER);
- }
+public $stringPrimary;
+public function getSql(SqlWalker $sqlWalker)
+{
+return $sqlWalker->getConnection()->getDatabasePlatform()->getLengthExpression($sqlWalker->walkSimpleArithmeticExpression($this->stringPrimary));
+}
+public function parse(Parser $parser)
+{
+$parser->match(TokenType::T_IDENTIFIER);
+$parser->match(TokenType::T_OPEN_PARENTHESIS);
+$this->stringPrimary = $parser->StringPrimary();
+$parser->match(TokenType::T_CLOSE_PARENTHESIS);
+}
+public function getReturnType(): Type
+{
+return Type::getType(Types::INTEGER);
+}
 }

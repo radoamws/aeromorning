@@ -43,6 +43,7 @@ class FormEntity {
   const TEXT_BLOCK_TYPE = 'text';
   const TEXTAREA_BLOCK_TYPE = 'textarea';
   const SUBMIT_BLOCK_TYPE = 'submit';
+  const CLOSE_BLOCK_TYPE = 'close';
   const COLUMNS_BLOCK_TYPE = 'columns';
   const COLUMN_BLOCK_TYPE = 'column';
 
@@ -62,6 +63,16 @@ class FormEntity {
     self::SELECT_BLOCK_TYPE,
     self::TEXT_BLOCK_TYPE,
     self::TEXTAREA_BLOCK_TYPE,
+  ];
+
+  // Keep in sync with assets/js/src/form-editor/components/close-button-settings.tsx
+  public const CLOSE_BUTTON_ICONS = [
+    'classic',
+    'classic_white',
+    'round_black',
+    'round_white',
+    'square_black',
+    'square_white',
   ];
 
   /**
@@ -120,6 +131,11 @@ class FormEntity {
    */
   public function getSettings() {
     return $this->settings;
+  }
+
+  public function getCloseButtonIcon(string $default): string {
+    $icon = $this->settings['close_button'] ?? null;
+    return in_array($icon, self::CLOSE_BUTTON_ICONS, true) ? $icon : $default;
   }
 
   /**

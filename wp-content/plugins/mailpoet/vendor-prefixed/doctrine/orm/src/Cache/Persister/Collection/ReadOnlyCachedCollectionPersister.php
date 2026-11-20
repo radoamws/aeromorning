@@ -7,11 +7,11 @@ use MailPoetVendor\Doctrine\ORM\PersistentCollection;
 use MailPoetVendor\Doctrine\ORM\Proxy\DefaultProxyClassNameResolver;
 class ReadOnlyCachedCollectionPersister extends NonStrictReadWriteCachedCollectionPersister
 {
- public function update(PersistentCollection $collection)
- {
- if ($collection->isDirty() && $collection->getSnapshot()) {
- throw CannotUpdateReadOnlyCollection::fromEntityAndField(DefaultProxyClassNameResolver::getClass($collection->getOwner()), $this->association['fieldName']);
- }
- parent::update($collection);
- }
+public function update(PersistentCollection $collection)
+{
+if ($collection->isDirty() && $collection->getSnapshot()) {
+throw CannotUpdateReadOnlyCollection::fromEntityAndField(DefaultProxyClassNameResolver::getClass($collection->getOwner()), $this->association['fieldName']);
+}
+parent::update($collection);
+}
 }

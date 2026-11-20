@@ -248,29 +248,12 @@ class Tribe__Tickets__Attendees_Table extends WP_List_Table {
 
 		$attendee_id = esc_html( $attendee_id );
 
-		$attendee_link = $name;
+		$attendee_link = esc_html( $name );
 
 		// If we're in the admin, we display details in the modal.
 		if ( is_admin() ) {
-			$link = add_query_arg(
-				[
-					'action' => 'tec_tickets_attendee_details',
-				],
-				admin_url( 'admin-ajax.php' )
-			);
-
-			$attendee_link = ' <a
-				href="' . $link . '&TB_iframe=1&width=500&height=400"
-				class="row-title thickbox"
-				name="' . $name . '"
-				data-attendee-id="' . esc_attr( $attendee_id ) . '"
-				data-provider="' . esc_attr( $item['provider'] ) . '"
-				data-provider-slug="' . esc_attr( $item['provider_slug'] ) . '"
-				data-event-id="' . esc_attr( $item['event_id'] ) . '"
-			>' . $name . '</a>';
-
 			$button_args = [
-				'button_text'       => $name,
+				'button_text'       => esc_html( $name ),
 				'button_attributes' => [
 					'data-attendee-id'    => (string) $item['attendee_id'],
 					'data-event-id'       => (string) $item['event_id'],
@@ -1042,6 +1025,7 @@ class Tribe__Tickets__Attendees_Table extends WP_List_Table {
 	 * Prepares the list of items for displaying.
 	 *
 	 * @since 5.8.4 Adding caching to eliminate method running multiple times.
+	 * @since 5.29.5.1 Only a sortable column and an `ASC`/`DESC` direction are read from the request.
 	 *
 	 * @return void
 	 */
@@ -1076,12 +1060,17 @@ class Tribe__Tickets__Attendees_Table extends WP_List_Table {
 		}
 
 		// Setup sorting args.
-		if ( tribe_get_request_var( 'orderby' ) ) {
-			$args['orderby'] = tribe_get_request_var( 'orderby' );
+		$orderby = tribe_get_request_var( 'orderby' );
+
+		if ( is_string( $orderby ) && in_array( $orderby, array_filter( $this->get_sortable_columns(), 'is_string' ), true ) ) {
+			$args['orderby'] = $orderby;
 		}
 
-		if ( tribe_get_request_var( 'order' ) ) {
-			$args['order']   = tribe_get_request_var( 'order' );
+		$order = tribe_get_request_var( 'order' );
+		$order = is_string( $order ) ? strtoupper( $order ) : '';
+
+		if ( in_array( $order, [ 'ASC', 'DESC' ], true ) ) {
+			$args['order'] = $order;
 		}
 
 		/**

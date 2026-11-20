@@ -51,7 +51,7 @@ class IndexAsset {
 
 			$asset_title    = $post->post_title;
 			$asset_url      = get_the_permalink($post->ID);
-			$asset_url_edit = get_edit_post_link($post->ID);
+			$asset_url_edit = self::get_edit_post_link($post->ID);
 		}
 
 		
@@ -437,4 +437,116 @@ class IndexAsset {
 		}
 		return $arr;
 	}
+
+	/**
+	 * Retrieves the edit post link for post.
+	 *
+	 * Can be used within the WordPress loop or outside of it. Can be used with
+	 * pages, posts, attachments, revisions, global styles, templates, and template parts.
+	 *
+	 * @param int|WP_Post $post    Optional. Post ID or post object. Default is the global `$post`.
+	 * @param string      $context Optional. How to output the '&' character. Default '&amp;'.
+	 * @return string|null The edit post link for the given post. Null if the post type does not exist.
+	 */
+	private static function get_edit_post_link($post = 0, $context = 'display') {
+		$post = get_post($post);
+
+		if (!$post) {
+			return;
+		}
+
+		if ('revision' === $post->post_type) {
+			$action = '';
+		} elseif ('display' === $context) {
+			$action = '&amp;action=edit';
+		} else {
+			$action = '&action=edit';
+		}
+
+		$post_type_object = get_post_type_object($post->post_type);
+
+		if (!$post_type_object) {
+			return;
+		}
+
+		$link = '';
+
+		if ('wp_template' === $post->post_type || 'wp_template_part' === $post->post_type) {
+			$slug = urlencode(get_stylesheet() . '//' . $post->post_name);
+			$link = admin_url(sprintf($post_type_object->_edit_link, $post->post_type, $slug));
+		} elseif ('wp_navigation' === $post->post_type) {
+			$link = admin_url(sprintf($post_type_object->_edit_link, (string) $post->ID));
+		} elseif ($post_type_object->_edit_link) {
+			$link = admin_url(sprintf($post_type_object->_edit_link . $action, $post->ID));
+		}
+
+		/**
+		 * Filters the post edit link.
+		 *
+		 * @since 2.3.0
+		 *
+		 * @param string $link    The edit link.
+		 * @param int    $post_id Post ID.
+		 * @param string $context The link context. If set to 'display' then ampersands
+		 *                        are encoded.
+		 */
+		return apply_filters('get_edit_post_link', $link, $post->ID, $context);
+	}
+
+	/**
+	 * Retrieves the URL for editing a given term.
+	 *
+	 * @param int|WP_Term|object $term        The ID or term object whose edit link will be retrieved.
+	 * @param string             $taxonomy    Optional. Taxonomy. Defaults to the taxonomy of the term identified
+	 *                                        by `$term`.
+	 * @param string             $object_type Optional. The object type. Used to highlight the proper post type
+	 *                                        menu on the linked page. Defaults to the first object_type associated
+	 *                                        with the taxonomy.
+	 * @return string|null The edit term link URL for the given term, or null on failure.
+	 */
+	private static function get_edit_term_link($term, $taxonomy = '', $object_type = '') {
+		$term = get_term($term, $taxonomy);
+		if (!$term || is_wp_error($term)) {
+			return;
+		}
+
+		$tax     = get_taxonomy($term->taxonomy);
+		$term_id = $term->term_id;
+		if (!$tax) {
+			return;
+		}
+
+		$args = array(
+			'taxonomy' => $tax->name,
+			'tag_ID'   => $term_id,
+		);
+
+		if ($object_type) {
+			$args['post_type'] = $object_type;
+		} elseif (!empty($tax->object_type)) {
+			$args['post_type'] = reset($tax->object_type);
+		}
+
+		if ($tax->show_ui) {
+			$location = add_query_arg($args, admin_url('term.php'));
+		} else {
+			$location = '';
+		}
+
+		/**
+		 * Filters the edit link for a term.
+		 *
+		 * @since 3.1.0
+		 *
+		 * @param string $location    The edit link.
+		 * @param int    $term_id     Term ID.
+		 * @param string $taxonomy    Taxonomy name.
+		 * @param string $object_type The object type.
+		 */
+		return apply_filters('get_edit_term_link', $location, $term_id, $taxonomy, $object_type);
+	}
+
+	
+
+	
 }

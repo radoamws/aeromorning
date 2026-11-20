@@ -6,5 +6,5 @@ use BackedEnum;
 use ReflectionProperty;
 interface TypedFieldMapper
 {
- public function validateAndComplete(array $mapping, ReflectionProperty $field) : array;
+public function validateAndComplete(array $mapping, ReflectionProperty $field): array;
 }

@@ -1,5 +1,14 @@
 (function (blocks, element, components, blockEditor) {
-    var el = element.createElement,
+    /**
+     * The slider id is either a numeric id or an alias limited to [a-z0-9%_-]
+     * (see ModelSliders alias sanitization). Strip anything else so a hand-edited
+     * block attribute cannot break out of the iframe URL or the shortcode and
+     * inject markup (CVE-2026-15798).
+     */
+    var sanitizeSliderId = function (slider) {
+            return String(slider === undefined || slider === null ? '' : slider).replace(/[^A-Za-z0-9%_-]/g, '');
+        },
+        el = element.createElement,
         smartSliderIcon = wp.element.createElement('svg',
             {
                 width: 20,
@@ -19,7 +28,7 @@
             });
         },
         EditSlider = function (attributes) {
-            window.open(window.gutenberg_smartslider3.slider_edit_url + attributes.slider, '_blank')
+            window.open(window.gutenberg_smartslider3.slider_edit_url + encodeURIComponent(sanitizeSliderId(attributes.slider)), '_blank')
         };
 
     blocks.registerBlockType('nextend/smartslider3', {
@@ -48,7 +57,7 @@
                             src: _N2._imageHelper.fixed('$ss3-admin$/images/ss3gutenbergblock.png')
                         }) :
                         attributes.slider ? el('div', {className: props.className, style: {pointerEvents: 'none'}},
-                                el(element.RawHTML, null, window.gutenberg_smartslider3.template.replace(/\{\{\{slider\}\}\}/g, attributes.slider)),
+                                el(element.RawHTML, null, window.gutenberg_smartslider3.template.replace(/\{\{\{slider\}\}\}/g, encodeURIComponent(sanitizeSliderId(attributes.slider)))),
                                 blockEditor.BlockControls && components.ToolbarGroup && el(blockEditor.BlockControls, null,
                                     el(components.ToolbarGroup, {className: 'wp-block-nextend-smartslider3--toolbar-group'},
                                         el(components.ToolbarButton, {
@@ -136,7 +145,7 @@
         save: function (props) {
             var attributes = props.attributes;
             if (attributes.slider) {
-                return el('div', blockEditor.useBlockProps.save(), '[smartslider3 slider="' + attributes.slider + '"]');
+                return el('div', blockEditor.useBlockProps.save(), '[smartslider3 slider="' + sanitizeSliderId(attributes.slider) + '"]');
             }
 
             return null;

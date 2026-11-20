@@ -2,8 +2,8 @@
 Contributors: nosilver4u
 Donate link: https://ewww.io/donate/
 Tags: compress, convert, webp, resize, lazy load
-Tested up to: 7.0
-Stable tag: 8.7.2
+Tested up to: 7.1
+Stable tag: 8.9.2
 License: GPLv3
 
 Comprehensive image optimization with WebP, AVIF, Lazy Load, and more. Optimize images automatically for Faster Sites and Happy Visitors.
@@ -32,7 +32,7 @@ Are you frustrated by a slow website? Do over-sized images make you say â€œewwwâ
 * Preserve GIF animations in thumbnails
 * [Free email support](https://ewww.io/contact-us/)
 
-EWWW Image Optimizer is the only plugin that lets you optimize images using tools on your own web server (jpegtran, optipng, pngout, pngquant, gifsicle, cwebp). This requires the PHP exec() function and a [compatible](https://docs.ewww.io/article/43-supported-web-hosts) Linux, Windows, MacOS, or FreeBSD web server. [If your web server is not compatible, we offer unlimited lossless JPG image optimization and WebP conversion via our Compress API **for free*](https://docs.ewww.io/article/29-what-is-exec-and-why-do-i-need-it).
+EWWW Image Optimizer is the only plugin that lets you optimize images using tools on your own web server (jpegtran, optipng, pngout, pngquant, gifsicle, cwebp). This requires the PHP exec() function and a [compatible](https://docs.ewww.io/article/43-supported-web-hosts) Linux, Windows, MacOS, or FreeBSD web server. [If your web server is not compatible, we offer unlimited lossless JPG image optimization and WebP conversion via our Compress API **for free**](https://docs.ewww.io/article/29-what-is-exec-and-why-do-i-need-it).
 
 **Upgrade to [Premium](https://ewww.io/plans/) for:**
 
@@ -102,6 +102,10 @@ Allows you to run all batch image processes from the command line, instead of th
 
 [WP Offload Media](https://wordpress.org/plugins/amazon-s3-and-cloudfront/) is the officially supported (and recommended) plugin for uploads to Amazon S3, Digital Ocean Spaces, and Google Cloud Storage. [Check our compatibility list for details on other plugins](https://docs.ewww.io/article/84-plugin-compatibility). All pull mode CDNs like Cloudflare, KeyCDN, Bunny CDN and Sucuri work automatically, but you will need to purge the CDN cache after you optimize images with bulk optimization.
 
+= Client-Side Media Processing =
+
+EWWW IO is fully compatible with browser-based thumbnail generation, but if you encounter any issues, you may [disable the in-browser image handling in Ludicrous Mode](https://docs.ewww.io/article/11-advanced-configuration). 
+
 = Translations =
 
 Huge thanks to all our translators, [see the full list](https://translate.wordpress.org/projects/wp-plugins/ewww-image-optimizer/contributors)!
@@ -170,6 +174,82 @@ That's not a question, but since I made it up, I'll answer it. See this resource
 
 * Feature requests can be viewed and submitted on our [feedback portal](https://feedback.ewww.io/b/features)
 * If you would like to help translate this plugin in your language, [join the team](https://translate.wordpress.org/projects/wp-plugins/ewww-image-optimizer/)
+
+= 8.9.2 =
+*Release Date - November 10, 2026*
+
+* added: eio_lazy_noscript and eio_webp_noscript filters to modify/suppress noscript fall-back elements
+* changed: Add Missing Dimensions no longer fills in height/width if only one dimension is missing
+* fixed: Easy IO skips manually generated srcset attributes with relative URLs
+* fixed: Easy IO only rewrites first background image in a CSS property when parsing internal style elements
+* fixed: optimization results not shown when bulk optimization is in WebP Only mode
+* fixed: failure to remove local images after optimization when using S3 Uploads plugin
+* fixed: local optimization blocked on WP NET VPS hosting
+* security: improved HTML attribute parsing applied to all front-end filters
+
+= 8.9.1 =
+*Release Date - October 29, 2026*
+
+* deprecated: support for PHP versions older than 8.2 will be removed in version 9.0.0
+* fixed: some images are not auto-optimized if thumbnail dimensions are set to zero
+* fixed: WebP thumbnails for images edited within WordPress use incorrect source image
+* fixed: Force Re-optimize does not recreate WebP images when using ImageMagick
+* security: Lazy Load HTML attribute parsing is now stricter and more secure
+
+= 8.9.0 =
+*Release Date - October 13, 2026*
+
+* added: option to disable resizing via maximum dimensions on media uploader and in post editor
+* fixed: regression in Easy IO handling of style attributes causes HTML entities to be double-encoded
+* fixed: PNG metadata not removed when using local optipng
+* fixed: images with fetchpriority="high" do not get skipped by Lazy Load when Picture WebP delivery is enabled
+* fixed: duplicate WebP delivery checks run on settings page
+* fixed: race condition with some LiteSpeed servers causes incorrect WebP test image to display
+* fixed: images too small for thumbnails failed to optimize automatically on upload
+* security: yet more hardening against stored XSS attacks, thanks to WPScan for reporting 
+
+= 8.8.0 =
+*Release Date - September 24, 2026*
+
+* added: quality setting for Premium compression, Premium Plus removed/migrated to quality 77
+* fixed: fatal error when fetching remote images via WP Offload Media due to strict type casting
+* fixed: multisite file modification outside upload directory
+* security: PHP object injection, reported by Karthik Ramakrishnan
+* security: further hardening of stored XSS fix, reported by Charles Vosburgh and Intrudify
+* security: prevent reflected XSS
+
+= 8.7.7 =
+*Release Date - September 1, 2026*
+
+* fixed: LQIP/DCIP inputs not available immediately after Easy IO activation
+* security: ensure all CDN image URLs are properly escaped to prevent XSS
+
+= 8.7.6 =
+*Release Date - August 20, 2026*
+
+* added: option to disable client-side media processing in WP 7.1, mostly for animated GIF images and indexed (palette) PNG images
+* fixed: compatibility with client-side media processing in WP 7.1
+* fixed: Easy IO modifies URLs in REST API endpoints used by media uploader in WP 7.1
+* fixed: WebP conversion via Imagick throws fatal error when source file goes missing
+* fixed: PNG to JPG conversion via API sometimes results in black background for 8-bit images
+* fixed: Auto-scaling sometimes makes images too large (or too small) when CSS width is set to `auto`
+
+= 8.7.5 =
+*Release Date - August 5, 2026*
+
+* improved: use WP file access functions wherever possible
+* fixed: PHP notices in BuddyPress/BuddyBoss compatibility functions
+* removed: PNG to JPG auto-convert for large PNG images
+
+= 8.7.4 =
+*Release Date - July 16, 2026*
+
+* security: prevent authenticated XSS
+
+= 8.7.3 =
+*Release Date - July 9, 2026*
+
+* added: ewww_image_optimizer_cloud_based_media filter for cloud-based storage plugins to integrate with optimization processes
 
 = 8.7.2 =
 *Release Date - June 10, 2026*

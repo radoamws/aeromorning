@@ -5,17 +5,17 @@ use Automattic\WooCommerce\EmailEditorVendor\Symfony\Component\CssSelector\Parse
 use Automattic\WooCommerce\EmailEditorVendor\Symfony\Component\CssSelector\Parser\TokenStream;
 class CommentHandler implements HandlerInterface
 {
- public function handle(Reader $reader, TokenStream $stream): bool
- {
- if ('/*' !== $reader->getSubstring(2)) {
- return false;
- }
- $offset = $reader->getOffset('*/');
- if (false === $offset) {
- $reader->moveToEnd();
- } else {
- $reader->moveForward($offset + 2);
- }
- return true;
- }
+public function handle(Reader $reader, TokenStream $stream): bool
+{
+if ('/*' !== $reader->getSubstring(2)) {
+return false;
+}
+$offset = $reader->getOffset('*/');
+if (false === $offset) {
+$reader->moveToEnd();
+} else {
+$reader->moveForward($offset + 2);
+}
+return true;
+}
 }

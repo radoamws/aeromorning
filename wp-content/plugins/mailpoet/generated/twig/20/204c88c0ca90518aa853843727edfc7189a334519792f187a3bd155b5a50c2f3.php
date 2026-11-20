@@ -39,7 +39,7 @@ class __TwigTemplate_85fc869f3ae1c550c3cf160741a139fd72e12753ecca0317d5c2fd9caec
         $macros = $this->macros;
         // line 1
         yield "<div id=\"mailpoet_social_icon_selector_contents\"></div>
-<input type=\"button\" class=\"button button-secondary mailpoet_button_full mailpoet_add_social_icon\" data-automation-id='social_select_another_network' value=\"";
+<input type=\"button\" class=\"button button-secondary mailpoet_button_full mailpoet_add_social_icon\" data-automation-id=\x27social_select_another_network\x27 value=\"";
         // line 2
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Add another social network");
         yield "\" />

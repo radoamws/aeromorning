@@ -15,9 +15,11 @@ use MailPoet\Form\DisplayFormInWPContent;
 use MailPoet\Mailer\WordPress\WordpressMailerReplacer;
 use MailPoet\Newsletter\Scheduler\PostNotificationScheduler;
 use MailPoet\Segments\WP;
+use MailPoet\Segments\WPUserDeleteNotice;
 use MailPoet\Settings\SettingsController;
 use MailPoet\Statistics\Track\SubscriberHandler;
 use MailPoet\Subscribers\SubscriberLimitNotificationScheduler;
+use MailPoet\Subscribers\WPUserSubscriberLink;
 use MailPoet\Subscription\AdminUserSubscription;
 use MailPoet\Subscription\Comment;
 use MailPoet\Subscription\Form;
@@ -76,6 +78,9 @@ class Hooks {
   /** @var WP */
   private $wpSegment;
 
+  /** @var WPUserDeleteNotice */
+  private $wpUserDeleteNotice;
+
   /** @var SubscriberHandler */
   private $subscriberHandler;
 
@@ -119,6 +124,8 @@ class Hooks {
 
   private ProductCollectionEmailRendererRegistrar $productCollectionEmailRendererRegistrar;
 
+  private WPUserSubscriberLink $wpUserSubscriberLink;
+
   public function __construct(
     Form $subscriptionForm,
     Comment $subscriptionComment,
@@ -130,6 +137,7 @@ class Hooks {
     WordpressMailerReplacer $wordpressMailerReplacer,
     DisplayFormInWPContent $displayFormInWPContent,
     WP $wpSegment,
+    WPUserDeleteNotice $wpUserDeleteNotice,
     SubscriberHandler $subscriberHandler,
     HooksWooCommerce $hooksWooCommerce,
     SubscriberChangesNotifier $subscriberChangesNotifier,
@@ -144,7 +152,8 @@ class Hooks {
     WooHelper $wooHelper,
     AdminUserSubscription $adminUserSubscription,
     CouponBlockGenerator $couponBlockGenerator,
-    ProductCollectionEmailRendererRegistrar $productCollectionEmailRendererRegistrar
+    ProductCollectionEmailRendererRegistrar $productCollectionEmailRendererRegistrar,
+    WPUserSubscriberLink $wpUserSubscriberLink
   ) {
     $this->subscriptionForm = $subscriptionForm;
     $this->subscriptionComment = $subscriptionComment;
@@ -156,6 +165,7 @@ class Hooks {
     $this->wordpressMailerReplacer = $wordpressMailerReplacer;
     $this->displayFormInWPContent = $displayFormInWPContent;
     $this->wpSegment = $wpSegment;
+    $this->wpUserDeleteNotice = $wpUserDeleteNotice;
     $this->subscriberHandler = $subscriberHandler;
     $this->hooksWooCommerce = $hooksWooCommerce;
     $this->captchaHooks = $captchaHooks;
@@ -171,6 +181,7 @@ class Hooks {
     $this->adminUserSubscription = $adminUserSubscription;
     $this->couponBlockGenerator = $couponBlockGenerator;
     $this->productCollectionEmailRendererRegistrar = $productCollectionEmailRendererRegistrar;
+    $this->wpUserSubscriberLink = $wpUserSubscriberLink;
   }
 
   public function init() {
@@ -196,6 +207,7 @@ class Hooks {
     $this->setupCaptchaOnRegisterForm();
     $this->adminUserSubscription->setupHooks();
     $this->deactivateMailPoetCronBeforePluginUpgrade();
+    $this->triggerDatabaseUpdateAfterPluginUpgrade();
   }
 
   public function initEarlyHooks() {
@@ -386,6 +398,11 @@ class Hooks {
       6
     );
     $this->wp->addAction(
+      'user_register',
+      [$this->subscriptionRegistration, 'applyTrackingConsentOnUserRegister'],
+      7
+    );
+    $this->wp->addAction(
       'added_existing_user',
       [$this->wpSegment, 'synchronizeUser'],
       6
@@ -423,6 +440,20 @@ class Hooks {
       'remove_user_from_blog',
       [$this->wpSegment, 'synchronizeUser'],
       1
+    );
+
+    // Warn on the delete-user confirmation screen that the subscriber is kept.
+    $this->wpUserDeleteNotice->setupHooks();
+
+    // A password reset needs a key sent to the user's address, which confirms it.
+    $this->wp->addAction(
+      'password_reset',
+      [$this->wpUserSubscriberLink, 'confirmOnPasswordReset']
+    );
+    // So does WooCommerce's own email verification (WooCommerce 11.0+).
+    $this->wp->addAction(
+      'woocommerce_customer_email_verified',
+      [$this->wpUserSubscriberLink, 'confirmOnEmailVerified']
     );
 
     // login
@@ -884,6 +915,57 @@ class Hooks {
     $this->cronTrigger->disable();
 
     return $response;
+  }
+
+  public function triggerDatabaseUpdateAfterPluginUpgrade(): void {
+    $this->wp->addAction(
+      'upgrader_process_complete',
+      [$this, 'triggerDatabaseUpdate'],
+      10,
+      2
+    );
+  }
+
+  /**
+   * Fires one non-blocking request at the site right after MailPoet's files were replaced,
+   * so a fresh process running the new code migrates the database now rather than on the
+   * next visitor's request. The updater's own process still has the old classes loaded,
+   * which is why the migration is not run in place. If the loopback is blocked, the
+   * init-time check in Initializer::maybeRunActivator() covers it.
+   *
+   * On multisite the request targets the current site only; other sites migrate on their
+   * own next request, as before.
+   *
+   * Automatic (background) updates fire this hook while core's maintenance mode is still
+   * on, so the request gets a 503 and does nothing. That is fine: after an automatic update
+   * of an active plugin, core loads the home page itself to check for fatal errors, and that
+   * request runs the migration.
+   *
+   * @param mixed $upgrader
+   * @param mixed $options The upgrader's hook_extra: single and automatic updates carry `plugin`, bulk updates carry `plugins`.
+   */
+  public function triggerDatabaseUpdate($upgrader, $options): void {
+    if (!is_array($options) || ($options['action'] ?? null) !== 'update' || ($options['type'] ?? null) !== 'plugin') {
+      return;
+    }
+    $plugins = is_array($options['plugins'] ?? null) ? $options['plugins'] : [];
+    if (isset($options['plugin'])) {
+      $plugins[] = $options['plugin'];
+    }
+    if (!in_array(Env::$pluginPath, $plugins, true)) {
+      return;
+    }
+    // Same request shape WordPress core uses for its own loopback in spawn_cron(): the
+    // response is never read, the tiny timeout returns control immediately, and TLS
+    // verification follows the site's https_local_ssl_verify choice so self-signed local
+    // certificates do not break the trigger. Any action would do because the migration
+    // runs on init before the handler; mailpoet_token is the cheapest nopriv one.
+    $this->wp->wpRemotePost($this->wp->adminUrl('admin-ajax.php'), [
+      'timeout' => 0.01,
+      'blocking' => false,
+      'sslverify' => $this->wp->applyFilters('https_local_ssl_verify', false),
+      'body' => ['action' => 'mailpoet_token'],
+    ]);
   }
 
   public function deactivateCronWhenInMaintenanceMode(): void {

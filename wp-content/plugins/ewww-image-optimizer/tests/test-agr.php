@@ -21,7 +21,7 @@ class EWWWIO_AGR_Tests extends WP_UnitTestCase {
 	/**
 	 * The API key used for API-based tests.
 	 *
-	 * @var stringg $api_key
+	 * @var string $api_key
 	 */
 	public static $api_key = '';
 
@@ -60,13 +60,13 @@ class EWWWIO_AGR_Tests extends WP_UnitTestCase {
 	function test_agr_local() {
 		$upload_gif = self::$test_gif . '.gif';
 		copy( self::$test_gif, $upload_gif );
-		$id = $this->factory->attachment->create_upload_object( $upload_gif );
+		$id = self::factory()->attachment->create_upload_object( $upload_gif );
 		$meta = wp_get_attachment_metadata( $id );
 		$file_path = ewww_image_optimizer_attachment_path( $meta, $id );
 		$thumb_path = trailingslashit( dirname( $file_path ) ) . wp_basename( $meta['sizes']['thumbnail']['file'] );
 		$this->assertTrue( ewww_image_optimizer_is_animated( $thumb_path ) );
 
-		unlink( $upload_gif );
+		\wp_delete_file( $upload_gif );
 	}
 
 	/**
@@ -80,7 +80,7 @@ class EWWWIO_AGR_Tests extends WP_UnitTestCase {
 		copy( self::$test_gif, $upload_gif );
 		update_option( 'ewww_image_optimizer_cloud_key', self::$api_key );
 		update_site_option( 'ewww_image_optimizer_cloud_key', self::$api_key );
-		$id = $this->factory->attachment->create_upload_object( $upload_gif );
+		$id = self::factory()->attachment->create_upload_object( $upload_gif );
 		$meta = wp_get_attachment_metadata( $id );
 		$file_path = ewww_image_optimizer_attachment_path( $meta, $id );
 		$thumb_path = trailingslashit( dirname( $file_path ) ) . wp_basename( $meta['sizes']['thumbnail']['file'] );
@@ -88,7 +88,7 @@ class EWWWIO_AGR_Tests extends WP_UnitTestCase {
 
 		update_option( 'ewww_image_optimizer_cloud_key', '' );
 		update_site_option( 'ewww_image_optimizer_cloud_key', '' );
-		unlink( $upload_gif );
+		\wp_delete_file( $upload_gif );
 	}
 
 	/**
@@ -110,8 +110,8 @@ class EWWWIO_AGR_Tests extends WP_UnitTestCase {
 	 * Cleans up the temp images.
 	 */
 	public static function tear_down_after_class() {
-		if ( ewwwio_is_file( self::$test_gif ) ) {
-			unlink( self::$test_gif );
+		if ( ewwwio()->is_file( self::$test_gif ) ) {
+			\wp_delete_file( self::$test_gif );
 		}
 		ewww_image_optimizer_remove_binaries();
 	}

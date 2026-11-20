@@ -66,7 +66,7 @@ trait LayoutTrait {
 
 		return sprintf(
 			'href="%s" class="%s" target="%s" rel="%s"',
-			esc_attr( $href ),
+			esc_url( $href ),
 			esc_attr( $class ),
 			$target,
 			$rel,
@@ -98,7 +98,7 @@ trait LayoutTrait {
 			return '';
 		}
 
-		$excerpt = $post->excerpt ?: $post->content;
+		$excerpt = $this->separateListItems( $post->excerpt ?: $post->content );
 		$render_link = '';
 		if ( ! empty( $this->ds->excerptMaxWords ) ) {
 			$numWords = max( 0, $this->ds->excerptMaxWords );
@@ -107,10 +107,26 @@ trait LayoutTrait {
 
 		if ( $this->ds->enableReadMore && $links ) {
 			$url = $this->getItemUrl( $post );
-			$render_link = $this->renderLink( $this->ds->readMoreText, esc_url( $url ), 'more-link' );
+			$class = $this->ds->readMoreNewLine ? 'more-link more-link-block' : 'more-link';
+			$render_link = $this->renderLink( $this->ds->readMoreText, $url, $class );
 		}
 
 		return wp_strip_all_tags( $excerpt ) . $render_link;
+	}
+
+	/**
+	 * Adds plain-text separators after list items before the Display excerpt is
+	 * converted to plain text.
+	 *
+	 * @since 5.6.0
+	 *
+	 * @param string $html The excerpt HTML.
+	 * @return string The excerpt HTML with list-item boundaries separated.
+	 */
+	private function separateListItems( string $html ): string {
+		$result = preg_replace( '#(</li\\s*>)#i', '$1 ', $html );
+
+		return is_string( $result ) ? $result : $html;
 	}
 
 	/** Renders an item's author, if enabled and applicable. */
@@ -149,9 +165,9 @@ trait LayoutTrait {
 			$diff = human_time_diff( $now, $post );
 
 			if ( $now > $post ) {
-				$dateStr = sprintf( _x( '%s ago', 'Time ago format', 'wprss' ), $diff );
+				$dateStr = sprintf( _x( '%s ago', 'Time ago format', 'wp-rss-aggregator' ), $diff );
 			} else {
-				$dateStr = sprintf( _x( '%s from now', 'Time ago format (future)', 'wprss' ), $diff );
+				$dateStr = sprintf( _x( '%s from now', 'Time ago format (future)', 'wp-rss-aggregator' ), $diff );
 			}
 		} else {
 			$class = 'feed-date';
@@ -201,19 +217,14 @@ trait LayoutTrait {
 			return '';
 		}
 
-		$srcName = $name;
+		// Source names can come from feed titles, so they are always untrusted.
+		$srcName = esc_html( $name );
 		if ( $this->ds->linkSource && $links && ! empty( $url ) ) {
-			$srcName = $this->renderLink( $name, $url );
+			$srcName = $this->renderLink( $srcName, $url );
 		}
 
 		$tag = $block ? 'div' : 'span';
 		$prefix = esc_html( $this->ds->sourcePrefix );
-
-		// $srcName is already HTML from renderLink, so it doesn't need escaping again.
-		// If linking is disabled, $srcName is just the source name string, which needs escaping.
-		if ( ! ( $this->ds->linkSource && $links && ! empty( $url ) ) ) {
-			$srcName = esc_html( $srcName );
-		}
 
 		return <<<HTML
             <{$tag} class="feed-source">
@@ -230,13 +241,30 @@ trait LayoutTrait {
 			return '';
 		}
 
-		$escapedUrl = esc_attr( $audioUrl );
+		$escapedUrl = esc_url( $audioUrl );
+		if ( '' === $escapedUrl ) {
+			return '';
+		}
 
 		return <<<HTML
             <div class="wpra-feed-audio">
                 <audio preload="none" controls src="{$escapedUrl}"></audio>
             </div>
         HTML;
+	}
+
+	/** Escapes a URL for use inside a CSS url('...') value in a style attribute. */
+	private function cssUrl( string $url ): string {
+		$url = esc_url_raw( html_entity_decode( $url, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+		$url = preg_replace_callback(
+			'/[^A-Za-z0-9\-._~:\/?#@!$&*+,;=%\[\]]/',
+			function ( $m ) {
+				return rawurlencode( $m[0] );
+			},
+			$url
+		);
+
+		return htmlspecialchars( $url, ENT_QUOTES, 'UTF-8', true );
 	}
 
 	private function renderItems( iterable $posts, callable $fn ): string {
@@ -246,7 +274,7 @@ trait LayoutTrait {
 		}
 
 		if ( $result === '' ) {
-			return sprintf( '<p>%s</p>', __( 'No feed items found.', 'wprss' ) );
+			return sprintf( '<p>%s</p>', __( 'No feed items found.', 'wp-rss-aggregator' ) );
 		}
 
 		return $result;

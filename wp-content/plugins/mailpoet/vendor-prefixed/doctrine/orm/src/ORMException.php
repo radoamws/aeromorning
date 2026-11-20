@@ -30,100 +30,100 @@ use Exception;
 use function sprintf;
 class ORMException extends Exception
 {
- public static function missingMappingDriverImpl()
- {
- return MissingMappingDriverImplementation::create();
- }
- public static function namedQueryNotFound($queryName)
- {
- return NamedQueryNotFound::fromName($queryName);
- }
- public static function namedNativeQueryNotFound($nativeQueryName)
- {
- return NamedNativeQueryNotFound::fromName($nativeQueryName);
- }
- public static function unrecognizedField($field)
- {
- return new UnrecognizedField(sprintf('Unrecognized field: %s', $field));
- }
- public static function unexpectedAssociationValue($class, $association, $given, $expected)
- {
- return UnexpectedAssociationValue::create($class, $association, $given, $expected);
- }
- public static function invalidOrientation($className, $field)
- {
- return InvalidOrientation::fromClassNameAndField($className, $field);
- }
- public static function entityManagerClosed()
- {
- return EntityManagerClosed::create();
- }
- public static function invalidHydrationMode($mode)
- {
- return InvalidHydrationMode::fromMode($mode);
- }
- public static function mismatchedEventManager()
- {
- return MismatchedEventManager::create();
- }
- public static function findByRequiresParameter($methodName)
- {
- return InvalidMagicMethodCall::onMissingParameter($methodName);
- }
- public static function invalidMagicCall($entityName, $fieldName, $method)
- {
- return InvalidMagicMethodCall::becauseFieldNotFoundIn($entityName, $fieldName, $method);
- }
- public static function invalidFindByInverseAssociation($entityName, $associationFieldName)
- {
- return InvalidFindByCall::fromInverseSideUsage($entityName, $associationFieldName);
- }
- public static function invalidResultCacheDriver()
- {
- return InvalidResultCacheDriver::create();
- }
- public static function notSupported()
- {
- return NotSupported::create();
- }
- public static function queryCacheNotConfigured()
- {
- return QueryCacheNotConfigured::create();
- }
- public static function metadataCacheNotConfigured()
- {
- return MetadataCacheNotConfigured::create();
- }
- public static function queryCacheUsesNonPersistentCache(CacheDriver $cache)
- {
- return QueryCacheUsesNonPersistentCache::fromDriver($cache);
- }
- public static function metadataCacheUsesNonPersistentCache(CacheDriver $cache)
- {
- return MetadataCacheUsesNonPersistentCache::fromDriver($cache);
- }
- public static function proxyClassesAlwaysRegenerating()
- {
- return ProxyClassesAlwaysRegenerating::create();
- }
- public static function unknownEntityNamespace($entityNamespaceAlias)
- {
- return UnknownEntityNamespace::fromNamespaceAlias($entityNamespaceAlias);
- }
- public static function invalidEntityRepository($className)
- {
- return InvalidEntityRepository::fromClassName($className);
- }
- public static function missingIdentifierField($className, $fieldName)
- {
- return MissingIdentifierField::fromFieldAndClass($fieldName, $className);
- }
- public static function unrecognizedIdentifierFields($className, $fieldNames)
- {
- return UnrecognizedIdentifierFields::fromClassAndFieldNames($className, $fieldNames);
- }
- public static function cantUseInOperatorOnCompositeKeys()
- {
- return CantUseInOperatorOnCompositeKeys::create();
- }
+public static function missingMappingDriverImpl()
+{
+return MissingMappingDriverImplementation::create();
+}
+public static function namedQueryNotFound($queryName)
+{
+return NamedQueryNotFound::fromName($queryName);
+}
+public static function namedNativeQueryNotFound($nativeQueryName)
+{
+return NamedNativeQueryNotFound::fromName($nativeQueryName);
+}
+public static function unrecognizedField($field)
+{
+return new UnrecognizedField(sprintf('Unrecognized field: %s', $field));
+}
+public static function unexpectedAssociationValue($class, $association, $given, $expected)
+{
+return UnexpectedAssociationValue::create($class, $association, $given, $expected);
+}
+public static function invalidOrientation($className, $field)
+{
+return InvalidOrientation::fromClassNameAndField($className, $field);
+}
+public static function entityManagerClosed()
+{
+return EntityManagerClosed::create();
+}
+public static function invalidHydrationMode($mode)
+{
+return InvalidHydrationMode::fromMode($mode);
+}
+public static function mismatchedEventManager()
+{
+return MismatchedEventManager::create();
+}
+public static function findByRequiresParameter($methodName)
+{
+return InvalidMagicMethodCall::onMissingParameter($methodName);
+}
+public static function invalidMagicCall($entityName, $fieldName, $method)
+{
+return InvalidMagicMethodCall::becauseFieldNotFoundIn($entityName, $fieldName, $method);
+}
+public static function invalidFindByInverseAssociation($entityName, $associationFieldName)
+{
+return InvalidFindByCall::fromInverseSideUsage($entityName, $associationFieldName);
+}
+public static function invalidResultCacheDriver()
+{
+return InvalidResultCacheDriver::create();
+}
+public static function notSupported()
+{
+return NotSupported::create();
+}
+public static function queryCacheNotConfigured()
+{
+return QueryCacheNotConfigured::create();
+}
+public static function metadataCacheNotConfigured()
+{
+return MetadataCacheNotConfigured::create();
+}
+public static function queryCacheUsesNonPersistentCache(CacheDriver $cache)
+{
+return QueryCacheUsesNonPersistentCache::fromDriver($cache);
+}
+public static function metadataCacheUsesNonPersistentCache(CacheDriver $cache)
+{
+return MetadataCacheUsesNonPersistentCache::fromDriver($cache);
+}
+public static function proxyClassesAlwaysRegenerating()
+{
+return ProxyClassesAlwaysRegenerating::create();
+}
+public static function unknownEntityNamespace($entityNamespaceAlias)
+{
+return UnknownEntityNamespace::fromNamespaceAlias($entityNamespaceAlias);
+}
+public static function invalidEntityRepository($className)
+{
+return InvalidEntityRepository::fromClassName($className);
+}
+public static function missingIdentifierField($className, $fieldName)
+{
+return MissingIdentifierField::fromFieldAndClass($fieldName, $className);
+}
+public static function unrecognizedIdentifierFields($className, $fieldNames)
+{
+return UnrecognizedIdentifierFields::fromClassAndFieldNames($className, $fieldNames);
+}
+public static function cantUseInOperatorOnCompositeKeys()
+{
+return CantUseInOperatorOnCompositeKeys::create();
+}
 }

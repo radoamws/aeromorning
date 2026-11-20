@@ -80,7 +80,7 @@ class __TwigTemplate_d397b2a974f636a1e1c9b326eb2ccfd5695d20d9e10469f6f7ff8efdcee
             yield "  <div class=\"error\">
     <p>";
             // line 22
-            yield $this->extensions['MailPoet\Twig\I18n']->translate("Yikes! Couldn't find any subscribers");
+            yield $this->extensions['MailPoet\Twig\I18n']->translate("Yikes! Couldn\x27t find any subscribers");
             yield "</p>
   </div>
   ";

@@ -14,6 +14,7 @@ use TEC\Common\Admin\Entities\Element_With_Children;
 use TEC\Common\Admin\Entities\Field_Wrapper;
 use Tribe\Admin\Pages as Admin_Pages;
 use TEC\Common\Notifications\Controller;
+use Tribe__Settings_Tab as Settings_Tab;
 
 if ( did_action( 'tec_settings_init' ) ) {
 	return;
@@ -48,7 +49,7 @@ class Tribe__Settings {
 	 * The tabs that will appear in the settings page.
 	 * Filtered on class construct.
 	 *
-	 * @var array<string, Tribe__Settings_Tab>
+	 * @var array<string, Settings_Tab>
 	 */
 	public $tabs = [];
 
@@ -57,7 +58,7 @@ class Tribe__Settings {
 	 *
 	 * @since 6.1.0
 	 *
-	 * @var array<string, Tribe__Settings_Tab>
+	 * @var array<string, Settings_Tab>
 	 */
 	public $all_tabs = [];
 
@@ -299,6 +300,13 @@ class Tribe__Settings {
 		$this->noSaveTabs  = $this->no_save_tabs;
 		$this->adminSlug   = $this->admin_slug;
 
+		/**
+		 * Binds itself as a singleton in the self::class id.
+		 * So when trying to get through tribe( 'settings' ) and tribe( self::class )
+		 * will return the same, already initialized instance.
+		 */
+		tribe_singleton( self::class, $this );
+
 		$this->hook();
 	}
 
@@ -348,7 +356,72 @@ class Tribe__Settings {
 		add_action( 'tribe_settings_below_tabs', [ $this, 'display_success' ] );
 		add_action( 'tribe_settings_tab_after_link', [ $this, 'add_child_tabs_to_nav' ] );
 
+		add_action( 'tribe_settings_form_element_open', [ $this, 'settings_form_element_open' ], 10, 3 );
+		add_action( 'tribe_settings_form_element_close', [ $this, 'settings_form_element_close' ] );
+
 		do_action( 'tec_settings_init' );
+	}
+
+	/**
+	 * Open the settings form element.
+	 *
+	 * @since 6.13.0
+	 *
+	 * @param string       $tab        The tab name.
+	 * @param Settings_Tab $tab_object The tab object.
+	 * @param string       $admin_page The admin page ID.
+	 */
+	public function settings_form_element_open( $tab, $tab_object, $admin_page ): void {
+		$form_id = 'tec-settings-form';
+
+		$form_classes = [
+			"tec-settings-form__{$tab}-tab--active" => true,
+			'tec-settings-form__subnav-active'      => ( $tab_object && $tab_object->has_parent() ),
+			'tec-settings-form'                     => true,
+		];
+
+		/**
+		 * Filter the classes for the settings form.
+		 *
+		 * @since 6.1.0
+		 *
+		 * @param array<string>     $form_classes The classes for the settings form.
+		 * @param string            $admin_page   The admin page ID.
+		 * @param Settings_Tab|null $tab_object   The current tab object.
+		 */
+		$form_classes = apply_filters( 'tribe_settings_form_class', $form_classes, $admin_page, $tab_object );
+
+		?>
+		<form id="<?php echo esc_attr( $form_id ); ?>" <?php tec_classes( $form_classes ); ?> method="post">
+		<?php
+	}
+
+	/**
+	 * Close the settings form element.
+	 *
+	 * @since 6.13.0
+	 * @since 6.14.1 The filtered markup is passed through wp_kses() with the post allow-list plus the form tag.
+	 */
+	public function settings_form_element_close(): void {
+		$allowed_html = wp_kses_allowed_html( 'post' );
+
+		/* The post allow-list may already carry `form` with attributes (core adds them once a site allows `input` or `select`); keep them. */
+		$allowed_html['form'] ??= [];
+
+		/**
+		 * Filters the markup that closes the settings form.
+		 *
+		 * The markup is passed through wp_kses() with the post allow-list plus the form tag, so tags the
+		 * post allow-list does not permit are stripped. By default that includes `input` and `select`.
+		 *
+		 * @since 4.0.1
+		 * @since 6.14.1 The returned markup is passed through wp_kses().
+		 *
+		 * @param string $closing_markup The markup that closes the settings form. Default `</form>`.
+		 */
+		$closing_markup = apply_filters( 'tribe_settings_closing_form_element', '</form>' );
+
+		echo wp_kses( $closing_markup, $allowed_html );
 	}
 
 	/**
@@ -386,8 +459,8 @@ class Tribe__Settings {
 		 *
 		 * @since 4.15.0
 		 *
-		 * @param array  $tabs<string,Tribe__Settings_Tab> The tabs that will appear in the settings page.
-		 * @param string $admin_page                       The admin page ID.
+		 * @param array  $tabs<string,Settings_Tab> The tabs that will appear in the settings page.
+		 * @param string $admin_page                The admin page ID.
 		 */
 		$this->tabs = (array) apply_filters( 'tribe_settings_tabs', [], $admin_page, $this );
 
@@ -396,8 +469,8 @@ class Tribe__Settings {
 		 *
 		 * @since 4.15.0
 		 *
-		 * @param array<string,Tribe__Settings_Tab> $all_tabs   The list of all tabs.
-		 * @param string                            $admin_page The admin page ID.
+		 * @param array<string,Settings_Tab> $all_tabs   The list of all tabs.
+		 * @param string                     $admin_page The admin page ID.
 		 */
 		$this->all_tabs = (array) apply_filters( 'tribe_settings_all_tabs', [], $admin_page, $this );
 
@@ -504,9 +577,9 @@ class Tribe__Settings {
 	 *
 	 * @param string $id The tab ID.
 	 *
-	 * @return Tribe__Settings_Tab|null
+	 * @return Settings_Tab|null
 	 */
-	public function get_tab( $id ): ?Tribe__Settings_Tab {
+	public function get_tab( $id ): ?Settings_Tab {
 		// Find tab if a parent.
 		$tab_object = $this->tabs[ $id ] ?? null;
 
@@ -702,23 +775,8 @@ class Tribe__Settings {
 			],
 			$admin_page
 		);
-		$tab_object   = $this->get_tab( $current_tab );
-		$form_classes = [
-			"tec-settings-form__{$current_tab}-tab--active" => true,
-			'tec-settings-form__subnav-active'              => ( $tab_object && $tab_object->has_parent() ),
-			'tec-settings-form'                             => true,
-		];
 
-		/**
-		 * Filter the classes for the settings form.
-		 *
-		 * @since 6.1.0
-		 *
-		 * @param array<string>            $form_classes The classes for the settings form.
-		 * @param string                   $admin_page   The admin page ID.
-		 * @param Tribe__Settings_Tab|null $tab_object   The current tab object.
-		 */
-		$form_classes = apply_filters( 'tribe_settings_form_class', $form_classes, $admin_page, $tab_object );
+		$tab_object = $this->get_tab( $current_tab );
 
 		ob_start();
 		do_action( 'tribe_settings_top', $admin_page );
@@ -739,10 +797,18 @@ class Tribe__Settings {
 				<?php
 				do_action( 'tribe_settings_above_form_element' );
 				do_action( 'tribe_settings_above_form_element_tab_' . $current_tab, $admin_page );
-				$form_id = 'tec-settings-form';
-				?>
-				<form id="<?php echo esc_attr( $form_id ); ?>" <?php tec_classes( $form_classes ); ?> method="post">
-				<?php
+
+				/**
+				 * Fires in order to allow for the form element to be opened.
+				 *
+				 * @since 6.13.0
+				 *
+				 * @param string       $current_tab The current tab ID.
+				 * @param Settings_Tab $tab_object  The current tab object.
+				 * @param string       $admin_page  The admin page ID.
+				*/
+				do_action( 'tribe_settings_form_element_open', $current_tab, $tab_object, $admin_page );
+
 				do_action( 'tribe_settings_before_content' );
 				do_action( 'tribe_settings_before_content_tab_' . $current_tab );
 				do_action( 'tribe_settings_content_tab_' . $current_tab );
@@ -757,7 +823,17 @@ class Tribe__Settings {
 
 				$this->do_footer();
 
-				echo apply_filters( 'tribe_settings_closing_form_element', '</form>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped,StellarWP.XSS.EscapeOutput.OutputNotEscaped
+				/**
+				 * Fires in order to allow for the form element to be closed.
+				 *
+				 * @since 6.13.0
+				 *
+				 * @param string       $current_tab The current tab ID.
+				 * @param Settings_Tab $tab_object  The current tab object.
+				 * @param string       $admin_page  The admin page ID.
+				*/
+				do_action( 'tribe_settings_form_element_close', $current_tab, $tab_object, $admin_page );
+
 				do_action( 'tribe_settings_after_form_element' );
 				do_action( 'tribe_settings_after_form_element_tab_' . $current_tab, $admin_page );
 				?>
@@ -971,9 +1047,9 @@ class Tribe__Settings {
 	 *
 	 * @since 6.1.0
 	 *
-	 * @param Tribe__Settings_Tab $tab The tab object.
+	 * @param Settings_Tab $tab The tab object.
 	 */
-	public function generate_tab( Tribe__Settings_Tab $tab ) {
+	public function generate_tab( Settings_Tab $tab ) {
 		$url         = $this->get_tab_url( $tab->id );
 		$class       = [
 			'tec-nav__tab',
@@ -1016,10 +1092,10 @@ class Tribe__Settings {
 	 *
 	 * @since 6.1.0
 	 *
-	 * @param Tribe__Settings_Tab $tab The parent tab object.
+	 * @param Settings_Tab $tab The parent tab object.
 	 * @return void
 	 */
-	public function add_child_tabs_to_nav( Tribe__Settings_Tab $tab ) {
+	public function add_child_tabs_to_nav( Settings_Tab $tab ) {
 		if ( ! $tab->has_children() ) {
 			return;
 		}

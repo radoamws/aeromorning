@@ -15,44 +15,42 @@ use function in_array;
 use function is_object;
 class SqlExpressionVisitor extends ExpressionVisitor
 {
- private $persister;
- private $classMetadata;
- public function __construct(BasicEntityPersister $persister, ClassMetadata $classMetadata)
- {
- $this->persister = $persister;
- $this->classMetadata = $classMetadata;
- }
- public function walkComparison(Comparison $comparison)
- {
- $field = $comparison->getField();
- $value = $comparison->getValue()->getValue();
- // shortcut for walkValue()
- if (isset($this->classMetadata->associationMappings[$field]) && $value !== null && !is_object($value) && !in_array($comparison->getOperator(), [Comparison::IN, Comparison::NIN], \true)) {
- throw MatchingAssociationFieldRequiresObject::fromClassAndAssociation($this->classMetadata->name, $field);
- }
- return $this->persister->getSelectConditionStatementSQL($field, $value, null, $comparison->getOperator());
- }
- public function walkCompositeExpression(CompositeExpression $expr)
- {
- $expressionList = [];
- foreach ($expr->getExpressionList() as $child) {
- $expressionList[] = $this->dispatch($child);
- }
- switch ($expr->getType()) {
- case CompositeExpression::TYPE_AND:
- return '(' . implode(' AND ', $expressionList) . ')';
- case CompositeExpression::TYPE_OR:
- return '(' . implode(' OR ', $expressionList) . ')';
- default:
- // Multiversion support for `doctrine/collections` before and after v2.1.0
- if (defined(CompositeExpression::class . '::TYPE_NOT') && $expr->getType() === CompositeExpression::TYPE_NOT) {
- return 'NOT (' . $expressionList[0] . ')';
- }
- throw new RuntimeException('Unknown composite ' . $expr->getType());
- }
- }
- public function walkValue(Value $value)
- {
- return '?';
- }
+private $persister;
+private $classMetadata;
+public function __construct(BasicEntityPersister $persister, ClassMetadata $classMetadata)
+{
+$this->persister = $persister;
+$this->classMetadata = $classMetadata;
+}
+public function walkComparison(Comparison $comparison)
+{
+$field = $comparison->getField();
+$value = $comparison->getValue()->getValue();
+if (isset($this->classMetadata->associationMappings[$field]) && $value !== null && !is_object($value) && !in_array($comparison->getOperator(), [Comparison::IN, Comparison::NIN], \true)) {
+throw MatchingAssociationFieldRequiresObject::fromClassAndAssociation($this->classMetadata->name, $field);
+}
+return $this->persister->getSelectConditionStatementSQL($field, $value, null, $comparison->getOperator());
+}
+public function walkCompositeExpression(CompositeExpression $expr)
+{
+$expressionList = [];
+foreach ($expr->getExpressionList() as $child) {
+$expressionList[] = $this->dispatch($child);
+}
+switch ($expr->getType()) {
+case CompositeExpression::TYPE_AND:
+return '(' . implode(' AND ', $expressionList) . ')';
+case CompositeExpression::TYPE_OR:
+return '(' . implode(' OR ', $expressionList) . ')';
+default:
+if (defined(CompositeExpression::class . '::TYPE_NOT') && $expr->getType() === CompositeExpression::TYPE_NOT) {
+return 'NOT (' . $expressionList[0] . ')';
+}
+throw new RuntimeException('Unknown composite ' . $expr->getType());
+}
+}
+public function walkValue(Value $value)
+{
+return '?';
+}
 }

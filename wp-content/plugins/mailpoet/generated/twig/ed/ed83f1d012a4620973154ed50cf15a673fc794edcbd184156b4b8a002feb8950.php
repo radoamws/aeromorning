@@ -52,22 +52,22 @@ class __TwigTemplate_fbbbbad2941fe4d62ead317e87baf3d52e20e55ee17d90822382ddf13ef
         $macros = $this->macros;
         // line 4
         yield "<script>
-  var mailpoet_logo_url = '";
+  var mailpoet_logo_url = \x27";
         // line 5
         yield $this->extensions['MailPoet\Twig\Assets']->generateCdnUrl("welcome-wizard/mailpoet-logo.20200623.png");
-        yield "';
-  var wizard_woocommerce_illustration_url = '";
+        yield "\x27;
+  var wizard_woocommerce_illustration_url = \x27";
         // line 6
         yield $this->extensions['MailPoet\Twig\Assets']->generateCdnUrl("welcome-wizard/woocommerce.20241219.png");
-        yield "';
+        yield "\x27;
   var mailpoet_show_customers_import = ";
         // line 7
         yield $this->extensions['MailPoet\Twig\Functions']->jsonEncode(($context["show_customers_import"] ?? null));
         yield ";
-  var finish_wizard_url = '";
+  var finish_wizard_url = \x27";
         // line 8
         yield $this->env->getRuntime('MailPoetVendor\Twig\Runtime\EscaperRuntime')->escape(($context["finish_wizard_url"] ?? null), "html", null, true);
-        yield "';
+        yield "\x27;
 </script>
 
 <div id=\"mailpoet-wizard-container\"></div>

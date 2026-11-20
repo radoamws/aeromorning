@@ -71,7 +71,8 @@ class ControllerAjaxBrowse extends AdminAjaxController {
             'mp4',
             'mp3',
             'svg',
-            'webp'
+            'webp',
+            'avif'
         );
         $_files     = scandir($path);
         $files      = array();
@@ -162,6 +163,7 @@ class ControllerAjaxBrowse extends AdminAjaxController {
             'jpeg' => 'image/jpeg',
             'gif'  => 'image/gif',
             'webp' => 'image/webp',
+            'avif' => 'image/avif',
             'svg'  => 'image/svg+xml',
             'mp4'  => 'video/mp4'
         );

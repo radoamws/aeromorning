@@ -130,7 +130,7 @@ class __TwigTemplate_22a77faa62e190779c8dce6c27d815339e592767581cf8e9672f667844f
         yield "</div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-        <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_image_alignment\" value=\"left\" {{#ifCond model.styles.block.textAlign '===' 'left'}}CHECKED{{/ifCond}}/>
+        <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_image_alignment\" value=\"left\" {{#ifCond model.styles.block.textAlign \x27===\x27 \x27left\x27}}CHECKED{{/ifCond}}/>
         ";
         // line 69
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Left");
@@ -139,7 +139,7 @@ class __TwigTemplate_22a77faa62e190779c8dce6c27d815339e592767581cf8e9672f667844f
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_image_alignment\" value=\"center\" {{#ifCond model.styles.block.textAlign '===' 'center'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_image_alignment\" value=\"center\" {{#ifCond model.styles.block.textAlign \x27===\x27 \x27center\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 75
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Center");
@@ -148,7 +148,7 @@ class __TwigTemplate_22a77faa62e190779c8dce6c27d815339e592767581cf8e9672f667844f
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_image_alignment\" value=\"right\" {{#ifCond model.styles.block.textAlign '===' 'right'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_image_alignment\" value=\"right\" {{#ifCond model.styles.block.textAlign \x27===\x27 \x27right\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 81
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Right");

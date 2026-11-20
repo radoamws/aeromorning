@@ -451,6 +451,7 @@ class Tribe__Tickets__Attendee_Repository extends Tribe__Repository {
 	 * Filters attendee to only get those related to posts with a specific status.
 	 *
 	 * @since 4.8
+	 * @since 5.30.3.1 Restricted the query to the post statuses the user can read.
 	 *
 	 * @param string|array $event_status
 	 *
@@ -473,10 +474,10 @@ class Tribe__Tickets__Attendee_Repository extends Tribe__Repository {
 		}
 
 		if ( ! $can_read_private_posts ) {
-			$event_status = array_intersect( $statuses, [ 'publish' ] );
+			$statuses = array_values( array_intersect( $statuses, [ 'publish' ] ) );
 		}
 
-		if ( empty( $event_status ) ) {
+		if ( ! $statuses ) {
 			throw Tribe__Repository__Void_Query_Exception::because_the_query_would_yield_no_results(
 				'The user cannot read posts with the requested post statuses.'
 			);
@@ -1386,6 +1387,7 @@ class Tribe__Tickets__Attendee_Repository extends Tribe__Repository {
 	 * Handles the `order_by` clauses for events
 	 *
 	 * @since 5.5.0
+	 * @since 5.29.5.1 Directions other than `ASC` or `DESC` are replaced with `DESC`.
 	 *
 	 * @param string $order_by The key used to order events; e.g. `event_date` to order events by start date.
 	 */
@@ -1403,6 +1405,13 @@ class Tribe__Tickets__Attendee_Repository extends Tribe__Repository {
 			$order_by      = is_numeric( $key ) ? $value : $key;
 			$default_order = Arr::get_in_any( [ $this->query_args, $this->default_args ], 'order', 'ASC' );
 			$order         = is_numeric( $key ) ? $default_order : $value;
+
+			// The direction is interpolated unquoted into the ORDER BY clause, so it can only ever be one of the two keywords.
+			$order = is_string( $order ) ? strtoupper( $order ) : '';
+
+			if ( ! in_array( $order, [ 'ASC', 'DESC' ], true ) ) {
+				$order = 'DESC';
+			}
 
 			// Let the first applied ORDER BY clause override the existing ones, then stack the ORDER BY clauses.
 			$override = $loop === 0;

@@ -7,11 +7,13 @@ if (!defined('ABSPATH')) exit;
 
 use MailPoet\Entities\SubscriberEntity;
 use MailPoet\Segments\SegmentsRepository;
+use MailPoet\Segments\WooCommerce as WooCommerceSegment;
 use MailPoet\Settings\SettingsController;
 use MailPoet\Subscribers\ConfirmationEmailMailer;
 use MailPoet\Subscribers\Source;
 use MailPoet\Subscribers\SubscriberSegmentRepository;
 use MailPoet\Subscribers\SubscribersRepository;
+use MailPoet\Subscribers\TrackingConsentCapture;
 use MailPoet\Util\Helpers;
 use MailPoet\WP\Functions as WPFunctions;
 use MailPoetVendor\Carbon\Carbon;
@@ -19,6 +21,7 @@ use MailPoetVendor\Carbon\Carbon;
 class Subscription {
   const CHECKOUT_OPTIN_INPUT_NAME = 'mailpoet_woocommerce_checkout_optin';
   const CHECKOUT_OPTIN_PRESENCE_CHECK_INPUT_NAME = 'mailpoet_woocommerce_checkout_optin_present';
+  const CHECKOUT_TRACKING_CONSENT_INPUT_NAME = 'mailpoet_woocommerce_checkout_tracking_consent';
   const OPTIN_ENABLED_SETTING_NAME = 'woocommerce.optin_on_checkout.enabled';
   const OPTIN_SEGMENTS_SETTING_NAME = 'woocommerce.optin_on_checkout.segments';
   const OPTIN_MESSAGE_SETTING_NAME = 'woocommerce.optin_on_checkout.message';
@@ -69,6 +72,12 @@ class Subscription {
   /** @var SubscriberSegmentRepository */
   private $subscriberSegmentRepository;
 
+  /** @var TrackingConsentCapture */
+  private $trackingConsentCapture;
+
+  /** @var WooCommerceSegment */
+  private $woocommerceSegment;
+
   public function __construct(
     SettingsController $settings,
     ConfirmationEmailMailer $confirmationEmailMailer,
@@ -76,7 +85,9 @@ class Subscription {
     Helper $wcHelper,
     SubscribersRepository $subscribersRepository,
     SegmentsRepository $segmentsRepository,
-    SubscriberSegmentRepository $subscriberSegmentRepository
+    SubscriberSegmentRepository $subscriberSegmentRepository,
+    TrackingConsentCapture $trackingConsentCapture,
+    WooCommerceSegment $woocommerceSegment
   ) {
     $this->settings = $settings;
     $this->wp = $wp;
@@ -85,6 +96,8 @@ class Subscription {
     $this->subscribersRepository = $subscribersRepository;
     $this->segmentsRepository = $segmentsRepository;
     $this->subscriberSegmentRepository = $subscriberSegmentRepository;
+    $this->trackingConsentCapture = $trackingConsentCapture;
+    $this->woocommerceSegment = $woocommerceSegment;
   }
 
   public function extendWooCommerceCheckoutForm() {
@@ -112,7 +125,56 @@ class Subscription {
     if ($template) {
       $field = $this->getSubscriptionPresenceCheckField();
       echo wp_kses($field, $this->allowedHtml);
+      // A second, independent control. Consent to open and click tracking can
+      // never be bundled with the marketing opt-in above it.
+      echo wp_kses($this->getTrackingConsentField(), $this->allowedHtml);
     }
+  }
+
+  /**
+   * Whether checkout actually put the consent question to the customer.
+   *
+   * The checkbox is rendered by extendWooCommerceCheckoutForm, which is only
+   * hooked when the checkout opt-in is switched on, while the code that reads
+   * the answer runs on every order. On a store that asks for consent but leaves
+   * the opt-in off, no box is drawn, so there is no answer to record and an
+   * empty POST field means "not asked" rather than "declined".
+   *
+   * Settings are necessary but not sufficient: the opt-in block can also be
+   * emptied through the mailpoet_woocommerce_checkout_optin_template filter,
+   * which takes the consent box with it. Callers that can see whether the block
+   * reached the customer pass that in.
+   */
+  private function wasTrackingConsentOffered(?bool $consentFieldRendered = null): bool {
+    if (!$this->trackingConsentCapture->isCaptureEnabled()) {
+      return false;
+    }
+    if (!(bool)$this->settings->get(self::OPTIN_ENABLED_SETTING_NAME, false)) {
+      return false;
+    }
+    // Callers that can tell whether the field really reached the customer say so.
+    // Null means they cannot, so the settings are the best answer available.
+    return $consentFieldRendered ?? true;
+  }
+
+  /**
+   * The tracking-consent checkbox, shown only on sites that chose to ask. It is
+   * never pre-ticked: a pre-ticked consent box is not valid consent (CJEU
+   * Planet49).
+   */
+  private function getTrackingConsentField(): string {
+    if (!$this->trackingConsentCapture->isCaptureEnabled()) {
+      return '';
+    }
+    $inputName = self::CHECKOUT_TRACKING_CONSENT_INPUT_NAME;
+    $copy = $this->trackingConsentCapture->getCopy(
+      SubscriberEntity::TRACKING_CONSENT_METHOD_WOOCOMMERCE_CHECKOUT
+    );
+
+    return '<label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox" data-automation-id="woo-commerce-tracking-consent">
+      <input id="' . $this->wp->escAttr($inputName) . '" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" type="checkbox" name="' . $this->wp->escAttr($inputName) . '" value="1" />
+      <span>' . $this->wp->escHtml($copy) . '</span>
+    </label>';
   }
 
   private function getSubscriptionField($inputName, $checked, $labelString) {
@@ -175,9 +237,20 @@ class Subscription {
       return null;
     }
 
-    $checkoutOptin = !empty($_POST[self::CHECKOUT_OPTIN_INPUT_NAME]);
+    $checkoutOptin = $this->isCheckoutOptinEnabled() && !empty($_POST[self::CHECKOUT_OPTIN_INPUT_NAME]);
+    $trackingConsent = !empty($_POST[self::CHECKOUT_TRACKING_CONSENT_INPUT_NAME]);
+    // Classic checkout has no pre-sync lookup of its own: the guest sync runs on
+    // this same hook three priorities earlier, so by now a brand new guest's row
+    // is already there. Ask the sync what it actually inserted.
+    $isNewSubscriber = $this->woocommerceSegment->wasNewlyCreatedByGuestSync($data['billing_email']);
+    // The consent box is printed inside the opt-in block, next to this hidden
+    // field, so its absence means the block did not render and no question was
+    // put to the customer. A site can empty the block through the
+    // mailpoet_woocommerce_checkout_optin_template filter with both settings
+    // still on, which the settings alone cannot tell us.
+    $consentFieldRendered = !empty($_POST[self::CHECKOUT_OPTIN_PRESENCE_CHECK_INPUT_NAME]);
 
-    return $this->handleSubscriberOptin($subscriber, $checkoutOptin);
+    return $this->handleSubscriberOptin($subscriber, $checkoutOptin, $trackingConsent, $isNewSubscriber, $consentFieldRendered);
   }
 
   /**
@@ -185,8 +258,14 @@ class Subscription {
    *
    * @param SubscriberEntity $subscriber Subscriber object
    * @param bool $shouldSubscribe Whether the subscriber should be subscribed
+   * @param bool $trackingConsent Whether the separate tracking-consent box was ticked
    */
-  public function handleSubscriberOptin(SubscriberEntity $subscriber, bool $shouldSubscribe): bool {
+  public function handleSubscriberOptin(SubscriberEntity $subscriber, bool $shouldSubscribe, bool $trackingConsent = false, bool $isNewSubscriber = false, ?bool $consentFieldRendered = null): bool {
+    // Recorded before the opt-in branch, and independently of it: consenting to
+    // tracking and subscribing are two separate decisions, so a customer who
+    // declines the newsletter can still allow tracking and vice versa.
+    $this->applyTrackingConsent($subscriber, $trackingConsent, $isNewSubscriber, $consentFieldRendered);
+
     $wcSegment = $this->segmentsRepository->getWooCommerceSegment();
 
     $segmentIds = (array)$this->settings->get(self::OPTIN_SEGMENTS_SETTING_NAME, []);
@@ -216,6 +295,33 @@ class Subscription {
     }
   }
 
+  /**
+   * Checkout always acts on a subscriber row that already exists (the
+   * WooCommerce customer sync creates it), so an unticked box leaves an earlier
+   * choice alone rather than revoking it. Persisted here because this path
+   * writes the entity itself instead of going through SubscriberSaveController.
+   */
+  private function applyTrackingConsent(SubscriberEntity $subscriber, bool $granted, bool $isNewSubscriber = false, ?bool $consentFieldRendered = null): void {
+    if (!$this->wasTrackingConsentOffered($consentFieldRendered)) {
+      return;
+    }
+    $method = SubscriberEntity::TRACKING_CONSENT_METHOD_WOOCOMMERCE_CHECKOUT;
+    $before = $subscriber->getTrackingConsent();
+
+    $this->trackingConsentCapture->applyToSubscriber(
+      $subscriber,
+      $granted,
+      $method,
+      $this->trackingConsentCapture->getCopy($method),
+      $isNewSubscriber
+    );
+
+    if ($subscriber->getTrackingConsent() !== $before) {
+      $this->subscribersRepository->persist($subscriber);
+      $this->subscribersRepository->flush();
+    }
+  }
+
   public function hideAutomateWooOptinCheckbox(): void {
     if (!$this->wp->isPluginActive('automatewoo/automatewoo.php')) {
       return;
@@ -229,13 +335,21 @@ class Subscription {
 
   private function triggerAutomateWooOptin(): void {
     if (
-      !$this->wp->isPluginActive('automatewoo/automatewoo.php')
+      !$this->isCheckoutOptinEnabled()
+      || !$this->wp->isPluginActive('automatewoo/automatewoo.php')
       || empty($_POST[self::CHECKOUT_OPTIN_INPUT_NAME])
     ) {
       return;
     }
     // Emulate checkout opt-in triggering for AutomateWoo
     $_POST['automatewoo_optin'] = 'On';
+  }
+
+  /**
+   * The checkbox is only shown when the setting is on, so its value counts only then.
+   */
+  private function isCheckoutOptinEnabled(): bool {
+    return (bool)$this->settings->get(self::OPTIN_ENABLED_SETTING_NAME, false);
   }
 
   private function subscribe(SubscriberEntity $subscriber) {

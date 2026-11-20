@@ -8,12 +8,15 @@ if (!defined('ABSPATH')) exit;
 use MailPoet\Entities\NewsletterEntity;
 use MailPoet\Entities\SendingQueueEntity;
 use MailPoet\Entities\SubscriberEntity;
+use MailPoet\Newsletter\Renderer\EscapeHelper;
+use MailPoet\Newsletter\Sending\Placeholders\PlaceholderCollector;
 use MailPoet\Newsletter\Shortcodes\Categories\CategoryInterface;
 use MailPoet\Newsletter\Shortcodes\Categories\Date;
 use MailPoet\Newsletter\Shortcodes\Categories\Link;
 use MailPoet\Newsletter\Shortcodes\Categories\Newsletter;
 use MailPoet\Newsletter\Shortcodes\Categories\Site;
 use MailPoet\Newsletter\Shortcodes\Categories\Subscriber;
+use MailPoet\Util\Helpers;
 use MailPoet\WP\Functions as WPFunctions;
 
 class Shortcodes {
@@ -211,7 +214,11 @@ class Shortcodes {
     return $processedShortcodes;
   }
 
-  public function replace($content, $contentSource = null, $categories = null) {
+  /**
+   * @param bool $isPlainText Content that is never parsed as HTML, such as a subject line,
+   *   so values are inserted as they are even where the text looks like a tag.
+   */
+  public function replace($content, $contentSource = null, $categories = null, bool $isPlainText = false) {
     $shortcodes = $this->extract($content, $categories);
     if (!$shortcodes) {
       return $content;
@@ -223,7 +230,239 @@ class Shortcodes {
       $shortcodes,
       ($contentSource) ? $contentSource : $content
     );
-    return str_replace($shortcodes, $processedShortcodes, $content);
+    $content = (string)$content;
+    if ($isPlainText) {
+      // Category values are escaped for HTML, which plain text must not show.
+      $processedShortcodes = array_map(function ($value) {
+        return is_string($value) ? htmlspecialchars_decode($value, ENT_QUOTES | ENT_HTML401) : $value;
+      }, $processedShortcodes);
+    }
+    if (!$isPlainText) {
+      $content = $this->removeDisallowedUrls($content, $shortcodes, $processedShortcodes);
+    }
+    $shortcodesInsideTags = $isPlainText ? [] : $this->findShortcodesInsideTags($content, $shortcodes);
+    return $this->replaceOccurrences($content, $shortcodes, $processedShortcodes, $shortcodesInsideTags, function (int $index) use ($processedShortcodes): string {
+      return self::encodeForAttribute((string)$processedShortcodes[$index]);
+    });
+  }
+
+  /**
+   * Empties every href or src attribute value that contains a shortcode and, once its shortcodes
+   * are replaced with $values, has a scheme that is not allowed in links.
+   *
+   * @param string[] $shortcodes
+   * @param array<int, mixed> $values
+   */
+  private function removeDisallowedUrls(string $content, array $shortcodes, array $values): string {
+    $values = array_map(function ($value): string {
+      return is_scalar($value) ? (string)$value : '';
+    }, $values);
+    $result = '';
+    $cursor = 0;
+    foreach ($this->findTags($content, strlen($content)) as [$tagStart, $tagEnd]) {
+      $tag = substr($content, $tagStart, $tagEnd - $tagStart);
+      foreach ($this->findUrlAttributeValues($tag) as [$valueOffset, $value]) {
+        if (str_replace($shortcodes, '', $value) === $value || !EscapeHelper::hasDisallowedScheme(str_replace($shortcodes, $values, $value))) {
+          continue;
+        }
+        $result .= substr($content, $cursor, $tagStart + $valueOffset - $cursor);
+        $cursor = $tagStart + $valueOffset + strlen($value);
+      }
+    }
+    return $result . substr($content, $cursor);
+  }
+
+  /**
+   * Lists the href and src attribute values of a start tag (without its closing ">")
+   * as [offset in $tag, value] pairs.
+   *
+   * @return array<int, array{int, string}>
+   */
+  private function findUrlAttributeValues(string $tag): array {
+    // Matches one attribute after the tag name: its name, then optionally "=" and a double-quoted,
+    // single-quoted or unquoted value. findTagEnd() already made sure every quoted value is closed.
+    preg_match_all('/[\s\/]*([^\s"\'>\/=]+)(?:\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s>]*)))?/', $tag, $attributes, PREG_SET_ORDER | PREG_OFFSET_CAPTURE, strcspn($tag, " \t\n\r\f/>", 1) + 1);
+    $values = [];
+    foreach ($attributes as $attribute) {
+      if (!in_array(strtolower($attribute[1][0]), ['href', 'src'], true)) {
+        continue;
+      }
+      for ($group = 2; $group <= 4; $group++) {
+        if (isset($attribute[$group]) && $attribute[$group][1] !== -1) {
+          $values[] = [$attribute[$group][1], $attribute[$group][0]];
+          break;
+        }
+      }
+    }
+    return $values;
+  }
+
+  /**
+   * Replaces every shortcode occurrence, inserting $insideTagReplacement($index) at the positions
+   * listed in $shortcodesInsideTags and $replacements[$index] everywhere else. Text around the tagged
+   * positions is replaced chunk by chunk, so shortcode-like text inside an inserted value is never
+   * replaced a second time.
+   *
+   * @param string[] $shortcodes
+   * @param string[] $replacements
+   * @param array<int, int> $shortcodesInsideTags As returned by findShortcodesInsideTags()
+   * @param callable(int): string $insideTagReplacement
+   */
+  private function replaceOccurrences(string $content, array $shortcodes, array $replacements, array $shortcodesInsideTags, callable $insideTagReplacement): string {
+    if (!$shortcodesInsideTags) {
+      return str_replace($shortcodes, $replacements, $content);
+    }
+    $result = '';
+    $cursor = 0;
+    foreach ($shortcodesInsideTags as $position => $index) {
+      if ($position < $cursor) {
+        continue;
+      }
+      $result .= str_replace($shortcodes, $replacements, substr($content, $cursor, $position - $cursor));
+      $result .= $insideTagReplacement($index);
+      $cursor = $position + strlen($shortcodes[$index]);
+    }
+    return $result . str_replace($shortcodes, $replacements, substr($content, $cursor));
+  }
+
+  /**
+   * @param string[] $shortcodes
+   * @return array<int, int> shortcode index by its position in $content, in position order
+   */
+  private function findShortcodesInsideTags(string $content, array $shortcodes): array {
+    $occurrences = [];
+    foreach ($shortcodes as $index => $shortcode) {
+      $position = strpos($content, $shortcode);
+      while ($position !== false) {
+        $occurrences[$position] = $index;
+        $position = strpos($content, $shortcode, $position + strlen($shortcode));
+      }
+    }
+    ksort($occurrences);
+    $tags = $this->findTags($content, (int)array_key_last($occurrences));
+    $tagIndex = 0;
+    $found = [];
+    foreach ($occurrences as $position => $index) {
+      while (isset($tags[$tagIndex]) && $tags[$tagIndex][1] < $position) {
+        $tagIndex++;
+      }
+      if (isset($tags[$tagIndex]) && $tags[$tagIndex][0] < $position) {
+        $found[$position] = $index;
+      }
+    }
+    return $found;
+  }
+
+  /**
+   * Lists start tags beginning before $until as [offset of "<", offset of ">"] pairs,
+   * scanning from the start the way a browser does. A start tag is "<" followed by a
+   * letter, so text such as "<3" or "< $50" is not one. Sending joins the subject,
+   * HTML and plain-text body with Helpers::DIVIDER, so each part is scanned on its
+   * own and a stray "<" in the subject cannot shift where tags are found in the HTML.
+   *
+   * @return array<int, array{int, int}>
+   */
+  private function findTags(string $content, int $until): array {
+    $tags = [];
+    $offset = 0;
+    foreach (explode(Helpers::DIVIDER, $content) as $part) {
+      $lastGreaterThan = strrpos($part, '>');
+      $start = strpos($part, '<');
+      while ($start !== false && $start < $lastGreaterThan && $offset + $start < $until) {
+        $end = ctype_alpha(substr($part, $start + 1, 1)) ? $this->findTagEnd($part, $start + 1) : null;
+        if ($end !== null) {
+          $tags[] = [$offset + $start, $offset + $end];
+        }
+        $start = strpos($part, '<', $end ?? $start + 1);
+      }
+      $offset += strlen($part) + strlen(Helpers::DIVIDER);
+      if ($offset > $until) {
+        break;
+      }
+    }
+    return $tags;
+  }
+
+  /**
+   * Returns the offset of the ">" that closes the tag, or null when the tag is never
+   * closed. As in a browser, a quote opens an attribute value only right after "=",
+   * and a ">" inside a quoted value does not close the tag.
+   */
+  private function findTagEnd(string $content, int $cursor): ?int {
+    $length = strlen($content);
+    while ($cursor < $length) {
+      $cursor += strcspn($content, '"\'>', $cursor);
+      if ($cursor >= $length) {
+        return null;
+      }
+      if ($content[$cursor] === '>') {
+        return $cursor;
+      }
+      $beforeQuote = $cursor - 1;
+      while (ctype_space($content[$beforeQuote])) {
+        $beforeQuote--;
+      }
+      if ($content[$beforeQuote] !== '=') {
+        $cursor++;
+        continue;
+      }
+      $closingQuote = strpos($content, $content[$cursor], $cursor + 1);
+      if ($closingQuote === false) {
+        return null;
+      }
+      $cursor = $closingQuote + 1;
+    }
+    return null;
+  }
+
+  public static function encodeForAttribute(string $value): string {
+    // Ampersands are left alone: values such as URLs must stay byte-identical, and
+    // an ampersand cannot end an attribute value.
+    return strtr($value, [
+      '"' => '&quot;',
+      "'" => '&#039;',
+      '<' => '&lt;',
+      '>' => '&gt;',
+    ]);
+  }
+
+  /**
+   * The templated counterpart of replace(): every shortcode becomes a placeholder and its value is
+   * recorded in the collector with the escaping replace() would have applied at that position.
+   *
+   * @param string $part One of the PlaceholderCollector::PART_* constants
+   */
+  public function replaceWithPlaceholders($content, $contentSource, PlaceholderCollector $collector, string $part) {
+    $shortcodes = $this->extract($content);
+    if (!$shortcodes) {
+      return $content;
+    }
+    $processedShortcodes = $this->process(
+      $shortcodes,
+      ($contentSource) ? $contentSource : $content
+    );
+    $placeholders = [];
+    foreach ($processedShortcodes as $index => $processedShortcode) {
+      $processedShortcode = (string)$processedShortcode;
+      $token = $shortcodes[$index];
+      // A shortcode value may be markup (e.g. [site:homepage_link]), so it is converted for the plain-text parts.
+      if ($part === PlaceholderCollector::PART_SUBJECT) {
+        $placeholders[] = $collector->addSubjectTextFromHtml($processedShortcode, $token);
+      } elseif ($part === PlaceholderCollector::PART_HTML) {
+        $placeholders[] = $collector->addHtml($processedShortcode, $token);
+      } else {
+        $placeholders[] = $collector->addTextFromHtml($processedShortcode, $token);
+      }
+    }
+    $content = (string)$content;
+    // Only the HTML part is parsed as markup; the subject and text parts never are.
+    if ($part === PlaceholderCollector::PART_HTML) {
+      $content = $this->removeDisallowedUrls($content, $shortcodes, $processedShortcodes);
+    }
+    $shortcodesInsideTags = $part === PlaceholderCollector::PART_HTML ? $this->findShortcodesInsideTags($content, $shortcodes) : [];
+    return $this->replaceOccurrences($content, $shortcodes, $placeholders, $shortcodesInsideTags, function (int $index) use ($collector, $processedShortcodes, $shortcodes): string {
+      return $collector->addHtmlAttribute((string)$processedShortcodes[$index], $shortcodes[$index]);
+    });
   }
 
   private function getCategoryObject($category): ?CategoryInterface {

@@ -71,9 +71,9 @@ class __TwigTemplate_4e0ede03c63347844b541c798d581116f05e6725f71ff37333dec655706
         yield "</td>
   </tr>
   <tr>
-    <td data-export-label=\"Send all site's emails with\">";
+    <td data-export-label=\"Send all site\x27s emails with\">";
         // line 19
-        yield $this->extensions['MailPoet\Twig\I18n']->translate("Send all site's emails with:");
+        yield $this->extensions['MailPoet\Twig\I18n']->translate("Send all site\x27s emails with:");
         yield "</td>
     <td class=\"help\">
       <span class=\"woocommerce-help-tip\" data-tip=\"";

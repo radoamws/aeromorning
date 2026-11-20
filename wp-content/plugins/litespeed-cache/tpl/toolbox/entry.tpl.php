@@ -26,7 +26,9 @@ if ( ! $this->_is_multisite || $this->_is_network_admin ) {
 
 if ( ! $this->_is_network_admin ) {
 	$menu_list['heartbeat'] = esc_html__( 'Heartbeat', 'litespeed-cache' );
-	$menu_list['report']    = esc_html__( 'Report', 'litespeed-cache' );
+	if ( ! is_multisite() || current_user_can( 'manage_network_options' ) ) {
+		$menu_list['report'] = esc_html__( 'Report', 'litespeed-cache' );
+	}
 }
 
 if ( ! $this->_is_multisite || $this->_is_network_admin ) {
@@ -52,10 +54,12 @@ if ( ! $this->_is_multisite || $this->_is_network_admin ) {
 	</h2>
 
 	<div class="litespeed-body">
-		<?php foreach ( $menu_list as $curr_tab => $val ) : ?>
-			<div data-litespeed-layout="<?php echo esc_attr( $curr_tab ); ?>">
-				<?php require LSCWP_DIR . "tpl/toolbox/$curr_tab.tpl.php"; ?>
-			</div>
-		<?php endforeach; ?>
+		<?php
+		foreach ( $menu_list as $curr_tab => $val ) {
+			GUI::display_tab_layout( $menu_list, $curr_tab );
+			require LSCWP_DIR . "tpl/toolbox/$curr_tab.tpl.php";
+			echo '</div>';
+		}
+		?>
 	</div>
 </div>

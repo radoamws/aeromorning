@@ -117,11 +117,12 @@ abstract class Tribe__Events__Importer__File_Importer {
 	 * Constructor.
 	 *
 	 * @since 3.2.0
+	 * @since 6.17.0 Made $featured_image_uploader explicitly nullable.
 	 *
 	 * @param Tribe__Events__Importer__File_Reader                  $file_reader             The file reader class.
 	 * @param Tribe__Events__Importer__Featured_Image_Uploader|null $featured_image_uploader The featured image uploader class.
 	 */
-	public function __construct( Tribe__Events__Importer__File_Reader $file_reader, Tribe__Events__Importer__Featured_Image_Uploader $featured_image_uploader = null ) {
+	public function __construct( Tribe__Events__Importer__File_Reader $file_reader, ?Tribe__Events__Importer__Featured_Image_Uploader $featured_image_uploader = null ) {
 		$this->reader                  = $file_reader;
 		$this->featured_image_uploader = $featured_image_uploader;
 		$this->limit                   = apply_filters( 'tribe_aggregator_batch_size', Tribe__Events__Aggregator__Record__Queue_Processor::$batch_size );
@@ -290,8 +291,31 @@ abstract class Tribe__Events__Importer__File_Importer {
 		return $post_id;
 	}
 
+	/**
+	 * @since 3.2.0
+	 * @since 6.18.4.1 Skips the row when the user running the import cannot edit the matched post.
+	 *
+	 * @param array $record A record from the import.
+	 *
+	 * @return int|false The ID of the updated or created post, or `false` if the row was skipped.
+	 */
 	protected function update_or_create_post( array $record ) {
 		if ( $id = $this->match_existing_post( $record ) ) {
+			/* The ticket importers report a match as `true`: it names no post, and their update writes nothing. */
+			if ( true !== $id && ! $this->can_update_post( $id ) ) {
+				$row = $this->reader->get_last_line_number_read() + 1;
+
+				$this->log[ $row ] = sprintf(
+					/* translators: %d: The row number in the CSV file. */
+					esc_html__( 'Skipped row %d: the matching post cannot be edited by the user who started the import.', 'the-events-calendar' ),
+					$row
+				);
+
+				$this->skipped[] = $row;
+
+				return false;
+			}
+
 			if ( false !== $this->update_post( $id, $record ) ) {
 				$this->updated ++;
 				$this->log[ $this->reader->get_last_line_number_read() + 1 ] = sprintf( esc_html__( '%s (post ID %d) updated.', 'the-events-calendar' ), get_the_title( $id ), $id );
@@ -553,5 +577,31 @@ abstract class Tribe__Events__Importer__File_Importer {
 		$iterator = Tribe__Utils__Array::get( $this->created_terms, $taxonomy, new ArrayIterator() );
 
 		return $rewind ? $iterator : new NoRewindIterator( $iterator );
+	}
+
+	/**
+	 * Whether the user running the import can edit the matched post.
+	 *
+	 * Background batches run with no logged-in user, so the import record's author is checked when there is one.
+	 *
+	 * @since 6.18.4.1
+	 *
+	 * @param int|string $post_id The ID of the matched post.
+	 *
+	 * @return bool Whether the matched post can be updated.
+	 */
+	protected function can_update_post( $post_id ): bool {
+		$user_id = get_current_user_id();
+
+		if ( $this->is_aggregator && ! empty( $this->aggregator_record->post->post_author ) ) {
+			$user_id = $this->aggregator_record->post->post_author;
+		}
+
+		/* WP-CLI runs as no user unless `--user` is passed, and whoever runs it already has full access to the site. */
+		if ( ! $user_id && defined( 'WP_CLI' ) && WP_CLI ) {
+			return true;
+		}
+
+		return user_can( $user_id, 'edit_post', $post_id );
 	}
 }

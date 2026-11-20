@@ -18,29 +18,29 @@ use function is_a;
 use const PHP_VERSION_ID;
 final class DefaultTypedFieldMapper implements TypedFieldMapper
 {
- private $typedFieldMappings;
- private const DEFAULT_TYPED_FIELD_MAPPINGS = [DateInterval::class => Types::DATEINTERVAL, DateTime::class => Types::DATETIME_MUTABLE, DateTimeImmutable::class => Types::DATETIME_IMMUTABLE, 'array' => Types::JSON, 'bool' => Types::BOOLEAN, 'float' => Types::FLOAT, 'int' => Types::INTEGER, 'string' => Types::STRING];
- public function __construct(array $typedFieldMappings = [])
- {
- $this->typedFieldMappings = array_merge(self::DEFAULT_TYPED_FIELD_MAPPINGS, $typedFieldMappings);
- }
- public function validateAndComplete(array $mapping, ReflectionProperty $field) : array
- {
- $type = $field->getType();
- if (!isset($mapping['type']) && $type instanceof ReflectionNamedType) {
- if (PHP_VERSION_ID >= 80100 && !$type->isBuiltin() && enum_exists($type->getName())) {
- $reflection = new ReflectionEnum($type->getName());
- if (!$reflection->isBacked()) {
- throw MappingException::backedEnumTypeRequired($field->class, $mapping['fieldName'], $type->getName());
- }
- assert(is_a($type->getName(), BackedEnum::class, \true));
- $mapping['enumType'] = $type->getName();
- $type = $reflection->getBackingType();
- }
- if (isset($this->typedFieldMappings[$type->getName()])) {
- $mapping['type'] = $this->typedFieldMappings[$type->getName()];
- }
- }
- return $mapping;
- }
+private $typedFieldMappings;
+private const DEFAULT_TYPED_FIELD_MAPPINGS = [DateInterval::class => Types::DATEINTERVAL, DateTime::class => Types::DATETIME_MUTABLE, DateTimeImmutable::class => Types::DATETIME_IMMUTABLE, 'array' => Types::JSON, 'bool' => Types::BOOLEAN, 'float' => Types::FLOAT, 'int' => Types::INTEGER, 'string' => Types::STRING];
+public function __construct(array $typedFieldMappings = [])
+{
+$this->typedFieldMappings = array_merge(self::DEFAULT_TYPED_FIELD_MAPPINGS, $typedFieldMappings);
+}
+public function validateAndComplete(array $mapping, ReflectionProperty $field): array
+{
+$type = $field->getType();
+if (!isset($mapping['type']) && $type instanceof ReflectionNamedType) {
+if (PHP_VERSION_ID >= 80100 && !$type->isBuiltin() && enum_exists($type->getName())) {
+$reflection = new ReflectionEnum($type->getName());
+if (!$reflection->isBacked()) {
+throw MappingException::backedEnumTypeRequired($field->class, $mapping['fieldName'], $type->getName());
+}
+assert(is_a($type->getName(), BackedEnum::class, \true));
+$mapping['enumType'] = $type->getName();
+$type = $reflection->getBackingType();
+}
+if (isset($this->typedFieldMappings[$type->getName()])) {
+$mapping['type'] = $this->typedFieldMappings[$type->getName()];
+}
+}
+return $mapping;
+}
 }

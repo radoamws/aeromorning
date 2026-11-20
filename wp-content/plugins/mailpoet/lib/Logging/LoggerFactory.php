@@ -27,6 +27,7 @@ use MailPoetVendor\Monolog\Processor\WebProcessor;
  * If WP_DEBUG is true additional information will be added to every log message.
  */
 class LoggerFactory {
+  // Add a readable label for new topics to LOG_TOPIC_LABELS in assets/js/src/logs/filters.ts.
   const TOPIC_NEWSLETTERS = 'newsletters';
   const TOPIC_POST_NOTIFICATIONS = 'post-notifications';
   const TOPIC_MSS = 'mss';
@@ -40,6 +41,9 @@ class LoggerFactory {
   const TOPIC_PROVISIONING = 'provisioning';
   const TOPIC_SEGMENTS = 'segments';
   const TOPIC_EMAIL_EDITOR = 'email-editor';
+  const TOPIC_MIGRATIONS = 'migrations';
+  const TOPIC_PAGES = 'pages';
+  const TOPIC_CAPTCHA = 'captcha';
 
   /** @var LoggerFactory */
   private static $instance;

@@ -38,7 +38,7 @@ class __TwigTemplate_49dbfe4146cc56abca0fd262ba63938d36f1ee75a2835926df2a4ac7314
     {
         $macros = $this->macros;
         // line 1
-        yield "<div class=\"mailpoet_container_empty\">{{#ifCond emptyContainerMessage '!==' ''}}{{emptyContainerMessage}}{{else}}{{#if isRoot}}";
+        yield "<div class=\"mailpoet_container_empty\">{{#ifCond emptyContainerMessage \x27!==\x27 \x27\x27}}{{emptyContainerMessage}}{{else}}{{#if isRoot}}";
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Add a column block here.");
         yield "{{else}}";
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Add a content block here.");

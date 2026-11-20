@@ -148,7 +148,7 @@ class PurchasedInCategory {
     if (!$subscriber instanceof SubscriberEntity) {
       $this->loggerFactory->getLogger(self::SLUG)->info(
         'Email not scheduled because the customer was not found as WooCommerce list subscriber',
-        ['order_id' => $orderId, 'customer_email' => $customerEmail]
+        ['order_id' => $orderId, 'customer_email' => Helpers::maskEmail($customerEmail)]
       );
       return;
     }
@@ -182,10 +182,10 @@ class PurchasedInCategory {
     };
 
     $this->loggerFactory->getLogger(self::SLUG)->info(
-      'Email scheduled',
+      'MailPoet tried to schedule the automatic email for the customer of this order (previously logged as: Email scheduled).',
       [
         'order_id' => $orderId,
-        'customer_email' => $customerEmail,
+        'customer_email' => Helpers::maskEmail($customerEmail),
         'subscriber_id' => $subscriber->getId(),
       ]
     );

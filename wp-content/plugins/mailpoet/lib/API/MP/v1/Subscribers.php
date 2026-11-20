@@ -16,6 +16,7 @@ use MailPoet\Newsletter\Scheduler\WelcomeScheduler;
 use MailPoet\Segments\SegmentsRepository;
 use MailPoet\Settings\SettingsController;
 use MailPoet\Statistics\Track\Unsubscribes;
+use MailPoet\Subscribers\ApiSourcePluginResolver;
 use MailPoet\Subscribers\ConfirmationEmailMailer;
 use MailPoet\Subscribers\ConfirmationEmailResolver;
 use MailPoet\Subscribers\NewSubscriberNotificationMailer;
@@ -26,6 +27,7 @@ use MailPoet\Subscribers\SubscriberSaveController;
 use MailPoet\Subscribers\SubscriberSegmentRepository;
 use MailPoet\Subscribers\SubscribersRepository;
 use MailPoet\Subscribers\SubscriberTagRepository;
+use MailPoet\Subscribers\TrackingConsentCapture;
 use MailPoet\Tags\TagRepository;
 use MailPoet\Util\Helpers;
 use MailPoet\WP\Functions as WPFunctions;
@@ -83,6 +85,12 @@ class Subscribers {
   /** @var ConfirmationEmailResolver */
   private $confirmationEmailResolver;
 
+  /** @var TrackingConsentCapture */
+  private $trackingConsentCapture;
+
+  /** @var ApiSourcePluginResolver */
+  private $apiSourcePluginResolver;
+
   public function __construct (
     ConfirmationEmailMailer $confirmationEmailMailer,
     NewSubscriberNotificationMailer $newSubscriberNotificationMailer,
@@ -99,7 +107,9 @@ class Subscribers {
     Unsubscribes $unsubscribesTracker,
     TagRepository $tagRepository,
     SubscriberTagRepository $subscriberTagRepository,
-    ConfirmationEmailResolver $confirmationEmailResolver
+    ConfirmationEmailResolver $confirmationEmailResolver,
+    TrackingConsentCapture $trackingConsentCapture,
+    ApiSourcePluginResolver $apiSourcePluginResolver
   ) {
     $this->confirmationEmailMailer = $confirmationEmailMailer;
     $this->newSubscriberNotificationMailer = $newSubscriberNotificationMailer;
@@ -117,6 +127,8 @@ class Subscribers {
     $this->tagRepository = $tagRepository;
     $this->subscriberTagRepository = $subscriberTagRepository;
     $this->confirmationEmailResolver = $confirmationEmailResolver;
+    $this->trackingConsentCapture = $trackingConsentCapture;
+    $this->apiSourcePluginResolver = $apiSourcePluginResolver;
   }
 
   public function getSubscriber($subscriberIdOrEmail): array {
@@ -128,6 +140,7 @@ class Subscribers {
     $sendConfirmationEmail = !(isset($options['send_confirmation_email']) && $options['send_confirmation_email'] === false);
     $scheduleWelcomeEmail = !(isset($options['schedule_welcome_email']) && $options['schedule_welcome_email'] === false);
     $skipSubscriberNotification = (isset($options['skip_subscriber_notification']) && $options['skip_subscriber_notification'] === true);
+    $skipUnsentRequiredCustomFields = $this->shouldSkipUnsentRequiredCustomFields($options);
 
     // throw exception when subscriber email is missing
     if (empty($data['email'])) {
@@ -147,15 +160,21 @@ class Subscribers {
 
     [$defaultFields, $customFields] = $this->extractCustomFieldsFromFromSubscriberData($data);
 
-    $this->requiredCustomFieldsValidator->validate($customFields);
+    try {
+      $this->requiredCustomFieldsValidator->validate($customFields, null, $skipUnsentRequiredCustomFields);
+    } catch (\Exception $e) {
+      throw new APIException($e->getMessage(), APIException::CUSTOM_FIELD_VALUE_REQUIRED, $e);
+    }
 
     // filter out all incoming data that we don't want to change, like status ...
-    $defaultFields = array_intersect_key($defaultFields, array_flip(['email', 'first_name', 'last_name', 'subscribed_ip']));
+    $defaultFields = array_intersect_key($defaultFields, array_flip(['email', 'first_name', 'last_name', 'subscribed_ip', 'tracking_consent', 'tracking_consent_copy']));
+    $defaultFields = $this->resolveTrackingConsentFields($defaultFields);
 
     if (empty($defaultFields['subscribed_ip'])) {
       $defaultFields['subscribed_ip'] = Helpers::getIP();
     }
     $defaultFields['source'] = Source::API;
+    $defaultFields['source_plugin'] = $this->apiSourcePluginResolver->resolve();
 
     // Pre-resolve tag names before any persistence so invalid tags fail fast
     // and don't leave a half-created subscriber behind.
@@ -204,17 +223,22 @@ class Subscribers {
     return $this->subscribersResponseBuilder->build($subscriberEntity);
   }
 
-  public function updateSubscriber($subscriberIdOrEmail, array $data): array {
+  public function updateSubscriber($subscriberIdOrEmail, array $data, array $options = []): array {
     $this->checkSubscriberParam($subscriberIdOrEmail);
 
     $subscriber = $this->findSubscriber($subscriberIdOrEmail);
 
     [$defaultFields, $customFields] = $this->extractCustomFieldsFromFromSubscriberData($data);
 
-    $this->requiredCustomFieldsValidator->validate($customFields);
+    try {
+      $this->requiredCustomFieldsValidator->validate($customFields, null, $this->shouldSkipUnsentRequiredCustomFields($options));
+    } catch (\Exception $e) {
+      throw new APIException($e->getMessage(), APIException::CUSTOM_FIELD_VALUE_REQUIRED, $e);
+    }
 
     // filter out all incoming data that we don't want to change, like status ...
-    $defaultFields = array_intersect_key($defaultFields, array_flip(['email', 'first_name', 'last_name', 'subscribed_ip']));
+    $defaultFields = array_intersect_key($defaultFields, array_flip(['email', 'first_name', 'last_name', 'subscribed_ip', 'tracking_consent', 'tracking_consent_copy']));
+    $defaultFields = $this->resolveTrackingConsentFields($defaultFields);
 
     if ($subscriber->getWpUserId() !== null) {
       unset($defaultFields['email']);
@@ -226,6 +250,11 @@ class Subscribers {
       $defaultFields['subscribed_ip'] = Helpers::getIP();
     }
     $defaultFields['source'] = Source::API;
+    // Keep a previously stored slug when no plugin can be resolved
+    $sourcePlugin = $this->apiSourcePluginResolver->resolve();
+    if ($sourcePlugin) {
+      $defaultFields['source_plugin'] = $sourcePlugin;
+    }
 
     // Pre-resolve tag names before any persistence so invalid tags fail fast
     // and don't leave the subscriber partially updated.
@@ -703,6 +732,58 @@ class Subscribers {
       throw new APIException(__('Tag name is required.', 'mailpoet'), APIException::TAG_NAME_REQUIRED);
     }
     return $sanitized;
+  }
+
+  /**
+   * Validates and resolves the tracking-consent fields a public-API caller sent.
+   *
+   * Only the three known states can be stored. Anything else is dropped rather
+   * than stored or thrown on, so the subscriber keeps whatever consent they
+   * already had (or the unknown default, for one being created now) — the same
+   * shape as the rest of this whitelist, which silently drops fields it does
+   * not accept.
+   *
+   * The method is always stamped 'api': the caller rendered its own consent
+   * control, so it IS the collection point and never gets to name a different
+   * one. The wording is the caller's own when it sends one, otherwise the
+   * application default, read through TrackingConsentCapture::getCopy() so a
+   * site's mailpoet_tracking_consent_copy filter still applies. getCopy() is
+   * used deliberately instead of getConsentData()/applyToSubscriber(): those
+   * two gate on isCaptureEnabled(), which would silently drop a decline on a
+   * site whose own consent controls are switched off, and a decline has to be
+   * honoured either way.
+   */
+  private function resolveTrackingConsentFields(array $fields): array {
+    if (!isset($fields['tracking_consent'])) {
+      unset($fields['tracking_consent_copy']);
+      return $fields;
+    }
+    $validStates = [
+      SubscriberEntity::TRACKING_CONSENT_GRANTED,
+      SubscriberEntity::TRACKING_CONSENT_DENIED,
+      SubscriberEntity::TRACKING_CONSENT_UNKNOWN,
+    ];
+    // Checked with is_string() rather than cast: casting an array or object here throws
+    // an \Error, which does not extend \Exception and so escapes the try/catch this
+    // method's callers wrap createOrUpdate() in. That would turn "invalid values are
+    // ignored" into a fatal.
+    $consent = $fields['tracking_consent'];
+    if (!is_string($consent) || !in_array($consent, $validStates, true)) {
+      unset($fields['tracking_consent'], $fields['tracking_consent_copy']);
+      return $fields;
+    }
+    $fields['tracking_consent'] = $consent;
+    $fields['tracking_consent_method'] = SubscriberEntity::TRACKING_CONSENT_METHOD_API;
+    $copy = $fields['tracking_consent_copy'] ?? null;
+    $fields['tracking_consent_copy'] = $this->trackingConsentCapture->getCopy(
+      SubscriberEntity::TRACKING_CONSENT_METHOD_API,
+      is_string($copy) ? $copy : null
+    );
+    return $fields;
+  }
+
+  private function shouldSkipUnsentRequiredCustomFields(array $options): bool {
+    return isset($options['skip_unsent_required_custom_fields']) && $options['skip_unsent_required_custom_fields'] === true;
   }
 
   /**

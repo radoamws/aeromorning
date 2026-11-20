@@ -289,6 +289,15 @@ function ewww_image_optimizer_get_image_table_row( $optimized_image, $alternate,
 	$thumb_url  = '';
 	$image_url  = '';
 	ewwwio_debug_message( "name is $image_name after replacing ABSPATH" );
+	if ( ewwwio()->get_option( 'ewww_image_optimizer_debug' ) ) {
+		ewwwio_debug_message( 'optimized_image:' );
+		foreach ( $optimized_image as $key => $value ) {
+			if ( 'debug' === $key ) {
+				continue;
+			}
+			ewwwio_debug_message( "$key: $value" );
+		}
+	}
 	if ( 'media' === $optimized_image['gallery'] && ! empty( $optimized_image['attachment_id'] ) ) {
 		$thumb_url = wp_get_attachment_image_url( $optimized_image['attachment_id'] );
 	}
@@ -988,7 +997,8 @@ function ewww_image_optimizer_delete_webp( $id ) {
 			foreach ( $webp_paths as $webp_path ) {
 				if ( ewwwio_is_file( $webp_path ) ) {
 					ewwwio_debug_message( 'removing: ' . $webp_path );
-					unlink( $webp_path );
+					// Intentionally using wp_delete_file here (and elsewhere with S3 paths) just in case our delete_file() method doesn't work with s3:// paths.
+					wp_delete_file( $webp_path );
 				}
 			}
 		}
@@ -1037,7 +1047,7 @@ function ewww_image_optimizer_delete_webp( $id ) {
 		}
 		if ( $s3_path && $s3_dir && wp_basename( $meta['original_image'] ) ) {
 			ewwwio_debug_message( 'removing: ' . $s3_dir . wp_basename( $meta['original_image'] ) . '.webp' );
-			if ( unlink( $s3_dir . wp_basename( $meta['original_image'] ) . '.webp' ) ) {
+			if ( wp_delete_file( $s3_dir . wp_basename( $meta['original_image'] ) . '.webp' ) ) {
 				++$removed;
 			}
 		}
@@ -1071,7 +1081,7 @@ function ewww_image_optimizer_delete_webp( $id ) {
 			}
 			if ( $s3_path && $s3_dir && wp_basename( $data['file'] ) ) {
 				ewwwio_debug_message( 'removing: ' . $s3_dir . wp_basename( $data['file'] ) . '.webp' );
-				if ( unlink( $s3_dir . wp_basename( $data['file'] ) . '.webp' ) ) {
+				if ( wp_delete_file( $s3_dir . wp_basename( $data['file'] ) . '.webp' ) ) {
 					++$removed;
 				}
 			}

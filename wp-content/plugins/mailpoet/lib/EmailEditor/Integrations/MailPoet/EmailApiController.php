@@ -5,6 +5,8 @@ namespace MailPoet\EmailEditor\Integrations\MailPoet;
 if (!defined('ABSPATH')) exit;
 
 
+use MailPoet\AccessDeniedException;
+use MailPoet\Config\AccessControl;
 use MailPoet\Entities\NewsletterEntity;
 use MailPoet\Entities\NewsletterOptionEntity;
 use MailPoet\Entities\NewsletterOptionFieldEntity;
@@ -14,11 +16,14 @@ use MailPoet\Newsletter\NewslettersRepository;
 use MailPoet\Newsletter\Options\NewsletterOptionFieldsRepository;
 use MailPoet\Newsletter\Options\NewsletterOptionsRepository;
 use MailPoet\Newsletter\Segment\NewsletterSegmentRepository;
+use MailPoet\Newsletter\Sending\TimeZoneCampaignScheduler;
 use MailPoet\Newsletter\Sharing\ShareVisibility;
 use MailPoet\Newsletter\Url as NewsletterUrl;
 use MailPoet\NotFoundException;
 use MailPoet\UnexpectedValueException;
 use MailPoet\Validator\Builder;
+use MailPoet\WP\Functions as WPFunctions;
+use MailPoetVendor\Carbon\Carbon;
 use MailPoetVendor\Doctrine\ORM\EntityManager;
 
 class EmailApiController {
@@ -43,6 +48,9 @@ class EmailApiController {
   /** @var ShareVisibility */
   private $shareVisibility;
 
+  /** @var WPFunctions */
+  private $wp;
+
   public function __construct(
     NewslettersRepository $newsletterRepository,
     NewsletterUrl $newsletterUrl,
@@ -50,7 +58,8 @@ class EmailApiController {
     NewsletterOptionsRepository $newsletterOptionsRepository,
     NewsletterSegmentRepository $newsletterSegmentRepository,
     EntityManager $entityManager,
-    ShareVisibility $shareVisibility
+    ShareVisibility $shareVisibility,
+    WPFunctions $wp
   ) {
     $this->newsletterRepository = $newsletterRepository;
     $this->newsletterUrl = $newsletterUrl;
@@ -59,6 +68,7 @@ class EmailApiController {
     $this->newsletterSegmentRepository = $newsletterSegmentRepository;
     $this->entityManager = $entityManager;
     $this->shareVisibility = $shareVisibility;
+    $this->wp = $wp;
   }
 
   /**
@@ -82,7 +92,10 @@ class EmailApiController {
       'reply_to_address' => $newsletter ? $newsletter->getReplyToAddress() : '',
       'preview_url' => $this->newsletterUrl->getViewInBrowserUrl($newsletter),
       'deleted_at' => $newsletter && $newsletter->getDeletedAt() !== null ? $newsletter->getDeletedAt()->format('c') : null,
-      'scheduled_at' => $newsletter ? $newsletter->getOptionValue(NewsletterOptionFieldEntity::NAME_SCHEDULED_AT) : null,
+      'scheduled_at' => $newsletter ? $this->toSiteLocal($newsletter->getOptionValue(NewsletterOptionFieldEntity::NAME_SCHEDULED_AT)) : null,
+      'schedule_mode' => $newsletter ? $newsletter->getOptionValue(NewsletterOptionFieldEntity::NAME_SCHEDULE_MODE) : null,
+      'scheduled_local_date' => $newsletter ? $newsletter->getOptionValue(NewsletterOptionFieldEntity::NAME_SCHEDULED_LOCAL_DATE) : null,
+      'scheduled_local_time' => $newsletter ? $newsletter->getOptionValue(NewsletterOptionFieldEntity::NAME_SCHEDULED_LOCAL_TIME) : null,
       'utm_campaign' => $newsletter ? $newsletter->getGaCampaign() : '',
       'segment_ids' => $newsletter ? $newsletter->getSegmentIds() : [],
       'is_automation_newsletter' => $isAutomationNewsletter,
@@ -104,6 +117,9 @@ class EmailApiController {
    * Update MailPoet specific data we store with Emails.
    */
   public function saveEmailData(array $data, \WP_Post $emailPost): void {
+    if (!$this->wp->currentUserCan(AccessControl::PERMISSION_MANAGE_EMAILS)) {
+      throw new AccessDeniedException('You do not have permission to perform this action.');
+    }
     $newsletter = $this->newsletterRepository->findOneById($data['id']);
     if (!$newsletter) {
       throw new NotFoundException('Newsletter was not found');
@@ -132,7 +148,7 @@ class EmailApiController {
     }
 
     if (isset($data['utm_campaign'])) {
-      $newsletter->setGaCampaign($data['utm_campaign']);
+      $newsletter->setGaCampaign($this->wp->wpStripAllTags((string)$data['utm_campaign'], true));
     }
 
     if (isset($data['deleted_at'])) {
@@ -146,6 +162,30 @@ class EmailApiController {
 
     if (array_key_exists('scheduled_at', $data)) {
       $this->updateScheduledAtOption($newsletter, $data['scheduled_at']);
+    }
+
+    if (array_key_exists('schedule_mode', $data)) {
+      $this->updateScheduleModeOption($newsletter, $data['schedule_mode']);
+    }
+
+    if (array_key_exists('scheduled_local_date', $data)) {
+      $this->updateScheduledLocalOption(
+        $newsletter,
+        NewsletterOptionFieldEntity::NAME_SCHEDULED_LOCAL_DATE,
+        $data['scheduled_local_date'],
+        'Y-m-d',
+        'Invalid scheduled_local_date format. Expected a Y-m-d date string.'
+      );
+    }
+
+    if (array_key_exists('scheduled_local_time', $data)) {
+      $this->updateScheduledLocalOption(
+        $newsletter,
+        NewsletterOptionFieldEntity::NAME_SCHEDULED_LOCAL_TIME,
+        $data['scheduled_local_time'],
+        'H:i:s',
+        'Invalid scheduled_local_time format. Expected a H:i:s time string.'
+      );
     }
 
     if (array_key_exists('share_visibility', $data)) {
@@ -208,11 +248,54 @@ class EmailApiController {
     $option->setValue($optionValue);
   }
 
+  private function updateScheduleModeOption(NewsletterEntity $newsletter, $scheduleModeValue): void {
+    $allowedModes = [
+      TimeZoneCampaignScheduler::SCHEDULE_MODE_WEBSITE_TIME,
+      TimeZoneCampaignScheduler::SCHEDULE_MODE_SUBSCRIBER_TIMEZONE,
+    ];
+    if ($scheduleModeValue !== null && $scheduleModeValue !== '' && !in_array($scheduleModeValue, $allowedModes, true)) {
+      throw new UnexpectedValueException('Invalid schedule_mode value.');
+    }
+
+    $this->updateOption($newsletter, NewsletterOptionFieldEntity::NAME_SCHEDULE_MODE, $scheduleModeValue);
+
+    // Subscriber timezone scheduling has no scheduled_at datetime, so the isScheduled
+    // option derived from scheduled_at would stay '0' and sending would dispatch to the
+    // immediate path instead of TimeZoneCampaignScheduler.
+    if ($scheduleModeValue === TimeZoneCampaignScheduler::SCHEDULE_MODE_SUBSCRIBER_TIMEZONE) {
+      $this->updateOption($newsletter, NewsletterOptionFieldEntity::NAME_IS_SCHEDULED, '1');
+      return;
+    }
+
+    // Switching back to website time must re-derive isScheduled from scheduledAt,
+    // otherwise a payload without the scheduled_at key would leave isScheduled
+    // stuck at '1' with no datetime and sending would take the scheduled path.
+    if ($scheduleModeValue === TimeZoneCampaignScheduler::SCHEDULE_MODE_WEBSITE_TIME) {
+      $scheduledAt = $newsletter->getOptionValue(NewsletterOptionFieldEntity::NAME_SCHEDULED_AT);
+      $this->updateOption(
+        $newsletter,
+        NewsletterOptionFieldEntity::NAME_IS_SCHEDULED,
+        $scheduledAt !== null && $scheduledAt !== '' ? '1' : '0'
+      );
+    }
+  }
+
+  private function updateScheduledLocalOption(NewsletterEntity $newsletter, string $optionName, $value, string $format, string $errorMessage): void {
+    if ($value !== null && $value !== '') {
+      $parsed = is_string($value) ? \DateTimeImmutable::createFromFormat("!{$format}", $value) : false;
+      if (!$parsed || $parsed->format($format) !== $value) {
+        throw new UnexpectedValueException($errorMessage);
+      }
+    }
+
+    $this->updateOption($newsletter, $optionName, $value);
+  }
+
   private function updateScheduledAtOption($newsletter, $scheduledAtValue): void {
-    // Validate the scheduled_at value
+    // Validate and convert the scheduled_at value from site-local time to UTC
     if ($scheduledAtValue !== null && $scheduledAtValue !== '') {
       try {
-        new \DateTime($scheduledAtValue);
+        $scheduledAtValue = $this->toUtcOptionValue($scheduledAtValue);
       } catch (\Exception $e) {
         throw new UnexpectedValueException('Invalid scheduled_at format. Expected a valid datetime string.');
       }
@@ -226,6 +309,43 @@ class EmailApiController {
       NewsletterOptionFieldEntity::NAME_IS_SCHEDULED,
       $scheduledAtValue !== null && $scheduledAtValue !== '' ? '1' : '0'
     );
+  }
+
+  /**
+   * Converts a site-local (or explicitly offset) datetime string, as emitted by the
+   * block editor's DateTimePicker, into the UTC string format used for storage.
+   * A date that does not exist, such as 31 February, is reported by the parser as a
+   * warning rather than an error, and would otherwise be stored as the day it rolls
+   * over to.
+   */
+  private function toUtcOptionValue(string $value): string {
+    $date = new \DateTimeImmutable($value, $this->wp->wpTimezone());
+
+    $parseResult = \DateTimeImmutable::getLastErrors();
+    if (is_array($parseResult) && ($parseResult['warning_count'] > 0 || $parseResult['error_count'] > 0)) {
+      throw new \InvalidArgumentException('The date does not exist.');
+    }
+
+    return $date->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+  }
+
+  /**
+   * Converts a UTC datetime string, as stored in the scheduledAt option, into the
+   * site-local T-form expected by the block editor's DateTimePicker. Falls back to
+   * the raw stored value if it cannot be parsed, since older/legacy rows may contain
+   * non-standard strings (e.g. relative dates) that were never validated on write.
+   */
+  private function toSiteLocal($value) {
+    if ($value === null || $value === '') {
+      return $value;
+    }
+
+    try {
+      $date = new \DateTimeImmutable($value, new \DateTimeZone('UTC'));
+      return $date->setTimezone($this->wp->wpTimezone())->format('Y-m-d\TH:i:s');
+    } catch (\Exception $e) {
+      return $value;
+    }
   }
 
   /**
@@ -266,6 +386,19 @@ class EmailApiController {
     $this->entityManager->flush();
   }
 
+  /**
+   * Content saved in the email editor lives in the post, so the newsletter row
+   * does not change on its own and its updated_at would stay old.
+   */
+  public function markNewsletterAsUpdated(\WP_Post $wpPost): void {
+    $newsletter = $this->newsletterRepository->findOneBy(['wpPost' => $wpPost->ID]);
+    if (!$newsletter) {
+      return;
+    }
+    $newsletter->setUpdatedAt(Carbon::now()->millisecond(0));
+    $this->newsletterRepository->flush();
+  }
+
   public function trashEmail(\WP_Post $wpPost) {
     $newsletter = $this->newsletterRepository->findOneBy(['wpPost' => $wpPost->ID]);
     if (!$newsletter) {
@@ -290,6 +423,9 @@ class EmailApiController {
       'preview_url' => Builder::string(),
       'deleted_at' => Builder::string()->nullable(),
       'scheduled_at' => Builder::string()->nullable(),
+      'schedule_mode' => Builder::string()->nullable(),
+      'scheduled_local_date' => Builder::string()->nullable(),
+      'scheduled_local_time' => Builder::string()->nullable(),
       'utm_campaign' => Builder::string(),
       'segment_ids' => Builder::array(),
       'is_automation_newsletter' => Builder::boolean(),

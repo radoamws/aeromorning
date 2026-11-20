@@ -78,6 +78,9 @@ class FastImageSize {
         'webp' => array(
             'webp',
         ),
+        'avif' => array(
+            'avif',
+        ),
         'svg'  => array(
             'svg',
         )

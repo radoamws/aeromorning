@@ -79,7 +79,7 @@ class __TwigTemplate_97885955d9a61cd687e4b5c17a9f999c888cf1faf1a92c3e61951df9645
         yield "</div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"display_type\" class=\"mailpoet_field_display_type\" value=\"scale\" {{#ifCond model.image.display '===' 'scale'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"display_type\" class=\"mailpoet_field_display_type\" value=\"scale\" {{#ifCond model.image.display \x27===\x27 \x27scale\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 27
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Scale");
@@ -88,7 +88,7 @@ class __TwigTemplate_97885955d9a61cd687e4b5c17a9f999c888cf1faf1a92c3e61951df9645
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"display_type\" class=\"mailpoet_field_display_type\" value=\"fit\" {{#ifCond model.image.display '===' 'fit'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"display_type\" class=\"mailpoet_field_display_type\" value=\"fit\" {{#ifCond model.image.display \x27===\x27 \x27fit\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 33
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Fit");
@@ -97,7 +97,7 @@ class __TwigTemplate_97885955d9a61cd687e4b5c17a9f999c888cf1faf1a92c3e61951df9645
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"display_type\" class=\"mailpoet_field_display_type\" value=\"tile\" {{#ifCond model.image.display '===' 'tile'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"display_type\" class=\"mailpoet_field_display_type\" value=\"tile\" {{#ifCond model.image.display \x27===\x27 \x27tile\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 39
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Tile");

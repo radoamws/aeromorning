@@ -145,20 +145,15 @@ class API extends Base {
 		add_action( 'litespeed_vary_no', __NAMESPACE__ . '\Control::set_no_vary' );
 
 		/**
-		 * Cloud
-		 */
-		add_filter( 'litespeed_is_from_cloud', [ $this, 'is_from_cloud' ] ); // Check if current request is from QC (usually its to check REST access) // @see https://wordpress.org/support/topic/image-optimization-not-working-3/
-
-		/**
 		 * Media
 		 */
 		add_action( 'litespeed_media_reset', __NAMESPACE__ . '\Media::delete_attachment' );
 
 		/**
-		 * GUI
+		 * ESI clean wrappers (moved from GUI in 7.9 — wrapper logic is ESI-specific).
 		 */
-		add_filter( 'litespeed_clean_wrapper_begin', __NAMESPACE__ . '\GUI::clean_wrapper_begin' );
-		add_filter( 'litespeed_clean_wrapper_end', __NAMESPACE__ . '\GUI::clean_wrapper_end' );
+		add_filter( 'litespeed_clean_wrapper_begin', __NAMESPACE__ . '\ESI::clean_wrapper_begin' );
+		add_filter( 'litespeed_clean_wrapper_end', __NAMESPACE__ . '\ESI::clean_wrapper_end' );
 
 		/**
 		 * Misc
@@ -213,19 +208,6 @@ class API extends Base {
 	 */
 	public static function vary_append_commenter() {
 		Vary::cls()->append_commenter();
-	}
-
-	/**
-	 * Check if is from Cloud
-	 *
-	 * Checks if the current request originates from QUIC.cloud.
-	 *
-	 * @since 4.2
-	 * @access public
-	 * @return bool True if from QUIC.cloud, false otherwise.
-	 */
-	public function is_from_cloud() {
-		return $this->cls( 'Cloud' )->is_from_cloud();
 	}
 
 	/**

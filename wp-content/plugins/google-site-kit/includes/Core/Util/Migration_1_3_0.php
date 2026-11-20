@@ -17,7 +17,7 @@ use Google\Site_Kit\Core\Storage\User_Options;
 use Google\Site_Kit\Core\Tracking\Tracking_Consent;
 
 /**
- * Class Migration_1_3_0
+ * Class Migration_1_3_0.
  *
  * @since 1.3.0
  * @access private
@@ -73,9 +73,10 @@ class Migration_1_3_0 {
 	 * Registers hooks.
 	 *
 	 * @since 1.3.0
+	 * @since 1.192.0 Changed the `admin_init` priority to 0.
 	 */
 	public function register() {
-		add_action( 'admin_init', array( $this, 'migrate' ) );
+		add_action( 'admin_init', array( $this, 'migrate' ), 0 );
 	}
 
 	/**

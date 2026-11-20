@@ -17,6 +17,7 @@ use MailPoet\NewsletterTemplates\BrandStyles;
 use MailPoet\Settings\SettingsController;
 use MailPoet\Settings\UserFlagsController;
 use MailPoet\Subscribers\SubscribersRepository;
+use MailPoet\Subscribers\TrackingConsentController;
 use MailPoet\WooCommerce\Helper as WooCommerceHelper;
 use MailPoet\WooCommerce\TransactionalEmailHooks;
 use MailPoet\WooCommerce\TransactionalEmails;
@@ -42,6 +43,7 @@ class NewsletterEditor {
   private BrandStyles $brandStyles;
   private WooTransactionalEmailTemplate $template;
   private NewslettersRepository $newslettersRepository;
+  private TrackingConsentController $trackingConsentController;
 
   public function __construct(
     PageRenderer $pageRenderer,
@@ -58,7 +60,8 @@ class NewsletterEditor {
     AssetsController $assetsController,
     WooTransactionalEmailTemplate $template,
     BrandStyles $brandStyles,
-    NewslettersRepository $newslettersRepository
+    NewslettersRepository $newslettersRepository,
+    TrackingConsentController $trackingConsentController
   ) {
     $this->pageRenderer = $pageRenderer;
     $this->settings = $settings;
@@ -75,6 +78,7 @@ class NewsletterEditor {
     $this->template = $template;
     $this->brandStyles = $brandStyles;
     $this->newslettersRepository = $newslettersRepository;
+    $this->trackingConsentController = $trackingConsentController;
   }
 
   public function render() {
@@ -145,6 +149,7 @@ class NewsletterEditor {
       'woocommerce' => $woocommerceData,
       'is_wc_transactional_email' => $newsletterId === $woocommerceTemplateId,
       'is_confirmation_email_type' => $isConfirmationEmailType,
+      'is_tracking_consent_ask_all' => $this->trackingConsentController->getSubscriberChoice() === TrackingConsentController::CHOICE_ASK_ALL,
       'is_confirmation_email_customizer_enabled' => (bool)$this->settings->get('signup_confirmation.use_mailpoet_editor', false),
       'original_template_body' => $originalTemplateBody,
       'product_categories' => $this->wpPostListLoader->getWooCommerceCategories(),

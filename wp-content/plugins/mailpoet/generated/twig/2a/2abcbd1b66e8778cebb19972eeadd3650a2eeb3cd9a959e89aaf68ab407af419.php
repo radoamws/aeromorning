@@ -47,7 +47,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
         yield "</h3>
 <div class=\"mailpoet_region_content\">
     <form id=\"mailpoet_newsletter_styles\" class=\"mailpoet_newsletter_styles\" action=\"\" method=\"post\" accept-charset=\"utf-8\">
-        <div id='mailpoet_brand_styles'></div>
+        <div id=\x27mailpoet_brand_styles\x27></div>
         {{#if isWoocommerceTransactional}}
             <div class=\"mailpoet_form_field\">
                 <span>
@@ -82,7 +82,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Standard fonts");
         yield "\">
             {{#each availableStyles.fonts.standard}}
-                <option value=\"{{ this }}\" {{#ifCond this '==' ../model.text.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
+                <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.text.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
             {{/each}}
             </optgroup>
             {{#if availableStyles.fonts.custom.length}}
@@ -91,14 +91,14 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Custom fonts");
         yield "\">
             {{#each availableStyles.fonts.custom}}
-                <option value=\"{{ this }}\" {{#ifCond this '==' ../model.text.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
+                <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.text.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
             {{/each}}
             </optgroup>
             {{/if}}
             </select>
             <select id=\"mailpoet_text_font_size\" name=\"text-size\" class=\"mailpoet_font_size mailpoet_select mailpoet_select_small\">
             {{#each availableStyles.textSizes}}
-                <option value=\"{{ this }}\" {{#ifCond this '==' ../model.text.fontSize}}SELECTED{{/ifCond}}>{{ this }}</option>
+                <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.text.fontSize}}SELECTED{{/ifCond}}>{{ this }}</option>
             {{/each}}
             </select>
         </div>
@@ -120,7 +120,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Standard fonts");
         yield "\">
                     {{#each availableStyles.fonts.standard}}
-                        <option value=\"{{ this }}\" {{#ifCond this '==' ../model.woocommerce.headingFontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
+                        <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.woocommerce.headingFontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
                     {{/each}}
                     </optgroup>
                     {{#if availableStyles.fonts.custom.length}}
@@ -129,7 +129,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Custom fonts");
         yield "\">
                     {{#each availableStyles.fonts.custom}}
-                        <option value=\"{{ this }}\" {{#ifCond this '==' ../model.woocommerce.headingFontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
+                        <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.woocommerce.headingFontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
                     {{/each}}
                     </optgroup>
                     {{/if}}
@@ -153,7 +153,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Standard fonts");
         yield "\">
                 {{#each availableStyles.fonts.standard}}
-                    <option value=\"{{ this }}\" {{#ifCond this '==' ../model.h1.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
+                    <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.h1.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
                 {{/each}}
                 </optgroup>
                 {{#if availableStyles.fonts.custom.length}}
@@ -162,7 +162,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Custom fonts");
         yield "\">
                 {{#each availableStyles.fonts.custom}}
-                    <option value=\"{{ this }}\" {{#ifCond this '==' ../model.h1.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
+                    <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.h1.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
                 {{/each}}
                 </optgroup>
                 {{/if}}
@@ -170,7 +170,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
             {{/unless}}
             <select id=\"mailpoet_h1_font_size\" name=\"h1-size\" class=\"mailpoet_font_size mailpoet_select mailpoet_select_small\">
             {{#each availableStyles.headingSizes}}
-                <option value=\"{{ this }}\" {{#ifCond this '==' ../model.h1.fontSize}}SELECTED{{/ifCond}}>{{ this }}</option>
+                <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.h1.fontSize}}SELECTED{{/ifCond}}>{{ this }}</option>
             {{/each}}
             </select>
         </div>
@@ -191,7 +191,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Standard fonts");
         yield "\">
                 {{#each availableStyles.fonts.standard}}
-                    <option value=\"{{ this }}\" {{#ifCond this '==' ../model.h2.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
+                    <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.h2.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
                 {{/each}}
                 </optgroup>
                 {{#if availableStyles.fonts.custom.length}}
@@ -200,7 +200,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Custom fonts");
         yield "\">
                 {{#each availableStyles.fonts.custom}}
-                    <option value=\"{{ this }}\" {{#ifCond this '==' ../model.h2.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
+                    <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.h2.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
                 {{/each}}
                 </optgroup>
                 {{/if}}
@@ -208,7 +208,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
             {{/unless}}
             <select id=\"mailpoet_h2_font_size\" name=\"h2-size\" class=\"mailpoet_font_size mailpoet_select mailpoet_select_small\">
             {{#each availableStyles.headingSizes}}
-                <option value=\"{{ this }}\" {{#ifCond this '==' ../model.h2.fontSize}}SELECTED{{/ifCond}}>{{ this }}</option>
+                <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.h2.fontSize}}SELECTED{{/ifCond}}>{{ this }}</option>
             {{/each}}
             </select>
         </div>
@@ -229,7 +229,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Standard fonts");
         yield "\">
                 {{#each availableStyles.fonts.standard}}
-                    <option value=\"{{ this }}\" {{#ifCond this '==' ../model.h3.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
+                    <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.h3.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
                 {{/each}}
                 </optgroup>
                 {{#if availableStyles.fonts.custom.length}}
@@ -238,7 +238,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Custom fonts");
         yield "\">
                 {{#each availableStyles.fonts.custom}}
-                    <option value=\"{{ this }}\" {{#ifCond this '==' ../model.h3.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
+                    <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.h3.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
                 {{/each}}
                 </optgroup>
                 {{/if}}
@@ -246,7 +246,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
             {{/unless}}
             <select id=\"mailpoet_h3_font_size\" name=\"h3-size\" class=\"mailpoet_font_size mailpoet_select mailpoet_select_small\">
             {{#each availableStyles.headingSizes}}
-                <option value=\"{{ this }}\" {{#ifCond this '==' ../model.h3.fontSize}}SELECTED{{/ifCond}}>{{ this }}</option>
+                <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.h3.fontSize}}SELECTED{{/ifCond}}>{{ this }}</option>
             {{/each}}
             </select>
         </div>
@@ -260,7 +260,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
             </label>
             <span>
                <span><input type=\"text\" class=\"mailpoet_color\" size=\"6\" maxlength=\"6\" name=\"link-color\" value=\"{{ model.link.fontColor }}\" id=\"mailpoet_a_font_color\"></span>
-            </span><input type=\"checkbox\" name=\"underline\" value=\"underline\" id=\"mailpoet_a_font_underline\" {{#ifCond model.link.textDecoration '==' 'underline'}}CHECKED{{/ifCond}} class=\"mailpoet_option_offset_left_small\"/> ";
+            </span><input type=\"checkbox\" name=\"underline\" value=\"underline\" id=\"mailpoet_a_font_underline\" {{#ifCond model.link.textDecoration \x27==\x27 \x27underline\x27}}CHECKED{{/ifCond}} class=\"mailpoet_option_offset_left_small\"/> ";
         // line 164
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Underline");
         yield "</label>
@@ -275,7 +275,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
               </label>
               <select id=\"mailpoet_text_line_height\" name=\"text-line-height\">
               {{#each availableStyles.lineHeights}}
-                  <option value=\"{{ this }}\" {{#ifCond this '==' ../model.text.lineHeight}}SELECTED{{/ifCond}}>{{ this }}</option>
+                  <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.text.lineHeight}}SELECTED{{/ifCond}}>{{ this }}</option>
               {{/each}}
               </select>
 
@@ -290,7 +290,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
               <select id=\"mailpoet_heading_line_height\" name=\"heading-line-height\">
               {{#each availableStyles.lineHeights}}
                   {{!-- Checking against h1 only since all headings have the same line height value. --}}
-                  <option value=\"{{ this }}\" {{#ifCond this '==' ../model.h1.lineHeight}}SELECTED{{/ifCond}}>{{ this }}</option>
+                  <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.h1.lineHeight}}SELECTED{{/ifCond}}>{{ this }}</option>
               {{/each}}
               </select>
           </div>
@@ -319,7 +319,7 @@ class __TwigTemplate_e73b2cb637db2bcb6f40e724fb0d13365d1675cbb501f971890ea259b1a
         yield "</p>
 </div>
 <script type=\"text/javascript\">
-    fontsSelect('.mailpoet_font_family.mailpoet_select');
+    fontsSelect(\x27.mailpoet_font_family.mailpoet_select\x27);
 </script>
 ";
         return; yield '';

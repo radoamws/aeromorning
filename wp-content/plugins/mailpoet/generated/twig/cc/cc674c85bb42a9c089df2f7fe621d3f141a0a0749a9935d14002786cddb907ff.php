@@ -68,7 +68,7 @@ class __TwigTemplate_eccf35d9fdf4f7fe19ba5b7d16351352bddcfe00eaea3c0e51821fc03e2
         yield "</h2>
 
 <div style=\"margin-bottom:40px\">
-\t<table class=\"m_3180768237544866075td\" cellspacing=\"0\" cellpadding=\"6\" border=\"1\" style=\"border:1px solid #e4e4e4;vertical-align:middle;width:100%;font-family:'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif\">
+\t<table class=\"m_3180768237544866075td\" cellspacing=\"0\" cellpadding=\"6\" border=\"1\" style=\"border:1px solid #e4e4e4;vertical-align:middle;width:100%;font-family:\x27Helvetica Neue\x27,Helvetica,Roboto,Arial,sans-serif\">
 \t\t<thead>
 \t\t\t<tr>
 \t\t\t\t<th class=\"m_3180768237544866075td\" scope=\"col\" style=\"border:1px solid #e4e4e4;vertical-align:middle;padding:12px;text-align:left\">";
@@ -87,11 +87,11 @@ class __TwigTemplate_eccf35d9fdf4f7fe19ba5b7d16351352bddcfe00eaea3c0e51821fc03e2
 \t\t</thead>
 \t\t<tbody>
 \t\t\t\t<tr class=\"m_3180768237544866075order_item\">
-\t\t<td class=\"m_3180768237544866075td\" style=\"border:1px solid #e4e4e4;padding:12px;text-align:left;vertical-align:middle;font-family:'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif;word-wrap:break-word\">
+\t\t<td class=\"m_3180768237544866075td\" style=\"border:1px solid #e4e4e4;padding:12px;text-align:left;vertical-align:middle;font-family:\x27Helvetica Neue\x27,Helvetica,Roboto,Arial,sans-serif;word-wrap:break-word\">
 \t\tMy First Product\t\t</td>
-\t\t<td class=\"m_3180768237544866075td\" style=\"border:1px solid #e4e4e4;padding:12px;text-align:left;vertical-align:middle;font-family:'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif\">
+\t\t<td class=\"m_3180768237544866075td\" style=\"border:1px solid #e4e4e4;padding:12px;text-align:left;vertical-align:middle;font-family:\x27Helvetica Neue\x27,Helvetica,Roboto,Arial,sans-serif\">
 \t\t\t1\t\t</td>
-\t\t<td class=\"m_3180768237544866075td\" style=\"border:1px solid #e4e4e4;padding:12px;text-align:left;vertical-align:middle;font-family:'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif\">
+\t\t<td class=\"m_3180768237544866075td\" style=\"border:1px solid #e4e4e4;padding:12px;text-align:left;vertical-align:middle;font-family:\x27Helvetica Neue\x27,Helvetica,Roboto,Arial,sans-serif\">
 \t\t\t<span class=\"m_3180768237544866075woocommerce-Price-amount m_3180768237544866075amount\">10,00<span class=\"m_3180768237544866075woocommerce-Price-currencySymbol\">€</span></span>\t\t</td>
 \t</tr>
 
@@ -135,7 +135,7 @@ class __TwigTemplate_eccf35d9fdf4f7fe19ba5b7d16351352bddcfe00eaea3c0e51821fc03e2
 
 <table id=\"m_3180768237544866075addresses\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" style=\"width:100%;vertical-align:top;margin-bottom:40px;padding:0\">
 \t<tbody><tr>
-\t\t<td valign=\"top\" width=\"50%\" style=\"text-align:left;font-family:'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif;border:0;padding:0\">
+\t\t<td valign=\"top\" width=\"50%\" style=\"text-align:left;font-family:\x27Helvetica Neue\x27,Helvetica,Roboto,Arial,sans-serif;border:0;padding:0\">
 \t\t\t<h2 style=\"display:block;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:18px;font-weight:bold;line-height:130%;margin:0 0 18px;text-align:left\">";
         // line 63
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Billing address", "woocommerce");
@@ -143,7 +143,7 @@ class __TwigTemplate_eccf35d9fdf4f7fe19ba5b7d16351352bddcfe00eaea3c0e51821fc03e2
 
 \t\t\t<address class=\"m_3180768237544866075address\" style=\"padding:12px;border:1px solid #e4e4e4\">Jane Doe<br>42 rue Blue Origin<br>75000 Paris<br>France</address>
 \t\t</td>
-\t\t\t\t\t<td valign=\"top\" width=\"50%\" style=\"text-align:left;font-family:'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif;padding:0\">
+\t\t\t\t\t<td valign=\"top\" width=\"50%\" style=\"text-align:left;font-family:\x27Helvetica Neue\x27,Helvetica,Roboto,Arial,sans-serif;padding:0\">
 \t\t\t\t<h2 style=\"display:block;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:18px;font-weight:bold;line-height:130%;margin:0 0 18px;text-align:left\">";
         // line 68
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Shipping address", "woocommerce");

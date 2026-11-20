@@ -9,8 +9,9 @@
  *
  * @since 1.4.0
  * @since 5.26.7 Updated Zapier Knowledgebase URL.
+ * @since 6.14.1 Removed the Zapier queue limit knowledgebase link.
  *
- * @version 5.26.7
+ * @version 6.14.1
  *
  * @link http://evnt.is/1aiy
  *
@@ -19,21 +20,18 @@
  * @var Url                 $url       The URLs handler for the integration.
  */
 
+defined( 'ABSPATH' ) || exit;
+
 ?>
 <fieldset id="tec-field-integration_token" class="tec-automator-endpoint-dashboard tribe-field tribe-field-text tribe-size-medium">
 	<legend class="tribe-field-label"><?php echo esc_html_x( 'Endpoint Dashboard', 'The legend for the integration endpoint dashboard.', 'tribe-common' ); ?></legend>
 	<?php if ( $manager::$api_id === 'zapier' ) { ?>
 		<p class="tec-settings-zapier-application__description">
 			<?php
-				printf(
-					/* Translators: 1: Opening anchor tag, 2: Closing anchor tag. */
-					esc_html_x(
-						'The Zapier queue is currently limited to 15 items for each endpoint on your site. To increase that limit, check out the %1$sIncreasing the Zapier Queue Limit knowledgebase article%2$s.',
-						'The Zapier endpoint dashboard description.',
-						'tribe-common'
-					),
-					'<a href="https://evnt.is/zapier-endpoints" target="_blank" rel="noopener noreferrer">',
-					'</a>',
+				echo esc_html_x(
+					'The Zapier queue is currently limited to 15 items for each endpoint on your site.',
+					'The Zapier endpoint dashboard description.',
+					'tribe-common'
 				);
 			?>
 		</p>

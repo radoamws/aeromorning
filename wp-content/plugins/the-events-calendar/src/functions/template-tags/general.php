@@ -207,13 +207,15 @@ function tec_events_get_today_button_label( $view = null ) {
  *
  * @uses Tribe__Templates::getTemplateHierarchy
  *
- * @param null|string $name
+ * @since 6.17.0 Made $data explicitly nullable.
  *
- * @param array       $data optional array of vars to inject into the template part
+ * @param string      $slug The base slug of the template part to include.
  *
- * @param string      $slug
+ * @param null|string $name Optional name of the template part variant to include.
+ *
+ * @param array|null  $data Optional array of vars to inject into the template part.
  */
-function tribe_get_template_part( $slug, $name = null, array $data = null ) {
+function tribe_get_template_part( $slug, $name = null, ?array $data = null ) {
 
 	// Execute code for this part
 	do_action( 'tribe_pre_get_template_part_' . $slug, $slug, $name, $data );
@@ -841,6 +843,8 @@ function tribe_is_organizer( $postId = null ) {
  *
  * Display HTML to output before the event template
  *
+ * @since 6.18.4 Passes a null view as the second filter argument, matching the Views V2 call of the same filter.
+ *
  * @category Events
  */
 function tribe_events_before_html() {
@@ -854,13 +858,23 @@ function tribe_events_before_html() {
 	$before = '<div class="tribe-events-before-html">' . $before . '</div>';
 	$before = $before . '<span class="tribe-events-ajax-loading"><img class="tribe-events-spinner-medium" src="' . esc_url( tribe_events_resource_url( 'images/tribe-loading.gif' ) ) . '" alt="' . sprintf( esc_attr__( 'Loading %s', 'the-events-calendar' ), $events_label_plural ) . '" /></span>';
 
-	echo apply_filters( 'tribe_events_before_html', $before );
+	/**
+	 * Filters the HTML to output before the event template.
+	 *
+	 * @since 6.18.4 Added the `$view` argument.
+	 *
+	 * @param string $html The HTML to output before the event template.
+	 * @param null   $view There is no view to pass outside of the Views V2 call of this filter.
+	 */
+	echo apply_filters( 'tribe_events_before_html', $before, null ); // phpcs:ignore StellarWP.XSS.EscapeOutput.OutputNotEscaped -- This setting and filter are meant to output HTML, escaping it would change what sites display.
 }
 
 /**
  * HTML After Event (Display)
  *
  * Display HTML to output after the event template
+ *
+ * @since 6.18.4 Passes a null view as the second filter argument, matching the Views V2 call of the same filter.
  *
  * @category Events
  */
@@ -872,7 +886,15 @@ function tribe_events_after_html() {
 	$after = do_shortcode( stripslashes( shortcode_unautop( $after ) ) );
 	$after = '<div class="tribe-events-after-html">' . $after . '</div>';
 
-	echo apply_filters( 'tribe_events_after_html', $after );
+	/**
+	 * Filters the HTML to output after the event template.
+	 *
+	 * @since 6.18.4 Added the `$view` argument.
+	 *
+	 * @param string $html The HTML to output after the event template.
+	 * @param null   $view There is no view to pass outside of the Views V2 call of this filter.
+	 */
+	echo apply_filters( 'tribe_events_after_html', $after, null ); // phpcs:ignore StellarWP.XSS.EscapeOutput.OutputNotEscaped -- This setting and filter are meant to output HTML, escaping it would change what sites display.
 }
 
 /**
@@ -1317,11 +1339,18 @@ function tribe_events_event_schedule_details( $event = null, $before = '', $afte
 				$inner .= ( $html ? '</span>' : '' ) . $time_range_separator;
 				$inner .= $html ? '<span class="tribe-event-date-end">' : '';
 
-				$end_date_full           = tribe_get_end_date( $event, true, Tribe__Date_Utils::DBDATETIMEFORMAT );
-				$end_date_full_timestamp = strtotime( $end_date_full );
+				$end_date_full = tribe_get_end_date( $event, true, Tribe__Date_Utils::DBDATETIMEFORMAT );
+
+				// Use UTC so the wall-clock timestamps remain independent of PHP's default timezone.
+				$end_date_obj            = Tribe__Date_Utils::build_date_object( $end_date_full, 'UTC', false );
+				$end_date_full_timestamp = false !== $end_date_obj ? $end_date_obj->getTimestamp() : strtotime( $end_date_full );
+
+				$beginning_of_day_str       = tribe_beginning_of_day( $end_date_full );
+				$beginning_of_day_obj       = Tribe__Date_Utils::build_date_object( $beginning_of_day_str, 'UTC', false );
+				$beginning_of_day_timestamp = false !== $beginning_of_day_obj ? $beginning_of_day_obj->getTimestamp() : strtotime( $beginning_of_day_str );
 
 				// if the end date is <= the beginning of the day, consider it the previous day
-				if ( $end_date_full_timestamp <= strtotime( tribe_beginning_of_day( $end_date_full ) ) ) {
+				if ( $end_date_full_timestamp <= $beginning_of_day_timestamp ) {
 					$end_date = tribe_format_date( $end_date_full_timestamp - DAY_IN_SECONDS, false, $format2ndday );
 				} else {
 					$end_date = tribe_get_end_date( $event, false, $format2ndday );

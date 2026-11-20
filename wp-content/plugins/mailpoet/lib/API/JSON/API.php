@@ -201,19 +201,22 @@ class API {
         empty($this->requestEndpointClass) ||
         !$this->container->has($this->requestEndpointClass)
       ) {
-        throw new \Exception(__('Invalid API endpoint.', 'mailpoet'));
+        return $this->createErrorResponse(Error::BAD_REQUEST, __('Invalid API endpoint.', 'mailpoet'), Response::STATUS_BAD_REQUEST);
       }
 
       $endpoint = $this->container->get($this->requestEndpointClass);
       if (!$endpoint instanceof Endpoint) {
-        throw new \Exception(__('Invalid API endpoint.', 'mailpoet'));
+        return $this->createErrorResponse(Error::BAD_REQUEST, __('Invalid API endpoint.', 'mailpoet'), Response::STATUS_BAD_REQUEST);
       }
-      if (!method_exists($endpoint, $this->requestMethod)) {
-        throw new \Exception(__('Invalid API endpoint method.', 'mailpoet'));
+      if (
+        !method_exists($endpoint, $this->requestMethod)
+        || !$this->isDispatchableEndpointMethod($endpoint, $this->requestMethod)
+      ) {
+        return $this->createErrorResponse(Error::BAD_REQUEST, __('Invalid API endpoint method.', 'mailpoet'), Response::STATUS_BAD_REQUEST);
       }
 
       if (!$endpoint->isMethodAllowed($this->requestMethod, $this->requestType)) {
-        throw new \Exception(__('HTTP request method not allowed.', 'mailpoet'));
+        return $this->createErrorResponse(Error::BAD_REQUEST, __('HTTP request method not allowed.', 'mailpoet'), Response::STATUS_BAD_REQUEST);
       }
 
       if (
@@ -233,6 +236,9 @@ class API {
         return $errorResponse;
       }
       $response = $endpoint->{$this->requestMethod}($this->requestData);
+      if (!$response instanceof Response) {
+        return $this->createErrorResponse(Error::BAD_REQUEST, __('Invalid API endpoint method.', 'mailpoet'), Response::STATUS_BAD_REQUEST);
+      }
       return $response;
     } catch (Exception $e) {
       $this->logError($e);
@@ -242,10 +248,32 @@ class API {
         Debugger::log($e, ILogger::EXCEPTION);
       }
       $this->logError($e);
-      $errorMessage = $e->getMessage();
+      $errorMessage = __('An unknown error occurred.', 'mailpoet');
       $errorResponse = $this->createErrorResponse(Error::BAD_REQUEST, $errorMessage, Response::STATUS_BAD_REQUEST);
       return $errorResponse;
     }
+  }
+
+  /**
+   * The response-builder helpers on the Endpoint base class are framework plumbing,
+   * blocked by name so that a subclass override cannot re-expose them. Non-public
+   * methods are never dispatchable.
+   */
+  private function isDispatchableEndpointMethod(Endpoint $endpoint, string $requestMethod): bool {
+    // Magic methods (__construct, __call, __get, __invoke, ...) are never actions.
+    if (strpos($requestMethod, '__') === 0) {
+      return false;
+    }
+    if (method_exists(Endpoint::class, $requestMethod)) {
+      return false;
+    }
+    $method = new \ReflectionMethod($endpoint, $requestMethod);
+    // PHP resolves method names case-insensitively; require the exact declared casing
+    // so that every name-keyed lookup downstream matches the method that runs.
+    if ($method->getName() !== $requestMethod) {
+      return false;
+    }
+    return $method->isPublic();
   }
 
   public function validatePermissions($requestMethod, $permissions) {
@@ -334,7 +362,7 @@ class API {
       // phpcs:enable QITStandard.PHP.DebugCode.DebugFunctionFound
     }
     // logging to the MailPoet table
-    $this->loggerFactory->getLogger(LoggerFactory::TOPIC_API)->warning($e->getMessage(), [
+    $this->loggerFactory->getLogger(LoggerFactory::TOPIC_API)->warning('An API request failed: ' . $e->getMessage(), [
       'requestMethod' => $this->requestMethod,
       'requestEndpoint' => $this->requestEndpoint,
       'exceptionMessage' => $e->getMessage(),

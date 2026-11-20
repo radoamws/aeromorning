@@ -40,7 +40,8 @@ class ImageListFromFolder extends ImageList implements ContainerInterface {
                 'png',
                 'svg',
                 'gif',
-                'webp'
+                'webp',
+                'avif'
             );
             if (in_array($ext, $extensions)) {
 

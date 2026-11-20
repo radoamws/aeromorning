@@ -26,7 +26,7 @@ $this->form_action();
 
 <h3 class="litespeed-title-short">
 	<?php esc_html_e( 'CDN Settings', 'litespeed-cache' ); ?>
-	<?php Doc::learn_more( 'https://docs.litespeedtech.com/lscache/lscwp/cdn/' ); ?>
+	<?php Doc::learn_more( 'https://docs.litespeedtech.com/lscache/lscwp/cdn/#other-static-cdn-tab' ); ?>
 </h3>
 
 <table class="wp-list-table striped litespeed-table">
@@ -68,11 +68,14 @@ $this->form_action();
 
 				<div id="litespeed_cdn_mapping_div"></div>
 
-				<script type="text/babel">
-					ReactDOM.render(
-						<CDNMapping list={ <?php echo wp_json_encode( $cdn_mapping ); ?> } />,
-						document.getElementById( 'litespeed_cdn_mapping_div' )
-					);
+				<script>
+					// Wait for localization printed in the footer.
+					jQuery( function () {
+						litespeed_cdn_mapping(
+							document.getElementById( 'litespeed_cdn_mapping_div' ),
+							<?php echo wp_json_encode( $cdn_mapping, Str::JSON_HTML_FLAGS ); ?>
+						);
+					} );
 				</script>
 
 				<div class="litespeed-warning">
@@ -106,14 +109,6 @@ $this->form_action();
 					);
 					?>
 					<?php Doc::learn_more( 'https://docs.litespeedtech.com/lscache/lscwp/cdn/#include-file-types', esc_html__( 'Default value', 'litespeed-cache' ) ); ?>
-					<br>
-					<?php
-					printf(
-						esc_html__( 'If you turn any of the above settings OFF, please remove the related file types from the %s box.', 'litespeed-cache' ),
-						'<b>' . esc_html__( 'Include File Types', 'litespeed-cache' ) . '</b>'
-					);
-					?>
-					<?php Doc::learn_more( 'https://docs.litespeedtech.com/lscache/lscwp/cdn/#include-file-types' ); ?>
 				</div>
 			</td>
 		</tr>

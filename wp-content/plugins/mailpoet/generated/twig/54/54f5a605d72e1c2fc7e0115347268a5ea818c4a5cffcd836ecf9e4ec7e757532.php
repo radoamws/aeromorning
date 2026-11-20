@@ -46,19 +46,19 @@ class __TwigTemplate_414e57f5d39be30b7212208368ba358fb4ae1c2f2d02bf5028ce033882d
 </div>
 <div class=\"mailpoet_browser_preview_toggle\">
   <label>
-    <input type=\"radio\" name=\"mailpoet_browser_preview_type\" class=\"mailpoet_browser_preview_type\" value=\"desktop\" {{#ifCond previewType '==' 'desktop'}}CHECKED{{/ifCond}} />";
+    <input type=\"radio\" name=\"mailpoet_browser_preview_type\" class=\"mailpoet_browser_preview_type\" value=\"desktop\" {{#ifCond previewType \x27==\x27 \x27desktop\x27}}CHECKED{{/ifCond}} />";
         // line 6
         yield $this->extensions['MailPoet\Twig\I18n']->translateWithContext("Desktop", "Desktop browser preview mode");
         yield "
   </label>
   <label>
-    <input type=\"radio\" name=\"mailpoet_browser_preview_type\" class=\"mailpoet_browser_preview_type\" value=\"mobile\" {{#ifCond previewType '==' 'mobile'}}CHECKED{{/ifCond}} />";
+    <input type=\"radio\" name=\"mailpoet_browser_preview_type\" class=\"mailpoet_browser_preview_type\" value=\"mobile\" {{#ifCond previewType \x27==\x27 \x27mobile\x27}}CHECKED{{/ifCond}} />";
         // line 9
         yield $this->extensions['MailPoet\Twig\I18n']->translateWithContext("Mobile", "Mobile browser preview mode");
         yield "
   </label>
   <label>
-    <input data-automation-id=\"switch_send_to_email\" type=\"radio\" name=\"mailpoet_browser_preview_type\" class=\"mailpoet_browser_preview_type\" value=\"send_to_email\" {{#ifCond previewType '==' 'send_to_email'}}CHECKED{{/ifCond}} />";
+    <input data-automation-id=\"switch_send_to_email\" type=\"radio\" name=\"mailpoet_browser_preview_type\" class=\"mailpoet_browser_preview_type\" value=\"send_to_email\" {{#ifCond previewType \x27==\x27 \x27send_to_email\x27}}CHECKED{{/ifCond}} />";
         // line 12
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Send to email");
         yield "
@@ -67,9 +67,9 @@ class __TwigTemplate_414e57f5d39be30b7212208368ba358fb4ae1c2f2d02bf5028ce033882d
 <div
   class=\"
     mailpoet_browser_preview_container
-   {{#ifCond previewType '==' 'mobile'}}mailpoet_browser_preview_container_mobile{{/ifCond}}
-   {{#ifCond previewType '==' 'desktop'}}mailpoet_browser_preview_container_desktop{{/ifCond}}
-   {{#ifCond previewType '==' 'send_to_email'}}mailpoet_browser_preview_container_send_to_email{{/ifCond}}
+   {{#ifCond previewType \x27==\x27 \x27mobile\x27}}mailpoet_browser_preview_container_mobile{{/ifCond}}
+   {{#ifCond previewType \x27==\x27 \x27desktop\x27}}mailpoet_browser_preview_container_desktop{{/ifCond}}
+   {{#ifCond previewType \x27==\x27 \x27send_to_email\x27}}mailpoet_browser_preview_container_send_to_email{{/ifCond}}
   \"
 >
   <div class=\"mailpoet_browser_preview_border\">

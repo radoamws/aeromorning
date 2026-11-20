@@ -6,6 +6,7 @@ if (!defined('ABSPATH')) exit;
 
 
 use MailPoet\AdminPages\PageRenderer;
+use MailPoet\Config\AccessControl;
 use MailPoet\Config\Menu;
 use MailPoet\Settings\SettingsController;
 use MailPoet\WP\Functions as WPFunctions;
@@ -33,6 +34,7 @@ class Landingpage {
     $data = [
       'welcome_wizard_url' => $this->wp->adminUrl('admin.php?page=' . Menu::WELCOME_WIZARD_PAGE_SLUG),
       'welcome_wizard_current_step' => $this->settingsController->get('welcome_wizard_current_step', ''),
+      'can_manage_settings' => $this->wp->currentUserCan(AccessControl::PERMISSION_MANAGE_SETTINGS),
     ];
     $this->pageRenderer->displayPage('landingpage.html', $data);
   }

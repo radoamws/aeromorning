@@ -7,15 +7,15 @@ use MailPoetVendor\Doctrine\ORM\Query\Parser;
 use MailPoetVendor\Doctrine\ORM\Query\SqlWalker;
 abstract class FunctionNode extends Node
 {
- public $name;
- public function __construct($name)
- {
- $this->name = $name;
- }
- public abstract function getSql(SqlWalker $sqlWalker);
- public function dispatch($sqlWalker)
- {
- return $sqlWalker->walkFunction($this);
- }
- public abstract function parse(Parser $parser);
+public $name;
+public function __construct($name)
+{
+$this->name = $name;
+}
+abstract public function getSql(SqlWalker $sqlWalker);
+public function dispatch($sqlWalker)
+{
+return $sqlWalker->walkFunction($this);
+}
+abstract public function parse(Parser $parser);
 }

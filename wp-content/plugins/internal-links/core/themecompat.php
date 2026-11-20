@@ -55,6 +55,11 @@ class ThemeCompat {
 					require_once get_template_directory() . '/includes/builder/' . 'class-et-global-settings.php';
 					require_once get_template_directory() . '/includes/builder/' . 'class-et-builder-settings.php';
 
+					$global_presets_path = get_template_directory() . '/includes/builder/feature/global-presets/Settings.php';
+					if (!class_exists('ET_Builder_Global_Presets_Settings') && file_exists($global_presets_path)) {
+						require_once $global_presets_path;
+					}
+					
 					if (function_exists('et_builder_init_global_settings')) {
 						et_builder_init_global_settings();
 					}

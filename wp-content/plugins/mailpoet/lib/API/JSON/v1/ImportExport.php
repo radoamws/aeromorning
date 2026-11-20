@@ -25,6 +25,7 @@ use MailPoet\Subscribers\ImportExport\Import\MailChimp;
 use MailPoet\Subscribers\ImportExport\ImportExportRepository;
 use MailPoet\Subscribers\SubscribersRepository;
 use MailPoet\Tags\TagRepository;
+use MailPoet\WP\Functions as WPFunctions;
 
 class ImportExport extends APIEndpoint {
 
@@ -61,6 +62,9 @@ class ImportExport extends APIEndpoint {
   /** @var CronWorkerScheduler */
   private $cronWorkerScheduler;
 
+  /** @var WPFunctions */
+  private $wp;
+
   public $permissions = [
     'global' => AccessControl::PERMISSION_MANAGE_SUBSCRIBERS,
   ];
@@ -76,7 +80,8 @@ class ImportExport extends APIEndpoint {
     CronWorkerScheduler $cronWorkerScheduler,
     SubscribersRepository $subscribersRepository,
     TagRepository $tagRepository,
-    Validator $validator
+    Validator $validator,
+    WPFunctions $wp
   ) {
     $this->wpSegment = $wpSegment;
     $this->customFieldsRepository = $customFieldsRepository;
@@ -89,6 +94,7 @@ class ImportExport extends APIEndpoint {
     $this->segmentsResponseBuilder = $segmentsResponseBuilder;
     $this->tagRepository = $tagRepository;
     $this->validator = $validator;
+    $this->wp = $wp;
   }
 
   public function getMailChimpLists($data) {
@@ -117,9 +123,10 @@ class ImportExport extends APIEndpoint {
 
   public function addSegment($data) {
     try {
-      $data['name'] = isset($data['name']) ? sanitize_text_field($data['name']) : '';
-      $data['description'] = isset($data['description']) ? sanitize_textarea_field($data['description']) : '';
-      $segment = $this->segmentSavecontroller->save($data);
+      $segment = $this->segmentSavecontroller->save([
+        'name' => isset($data['name']) ? sanitize_text_field($data['name']) : '',
+        'description' => isset($data['description']) ? sanitize_textarea_field($data['description']) : '',
+      ]);
       $response = $this->segmentsResponseBuilder->build($segment);
       return $this->successResponse($response);
     } catch (ValidationException $exception) {
@@ -174,6 +181,7 @@ class ImportExport extends APIEndpoint {
         $this->customFieldsRepository,
         $this->importExportRepository,
         $this->segmentsRepository,
+        $this->wp,
         $decoded
       );
       $process = $export->process();

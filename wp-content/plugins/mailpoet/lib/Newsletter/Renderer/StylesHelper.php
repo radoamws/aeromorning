@@ -95,11 +95,90 @@ class StylesHelper {
     $style = self::applyHeadingMargin($style, $selector);
     $style = self::applyLineHeight($style, $selector);
     foreach ($style as $attribute => $individualStyle) {
+      $property = self::translateCSSAttribute($attribute);
+      if (!self::isValidCssPropertyName($property) || !self::isValidCssValue($individualStyle)) {
+        continue;
+      }
       $individualStyle = self::applyFontFamily($attribute, $individualStyle);
-      $css .= self::translateCSSAttribute($attribute) . ':' . $individualStyle . ';' . PHP_EOL;
+      $css .= $property . ':' . $individualStyle . ';' . PHP_EOL;
     }
     $css .= '}' . PHP_EOL;
     return $css;
+  }
+
+  /**
+   * Accepts scalar values without <, >, {, }, ;, @ or &.
+   * @param mixed $value
+   */
+  public static function isValidCssValue($value): bool {
+    return is_scalar($value) && strpbrk((string)$value, '<>{};@&') === false;
+  }
+
+  /**
+   * Percent-encodes characters that would end an unquoted CSS url() or its declaration early.
+   * The encoded URL points to the same resource.
+   */
+  public static function escapeCssUrl(string $url): string {
+    return strtr($url, [
+      '(' => '%28',
+      ')' => '%29',
+      ';' => '%3B',
+      "'" => '%27',
+      '"' => '%22',
+      '\\' => '%5C',
+      ' ' => '%20',
+      "\t" => '%09',
+      "\n" => '%0A',
+      "\r" => '%0D',
+      "\f" => '%0C',
+    ]);
+  }
+
+  /**
+   * Empties block style values that isValidCssValue() rejects and removes keys that isValidStyleKey() rejects.
+   * Walks nested parts too (e.g. a posts block's read more button). Renderers read the value keys directly, so they stay.
+   */
+  public static function sanitizeBlockStyles(array $data): array {
+    foreach ($data as $key => $value) {
+      if (!is_array($value)) {
+        continue;
+      }
+      $data[$key] = $key === 'styles' ? self::sanitizeBlockStyleGroups($value) : self::sanitizeBlockStyles($value);
+    }
+    return $data;
+  }
+
+  private static function sanitizeBlockStyleGroups(array $groups): array {
+    foreach ($groups as $group => $styles) {
+      if (!is_array($styles)) {
+        continue;
+      }
+      foreach ($styles as $property => $value) {
+        if (!self::isValidStyleKey($property)) {
+          unset($groups[$group][$property]);
+        } elseif (!self::isValidCssValue($value)) {
+          $groups[$group][$property] = '';
+        }
+      }
+    }
+    return $groups;
+  }
+
+  /**
+   * Accepts camelCase or hyphenated style keys, e.g. backgroundColor or border-radius.
+   * @param mixed $key
+   */
+  public static function isValidStyleKey($key): bool {
+    return is_string($key) && self::isValidCssPropertyName(strtolower($key));
+  }
+
+  /**
+   * @param mixed $property
+   */
+  private static function isValidCssPropertyName($property): bool {
+    return is_string($property)
+      && $property !== ''
+      && strspn($property, 'abcdefghijklmnopqrstuvwxyz-') === strlen($property);
   }
 
   public static function applyTextAlignment($block, string $defaultAlignment = 'left', string $styleType = 'block') {
@@ -158,7 +237,7 @@ class StylesHelper {
 
   public static function applyHeadingMargin(array $style, string $selector): array {
     if (!preg_match('/h[1-4]/i', $selector)) return $style;
-    $fontSize = (int)$style['fontSize'];
+    $fontSize = (int)($style['fontSize'] ?? 0);
     $style['margin'] = sprintf('0 0 %spx 0', self::$headingMarginMultiplier * $fontSize);
     return $style;
   }
@@ -166,7 +245,7 @@ class StylesHelper {
   public static function applyLineHeight(array $style, string $selector): array {
     if (!preg_match('/mailpoet_paragraph|h[1-4]/i', $selector)) return $style;
     $lineHeight = isset($style['lineHeight']) ? (float)$style['lineHeight'] : self::$defaultLineHeight;
-    $fontSize = (int)$style['fontSize'];
+    $fontSize = (int)($style['fontSize'] ?? 0);
     $msoLineHeight = round($lineHeight * $fontSize);
     if ($msoLineHeight % 2 === 1) {
       $msoLineHeight++;
@@ -204,6 +283,6 @@ class StylesHelper {
     // see https://stackoverflow.com/a/48214207
     return '<!--[if !mso]><!-- --><link href="https://fonts.googleapis.com/css?family='
       . implode("|", $links)
-      . '" rel="stylesheet"><!--<![endif]-->';
+      . '" rel="stylesheet"><!--<![endif]-->'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- Email HTML can't enqueue styles.
   }
 }

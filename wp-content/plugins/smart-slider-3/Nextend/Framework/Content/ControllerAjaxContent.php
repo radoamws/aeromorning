@@ -11,6 +11,7 @@ class ControllerAjaxContent extends AdminAjaxController {
 
     public function actionSearchLink() {
         $this->validateToken();
+        $this->validatePermission('smartslider_edit');
 
         $keyword = Request::$REQUEST->getVar('keyword', '');
         $this->response->respond(Content::searchLink($keyword));
@@ -18,6 +19,7 @@ class ControllerAjaxContent extends AdminAjaxController {
 
     public function actionSearchContent() {
         $this->validateToken();
+        $this->validatePermission('smartslider_edit');
 
         $keyword = Request::$REQUEST->getVar('keyword', '');
         $this->response->respond(Content::searchContent($keyword));

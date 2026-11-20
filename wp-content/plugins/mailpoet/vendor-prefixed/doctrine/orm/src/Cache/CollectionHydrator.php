@@ -7,6 +7,6 @@ use MailPoetVendor\Doctrine\ORM\Mapping\ClassMetadata;
 use MailPoetVendor\Doctrine\ORM\PersistentCollection;
 interface CollectionHydrator
 {
- public function buildCacheEntry(ClassMetadata $metadata, CollectionCacheKey $key, $collection);
- public function loadCacheEntry(ClassMetadata $metadata, CollectionCacheKey $key, CollectionCacheEntry $entry, PersistentCollection $collection);
+public function buildCacheEntry(ClassMetadata $metadata, CollectionCacheKey $key, $collection);
+public function loadCacheEntry(ClassMetadata $metadata, CollectionCacheKey $key, CollectionCacheEntry $entry, PersistentCollection $collection);
 }

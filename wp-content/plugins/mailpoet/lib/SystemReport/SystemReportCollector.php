@@ -102,6 +102,7 @@ class SystemReportCollector {
 
     $inconsistencyStatus = $this->dataInconsistencyController->getInconsistentDataStatus();
     unset($inconsistencyStatus['total']);
+    $inconsistencyStatus += $this->dataInconsistencyController->getUnfixableDataStatus();
 
     $pingBridgeResponse = $this->getBridgePingResponse();
     $pingResponse = $this->wp->isWpError($pingBridgeResponse)
@@ -177,7 +178,7 @@ class SystemReportCollector {
       'Plugin installed at' => $this->settings->get('installed_at'),
       'Installed via WooCommerce onboarding wizard' => $this->wooCommerceHelper->wasMailPoetInstalledViaWooCommerceOnboardingWizard(),
       'Sending queue status' => $this->formatCompositeField([
-        'Status' => $mailerLog['status'] ?? 'Unknown',
+        'Status' => $mailerLog['status'] ?? (MailerLog::isSendingLimitReached() ? 'Sending frequency limit reached' : 'Unknown'),
         'Started at' => isset($mailerLog['started']) ? $this->formatTimestamp((int)$mailerLog['started']) : 'Unknown',
         'Emails sent' => $mailerLog['sent'],
         'Retry attempts' => $mailerLog['retry_attempt'] ?? 0,

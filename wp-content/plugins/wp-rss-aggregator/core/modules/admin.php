@@ -11,8 +11,10 @@ use RebelCode\WpSdk\Wp\AdminPage;
 use RebelCode\WpSdk\Wp\AdminMenu;
 use RebelCode\Aggregator\Core\Utils\WpUtils;
 use RebelCode\Aggregator\Core\Utils\Time;
+use RebelCode\Aggregator\Core\Utils\LazyText;
 use RebelCode\Aggregator\Core\Utils\Arrays;
 use RebelCode\Aggregator\Core\Rpc\RpcServer;
+use RebelCode\Aggregator\Core\Rpc\Handlers\RpcCampaignHandler;
 use RebelCode\Aggregator\Core\Licensing\License;
 
 wpra()->addModule(
@@ -102,7 +104,7 @@ wpra()->addModule(
 				$count = apply_filters( 'wpra.admin.menu.badge', '' );
 				$display = empty( $count ) ? 'none' : 'inline-block';
 				$badge = <<<HTML
-            <span class="update-plugins wpra-shell-menu-badge" style="display: {$display}">
+            <span class="update-plugins wpra-shell-menu-badge" style="display: {$display}; pointer-events: none;">
                 <span class="plugins-count">{$count}</span>
             </span>
             HTML;
@@ -110,7 +112,12 @@ wpra()->addModule(
 				$page = new AdminPage( _x( 'Aggregator', 'wp-rss-aggregator' ), fn () => $frame );
 				$menu = new AdminMenu( $page, $slug, __( 'Aggregator', 'wp-rss-aggregator' ), $cap, $icon );
 
-				$bfBadge = Time::isBlackFridayActive() ? '<span class="update-plugins" style="margin-left:5px;">BF Sale</span>' : '';
+				$bfBadge = Time::isBlackFridayActive()
+					? sprintf(
+						'<span class="wpra-bf-pill" style="display:inline-block;margin-left:6px;padding:0 6px;border-radius:12px;background:#F34413;color:#fff;font-size:11px;font-weight:400;line-height:18px;vertical-align:middle;">%s</span>',
+						esc_html__( 'BF Sale', 'wp-rss-aggregator' )
+					)
+					: '';
 
 				if ( $wpra->getState() === State::Normal ) {
 					$menu->items = array(
@@ -122,11 +129,12 @@ wpra()->addModule(
 						AdminSubMenu::forUrl( $subUrl . 'settings', __( 'Settings', 'wp-rss-aggregator' ), $cap ),
 						AdminSubMenu::forUrl( $subUrl . 'help', __( 'Help', 'wp-rss-aggregator' ), $cap ),
 						AdminSubMenu::forUrl( $subUrl . 'tutorials', __( 'Tutorials', 'wp-rss-aggregator' ), $cap ),
-						AdminSubMenu::forUrl( $subUrl . 'upgrade', $licensing->getTier() === Tier::Free ? __( 'Upgrade', 'wp-rss-aggregator' ) . $bfBadge : __( 'Manage Plan', 'wp-rss-aggregator' ), $cap ),
+						AdminSubMenu::forUrl( $subUrl . 'toolkit', __( 'Toolkit', 'wp-rss-aggregator' ), 'install_plugins' ),
+						AdminSubMenu::forUrl( $subUrl . 'upgrade', ( ! $wpra->premiumInstalled || $licensing->getTier() === Tier::Free ) ? __( 'Upgrade', 'wp-rss-aggregator' ) . $bfBadge : __( 'Manage Plan', 'wp-rss-aggregator' ), $cap ),
 					);
 
 					if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-						$menu->items[] = AdminSubMenu::forUrl( $subUrl . 'wpra-logger', __( 'Logs', 'wp-rss-aggregator' ), $cap );
+						$menu->items[] = AdminSubMenu::forUrl( $subUrl . 'wpra-logger', __( 'Dev tools', 'wp-rss-aggregator' ), $cap );
 					}
 				}
 
@@ -140,22 +148,52 @@ wpra()->addModule(
 	'admin.frame.l10n',
 	array( 'rpc', 'settings', 'licensing' ),
 	function ( RpcServer $rpc, Settings $settings, Licensing $licensing ) {
-		return function () use ( $rpc, $settings, $licensing ) {
+		$settings->register( 'doUninstall' )->setDefault( false );
+
+		// The Black Friday deal cards show "Active" for plugins the site already pays for.
+		// Vireo Analytics PRO registers this filter and returns its license state, so it
+		// works whatever folder the plugin was installed in.
+		$isVireoProActive = function (): bool {
+			return (bool) apply_filters( 'vireo_pro_is_active', false );
+		};
+
+		$isSpotlightProActive = function (): bool {
+			if ( ! function_exists( 'sliFreemius' ) ) {
+				return false;
+			}
+
+			$freemius = sliFreemius();
+
+			return is_object( $freemius )
+				&& method_exists( $freemius, 'is_paying_or_trial' )
+				&& $freemius->is_paying_or_trial();
+		};
+
+		return function () use ( $rpc, $settings, $licensing, $isVireoProActive, $isSpotlightProActive ) {
 			$wpra = wpra();
 			$user = wp_get_current_user();
 			$license = $licensing->getLicense();
-			$tier = $licensing->getTier();
+			$tier = $wpra->premiumInstalled ? $licensing->getTier() : Tier::Free;
+			$disabledModules = array_map(
+				function ( array $module ): array {
+					$module['reason'] = LazyText::resolve( $module['reason'] ?? '' );
+					return $module;
+				},
+				$wpra->disabledModules
+			);
 
 			$l10n = apply_filters(
 				'wpra.admin.frame.l10n',
 				array(
 					'rpcNonce' => $rpc->getNonce(),
+					'locale' => determine_locale(),
 					'state' => $wpra->getState(),
 					'v4MigrationState' => get_option( 'wpra_did_v4_migration', false ),
 					'settings' => $settings->toArray(),
 					'license' => $license ? $license->toArray() : null,
 					'premiumInstalled' => $wpra->premiumInstalled,
-					'isPluginMismatch' => defined( 'WPRA_PREMIUM_VERSION' ) && version_compare( WPRA_VERSION, WPRA_PREMIUM_VERSION, '!=' ),
+					'isPluginMismatch' => ! empty( $disabledModules ),
+					'disabledModules' => $disabledModules,
 					'sslCertPath' => implode( '/', array( WPINC, 'certificates', 'ca-bundle.crt' ) ),
 					'isMultiSite' => WpUtils::isMultiSite(),
 					'isMainSite' => is_main_site(),
@@ -229,16 +267,184 @@ wpra()->addModule(
 							get_post_types( array( 'public' => true ), 'objects' )
 						)
 					),
+					'postStatuses' => array_values(
+						array_map(
+							fn ( $postStatus ) => array(
+								'slug' => $postStatus->name,
+								'label' => $postStatus->label ?: $postStatus->name,
+							),
+							array_filter(
+								get_post_stati( array(), 'objects' ),
+								fn ( $postStatus ) => ! $postStatus->internal || $postStatus->show_in_admin_status_list
+							)
+						)
+					),
 					'tokenTypes' => array(),
 					'moduleGraph' => $wpra->getModuleGraph(),
 					'prevVersion' => get_option( 'wprss_prev_update_page_version', '' ),
 					'premiumVersion' => defined( 'WPRA_PREMIUM_VERSION' ) ? WPRA_PREMIUM_VERSION : null,
 					'isBlackFridayActive' => Time::isBlackFridayActive(),
+					'blackFridayEnd' => Time::getBlackFridayEnd(),
+					'isBlackFridayBannerDismissed' => ( new RpcCampaignHandler() )->isBlackFridayBannerDismissed(),
+					'isVireoProActive' => $isVireoProActive(),
+					'isSpotlightProActive' => $isSpotlightProActive(),
 				)
 			);
 
 			return new ScriptL10n( 'WpraAdminConfig', $l10n );
 		};
+	}
+);
+
+wpra()->addModule(
+	'cron-disabled-notice',
+	array( 'admin.frame.l10n' ),
+	function () {
+		$pointer = 'wpra_cron_disabled_notice';
+		$dismissAction = 'wpra_dismiss_cron_disabled_notice';
+		$helpUrl = 'https://www.wprssaggregator.com/help/wordpress-cron/';
+
+		$isDismissed = function () use ( $pointer ): bool {
+			$dismissed = get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true );
+			return in_array( $pointer, explode( ',', (string) $dismissed ), true );
+		};
+
+		$shouldShow = function () use ( $isDismissed ): bool {
+			return defined( 'DISABLE_WP_CRON' )
+				&& DISABLE_WP_CRON
+				&& current_user_can( Capabilities::SEE_AGGREGATOR )
+				&& ! $isDismissed();
+		};
+
+		add_filter(
+			'wpra.admin.frame.l10n',
+			function ( array $l10n ) use ( $shouldShow ): array {
+				$l10n['isWpCronDisabled'] = $shouldShow();
+				return $l10n;
+			}
+		);
+
+		add_action(
+			'wp_ajax_' . $dismissAction,
+			function () use ( $pointer ) {
+				check_ajax_referer( RpcServer::NONCE_ACTION, 'nonce' );
+
+				if ( ! current_user_can( Capabilities::SEE_AGGREGATOR ) ) {
+					wp_send_json_error( array( 'message' => __( 'Unauthorized', 'wp-rss-aggregator' ) ), 403 );
+				}
+
+				$dismissed = array_filter( explode( ',', (string) get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true ) ) );
+				if ( ! in_array( $pointer, $dismissed, true ) ) {
+					$dismissed[] = $pointer;
+				}
+
+				update_user_meta( get_current_user_id(), 'dismissed_wp_pointers', implode( ',', $dismissed ) );
+				wp_send_json_success();
+			}
+		);
+
+		add_action(
+			'admin_notices',
+			function () use ( $shouldShow, $dismissAction, $helpUrl ) {
+				if ( ! $shouldShow() ) {
+					return;
+				}
+
+				$screen = get_current_screen();
+				if ( ! $screen || $screen->id === 'toplevel_page_wprss-aggregator' ) {
+					return;
+				}
+
+				$nonce = wp_create_nonce( RpcServer::NONCE_ACTION );
+				?>
+				<div class="notice is-dismissible wpra-cron-disabled-notice">
+					<div class="wpra-cron-disabled-notice-icon">
+						<img src="<?php echo esc_url( WPRA_URL . 'core/imgs/bee.svg' ); ?>" alt="" />
+					</div>
+					<div class="wpra-cron-disabled-notice-content">
+						<h3><?php esc_html_e( 'WordPress cron is disabled on this site.', 'wp-rss-aggregator' ); ?></h3>
+						<p>
+							<?php
+							echo wp_kses_post(
+								sprintf(
+									/* translators: %s: Cron help URL. */
+									__( 'Aggregator cannot import new items on schedule. If your host runs a server cron job instead, you can safely dismiss this notice. <a href="%s" target="_blank" rel="noopener noreferrer">How to fix it.</a>', 'wp-rss-aggregator' ),
+									esc_url( $helpUrl )
+								)
+							);
+							?>
+						</p>
+					</div>
+				</div>
+				<script>
+					jQuery( function( $ ) {
+						$( '.wpra-cron-disabled-notice' ).on( 'click', '.notice-dismiss', function() {
+							$.post( ajaxurl, {
+								action: <?php echo wp_json_encode( $dismissAction ); ?>,
+								nonce: <?php echo wp_json_encode( $nonce ); ?>
+							} );
+						} );
+					} );
+				</script>
+				<style>
+					.wpra-cron-disabled-notice {
+						position: relative;
+						display: flex;
+						gap: 20px;
+						padding: 0 38px 0 0;
+						border-top: 1px solid #ccc;
+						border-right: 1px solid #ccc;
+						border-bottom: 1px solid #ccc;
+						border-left: 0;
+						background: #fff;
+						box-shadow: none;
+					}
+					.wpra-cron-disabled-notice-icon {
+						display: flex;
+						align-items: flex-start;
+						justify-content: center;
+						width: 44px;
+						padding: 28px 12px 12px;
+						border-left: 5px solid #f34413;
+						background: #f6f7fb;
+						color: #f34413;
+						flex-shrink: 0;
+					}
+					.wpra-cron-disabled-notice-icon img {
+						width: 25px;
+						height: 25px;
+					}
+					.wpra-cron-disabled-notice-content {
+						display: flex;
+						flex-direction: column;
+						gap: 10px;
+						padding: 24px 0;
+					}
+					.wpra-cron-disabled-notice-content h3 {
+						margin: 0;
+						font-size: 14px;
+						font-weight: 600;
+						line-height: 1.4;
+						color: #f34413;
+					}
+					.wpra-cron-disabled-notice-content p {
+						margin: 0;
+						font-size: 13px;
+						line-height: 1.35;
+						color: #2f2f2f;
+					}
+					.wpra-cron-disabled-notice a {
+						color: #14248a;
+						text-decoration: underline;
+					}
+					.wpra-cron-disabled-notice .notice-dismiss {
+						top: 8px;
+						right: 8px;
+					}
+				</style>
+				<?php
+			}
+		);
 	}
 );
 

@@ -21,12 +21,21 @@ use AppendIterator;
 class RssImageFinder {
 
 	protected int $cacheTtl;
+	protected string $userAgent;
+	protected int $requestTimeout;
+	protected int $maxResponseSize;
 
 	/**
 	 * @param int $cacheTtl The TTL for the image size cache, in seconds.
+	 * @param string $userAgent The User-Agent to use for remote image requests.
+	 * @param int $requestTimeout The timeout in seconds for remote image requests.
+	 * @param int $maxResponseSize The maximum bytes to download for image size detection.
 	 */
-	public function __construct( int $cacheTtl ) {
+	public function __construct( int $cacheTtl, string $userAgent = '', int $requestTimeout = 15, int $maxResponseSize = 5242880 ) {
 		$this->cacheTtl = $cacheTtl;
+		$this->userAgent = trim( $userAgent );
+		$this->requestTimeout = max( 1, $requestTimeout );
+		$this->maxResponseSize = max( 1, $maxResponseSize );
 	}
 
 	/**
@@ -80,6 +89,8 @@ class RssImageFinder {
 	/**
 	 * Finds images in HTML content.
 	 *
+	 * @since 5.5.0 Preserves source alt text for imported images.
+	 *
 	 * @return Generator<int,IrImage>
 	 */
 	public function findInHtml( string $content, bool $doSrcSet = false ): Generator {
@@ -99,10 +110,14 @@ class RssImageFinder {
 
 			$srcNode = $img->attributes->getNamedItem( 'src' );
 			$srcSetNode = $img->attributes->getNamedItem( 'srcset' );
+			$altNode = $img->attributes->getNamedItem( 'alt' );
+			$altText = $altNode !== null
+				? trim( $altNode->nodeValue ?? '' )
+				: '';
 
 			if ( $srcNode !== null ) {
 				$src = trim( $srcNode->nodeValue ?? '' );
-				yield new IrImage( $src, IrImage::FROM_CONTENT );
+				yield new IrImage( $src, IrImage::FROM_CONTENT, null, array(), $altText );
 			}
 
 			if ( $doSrcSet && $srcSetNode !== null ) {
@@ -114,7 +129,7 @@ class RssImageFinder {
 					$pieces = preg_split( '!(\s+)!m', $entry );
 
 					if ( $pieces !== false && count( $pieces ) > 0 ) {
-						yield new IrImage( $pieces[0], IrImage::FROM_CONTENT );
+						yield new IrImage( $pieces[0], IrImage::FROM_CONTENT, null, array(), $altText );
 					}
 				}
 			}
@@ -268,6 +283,8 @@ class RssImageFinder {
 	/**
 	 * Processes image URLs.
 	 *
+	 * @since 5.5.0 Normalizes HTML-encoded URLs and removes duplicate image variants.
+	 *
 	 * @param iterable<IrImage> $images The list of images.
 	 * @param RssItem           $item The RSS item.
 	 * @param Source            $source The source.
@@ -275,6 +292,7 @@ class RssImageFinder {
 	 */
 	public function processImageUrls( iterable $images, RssItem $item, Source $source ): Generator {
 		$srcUrl = $item->getFeed()->getSourceUrl();
+		$seenUrls = array();
 
 		if ( $srcUrl ) {
 			$scheme = parse_url( $srcUrl, PHP_URL_SCHEME ) ?: null;
@@ -298,8 +316,14 @@ class RssImageFinder {
 
 			// Only perform URL manipulation on non-data URIs
 			if ( strpos( $image->url, 'data:image' ) !== 0 ) {
+				$image->url = trim( html_entity_decode( $image->url, ENT_QUOTES | ENT_HTML5 ) );
+
 				if ( ! Uri::isAbsolute( $image->url ) ) {
 					$image->url = $baseUrl . $image->url;
+				}
+
+				if ( '' === esc_url_raw( $image->url ) ) {
+					continue;
 				}
 
 				$image->url = Uri::modifyQuery(
@@ -311,12 +335,33 @@ class RssImageFinder {
 						return $query;
 					}
 				);
+
+				$identityUrl = Uri::modifyQuery(
+					$image->url,
+					function ( array $query ) {
+						unset( $query['strip'] );
+						unset( $query['quality'] );
+						ksort( $query );
+						return $query;
+					}
+				);
+
+				if ( isset( $seenUrls[ $identityUrl ] ) ) {
+					$existing = $seenUrls[ $identityUrl ];
+					if ( $existing->altText === '' && $image->altText !== '' ) {
+						$existing->altText = $image->altText;
+					}
+					continue;
+				}
+
+				$seenUrls[ $identityUrl ] = $image;
 			}
 
 			$size = $this->getImageSize( $image->url );
 
 			if ( $size->isAtLeast( $source->settings->minImageSize ) ) {
 				$image->size = $size;
+				$image->requestUserAgent = $this->userAgent;
 				yield $image;
 			}
 		}
@@ -349,7 +394,7 @@ class RssImageFinder {
 				$imgData = base64_decode( substr( $url, $commaPos + 1 ) );
 				$imgSize = @getimagesizefromstring( $imgData );
 			} else {
-				$imgSize = @getimagesize( $url );
+				$imgSize = $this->getRemoteImageSize( $url );
 			}
 
 			if ( $imgSize !== false ) {
@@ -369,5 +414,59 @@ class RssImageFinder {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Gets the size of a remote image using WordPress HTTP requests.
+	 *
+	 * @since 5.2.1
+	 *
+	 * @param string $url The remote image URL.
+	 * @return array<int,int|string>|false The image size data, or false on failure.
+	 */
+	protected function getRemoteImageSize( string $url ) {
+		$args = array(
+			'timeout' => $this->requestTimeout,
+			'redirection' => 5,
+			'limit_response_size' => $this->maxResponseSize,
+			'headers' => array(
+				'Accept' => 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+			),
+		);
+
+		if ( $this->userAgent !== '' ) {
+			$args['user-agent'] = $this->userAgent;
+			$args['headers']['User-Agent'] = $this->userAgent;
+		}
+
+		/**
+		 * Filters request arguments used to detect remote image dimensions.
+		 *
+		 * @since 5.2.1
+		 *
+		 * @param array<string,mixed> $args The WordPress HTTP request arguments.
+		 * @param string              $url The remote image URL.
+		 */
+		$filteredArgs = apply_filters( 'wpra.importer.imageFinder.sizeRequestArgs', $args, $url );
+		if ( is_array( $filteredArgs ) ) {
+			$args = $filteredArgs;
+		}
+
+		$response = wp_safe_remote_get( $url, $args );
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+
+		$status = wp_remote_retrieve_response_code( $response );
+		if ( $status < 200 || $status >= 300 ) {
+			return false;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		if ( $body === '' ) {
+			return false;
+		}
+
+		return @getimagesizefromstring( $body );
 	}
 }

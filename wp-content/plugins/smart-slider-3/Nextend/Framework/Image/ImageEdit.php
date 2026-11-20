@@ -59,7 +59,7 @@ class ImageEdit {
                 return $originalImageUrl;
             }
 
-            if (strtolower($extension) === 'webp' && !function_exists('imagecreatefromwebp')) {
+            if (strtolower($extension) === 'webp' && (!function_exists('imagecreatefromwebp') || self::isAnimatedWebp($imageUrl))) {
                 return $originalImageUrl;
             }
 
@@ -104,7 +104,11 @@ class ImageEdit {
                     $extension = 'png';
                     break;
                 case IMAGETYPE_WEBP:
-                    if (!function_exists('imagecreatefromwebp')) {
+                    if (!function_exists('imagecreatefromwebp') || self::isAnimatedWebp($imagePath)) {
+                        /**
+                         * GD cannot decode animated WebP images (it raises a fatal "gd-webp cannot
+                         * allocate temporary buffer" error), so we skip optimization and keep the original.
+                         */
                         return $originalImageUrl;
                     }
                     $extension = 'webp';
@@ -267,7 +271,7 @@ class ImageEdit {
                 return $originalImageUrl;
             }
 
-            if (strtolower($extension) === 'webp' && !function_exists('imagecreatefromwebp')) {
+            if (strtolower($extension) === 'webp' && (!function_exists('imagecreatefromwebp') || self::isAnimatedWebp($imageUrl))) {
                 return $originalImageUrl;
             }
 
@@ -296,7 +300,11 @@ class ImageEdit {
                     $extension = 'png';
                     break;
                 case IMAGETYPE_WEBP:
-                    if (!function_exists('imagecreatefromwebp')) {
+                    if (!function_exists('imagecreatefromwebp') || self::isAnimatedWebp($imagePath)) {
+                        /**
+                         * GD cannot decode animated WebP images (it raises a fatal "gd-webp cannot
+                         * allocate temporary buffer" error), so we skip optimization and keep the original.
+                         */
                         return $originalImageUrl;
                     }
                     $extension = 'webp';
@@ -499,6 +507,49 @@ class ImageEdit {
         return exif_imagetype($filename);
     }
 
+    /**
+     * Detects whether a WebP file (a local path or a remote URL) is animated. GD cannot decode
+     * animated WebP images and raises a fatal "gd-webp cannot allocate temporary buffer" error when
+     * it tries, so we check the file header (the VP8X "animation" flag) up front and skip
+     * optimization for these images. The result is memoized per path for the current request.
+     *
+     * @param string $path
+     *
+     * @return bool
+     */
+    public static function isAnimatedWebp($path) {
+        static $cache = array();
+
+        if (array_key_exists($path, $cache)) {
+            return $cache[$path];
+        }
+
+        $result = false;
+
+        $handle = @fopen($path, 'rb');
+        if ($handle) {
+            $header = @fread($handle, 21);
+            @fclose($handle);
+
+            /**
+             * A WebP file starts with a "RIFF" header followed by the "WEBP" form type. Only the
+             * extended "VP8X" format can hold animation: its flags byte sits at offset 20, where the
+             * animation bit has the value 0x02.
+             */
+            if ($header !== false && strlen($header) >= 21
+                && substr($header, 0, 4) === 'RIFF'
+                && substr($header, 8, 4) === 'WEBP'
+                && substr($header, 12, 4) === 'VP8X'
+            ) {
+                $result = (ord($header[20]) & 0x02) === 0x02;
+            }
+        }
+
+        $cache[$path] = $result;
+
+        return $result;
+    }
+
     public static function isPNG8($path) {
         $fp = fopen($path, 'r');
         fseek($fp, 25);
@@ -552,22 +603,34 @@ class ImageEdit {
             $extension = false;
             if (isset($pathInfo['extension'])) {
                 $extension = self::validateGDExtension($pathInfo['extension']);
+                if (!$extension && strtolower($pathInfo['extension']) === 'avif' && function_exists('imagecreatefromavif')) {
+                    // AVIF is only decoded here (never encoded): we read it and output WebP.
+                    $extension = 'avif';
+                }
             }
 
             $extension = self::checkMetaExtension($imageUrl, $extension);
 
-            if (!$extension || (strtolower($extension) === 'webp' && !function_exists('imagecreatefromwebp')) || !ini_get('allow_url_fopen')) {
+            if (!$extension || (strtolower($extension) === 'webp' && (!function_exists('imagecreatefromwebp') || self::isAnimatedWebp($imageUrl))) || !ini_get('allow_url_fopen')) {
                 return $originalImageUrl;
             }
 
-            return ResourceTranslator::urlToResource(Filesystem::pathToAbsoluteURL($cache->makeCache('webp', array(
-                self::class,
-                '_scaleRemoteImageWebp'
-            ), array(
-                $extension,
-                $imageUrl,
-                $options
-            ))));
+            try {
+                return ResourceTranslator::urlToResource(Filesystem::pathToAbsoluteURL($cache->makeCache('webp', array(
+                    self::class,
+                    '_scaleRemoteImageWebp'
+                ), array(
+                    $extension,
+                    $imageUrl,
+                    $options
+                ))));
+            } catch (Exception $e) {
+                /**
+                 * The image could not be processed (e.g. an animated WebP, which GD cannot decode).
+                 * In this case we skip the optimization and let the original image be used.
+                 */
+                return false;
+            }
 
         } else {
             $extension = false;
@@ -580,24 +643,40 @@ class ImageEdit {
                     $extension = 'png';
                     break;
                 case IMAGETYPE_WEBP:
-                    if (!function_exists('imagecreatefromwebp')) {
+                    if (!function_exists('imagecreatefromwebp') || self::isAnimatedWebp($imagePath)) {
+                        /**
+                         * GD cannot decode animated WebP images (it raises a fatal "gd-webp cannot
+                         * allocate temporary buffer" error), so we skip optimization and keep the original.
+                         */
                         return $originalImageUrl;
                     }
                     $extension = 'webp';
                     break;
             }
+            if (!$extension && defined('IMAGETYPE_AVIF') && $imageType === IMAGETYPE_AVIF && function_exists('imagecreatefromavif')) {
+                // AVIF is only decoded here (never encoded): we read it and output WebP.
+                $extension = 'avif';
+            }
             if (!$extension) {
                 return $originalImageUrl;
             }
 
-            return ResourceTranslator::urlToResource(Filesystem::pathToAbsoluteURL($cache->makeCache('webp', array(
-                self::class,
-                '_scaleImageWebp'
-            ), array(
-                $extension,
-                $imagePath,
-                $options
-            ))));
+            try {
+                return ResourceTranslator::urlToResource(Filesystem::pathToAbsoluteURL($cache->makeCache('webp', array(
+                    self::class,
+                    '_scaleImageWebp'
+                ), array(
+                    $extension,
+                    $imagePath,
+                    $options
+                ))));
+            } catch (Exception $e) {
+                /**
+                 * The image could not be processed (e.g. an animated WebP, which GD cannot decode).
+                 * In this case we skip the optimization and let the original image be used.
+                 */
+                return false;
+            }
         }
     }
 
@@ -618,7 +697,7 @@ class ImageEdit {
 
         if ($extension == 'png') {
             $image = @imagecreatefrompng($imagePath);
-            if (!imageistruecolor($image)) {
+            if ($image && !imageistruecolor($image)) {
                 imagepalettetotruecolor($image);
                 imagealphablending($image, true);
                 imagesavealpha($image, true);
@@ -636,11 +715,17 @@ class ImageEdit {
         } else if ($extension == 'webp') {
             //@TODO: should we need to care about rotation?
             $image = @imagecreatefromwebp($imagePath);
-            if (!imageistruecolor($image)) {
+            if ($image && !imageistruecolor($image)) {
                 imagepalettetotruecolor($image);
                 imagealphablending($image, true);
                 imagesavealpha($image, true);
             }
+        } else if ($extension == 'avif') {
+            /**
+             * AVIF is decoded and re-saved as WebP (see imagewebp() below). We never call
+             * imageavif(), so the slow AVIF encoding is avoided; only the fast WebP encoder runs.
+             */
+            $image = @imagecreatefromavif($imagePath);
         }
 
         if ($image) {
@@ -658,7 +743,7 @@ class ImageEdit {
             }
             if ((isset($rotated) && $rotated) || $originalWidth != $targetWidth || $originalHeight != $targetHeight) {
                 $newImage = imagecreatetruecolor($targetWidth, $targetHeight);
-                if ($extension == 'png' || $extension == 'webp') {
+                if ($extension == 'png' || $extension == 'webp' || $extension == 'avif') {
                     imagesavealpha($newImage, true);
                     imagealphablending($newImage, false);
                     $transparent = imagecolorallocatealpha($newImage, 255, 255, 255, 127);

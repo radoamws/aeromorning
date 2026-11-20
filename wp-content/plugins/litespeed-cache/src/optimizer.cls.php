@@ -14,6 +14,9 @@ defined('WPINC') || exit();
 
 class Optimizer extends Root {
 
+	// Remote asset HTTP statuses treated as permanent: the asset is skipped instead of failing the whole combine.
+	const PERMANENT_FAIL_STATUSES = [ 404, 410 ];
+
 	private $_conf_css_font_display;
 
 	/**
@@ -78,7 +81,7 @@ class Optimizer extends Root {
 	 * @since  1.9
 	 * @access public
 	 */
-	public function serve( $request_url, $file_type, $minify, $src_list ) {
+	public function serve( $request_url, $file_type, $minify, $src_list, $is_delayed = false ) {
 		// Try Unique CSS
 		if ($file_type == 'css') {
 			$content = false;
@@ -104,14 +107,33 @@ class Optimizer extends Root {
 
 		$static_file = LITESPEED_STATIC_DIR . $file_path_prefix . $url_tag_for_file . '.' . $file_type;
 
-		// Create tmp file to avoid conflict
+		// Create tmp file to avoid conflict. Use atomic O_CREAT|O_EXCL via fopen('x') so two concurrent workers cannot both pass the guard (TOCTOU race fix).
 		$tmp_static_file = $static_file . '.tmp';
-		if (file_exists($tmp_static_file) && time() - filemtime($tmp_static_file) <= 600) {
-			// some other request is generating
+		// Ensure parent directory exists (File::save would normally do this; fopen('x') would fail otherwise on a fresh install).
+		$tmp_dir = dirname($tmp_static_file);
+		if (!is_dir($tmp_dir)) {
+			wp_mkdir_p($tmp_dir);
+		}
+		$tmp_fh = @fopen($tmp_static_file, 'x');
+		if ($tmp_fh === false) {
+			// Another worker holds the slot. Only treat the existing tmp as orphaned if filemtime() actually returns a usable timestamp older than 600s. A failed stat must NOT be interpreted as "stale" or we could evict a live worker and reopen the very race we are trying to prevent.
+			$mtime = @filemtime($tmp_static_file);
+			if ($mtime !== false && time() - $mtime > 600) {
+				@unlink($tmp_static_file);
+				$tmp_fh = @fopen($tmp_static_file, 'x');
+			}
+			if ($tmp_fh === false) {
+				// Another live worker is generating; bail out and let the caller fall back to non-combined assets.
+				return false;
+			}
+		}
+		fclose($tmp_fh);
+		// File::save( $tmp_static_file, '/* ' . ( is_404() ? '404' : $request_url ) . ' */', true ); // Can't use this bcos this will get filecon md5 changed
+		if (File::save($tmp_static_file, '', true) === false) {
+			Debug2::debug('[Optmer] File::save init failed, aborting: ' . $tmp_static_file);
+			@unlink($tmp_static_file);
 			return false;
 		}
-		// File::save( $tmp_static_file, '/* ' . ( is_404() ? '404' : $request_url ) . ' */', true ); // Can't use this bcos this will get filecon md5 changed
-		File::save($tmp_static_file, '', true);
 
 		// Load content
 		$real_files = array();
@@ -124,15 +146,23 @@ class Optimizer extends Root {
 				// Load file
 				$content = $this->load_file($src_info['src'], $file_type);
 
-				if (!$content) {
+				if ( false === $content ) {
+					wp_delete_file( $tmp_static_file );
+					return false;
+				}
+				if ( '' === $content ) {
 					continue;
 				}
 
 				$is_min = $this->is_min($src_info['src']);
 			}
-			$content = $this->optm_snippet($content, $file_type, $minify && !$is_min, $src_info['src'], !empty($src_info['media']) ? $src_info['media'] : false);
-			// Write to file
-			File::save($tmp_static_file, $content, true, true);
+			$content = $this->optm_snippet($content, $file_type, $minify && !$is_min, $src_info['src'], !empty($src_info['media']) ? $src_info['media'] : false, $is_delayed);
+			// Write to file. Bail out on write failure (disk full / permission / etc.) so a partial tmp does not get hashed and persisted.
+			if (File::save($tmp_static_file, $content, true, true) === false) {
+				Debug2::debug('[Optmer] File::save append failed, aborting: ' . $tmp_static_file);
+				@unlink($tmp_static_file);
+				return false;
+			}
 		}
 
 		// if CSS - run the minification on the saved file.
@@ -141,16 +171,34 @@ class Optimizer extends Root {
 			$obj                   = new Lib\CSS_JS_MIN\Minify\CSS();
 			$file_content_combined = $obj->moveImportsToTop(File::read($tmp_static_file));
 
-			File::save($tmp_static_file, $file_content_combined);
+			if (File::save($tmp_static_file, $file_content_combined) === false) {
+				Debug2::debug('[Optmer] File::save minified CSS failed, aborting: ' . $tmp_static_file);
+				@unlink($tmp_static_file);
+				return false;
+			}
 		}
 
-		// validate md5
+		// validate md5. Defensive: if our tmp file vanished (e.g. swept by parallel cleanup, NFS metadata blip, or an unforeseen race), abort instead of writing a broken hash to the DB and serving 404 stylesheets.
+		if (!is_file($tmp_static_file)) {
+			Debug2::debug('[Optmer] tmp file vanished before md5_file: ' . $tmp_static_file);
+			return false;
+		}
 		$filecon_md5 = md5_file($tmp_static_file);
+		if ($filecon_md5 === false) {
+			Debug2::debug('[Optmer] md5_file failed: ' . $tmp_static_file);
+			@unlink($tmp_static_file);
+			return false;
+		}
 
 		$final_file_path = $file_path_prefix . $filecon_md5 . '.' . $file_type;
 		$realfile        = LITESPEED_STATIC_DIR . $final_file_path;
 		if (!file_exists($realfile)) {
-			rename($tmp_static_file, $realfile);
+			// Check rename() result so a failed move (disk full, permission, etc.) does NOT poison Data::save_url() with a hash whose final file was never created.
+			if (!rename($tmp_static_file, $realfile)) {
+				Debug2::debug('[Optmer] rename failed: ' . $tmp_static_file . ' -> ' . $realfile);
+				@unlink($tmp_static_file);
+				return false;
+			}
 			Debug2::debug2('[Optmer] Saved static file [path] ' . $realfile);
 		} else {
 			unlink($tmp_static_file);
@@ -199,7 +247,7 @@ class Optimizer extends Root {
 	 *
 	 * @since  4.0
 	 */
-	public function optm_snippet( $content, $file_type, $minify, $src, $media = false ) {
+	public function optm_snippet( $content, $file_type, $minify, $src, $media = false, $is_delayed = false ) {
 		// CSS related features
 		if ($file_type == 'css') {
 			// Font optimize
@@ -228,6 +276,9 @@ class Optimizer extends Root {
 			}
 
 			$content .= "\n;";
+			if ( $is_delayed ) {
+				$content = str_replace( 'DOMContentLoaded', 'DOMContentLiteSpeedLoaded', $content );
+			}
 		}
 
 		// Add filter
@@ -250,25 +301,31 @@ class Optimizer extends Root {
 			File::rrmdir($to_be_deleted_folder);
 		}
 
-		$today_file = $folder_name . date('Ymd') . '/' . md5($url);
+		$today_file = $folder_name . date('Ymd') . '/' . md5($url) . '.' . ( 'js' === $file_type ? 'js' : 'css' );
 		if (file_exists($today_file)) {
 			return File::read($today_file);
 		}
 
-		// Write file
-		$res      = wp_safe_remote_get($url);
-		$res_code = wp_remote_retrieve_response_code($res);
-		if (is_wp_error($res) || $res_code != 200) {
-			Debug2::debug2('[Optimizer] ❌ Load Remote error [code] ' . $res_code);
-			return false;
-		}
-		$con = wp_remote_retrieve_body($res);
-		if (!$con) {
+		$temp = File::download($url, $today_file);
+		if (is_wp_error($temp)) {
+			$err_code = $temp->get_error_code();
+			$err_data = $temp->get_error_data();
+			// Only definite permanent failures (404/410 or an empty body) are skipped; transient, network, disk and oversize failures keep the whole group on its original resources.
+			if ( ( File::E_HTTP === $err_code && in_array( (int) $err_data, self::PERMANENT_FAIL_STATUSES, true ) ) || ( File::E_DATA === $err_code && 'empty' === $err_data ) ) {
+				Debug2::debug('[Optimizer] skip permanently failing asset [status] ' . ( File::E_HTTP === $err_code ? (int) $err_data : 'empty' ) . ' [url] ' . $url);
+				return '';
+			}
+			Debug2::debug2('[Optimizer] ❌ Load Remote error [code] ' . $err_code);
 			return false;
 		}
 
+		$con = File::read($temp);
+		if (false === $con) {
+			wp_delete_file($temp);
+			return false;
+		}
 		Debug2::debug('[Optimizer] ✅ Save remote file to cache [name] ' . $today_file);
-		File::save($today_file, $con, true);
+		File::publish_temp_file($temp, $today_file);
 
 		return $con;
 	}
@@ -286,7 +343,7 @@ class Optimizer extends Root {
 			$this_url = substr($src, 0, 2) == '//' ? set_url_scheme($src) : $src;
 			$con      = $this->load_cached_file($this_url, $file_type);
 
-			if ($file_type == 'css') {
+			if ( false !== $con && $file_type == 'css' ) {
 				$dirname = dirname($this_url) . '/';
 
 				$con = Lib\UriRewriter::prepend($con, $dirname);
@@ -295,7 +352,7 @@ class Optimizer extends Root {
 			Debug2::debug2('[CSS] Load local [' . $file_type . '] ' . $real_file[0]);
 			$con = File::read($real_file[0]);
 
-			if ($file_type == 'css') {
+			if ( false !== $con && $file_type == 'css' ) {
 				$dirname = dirname($real_file[0]);
 
 				$con = Lib\UriRewriter::rewrite($con, $dirname);
@@ -313,7 +370,12 @@ class Optimizer extends Root {
 	 */
 	public static function minify_css( $data ) {
 		try {
-			$obj = new Lib\CSS_JS_MIN\Minify\CSS();
+			// The caller supplies content, never a path for the minifier to open.
+			$obj = new class() extends Lib\CSS_JS_MIN\Minify\CSS {
+				protected function canImportFile( $path ) {
+					return false;
+				}
+			};
 			$obj->add($data);
 
 			return $obj->minify();
@@ -343,7 +405,12 @@ class Optimizer extends Root {
 		}
 
 		try {
-			$obj = new Lib\CSS_JS_MIN\Minify\JS();
+			// The caller supplies content, never a path for the minifier to open.
+			$obj = new class() extends Lib\CSS_JS_MIN\Minify\JS {
+				protected function canImportFile( $path ) {
+					return false;
+				}
+			};
 			$obj->add($data);
 
 			return $obj->minify();

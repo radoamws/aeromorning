@@ -243,6 +243,7 @@ class Session {
 	 * Returns the token and object ID couple with the earliest expiration time from the cookie.
 	 *
 	 * @since 5.16.0
+	 * @since 5.29.5.1 Skip sessions whose timer was never started.
 	 *
 	 * @param array<string,string> $cookie_entries The entries from the cookie. A map from object ID to token.
 	 *
@@ -253,8 +254,9 @@ class Session {
 		$object_ids_interval_p = implode( ',', array_fill( 0, count( $cookie_entries ), '%d' ) );
 		$tokens_interval       = DB::prepare( $tokens_interval_p, ...array_values( $cookie_entries ) );
 		$object_ids_interval   = DB::prepare( $object_ids_interval_p, ...array_keys( $cookie_entries ) );
-		$query                 = DB::prepare(
-			"SELECT object_id, token FROM %i WHERE token IN ({$tokens_interval}) AND object_id IN ({$object_ids_interval}) ORDER BY expiration ASC LIMIT 1",
+
+		$query = DB::prepare(
+			"SELECT object_id, token FROM %i WHERE token IN ({$tokens_interval}) AND object_id IN ({$object_ids_interval}) AND timer_started = 1 ORDER BY expiration ASC LIMIT 1",
 			Sessions::table_name()
 		);
 
@@ -351,13 +353,14 @@ class Session {
 	 * Returns a list of all the reservations details for a specific ticket and event.
 	 *
 	 * @since 5.16.0
+	 * @since 5.29.0 Made $post_id and $ticket_id explicitly nullable.
 	 *
 	 * @param int|null $post_id   The post ID to get the reservations for.
 	 * @param int|null $ticket_id The ticket ID to get the reservations for.
 	 *
 	 * @return array|null The reservations for the ticket and post.
 	 */
-	public function get_post_ticket_reservations( int $post_id = null, int $ticket_id = null ): ?array {
+	public function get_post_ticket_reservations( ?int $post_id = null, ?int $ticket_id = null ): ?array {
 		if ( ! ( $ticket_id && $post_id && tec_tickets_seating_enabled( $post_id ) ) ) {
 			return null;
 		}

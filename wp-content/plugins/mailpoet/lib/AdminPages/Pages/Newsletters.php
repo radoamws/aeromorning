@@ -139,7 +139,7 @@ class Newsletters {
     $data['show_congratulate_after_first_newsletter'] = isset($data['settings']['show_congratulate_after_first_newsletter']) ? $data['settings']['show_congratulate_after_first_newsletter'] : 'false';
 
     $data['is_mailpoet_update_available'] = array_key_exists(Env::$pluginPath, $this->wp->getPluginUpdates());
-    $data['newsletters_count'] = $this->newslettersRepository->countBy([]);
+    $data['newsletters_count'] = $this->newslettersRepository->countUserCreatedNewsletters();
 
     $data['automatic_emails'] = $this->automaticEmails->getAutomaticEmails();
     $data['woocommerce_optin_on_checkout'] = $this->settings->get('woocommerce.optin_on_checkout.enabled', false);
@@ -186,6 +186,10 @@ class Newsletters {
     $data['legacy_automatic_emails_notice_dismissed'] = (bool)$this->userFlagsController->get('legacy_automatic_emails_notice_dismissed');
 
     $data['block_email_editor_enabled'] = $this->dependencyCheck->are_dependencies_met(); // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
+    $rememberEditorChoice = $this->userFlagsController->get('remember_email_editor_choice');
+    $showEditorChoiceModal = $rememberEditorChoice === null ? $this->settings->get('editor_choice_modal.enabled', false) : !(bool)$rememberEditorChoice;
+    $data['editor_choice_modal_enabled'] = $data['block_email_editor_enabled'] && (bool)$showEditorChoiceModal;
+    $data['last_email_editor_choice'] = $this->userFlagsController->get('last_email_editor_choice');
     $this->dependencyNotice->displayMessageIfNeeded();
     $this->pageRenderer->displayPage('newsletters.html', $data);
   }

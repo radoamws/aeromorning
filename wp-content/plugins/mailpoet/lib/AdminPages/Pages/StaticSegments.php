@@ -10,6 +10,8 @@ use MailPoet\AdminPages\PageRenderer;
 use MailPoet\Entities\NewsletterEntity;
 use MailPoet\Listing\PageLimit;
 use MailPoet\Newsletter\NewslettersRepository;
+use MailPoet\Settings\SettingsController;
+use MailPoet\Subscribers\ConfirmationEmailCustomizer;
 use MailPoet\WP\Functions as WPFunctions;
 
 class StaticSegments {
@@ -25,6 +27,9 @@ class StaticSegments {
   /** @var NewslettersRepository */
   private $newslettersRepository;
 
+  /** @var SettingsController */
+  private $settings;
+
   /** @var WPFunctions */
   private $wp;
 
@@ -33,12 +38,14 @@ class StaticSegments {
     PageRenderer $pageRenderer,
     PageLimit $listingPageLimit,
     NewslettersRepository $newslettersRepository,
+    SettingsController $settings,
     WPFunctions $wp
   ) {
     $this->assetsController = $assetsController;
     $this->pageRenderer = $pageRenderer;
     $this->listingPageLimit = $listingPageLimit;
     $this->newslettersRepository = $newslettersRepository;
+    $this->settings = $settings;
     $this->wp = $wp;
   }
 
@@ -55,6 +62,7 @@ class StaticSegments {
       'nonce' => $this->wp->wpCreateNonce('wp_rest'),
     ];
     $data['confirmation_emails'] = $this->getConfirmationEmails();
+    $data['default_confirmation_email_id'] = (int)$this->settings->get(ConfirmationEmailCustomizer::SETTING_EMAIL_ID, 0);
     $data['pages'] = $this->getPages();
 
     $this->pageRenderer->displayPage('segments/static.html', $data);

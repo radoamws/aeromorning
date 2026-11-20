@@ -82,47 +82,28 @@ class __TwigTemplate_e9532cf0026e4c617bee1d3c81fed011d9d7ae14ad609d02eaa36481262
                     <tr>
                       <td class=\"mailpoet_spacer\" height=\"36\" valign=\"top\" style=\"border-collapse:collapse\"></td>
                     </tr>
-                    ";
-        // line 40
-        if ( !$this->extensions['MailPoet\Twig\Functions']->isGarden()) {
-            // line 41
-            yield "                    <tr>
+                    <tr>
                       <td class=\"mailpoet_image mailpoet_padded_vertical mailpoet_padded_side\" align=\"center\" valign=\"top\" style=\"border-collapse:collapse;padding-top:10px;padding-bottom:10px;padding-left:20px;padding-right:20px\">
                         <img src=\"";
-            // line 43
-            yield $this->extensions['MailPoet\Twig\Assets']->generateCdnUrl("logo-orange-400x122.png");
-            yield "\" width=\"80\" alt=\"new_logo_orange\" style=\"height:auto;max-width:100%;-ms-interpolation-mode:bicubic;border:0;display:block;outline:none;text-align:center\" />
+        // line 42
+        yield $this->extensions['MailPoet\Twig\Assets']->generateCdnUrl("logo-orange-400x122.png");
+        yield "\" width=\"80\" alt=\"new_logo_orange\" style=\"height:auto;max-width:100%;-ms-interpolation-mode:bicubic;border:0;display:block;outline:none;text-align:center\" />
                       </td>
                     </tr>
-                    ";
-        }
-        // line 47
-        yield "                    <tr>
+                    <tr>
                       <td class=\"mailpoet_spacer\" height=\"26\" valign=\"top\" style=\"border-collapse:collapse\"></td>
                     </tr>
                     <tr>
                       <td class=\"mailpoet_text mailpoet_padded_vertical mailpoet_padded_side\" valign=\"top\" style=\"border-collapse:collapse;padding-top:10px;padding-bottom:10px;padding-left:20px;padding-right:20px;word-break:break-word;word-wrap:break-word\">
-                        <h1 style=\"margin:0 0 12px;color:#111111;font-family:'Trebuchet MS','Lucida Grande','Lucida Sans Unicode','Lucida Sans',Tahoma,sans-serif;font-size:40px;line-height:64px;margin-bottom:0;text-align:center;padding:0;font-style:normal;font-weight:normal\"><strong>";
-        // line 52
+                        <h1 style=\"margin:0 0 12px;color:#111111;font-family:\x27Trebuchet MS\x27,\x27Lucida Grande\x27,\x27Lucida Sans Unicode\x27,\x27Lucida Sans\x27,Tahoma,sans-serif;font-size:40px;line-height:64px;margin-bottom:0;text-align:center;padding:0;font-style:normal;font-weight:normal\"><strong>";
+        // line 50
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Congrats!");
         yield "<br />
                         ";
-        // line 53
-        if ($this->extensions['MailPoet\Twig\Functions']->isGarden()) {
-            // line 54
-            yield "                          ";
-            yield $this->extensions['MailPoet\Twig\I18n']->translate("Your emails are now being sent");
-            yield "
-                        ";
-        } else {
-            // line 56
-            yield "                          ";
-            yield $this->extensions['MailPoet\Twig\I18n']->translate("MailPoet is now sending your emails");
-            yield "
-                        ";
-        }
-        // line 58
-        yield "                        </strong></h1>
+        // line 51
+        yield $this->extensions['MailPoet\Twig\I18n']->translate("MailPoet is now sending your emails");
+        yield "
+                        </strong></h1>
                       </td>
                     </tr>
                     <tr>
@@ -132,24 +113,12 @@ class __TwigTemplate_e9532cf0026e4c617bee1d3c81fed011d9d7ae14ad609d02eaa36481262
                       <td class=\"mailpoet_text mailpoet_padded_vertical mailpoet_padded_side\" valign=\"top\" style=\"border-collapse:collapse;padding-top:10px;padding-bottom:10px;padding-left:20px;padding-right:20px;word-break:break-word;word-wrap:break-word\">
                         <table style=\"border-collapse:collapse;border-spacing:0;mso-table-lspace:0;mso-table-rspace:0\" width=\"100%\" cellpadding=\"0\">
                           <tr>
-                            <td class=\"mailpoet_paragraph\" style=\"border-collapse:collapse;color:#000000;font-family:Arial,'Helvetica Neue',Helvetica,sans-serif;font-size:16px;line-height:25.6px;word-break:break-word;word-wrap:break-word;text-align:center\">
+                            <td class=\"mailpoet_paragraph\" style=\"border-collapse:collapse;color:#000000;font-family:Arial,\x27Helvetica Neue\x27,Helvetica,sans-serif;font-size:16px;line-height:25.6px;word-break:break-word;word-wrap:break-word;text-align:center\">
                               ";
-        // line 69
-        if ($this->extensions['MailPoet\Twig\Functions']->isGarden()) {
-            // line 70
-            yield "                              ";
-            yield $this->extensions['MailPoet\Twig\I18n']->translate("This email was sent automatically after you activated your email sending key in your settings.");
-            yield "
-                              ";
-        } else {
-            // line 72
-            yield "                              ";
-            yield $this->extensions['MailPoet\Twig\I18n']->translate("This email was sent automatically with the MailPoet Sending Service after you activated your key in your MailPoet settings.");
-            yield "
-                              ";
-        }
-        // line 74
-        yield "                            </td>
+        // line 63
+        yield $this->extensions['MailPoet\Twig\I18n']->translate("This email was sent automatically with the MailPoet Sending Service after you activated your key in your MailPoet settings.");
+        yield "
+                            </td>
                           </tr></table>
                       </td>
                     </tr>
@@ -164,11 +133,7 @@ class __TwigTemplate_e9532cf0026e4c617bee1d3c81fed011d9d7ae14ad609d02eaa36481262
             </table>
           </td>
         </tr>
-        ";
-        // line 89
-        if ( !$this->extensions['MailPoet\Twig\Functions']->isGarden()) {
-            // line 90
-            yield "        <tr>
+        <tr>
           <td class=\"mailpoet_content-cols-two\" align=\"left\" style=\"border-collapse:collapse;background-color:#fe5301!important\" bgcolor=\"#fe5301\">
             <table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse;border-spacing:0;mso-table-lspace:0;mso-table-rspace:0\">
               <tbody>
@@ -187,9 +152,9 @@ class __TwigTemplate_e9532cf0026e4c617bee1d3c81fed011d9d7ae14ad609d02eaa36481262
                       <tr>
                         <td class=\"mailpoet_image mailpoet_padded_vertical mailpoet_padded_side\" align=\"left\" valign=\"top\" style=\"border-collapse:collapse;padding-top:10px;padding-bottom:10px;padding-left:20px;padding-right:20px\">
                           <img src=\"";
-            // line 108
-            yield $this->extensions['MailPoet\Twig\Assets']->generateCdnUrl("logo-white-400x122.png");
-            yield "\" width=\"130\" alt=\"new_logo_white\" style=\"height:auto;max-width:100%;-ms-interpolation-mode:bicubic;border:0;display:block;outline:none;text-align:center\" />
+        // line 97
+        yield $this->extensions['MailPoet\Twig\Assets']->generateCdnUrl("logo-white-400x122.png");
+        yield "\" width=\"130\" alt=\"new_logo_white\" style=\"height:auto;max-width:100%;-ms-interpolation-mode:bicubic;border:0;display:block;outline:none;text-align:center\" />
                         </td>
                       </tr>
                       <tr>
@@ -207,7 +172,7 @@ class __TwigTemplate_e9532cf0026e4c617bee1d3c81fed011d9d7ae14ad609d02eaa36481262
                         <td class=\"mailpoet_spacer\" bgcolor=\"#fe5301\" height=\"20\" valign=\"top\" style=\"border-collapse:collapse\"></td>
                       </tr>
                       <tr>
-                        <td class=\"mailpoet_header_footer_padded mailpoet_footer\" style=\"border-collapse:collapse;padding:10px 20px;line-height:25.6px;text-align:right;color:#222222;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:16px\">
+                        <td class=\"mailpoet_header_footer_padded mailpoet_footer\" style=\"border-collapse:collapse;padding:10px 20px;line-height:25.6px;text-align:right;color:#222222;font-family:Arial, \x27Helvetica Neue\x27, Helvetica, sans-serif;font-size:16px\">
 
                         </td>
                       </tr>
@@ -224,10 +189,7 @@ class __TwigTemplate_e9532cf0026e4c617bee1d3c81fed011d9d7ae14ad609d02eaa36481262
             </table>
           </td>
         </tr>
-        ";
-        }
-        // line 144
-        yield "        </tbody>
+        </tbody>
       </table><!--[if mso]>
       </td>
       </tr>
@@ -263,7 +225,7 @@ class __TwigTemplate_e9532cf0026e4c617bee1d3c81fed011d9d7ae14ad609d02eaa36481262
      */
     public function getDebugInfo()
     {
-        return array (  227 => 144,  188 => 108,  168 => 90,  166 => 89,  149 => 74,  143 => 72,  137 => 70,  135 => 69,  122 => 58,  116 => 56,  110 => 54,  108 => 53,  104 => 52,  97 => 47,  90 => 43,  86 => 41,  84 => 40,  48 => 7,  38 => 1,);
+        return array (  153 => 97,  116 => 63,  101 => 51,  97 => 50,  86 => 42,  48 => 7,  38 => 1,);
     }
 
     public function getSourceContext()

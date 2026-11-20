@@ -40,7 +40,7 @@ class __TwigTemplate_ca78fa0f2676e270e42ef1d4c3eb02b54f1eca3634385d076e24f0bef5a
         yield "<div class=\"mailpoet_settings_products_single_product\">
     <label>
         <input id=\"mailpoet_select_product_{{ index }}\" class=\"mailpoet_select_product_checkbox\" type=\"checkbox\" class=\"checkbox\" value=\"\" name=\"post_selection\">
-        {{#ellipsis model.post_title 40 '...'}}{{/ellipsis}}
+        {{#ellipsis model.post_title 40 \x27...\x27}}{{/ellipsis}}
     </label>
 </div>
 ";

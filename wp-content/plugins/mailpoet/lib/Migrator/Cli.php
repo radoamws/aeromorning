@@ -32,12 +32,25 @@ class Cli {
       return;
     }
 
-    WP_CLI::add_command('mailpoet:migrations:run', [$this, 'run'], [
+    WP_CLI::add_command('mailpoet migrations run', [$this, 'run'], [
       'shortdesc' => 'Runs MailPoet database migrations',
     ]);
 
-    WP_CLI::add_command('mailpoet:migrations:status', [$this, 'status'], [
+    WP_CLI::add_command('mailpoet migrations status', [$this, 'status'], [
       'shortdesc' => 'Shows status of MailPoet database migrations',
+    ]);
+
+    // Deprecated colon-named aliases kept for backwards compatibility. Remove in a future release (STOMAIL-8177).
+    $this->registerDeprecatedAlias('mailpoet:migrations:run', 'mailpoet migrations run', [$this, 'run']);
+    $this->registerDeprecatedAlias('mailpoet:migrations:status', 'mailpoet migrations status', [$this, 'status']);
+  }
+
+  private function registerDeprecatedAlias(string $oldName, string $newName, callable $handler): void {
+    WP_CLI::add_command($oldName, function () use ($oldName, $newName, $handler): void {
+      WP_CLI::warning(sprintf('`wp %s` is deprecated and will be removed in a future release. Use `wp %s` instead.', $oldName, $newName));
+      $handler();
+    }, [
+      'shortdesc' => sprintf('Deprecated. Use `wp %s` instead', $newName),
     ]);
   }
 
@@ -111,14 +124,38 @@ class Cli {
       $this->printStats($status);
 
       WP_CLI::log("MIGRATIONS:\n");
-      $table = array_map(function (array $data): array {
-        $data['name'] .= $data['unknown'] ? ' (unknown)' : '';
-        unset($data['unknown']);
-        return array_map(function ($field) {
-          return $field === null ? '' : $field;
-        }, $data);
-      }, $status);
+      $table = array_map([$this, 'formatStatusRow'], $status);
       WP_CLI\Utils\format_items('table', $table, array_keys($table[0]));
+      $this->printFailedMigrations();
+    }
+  }
+
+  /**
+   * One table row per migration. The error column keeps the first line of the stored
+   * dump, which carries the class and message; the whole dump is printed separately.
+   *
+   * @param array{name: string, level: string|null, status: string, started_at: string|null, completed_at: string|null, retries: int|null, error: string|null, unknown: bool} $data
+   * @return array<string, string|int>
+   */
+  public function formatStatusRow(array $data): array {
+    $data['name'] .= $data['unknown'] ? ' (unknown)' : '';
+    $data['error'] = $data['error'] === null ? null : explode("\n", $data['error'], 2)[0];
+    unset($data['unknown']);
+    return array_map(function ($field) {
+      return $field === null ? '' : $field;
+    }, $data);
+  }
+
+  private function printFailedMigrations(): void {
+    $failed = $this->migrator->getFailedMigrations();
+    if (!$failed) {
+      return;
+    }
+    WP_CLI::log("\nFAILED MIGRATIONS:\n");
+    foreach ($failed as $migration) {
+      WP_CLI::log(sprintf('%s (retries: %d)', $migration['name'], (int)$migration['retries']));
+      WP_CLI::log((string)$migration['error']);
+      WP_CLI::log('');
     }
   }
 

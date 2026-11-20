@@ -7,8 +7,8 @@ use MailPoetVendor\Doctrine\ORM\Mapping\ClassMetadata;
 use MailPoetVendor\Doctrine\Persistence\Event\LoadClassMetadataEventArgs as BaseLoadClassMetadataEventArgs;
 class LoadClassMetadataEventArgs extends BaseLoadClassMetadataEventArgs
 {
- public function getEntityManager()
- {
- return $this->getObjectManager();
- }
+public function getEntityManager()
+{
+return $this->getObjectManager();
+}
 }

@@ -1,10 +1,10 @@
 === Event Tickets and Registration ===
 
-Contributors: theeventscalendar, brianjessee, camwynsp, redscar, tribalmike, rafsuntaskin, aguseo, bordoni, borkweb, jentheo, leahkoerper, lucatume, neillmcshea, vicskf, zbtirrell
+Contributors: theeventscalendar, stellarwp, nexcess, bordoni, deblynprado, dpantazis, filipecouto, jehromegriffiths1, jentheo, larodiel, leahkoerper, sdokus, vicskf
 Tags: tickets, event registration, RSVP, ticket sales, attendee management
-Stable tag: 5.28.5.1
-Requires at least: 6.8
-Tested up to: 7.0
+Stable tag: 5.31.1.1
+Requires at least: 6.9
+Tested up to: 7.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -116,6 +116,13 @@ Still have a question? Shoot us an email at support@theeventscalendar.com.
 
 Event Tickets is translated into multiple languages, including German, Danish, and Dutch. Help localize Event Tickets even further by adding your locale – visit [translate.wordpress.org](https://evnt.is/1b5i).
 
+== All Time Contributors ==
+
+We want to thank the people that have contributed over the years !
+
+aguseo, bordoni, borkweb, brianjessee, camwynsp, deblynprado, dpantazis, filipecouto, jehromegriffiths1, jentheo,
+larodiel, leahkoerper, lucatume, neillmcshea, rafsuntaskin, redscar, sdokus, tribalmike, vicskf, zbtirrell
+
 == Installation ==
 
 1. From the dashboard of your site, navigate to Plugins --> Add New.
@@ -198,6 +205,198 @@ Check out our extensive [knowledgebase](https://evnt.is/18wm) for articles on us
 
 
 == Changelog ==
+
+= [5.31.1.1] 2026-11-17 =
+
+* Security - Hardened how attendee and purchaser names are saved and shown on the Attendees page. Props to ytaero for reporting.
+* Security - Hardened how dependent form fields look up the field they depend on. Props to ytaero for reporting.
+* Security - Hardened the coupon and password-protection checks for Tickets Commerce. Props to Elaprendiz1927 for reporting.
+* Security - Hardened the escaping of the Seating Associated Events view links. Props to Elaprendiz1927 for reporting.
+* Security - Hardened the quantity and sale-window checks for RSVPs. Props to Abdel Majid BOUKHLIK HAJJI for reporting.
+* Security - Hardened the Stripe payment confirmation checks. Props to Elaprendiz1927 for reporting.
+* Security - Improved how Tickets Commerce and RSVP apply the login setting when tickets are added to the cart and when an order is created. Props to ytaero for reporting.
+* Language - 5 new strings added, 119 updated, 0 fuzzied, and 0 obsoleted.
+
+= [5.31.1] 2026-11-12 =
+
+* Fix - Avoided a fatal error when a database table prefix of 31 or more characters pushed the migrations table name past MySQL's 64-character limit, added an admin notice explaining how to shorten the prefix, and stopped the Shepherd tables error notice from causing an error when displayed.
+* Fix - Changed the System Information copy button on the Troubleshooting page to copy plain text, so pasted system details take the destination's text color instead of arriving as invisible white text.
+* Fix - Closed the block editor's Attendee Information modal for tickets and RSVPs after its fields are saved, which stayed open in Chrome, including on WordPress 7.1.
+* Fix - Corrected the check-in of Series Pass Attendees from the Event Tickets Plus App, which appeared checked in and then reverted to unchecked on the next refresh.
+* Fix - Kept the event edit screen working when a translation breaks the placeholders of the Series Pass help text, falling back to English for that sentence.
+* Fix - Loaded the shared block editor stylesheet directly into the WordPress 7.1 editor canvas, removing the "added to the iframe incorrectly" browser console warning.
+* Fix - Loaded the Tickets block, ticket sale dates and Seating editor stylesheets directly into the WordPress 7.1 editor canvas, removing the "added to the iframe incorrectly" browser console warnings.
+* Fix - Prevented a fatal error when another plugin runs the save_post action with only the post ID.
+* Fix - Prevented fatal errors when another plugin runs the save_post action with only the post ID.
+* Fix - Re-enabled the Move option in the Bulk actions menu of an event's attendee list when Community is active, so several attendees can be moved at once again.
+* Fix - Removed broken and outdated help links from the Payments settings, the settings sidebar and the Tickets Help page, and pointed the remaining links to current articles.
+* Fix - Restored Move Ticket and Move RSVP in the block editor, where a move failed without an error and trashed the RSVP, made a failed move show its reason, and stopped a newly added Tickets block from listing each existing ticket twice in the editor.
+* Fix - Stopped a Series Pass Attendee's check-in history from carrying over to the next Occurrence they are checked into.
+* Fix - Stopped checkout from selling an assigned seating ticket with no seat when the seat was not held, and sent the buyer back to the event page to choose their seats again.
+* Fix - Stopped the Community Events submission form from ending on a critical error on PHP 8 when a new event was submitted with a ticket, which led organizers to resubmit and create duplicate events.
+* Fix - Stopped Tickets Commerce PayPal card payments from being captured when the buyer cancels or fails their bank's 3D Secure verification.
+* Language - 19 new strings added, 217 updated, 6 fuzzied, and 13 obsoleted.
+* Security - Hardened how HTML attributes are printed in templates. Props to Hatim Madmoune -DELTA for reporting.
+* Security - Hardened shortcode handling in post content shown by calendar views. Props to Filip Kowalski for reporting.
+* Security - Hardened the handling of attendee data. Props to Phuong Nguyen for reporting.
+* Security - Hardened the output of the settings page closing form element.
+* Tweak - Hid the per-event Ticket Header Image setting in the classic and block editors when Tickets Emails is enabled, because Tickets Emails uses the header image set under Tickets > Settings > Emails, and the classic editor's Ticket Settings panel shows a premium-settings note when it has no settings to show.
+* Tweak - Pointed the "Learn how to get live support" link on the Help page to a working page instead of a removed article.
+* Tweak - Pointed the Zapier API keys help link to the Zapier knowledgebase article and removed an outdated link from the Zapier Endpoint Dashboard.
+* Tweak - Removed the outdated planned features link from the notices that tickets and RSVPs are not supported on recurring events, and changed the RSVP notice to "RSVPs are not supported on recurring events."
+* Tweak - Simplified the Payment provider ticket setting by removing the helper text about running multiple ecommerce plugins, in both the classic and block editors.
+
+= [5.31.0] 2026-11-04 =
+
+* Feature - Added relative sale dates for Tickets Commerce tickets on events in the classic and block editors, so ticket sales and the sale price can start and end a set time before the event and follow the event when its date changes, and blocked saving a ticket whose sales window or sale price window ends before it starts, or whose sale price window starts outside the sales window, with the reason shown under the window.
+* Fix - Gave an event copied with Yoast Duplicate Post its own seating ID, and its tickets their seat settings and relative sale dates.
+* Fix - Included Tickets Commerce tickets whose sale price has no start or end date, or ends today, in the Discounted Tickets filter of the admin tickets list, and judged their sale price days in the event's timezone.
+* Fix - Kept the Ticket block from saving 1970-01-01 as the date of a sale price saved without dates when the ticket was updated.
+* Fix - Kept the Ticket block working for a ticket saved without an end date, whose form showed an invalid date and stopped the block from creating or updating any ticket on that post.
+* Fix - Made a Tickets Commerce ticket with a sale price read its sales dates and sale price days in the event's timezone instead of the site's, so it went on and off sale and showed its sale price at the right time.
+* Fix - Prevented the classic editor ticket form from breaking when it opens a ticket on sale from another provider, such as WooCommerce, on an event that sells through Tickets Commerce.
+* Language - 69 new strings added, 61 updated, 0 fuzzied, and 0 obsoleted.
+* Tweak - Rendered the sale dates and sale price fields of Tickets Commerce tickets on events from new templates that add the relative date options, so theme overrides of the original templates no longer change those fields on events.
+
+= [5.30.3.1] 2026-11-02 =
+
+* Security - Hardened how Stripe payments are matched to orders.
+* Security - Hardened the filtering of attendee and ticket data. Props to Aaron - WellKnown for reporting.
+* Security - Hardened the visibility checks for attendee data. Props to Aaron - WellKnown for reporting.
+* Security - Hardened the visibility rules for public attendee lists.
+* Language - 1 new strings added, 37 updated, 0 fuzzied, and 0 obsoleted.
+
+= [5.30.3] 2026-10-29 =
+
+* Fix - Kept an event's payment provider when an RSVP is saved in the Classic Editor or imported from CSV, showed the RSVP alongside tickets sold through another provider and on Classic Editor pages and posts, and restored the provider of events that had been switched to Tickets Commerce so their tickets show again.
+* Fix - Kept the Get Tickets button and ticket prices in calendar views for events saved in the block editor with an empty event price.
+* Fix - Made the Tickets block's Add a Ticket button open the new ticket form on the first click instead of leaving a blank ticket, and let keyboard users add and save tickets with Enter or Space.
+* Fix - Made WooCommerce or EDD, when active, the default payment provider for new events instead of Tickets Commerce, which RSVPs now turn on.
+* Security - Hardened how tickets and attendees are moved between posts. Props to awebitaL for reporting.
+* Security - Hardened PayPal payment confirmation.
+* Security - Hardened PayPal payment confirmation.
+* Security - Hardened the attendee updates submitted from the My Tickets page. Template overrides of `tickets/orders.php` must keep the `tribe_tickets_orders_before_submit` action.
+* Security - Hardened the handling of admin requests for attendee details. Props to Elieve for reporting.
+* Security - Hardened the ticket editor and attendee check-in.
+* Security - Hardened the validation of ticket prices.
+* Language - 6 new strings added, 120 updated, 1 fuzzied, and 0 obsoleted.
+
+= [5.30.2] 2026-10-15 =
+
+* Compatibility - Updated the RSVP and Attendee List blocks to Block API version 3, removing the deprecation notice shown in the block editor on WordPress 6.9 and later.
+* Fix - Resolved an issue where Square webhooks could be rejected for several hours when the generated webhook secret started or ended with a space.
+* Language - 0 new strings added, 31 updated, 0 fuzzied, and 0 obsoleted.
+* Security - Hardened the permission checks performed when deleting tickets and attendees. Props to "dzaku" for the report!
+
+= [5.30.1] 2026-10-13 =
+
+* Fix - Avoided a fatal error and a PHP warning on the Tickets Commerce Orders report when an order carried a fee or coupon for a ticket that was no longer part of the event's sales data.
+* Fix - Made the country selector on the Tickets Commerce PayPal connection screen update the Connect button.
+* Fix - Prevented a fatal error on pages with an RSVP shortcode limited to RSVPs that are no longer available.
+* Fix - Replaced the 404 link on the Tickets Commerce PayPal "Connect Automatically" button with an error notice when the connection link cannot be generated.
+* Fix - Restored deleting RSVP attendees from the Attendees report, and the View Attendees link in the Tickets box for events with RSVPs.
+* Language - 2 new strings added, 57 updated, 0 fuzzied, and 0 obsoleted.
+* Security - Tightened API key validation on the attendees REST endpoint.
+* Tweak - Improved the unified licensing page experience.
+
+= [5.30.0.2] 2026-10-05 =
+
+* Fix - Corrected the ticket sale duration date picker so it closes when clicking elsewhere in the editor, and gave new tickets a one day sale window when the event has no dates saved yet, instead of an invalid end date.
+* Fix - Kept an event's payment provider when its ticket settings are saved, and left the provider selectable until the first ticket (not an RSVP) is created.
+* Security - Hardened the permission and state handling of QR code check-in notices.
+* Security - Strengthened validation of RSVP orders placed through the REST API.
+* Security - Tightened the permission checks for regenerating the QR code API key.
+* Tweak - Centered the labels of the secondary buttons in the ticket admin panels, including the settings button icon, so they line up vertically within the button.
+* Language - 3 new strings added, 64 updated, 0 fuzzied, and 0 obsoleted.
+
+= [5.30.0.1] 2026-10-01 =
+
+* Fix - Prevented the Tickets metabox from losing fields in the Classic Editor when the RSVP metabox is placed above it.
+
+= [5.30.0] 2026-09-30 =
+
+* Feature - Changed where RSVPs are stored to agree with Tickets. This will happen after you manually start a migration and only if you are using RSVPs already.
+* Language - 60 new strings added, 336 updated, 3 fuzzied, and 8 obsoleted.
+* Security - Tightened the permission checks when creating and updating tickets through the REST API.
+* Tweak - Added actions: `tec_tickets_commerce_cart_process`, `tec_tickets_rsvp_after_save`, `tec_tickets_rsvp_after_meta_update`, `tec_tickets_rsvp_before_delete`, `tec_tickets_rsvp_after_delete`, `tec_tickets_commerce_attendee_before_delete`, `tec_tickets_commerce_attendee_after_delete`, `tec_tickets_attendee_registration_before_meta_form_fields`, `tec_tickets_attendee_registration_after_save`, `tec_tickets_commerce_single_order_details_metabox_before`, `tec_tickets_commerce_single_order_details_metabox_after`, `tribe_events_rsvp_pre_edit`, `tec_event_tickets_rsvp_form__start`, `tec_event_tickets_rsvp_metabox_edit_main`, `tec_event_tickets_rsvp_post_options`, `tec_event_tickets_rsvp_bottom`, `tec_tickets_my_tickets_ticket_information_after_ticket_name`, `event_tickets_user_details_tickets`, `tec_tickets_user_details_tickets`
+* Tweak - Added filters: `tec_tickets_enabled_ticket_forms`, `tec_tickets_build_ticket_properties`, `tec_tickets_rest_ticket_upsert_params`, `tec_tickets_rsvp_enabled`, `tec_tickets_rsvp_version`, `tec_tickets_rsvp_v2_initial_ticket`, `tec_tickets_commerce_cart_add_full_item_params`, `tec_tickets_rsvp_v2_classic_save_data`, `tec_tickets_commerce_get_ticket_legacy`, `tec_tickets_rsvp_v2_cart_upsert_item_args`, `tec_tickets_rsvp_v2_render_step_template_args_pre_process`, `tec_tickets_rsvp_v2_render_step_template_args`, `tec_tickets_rsvp_v2_show_attendees_list_optout`, `tec_tickets_rsvp_process_ticket_fields`, `tec_tickets_rsvp_process_additional_fields`, `tec_tickets_editor_list_tickets`, `tec_tickets_rsvp_show_attendees_list`, `tec_tickets_rsvp_get_attendees_by_id_pre`, `tec_tickets_rsvp_get_attendees_by_user_id_pre`, `tribe_tickets_attendee_activity_log_data`, `tribe_tickets_has_meta_enabled`, `tribe_tickets_rsvp_form_email`, `tribe_tickets_rsvp_form_full_name`
+* Tweak - Changed views: `tickets/email`, `tickets/my-tickets/orders-list`, `tickets/my-tickets/ticket-information`, `tickets/my-tickets/tickets-list`, `tickets/my-tickets/user-details`, `tickets/orders-rsvp`, `tickets/orders-tc-tickets`, `v2/commerce/rsvp`, `v2/commerce/rsvp/actions`, `v2/commerce/rsvp/actions/full`, `v2/commerce/rsvp/actions/rsvp`, `v2/commerce/rsvp/actions/rsvp/going`, `v2/commerce/rsvp/actions/rsvp/not-going`, `v2/commerce/rsvp/actions/success`, `v2/commerce/rsvp/actions/success/title`, `v2/commerce/rsvp/actions/success/toggle`, `v2/commerce/rsvp/actions/success/tooltip`, `v2/commerce/rsvp/ari`, `v2/commerce/rsvp/ari/form`, `v2/commerce/rsvp/ari/form/buttons`, `v2/commerce/rsvp/ari/form/error`, `v2/commerce/rsvp/ari/form/fields`, `v2/commerce/rsvp/ari/form/fields/email`, `v2/commerce/rsvp/ari/form/fields/meta`, `v2/commerce/rsvp/ari/form/fields/name`, `v2/commerce/rsvp/ari/form/guest-template`, `v2/commerce/rsvp/ari/form/guest`, `v2/commerce/rsvp/ari/form/template/fields`, `v2/commerce/rsvp/ari/form/template/title`, `v2/commerce/rsvp/ari/form/title`, `v2/commerce/rsvp/ari/sidebar`, `v2/commerce/rsvp/ari/sidebar/guest-list`, `v2/commerce/rsvp/ari/sidebar/guest-list/guest-template`, `v2/commerce/rsvp/ari/sidebar/guest-list/guest`, `v2/commerce/rsvp/ari/sidebar/quantity`, `v2/commerce/rsvp/ari/sidebar/quantity/input`, `v2/commerce/rsvp/ari/sidebar/quantity/minus`, `v2/commerce/rsvp/ari/sidebar/quantity/plus`, `v2/commerce/rsvp/ari/sidebar/title`, `v2/commerce/rsvp/attendees`, `v2/commerce/rsvp/attendees/attendee`, `v2/commerce/rsvp/attendees/attendee/name`, `v2/commerce/rsvp/attendees/attendee/rsvp`, `v2/commerce/rsvp/attendees/title`, `v2/commerce/rsvp/content-inactive`, `v2/commerce/rsvp/content`, `v2/commerce/rsvp/details`, `v2/commerce/rsvp/details/attendance`, `v2/commerce/rsvp/details/availability`, `v2/commerce/rsvp/details/availability/days-to-rsvp`, `v2/commerce/rsvp/details/availability/full`, `v2/commerce/rsvp/details/availability/remaining`, `v2/commerce/rsvp/details/availability/unlimited`, `v2/commerce/rsvp/details/description`, `v2/commerce/rsvp/details/title`, `v2/commerce/rsvp/form/buttons`, `v2/commerce/rsvp/form/fields`, `v2/commerce/rsvp/form/fields/cancel`, `v2/commerce/rsvp/form/fields/email`, `v2/commerce/rsvp/form/fields/name`, `v2/commerce/rsvp/form/fields/quantity`, `v2/commerce/rsvp/form/fields/submit`, `v2/commerce/rsvp/form/form`, `v2/commerce/rsvp/form/going/title`, `v2/commerce/rsvp/form/not-going/title`, `v2/commerce/rsvp/form/title`, `v2/commerce/rsvp/messages/error`, `v2/commerce/rsvp/messages/must-login`, `v2/commerce/rsvp/messages/success`, `v2/commerce/rsvp/messages/success/going`, `v2/commerce/rsvp/messages/success/not-going`, `v2/commerce/rsvp/my-tickets/ticket-status`, `v2/commerce/rsvp/my-tickets/user-details`, `v2/rsvp/actions/rsvp`, `v2/rsvp/actions/success`, `v2/rsvp/content`, `v2/rsvp/details/availability/remaining`, `v2/rsvp/messages/must-login`
+* Tweak - Removed filters: `tribe_rsvp_email_subject`, `tribe_rsvp_non_attendance_email_content`
+
+= [5.29.5.2] 2026-09-29 =
+
+* Security - Hardened the validation of assigned seating reservations.
+
+= [5.29.5.1] 2026-09-24 =
+
+* Language - 0 new strings added, 39 updated, 0 fuzzied, and 0 obsoleted.
+* Security - Hardened the validation of the sort parameters used when ordering the tickets reports.
+* Security - Tightened validation on assigned seating reservation and session handling. Props to "sequence_X0" for the report!
+
+= [5.29.5] 2026-09-17 =
+
+* Fix - Dropped the cached calendar-view ticket data when tickets are sold and when the plugin updates, instead of rebuilding it mid-order, resolving an issue where sold-out events kept showing the remaining ticket count on calendar and list views.
+* Fix - Fixed an issue where a custom ticket sale end date set during ticket creation in the block editor reverted to the event start date after saving the event.
+* Fix - Renewed the Square access token ahead of its expiration and retried a rejected request once against the fresh one, which kept Tickets Commerce checkout from failing about 30 days after connecting to Square. Where Square would neither renew the credentials nor accept the stored token, the gateway reported itself as disconnected with an admin notice instead of showing a healthy connection while live charges failed.
+* Fix - Resolved a fatal error that could occur while rendering the Move Attendees dialog when another plugin listened on the admin_enqueue_scripts action.
+* Fix - Resolved an issue where the tickets and attendees REST API archives could return a JSON object instead of an array when an entry could not be formatted, preventing the Event Tickets Plus App from listing attendees.
+* Fix - Stripe checkout could return a server error and never charge the buyer when a coupon changed the cart total, because the application fee left on the Payment Intent no longer matched the discounted amount.
+* Language - 7 new strings added, 153 updated, 0 fuzzied, and 1 obsoleted.
+* Security - Tightened the handling of Assigned Seating reservations, covering the seat labels stored against attendees and the session tokens reservations are filed under.
+
+= [5.29.4] 2026-09-03 =
+
+* Fix - Resolved a fatal error that could be triggered in the Tickets Commerce cart when the decoded ticket data was null.
+* Fix - Prevented the cart-to-checkout redirect and the checkout page from being stored by full-page and edge caches, resolving an issue where the Tickets Commerce checkout could show 'Oops, no tickets!' after selecting tickets.
+* Language - 5 new strings added, 75 updated, 0 fuzzied, and 9 obsoleted.
+
+= [5.29.3.1] 2026-08-26 =
+
+* Security - Enforced ticket sale start and end dates server-side, and capped RSVP quantities to the maximum allowed per purchase.
+
+= [5.29.3] 2026-08-20 =
+
+* Security - Hardened attendee details rendering.
+* Security - Hardened validation of the ticket parameters.
+* Fix - Resolved an issue where a Stripe checkout could leave the buyer on an endless spinner with their payment taken but no order completed.
+* Performance - Stopped resolving the current user during bootstrap on front-end requests to decide whether the admin Attendees screens should be registered.
+* Language - 1 new strings added, 16 updated, 0 fuzzied, and 0 obsoleted.
+
+= [5.29.2.1] 2026-08-07 =
+
+* Fix - Prevented a fatal error on the WooCommerce order edit screen when attendee data was read from a generator, so orders containing tickets open normally again.
+* Language - 0 new strings added, 15 updated, 0 fuzzied, and 0 obsoleted.
+
+= [5.29.2] 2026-08-05 =
+
+* Language - 0 new strings added, 22 updated, 0 fuzzied, and 0 obsoleted.
+* Tweak - Improved the unified licensing page experience.
+* Tweak - Switched changelog tooling from jetpack-changelogger to @stellarwp/changelogger.
+* Fix - Reduced the number of queries and the memory used when rendering events with shared capacity tickets by sharing the event attendees between all the tickets of the same event and by caching sold out inventory results in `Tribe__Tickets__Ticket_Object::inventory()`.
+* Fix - Resolved an issue where an attendee could still be checked in after their order was refunded.
+
+= [5.29.1] 2026-07-22 =
+
+* Fix - Fixed triggered emails (RSVP going, ticket purchased) failing silently with a 403 "Unauthorized token" response from Promoter due to a missing `domain` claim in the trigger JWT payload.
+* Fix - Resolved a fatal error on the Attendees admin page when having both TC and Woo tickets bought on the same event.
+* Fix - Resolved a fatal error on the Orders admin page when viewing orders for an event without an active ticket provider. The Orders page now gracefully handles missing provider context instead of crashing.
+* Fix - Resolved an issue where the legacy Orders tabbed view could render duplicate "Orders" tabs when both Tickets Commerce and WooCommerce (Event Tickets Plus) were active.
+* Security - Extracted the event-accessibility check into `is_event_accessible()` for reuse in RSVPs.
+* Language - 1 new strings added, 87 updated, 0 fuzzied, and 1 obsoleted.
+
+= [5.29.0.1] 2026-07-10 =
+
+* Security - Strengthened Tickets Commerce failed order Gateway endpoints.
+* Security - Strengthened capability checks for Seating's Layout ajax actions.
+
+= [5.29.0] 2026-07-08 =
+
+* Fix - Excluded RSVP "not going" attendees from the Dashboard "At a Glance" attendee count so the number reflects actual attendance.
+* Fix - Resolved an issue where duplicating an event with shared-capacity tickets reset the duplicated tickets capacity to zero.
+* Tweak - Added the `tec_tickets_glance_item_attendee_count_enabled` filter to allow disabling the attendee count glance item entirely.
+* Performance - Replaced full attendee object hydration in `Glance_Items::update_attendee_count()` with a single SQL COUNT query, preventing PHP timeouts and infinite WP-Cron re-queuing on high-volume sites.
+* Compatibility - Improved PHP compatibility for versions 7.4 and up to 8.4.
+* Language - 4 new strings added, 97 updated, 0 fuzzied, and 0 obsoleted.
 
 = [5.28.5.1] 2026-06-29 =
 

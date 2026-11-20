@@ -72,7 +72,7 @@ class Crawler_Map extends Root {
 	 * @since 1.1.0
 	 */
 	public function __construct() {
-		$this->_site_url     = get_site_url();
+		$this->_site_url     = rtrim( get_option( 'home' ), '/' );
 		$this->__data        = Data::cls();
 		$this->_tb           = $this->__data->tb( 'crawler' );
 		$this->_tb_blacklist = $this->__data->tb( 'crawler_blacklist' );
@@ -113,30 +113,33 @@ class Crawler_Map extends Root {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->query("UPDATE `$this->_tb` SET res = CONCAT( LEFT( res, $curr_crawler ), '$bit', RIGHT( res, $right_pos ) ) WHERE id IN ( $id_all )");
 
-			// Add blacklist
+			// Failure: bump this crawler position '-' -> '1' -> ... -> B/N at threshold.
 			if (Crawler::STATUS_BLACKLIST === $bit || Crawler::STATUS_NOCACHE === $bit) {
-				$q = "SELECT a.id, a.url FROM `$this->_tb_blacklist` a LEFT JOIN `$this->_tb` b ON b.url=a.url WHERE b.id IN ( $id_all )";
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
-				$existing = $wpdb->get_results($q, ARRAY_A);
-				// Update current crawler status tag in existing blacklist
-				if ($existing) {
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-					$count = $wpdb->query("UPDATE `$this->_tb_blacklist` SET res = CONCAT( LEFT( res, $curr_crawler ), '$bit', RIGHT( res, $right_pos ) ) WHERE id IN ( " . implode(',', array_column($existing, 'id')) . ' )');
-					self::debug('Update blacklist [count] ' . $count);
+				$fail_urls = array_values(array_unique(array_column($ids, 'url')));
+
+				// Find existing rows by URL directly (the crawler map table is transient).
+				$placeholders = implode(',', array_fill(0, count($fail_urls), '%s'));
+				// phpcs:ignore WordPress.DB
+				$existing = $wpdb->get_results($wpdb->prepare("SELECT id, url, res FROM `$this->_tb_blacklist` WHERE url IN ( $placeholders )", $fail_urls), ARRAY_A);
+
+				// Bump tracked rows.
+				foreach ($existing as $row) {
+					$new_res = self::_bump_blacklist_res($row['res'], $curr_crawler, $total_crawler, $bit);
+					if ($new_res !== $row['res']) {
+						// phpcs:ignore WordPress.DB
+						$wpdb->query($wpdb->prepare("UPDATE `$this->_tb_blacklist` SET res = %s WHERE id = %d", $new_res, (int) $row['id']));
+					}
 				}
 
-				// Append new blacklist
-				if (count($ids) > count($existing)) {
-					$new_urls = array_diff(array_column($ids, 'url'), array_column($existing, 'url'));
-
+				// Insert first-failure rows for untracked URLs.
+				$new_urls = array_values(array_diff($fail_urls, array_column($existing, 'url')));
+				if ($new_urls) {
 					self::debug('Insert into blacklist [count] ' . count($new_urls));
 
-					$q                  = "INSERT INTO `$this->_tb_blacklist` ( url, res, reason ) VALUES " . implode(',', array_fill(0, count($new_urls), '( %s, %s, %s )'));
-					$data               = [];
-					$res                = array_fill(0, $total_crawler, '-');
-					$res[$curr_crawler] = $bit;
-					$res                = implode('', $res);
-					$default_reason     = $total_crawler > 1 ? str_repeat(',', $total_crawler - 1) : ''; // Pre-populate default reason value first, update later
+					$res            = self::_bump_blacklist_res(str_repeat('-', $total_crawler), $curr_crawler, $total_crawler, $bit);
+					$default_reason = $total_crawler > 1 ? str_repeat(',', $total_crawler - 1) : ''; // Pre-populate default reason value first, update later
+					$q              = "INSERT INTO `$this->_tb_blacklist` ( url, res, reason ) VALUES " . implode(',', array_fill(0, count($new_urls), '( %s, %s, %s )'));
+					$data           = [];
 					foreach ($new_urls as $url) {
 						$data[] = $url;
 						$data[] = $res;
@@ -147,17 +150,40 @@ class Crawler_Map extends Root {
 				}
 			}
 
-			// Update sitemap reason w/ HTTP code.
+			// Success: clear this position; drop the row when no markers remain. 'Man' rows are permanent.
+			if (Crawler::STATUS_HIT === $bit || Crawler::STATUS_MISS === $bit) {
+				$ok_urls      = array_values(array_unique(array_column($ids, 'url')));
+				$placeholders = implode(',', array_fill(0, count($ok_urls), '%s'));
+				// phpcs:ignore WordPress.DB
+				$existing = $wpdb->get_results($wpdb->prepare("SELECT id, res, reason FROM `$this->_tb_blacklist` WHERE url IN ( $placeholders )", $ok_urls), ARRAY_A);
+				foreach ($existing as $row) {
+					if (false !== strpos((string) $row['reason'], 'Man')) {
+						continue;
+					}
+					$new_res                = substr( str_pad((string) $row['res'], $total_crawler, '-'), 0, $total_crawler );
+					$new_res[$curr_crawler] = '-';
+					if ('' === trim($new_res, '-')) {
+						// phpcs:ignore WordPress.DB
+						$wpdb->query($wpdb->prepare("DELETE FROM `$this->_tb_blacklist` WHERE id = %d", (int) $row['id']));
+					} elseif ($new_res !== $row['res']) {
+						// phpcs:ignore WordPress.DB
+						$wpdb->query($wpdb->prepare("UPDATE `$this->_tb_blacklist` SET res = %s WHERE id = %d", $new_res, (int) $row['id']));
+					}
+				}
+			}
+
+			// Update reason w/ HTTP code: map table by id, blacklist by URL.
 			$reason_array = [];
 			foreach ( $ids as $row_id => $row ) {
 				$code = (int) $row['code'];
 				if ( empty( $reason_array[ $code ] ) ) {
-					$reason_array[ $code ] = [];
+					$reason_array[ $code ] = [ 'ids' => [], 'urls' => [] ];
 				}
-				$reason_array[ $code ][] = (int) $row_id;
+				$reason_array[ $code ]['ids'][]  = (int) $row_id;
+				$reason_array[ $code ]['urls'][] = $row['url'];
 			}
 
-			foreach ($reason_array as $code => $v2) {
+			foreach ($reason_array as $code => $grp) {
 				// Complement comma
 				if ($curr_crawler) {
 					$code = ',' . $code;
@@ -167,14 +193,16 @@ class Crawler_Map extends Root {
 				}
 
 				// phpcs:ignore WordPress.DB
-				$count = $wpdb->query( "UPDATE `$this->_tb` SET reason=CONCAT(SUBSTRING_INDEX(reason, ',', $curr_crawler), '$code', SUBSTRING_INDEX(reason, ',', -$right_pos)) WHERE id IN (" . implode(',', $v2) . ')' );
+				$count = $wpdb->query( "UPDATE `$this->_tb` SET reason=CONCAT(SUBSTRING_INDEX(reason, ',', $curr_crawler), '$code', SUBSTRING_INDEX(reason, ',', -$right_pos)) WHERE id IN (" . implode(',', $grp['ids']) . ')' );
 
 				self::debug("Update map reason [code] $code [pos] left $curr_crawler right -$right_pos [count] $count");
 
-				// Update blacklist reason
+				// Update blacklist reason by URL.
 				if (Crawler::STATUS_BLACKLIST === $bit || Crawler::STATUS_NOCACHE === $bit) {
+					$b_urls       = array_values(array_unique($grp['urls']));
+					$placeholders = implode(',', array_fill(0, count($b_urls), '%s'));
 					// phpcs:ignore WordPress.DB
-					$count = $wpdb->query( "UPDATE `$this->_tb_blacklist` a LEFT JOIN `$this->_tb` b ON b.url = a.url SET a.reason=CONCAT(SUBSTRING_INDEX(a.reason, ',', $curr_crawler), '$code', SUBSTRING_INDEX(a.reason, ',', -$right_pos)) WHERE b.id IN (" . implode(',', $v2) . ')' );
+					$count = $wpdb->query( $wpdb->prepare( "UPDATE `$this->_tb_blacklist` SET reason=CONCAT(SUBSTRING_INDEX(reason, ',', $curr_crawler), '$code', SUBSTRING_INDEX(reason, ',', -$right_pos)) WHERE url IN ( $placeholders )", $b_urls ) );
 
 					self::debug("Update blacklist [code] $code [pos] left $curr_crawler right -$right_pos [count] $count");
 				}
@@ -185,6 +213,30 @@ class Crawler_Map extends Root {
 		}
 
 		return $items;
+	}
+
+	/**
+	 * Bump one crawler position's failure marker: '-' -> '1' -> ... -> B/N at threshold.
+	 * A position already at B/N is left untouched.
+	 *
+	 * @since 7.9
+	 * @param string $res           Per-crawler marker string.
+	 * @param int    $pos           Position to bump.
+	 * @param int    $total_crawler Crawler count.
+	 * @param string $giveup_char   Char written at threshold (B or N).
+	 * @return string Updated marker string.
+	 */
+	private static function _bump_blacklist_res( $res, $pos, $total_crawler, $giveup_char ) {
+		// Pad/truncate to the current crawler count.
+		$res = substr( str_pad( (string) $res, $total_crawler, '-' ), 0, $total_crawler );
+		$cur = $res[ $pos ];
+		if ( Crawler::STATUS_BLACKLIST === $cur || Crawler::STATUS_NOCACHE === $cur ) {
+			// Already given up at this position.
+			return $res;
+		}
+		$next        = ctype_digit( $cur ) ? ( (int) $cur + 1 ) : 1;
+		$res[ $pos ] = $next >= Crawler::BLACKLIST_THRESHOLD ? $giveup_char : (string) $next;
+		return $res;
 	}
 
 	/**
@@ -220,6 +272,7 @@ class Crawler_Map extends Root {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
 		$wpdb->query($wpdb->prepare($q, [ $res, $reason, $id ]));
 
+		// Manual entries stay permanent via their 'Man' reason.
 		if ($row['id']) {
 			$q = "UPDATE `$this->_tb_blacklist` SET res = %s, reason = %s WHERE id = %d";
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
@@ -442,20 +495,147 @@ class Crawler_Map extends Root {
 	 * @access public
 	 *
 	 * @param bool $manual Whether triggered manually from UI.
-	 * @return void
+	 * @return bool Whether a new map was generated.
 	 */
 	public function gen( $manual = false ) {
 		$count = $this->_gen();
 
 		if ( ! $count ) {
 			Admin_Display::error( __( 'No valid sitemap parsed for crawler.', 'litespeed-cache' ) );
-			return;
+			return false;
 		}
 
 		if ( ! wp_doing_cron() && $manual ) {
 			$msg = sprintf( __( 'Sitemap created successfully: %d items', 'litespeed-cache' ), $count );
 			Admin_Display::success( $msg );
 		}
+		return true;
+	}
+
+	/**
+	 * Normalize the port of a parsed http(s) URL for origin comparison.
+	 *
+	 * @since 7.9.2
+	 *
+	 * @param array<string,mixed> $parts Result of wp_parse_url().
+	 * @return int|null|false Explicit non-default port, null for the scheme default, false for a non-http(s) scheme.
+	 */
+	private static function _explicit_port( $parts ) {
+		$scheme = isset( $parts['scheme'] ) ? strtolower( $parts['scheme'] ) : '';
+		if ( 'http' !== $scheme && 'https' !== $scheme ) {
+			return false;
+		}
+		if ( ! isset( $parts['port'] ) ) {
+			return null;
+		}
+		$port = (int) $parts['port'];
+		return ( 'https' === $scheme ? 443 : 80 ) === $port ? null : $port;
+	}
+
+	/**
+	 * Build a host allowlist key: lowercase host plus an explicit non-default port.
+	 *
+	 * @since 7.9.2
+	 *
+	 * @param string   $host Host name.
+	 * @param int|null $port Explicit non-default port, or null for the scheme default.
+	 * @return string
+	 */
+	private static function _host_key( $host, $port ) {
+		return strtolower( $host ) . ( null === $port ? '' : ':' . $port );
+	}
+
+	/**
+	 * Normalize one allowlist entry (full URL, `host` or `host:port`) into host keys including its www/apex twin.
+	 *
+	 * @since 7.9.2
+	 *
+	 * @param mixed    $entry        Allowlist entry.
+	 * @param int|null $default_port Port used for a bare host without an explicit port (the home port).
+	 * @param bool     $as_key       Parse a bare entry as a host key: no port means the scheme default and an explicit port is kept verbatim, so keys round-trip unchanged.
+	 * @return array<int,string>
+	 */
+	private static function _host_keys( $entry, $default_port, $as_key = false ) {
+		if ( ! is_string( $entry ) ) {
+			return [];
+		}
+		$entry = trim( $entry );
+		if ( '' === $entry ) {
+			return [];
+		}
+		if ( false !== strpos( $entry, '://' ) ) {
+			$parts = wp_parse_url( $entry );
+			$port  = is_array( $parts ) ? self::_explicit_port( $parts ) : false;
+			if ( false === $port || empty( $parts['host'] ) ) {
+				return [];
+			}
+		} else {
+			$parts = wp_parse_url( '//' . $entry );
+			if ( ! is_array( $parts ) || empty( $parts['host'] ) ) {
+				return [];
+			}
+			$port = $as_key ? null : $default_port;
+			if ( isset( $parts['port'] ) ) {
+				$port = (int) $parts['port'];
+				if ( ! $as_key && ( 80 === $port || 443 === $port ) ) {
+					$port = null;
+				}
+			}
+		}
+
+		$host = strtolower( $parts['host'] );
+		$keys = [ self::_host_key( $host, $port ) ];
+		if ( 0 === strpos( $host, 'www.' ) ) {
+			$keys[] = self::_host_key( substr( $host, 4 ), $port );
+		} elseif ( false === strpos( $host, '[' ) && ! filter_var( $host, FILTER_VALIDATE_IP ) ) {
+			$keys[] = self::_host_key( 'www.' . $host, $port );
+		}
+		return $keys;
+	}
+
+	/**
+	 * Hosts whose sitemap URLs may be crawled outside drop-domain mode.
+	 *
+	 * Covers home, siteurl, filtered home_url(), litespeed_internal_domains (e.g. WPML language domains), the current network's site domains and their www/apex twins; foreign hosts never receive crawler cookies.
+	 *
+	 * @since 7.9.2
+	 *
+	 * @param int|null $home_port Explicit non-default home port, or null for the scheme default.
+	 * @return array<string,bool> Map of allowed host keys (`host` or `host:port`).
+	 */
+	private function _sitemap_hosts( $home_port ) {
+		$sources = [ $this->_site_url, (string) get_option( 'siteurl' ), home_url() ];
+		$sources = array_merge( $sources, (array) apply_filters( 'litespeed_internal_domains', [] ) );
+		if ( is_multisite() ) {
+			foreach ( get_sites( [ 'network_id' => get_current_network_id(), 'number' => 0 ] ) as $site ) {
+				if ( isset( $site->domain ) ) {
+					$sources[] = $site->domain;
+				}
+			}
+		}
+
+		$hosts = [];
+		foreach ( $sources as $source ) {
+			$hosts = array_merge( $hosts, self::_host_keys( $source, $home_port ) );
+		}
+
+		/**
+		 * Filter the hosts the crawler may fetch from the sitemap (non drop-domain mode).
+		 *
+		 * @since 7.9.2
+		 *
+		 * @param array<int,string> $hosts Host keys: `host` (scheme default port) or `host:port` (that exact port); full URLs are accepted too.
+		 */
+		$filtered = apply_filters( 'litespeed_crawler_sitemap_hosts', array_values( array_unique( $hosts ) ) );
+
+		$allowed = [];
+		foreach ( (array) $filtered as $entry ) {
+			$keys = self::_host_keys( $entry, $home_port, true );
+			if ( $keys ) {
+				$allowed[ $keys[0] ] = true;
+			}
+		}
+		return $allowed;
 	}
 
 	/**
@@ -482,29 +662,52 @@ class Crawler_Map extends Root {
 			return false;
 		}
 
-		$offset  = strlen( $this->_site_url );
 		$sitemap = Utility::sanitize_lines( $sitemap );
 
-		try {
-			foreach ( $sitemap as $this_map ) {
-				$this->_parse( $this_map );
-			}
-		} catch ( \Exception $e ) {
-			self::debug( '❌ failed to parse custom sitemap: ' . $e->getMessage() );
+		$visited = [];
+		foreach ( $sitemap as $this_map ) {
+			$this->_parse_available( $this_map, $visited );
 		}
 
 		if ( is_array( $this->_urls ) && ! empty( $this->_urls ) ) {
-			if ( defined( 'LITESPEED_CRAWLER_DROP_DOMAIN' ) && constant( 'LITESPEED_CRAWLER_DROP_DOMAIN' ) ) {
-				foreach ( $this->_urls as $k => $v ) {
-					if ( 0 !== stripos( $v, $this->_site_url ) ) {
-						unset( $this->_urls[ $k ] );
-						continue;
-					}
-					$this->_urls[ $k ] = substr( $v, $offset );
+			$crawler_drop_domain = defined( 'LITESPEED_CRAWLER_DROP_DOMAIN' ) && constant( 'LITESPEED_CRAWLER_DROP_DOMAIN' );
+			$site                = wp_parse_url( $this->_site_url );
+			$site_port           = is_array( $site ) ? self::_explicit_port( $site ) : false;
+			$allowed_hosts       = $crawler_drop_domain ? [] : $this->_sitemap_hosts( false === $site_port ? null : $site_port );
+			$dropped             = 0;
+			foreach ( $this->_urls as $k => $v ) {
+				$url      = wp_parse_url( $v );
+				$url_port = is_array( $url ) ? self::_explicit_port( $url ) : false;
+				// http/80 and https/443 on the same host are one origin (e.g. http home behind an https proxy); other schemes and non-equivalent explicit ports are foreign.
+				if ( false === $url_port || empty( $url['host'] ) ) {
+					unset( $this->_urls[ $k ] );
+					++$dropped;
+					continue;
 				}
+				if ( ! $crawler_drop_domain ) {
+					// Only allowlisted hosts receive crawler role/vary cookies.
+					if ( ! isset( $allowed_hosts[ self::_host_key( $url['host'], $url_port ) ] ) ) {
+						unset( $this->_urls[ $k ] );
+						++$dropped;
+					}
+					continue;
+				}
+				// Drop-domain mode rebuilds URLs on home, so only the home origin is kept, relative to home as Crawler::_multi_request() expects.
+				if ( false === $site_port || empty( $site['host'] ) || strtolower( $url['host'] ) !== strtolower( $site['host'] ) || $url_port !== $site_port || 0 !== stripos( $v, $this->_site_url ) ) {
+					unset( $this->_urls[ $k ] );
+					++$dropped;
+					continue;
+				}
+				$this->_urls[ $k ] = substr( $v, strlen( $this->_site_url ) );
+			}
+			if ( $dropped ) {
+				self::debug( 'Dropped sitemap URLs outside the allowed hosts: ' . $dropped );
 			}
 
 			$this->_urls = array_values( array_unique( $this->_urls ) );
+		}
+		if ( ! $this->_urls ) {
+			return false;
 		}
 
 		self::debug( 'Truncate sitemap' );
@@ -512,37 +715,39 @@ class Crawler_Map extends Root {
 
 		self::debug( 'Generate sitemap' );
 
-		// Filter URLs in blacklist.
-		$blacklist = $this->list_blacklist();
+		// Filter URLs in blacklist: drop fully given-up URLs; keep sub-threshold ones (preserving given-up positions) for retry.
+		$crawler_count = count( Crawler::cls()->list_crawlers() );
+		$blacklist     = $this->list_blacklist();
 
 		$full_blacklisted    = [];
 		$partial_blacklisted = [];
 		foreach ( $blacklist as $v ) {
-			if ( false === strpos( $v['res'], '-' ) ) {
-				// Full blacklisted.
+			// Pad/truncate to the current crawler count.
+			$res       = substr( str_pad( (string) $v['res'], $crawler_count, '-' ), 0, $crawler_count );
+			$is_manual = isset( $v['reason'] ) && false !== strpos( $v['reason'], 'Man' );
+			// Active (retryable) = '-' or a digit; given-up = 'B'/'N'.
+			$has_active = (bool) preg_match( '/[-0-9]/', $res );
+			if ( $is_manual || ! $has_active ) {
+				// Manual or fully given up -> drop from sitemap.
 				$full_blacklisted[] = $v['url'];
-			} else {
-				// Replace existing reason.
-				$v['reason']                      = explode( ',', $v['reason'] );
-				$v['reason']                      = array_map(
-					function ( $element ) {
-						return $element ? 'Existed' : '';
-					},
-					$v['reason']
-				);
-				$v['reason']                      = implode( ',', $v['reason'] );
-				$partial_blacklisted[ $v['url'] ] = [
-					'res'    => $v['res'],
-					'reason' => $v['reason'],
-				];
+				continue;
 			}
+			// Digits -> '-' so those positions retry; keep 'B'/'N' to stay skipped.
+			$restore_res  = preg_replace( '/[0-9]/', '-', $res );
+			$reason_parts = [];
+			foreach ( str_split( $restore_res ) as $c ) {
+				$reason_parts[] = ( Crawler::STATUS_BLACKLIST === $c || Crawler::STATUS_NOCACHE === $c ) ? 'Existed' : '';
+			}
+			$partial_blacklisted[ $v['url'] ] = [
+				'res'    => $restore_res,
+				'reason' => implode( ',', $reason_parts ),
+			];
 		}
 
-		// Drop all blacklisted URLs.
+		// Drop all fully given-up URLs.
 		$this->_urls = array_diff( $this->_urls, $full_blacklisted );
 
 		// Default res & reason.
-		$crawler_count  = count( Crawler::cls()->list_crawlers() );
 		$default_res    = str_repeat( '-', $crawler_count );
 		$default_reason = $crawler_count > 1 ? str_repeat( ',', $crawler_count - 1 ) : '';
 
@@ -590,16 +795,36 @@ class Crawler_Map extends Root {
 	}
 
 	/**
-	 * Parse custom sitemap and collect urls.
+	 * Parse one sitemap, reporting a failure without dropping the others.
 	 *
 	 * @since    1.1.1
 	 * @access private
 	 *
 	 * @param string $sitemap Absolute sitemap URL.
+	 * @param array  $visited Sitemap URLs already fetched in this rebuild.
 	 * @return void
-	 * @throws \Exception If remote read or parsing fails.
 	 */
-	private function _parse( $sitemap ) {
+	private function _parse_available( $sitemap, &$visited ) {
+		try {
+			$this->_parse( $sitemap, $visited );
+		} catch ( \Exception $error ) {
+			self::debug( 'Failed to parse sitemap: ' . $error->getMessage() );
+			Admin_Display::error( sprintf( __( 'Could not read sitemap: %s. Other available sitemaps will still be used.', 'litespeed-cache' ), esc_url( $sitemap ) ) );
+		}
+	}
+
+	/**
+	 * Fetch one sitemap and collect its urls, recursing into sitemap indexes.
+	 *
+	 * @param string $sitemap Sitemap URL.
+	 * @param array  $visited URLs visited in this rebuild.
+	 * @throws \Exception When fetching or parsing fails.
+	 */
+	private function _parse( $sitemap, &$visited ) {
+		if ( isset( $visited[ $sitemap ] ) ) {
+			return;
+		}
+		$visited[ $sitemap ] = true;
 		/**
 		 * Read via wp func to avoid allow_url_fopen = off
 		 *
@@ -612,17 +837,17 @@ class Crawler_Map extends Root {
 				'sslverify' => false,
 			]
 		);
-		if ( is_wp_error( $response ) ) {
-			$error_message = $response->get_error_message();
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			$error_message = is_wp_error( $response ) ? $response->get_error_message() : 'Unexpected HTTP status';
 			self::debug( 'failed to read sitemap: ' . $error_message );
 			throw new \Exception( 'Failed to remote read ' . esc_url( $sitemap ) );
 		}
 
-		$xml_object = simplexml_load_string($response['body'], null, LIBXML_NOCDATA);
+		$xml_errors = libxml_use_internal_errors( true );
+		$xml_object = simplexml_load_string( $response['body'], null, LIBXML_NOCDATA );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $xml_errors );
 		if (!$xml_object) {
-			if ($this->_urls) {
-				return;
-			}
 			throw new \Exception('Failed to parse xml ' . esc_url( $sitemap ));
 		}
 
@@ -636,13 +861,13 @@ class Crawler_Map extends Root {
 
 			if ( ! empty( $xml_array['sitemap']['loc'] ) ) {
 				// is single sitemap.
-				$this->_parse( (string) $xml_array['sitemap']['loc'] );
+				$this->_parse_available( (string) $xml_array['sitemap']['loc'], $visited );
 			} else {
 				// parse multiple sitemaps.
 				foreach ( (array) $xml_array['sitemap'] as $val ) {
 					$val = (array) $val;
 					if ( ! empty( $val['loc'] ) ) {
-						$this->_parse( (string) $val['loc'] ); // recursive parse sitemap.
+						$this->_parse_available( (string) $val['loc'], $visited );
 					}
 				}
 			}

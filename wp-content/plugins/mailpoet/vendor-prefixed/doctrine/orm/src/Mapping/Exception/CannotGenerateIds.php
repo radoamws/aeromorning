@@ -8,8 +8,8 @@ use function get_debug_type;
 use function sprintf;
 final class CannotGenerateIds extends ORMException
 {
- public static function withPlatform(AbstractPlatform $platform) : self
- {
- return new self(sprintf('Platform %s does not support generating identifiers', get_debug_type($platform)));
- }
+public static function withPlatform(AbstractPlatform $platform): self
+{
+return new self(sprintf('Platform %s does not support generating identifiers', get_debug_type($platform)));
+}
 }

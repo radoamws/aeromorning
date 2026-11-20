@@ -27,7 +27,7 @@ class LogCleanup extends SimpleWorker {
   }
 
   public function processTaskStrategy(ScheduledTaskEntity $task, $timer) {
-    $startTime = microtime(true);
+    $startTime = (float)Carbon::now()->format('U.u');
 
     do {
       $this->cronHelper->enforceExecutionLimit($timer);
@@ -41,7 +41,7 @@ class LogCleanup extends SimpleWorker {
       // or if we've exceeded the maximum execution time
       if (
         $deleted < self::BATCH_SIZE ||
-          (microtime(true) - $startTime) > self::MAX_EXECUTION_TIME
+          ((float)Carbon::now()->format('U.u') - $startTime) > self::MAX_EXECUTION_TIME
       ) {
         break;
       }
@@ -57,9 +57,9 @@ class LogCleanup extends SimpleWorker {
 
     // Schedule tasks for each 6-hour time slot
     for ($slot = 0; $slot < 4; $slot++) {
-      $hour = $slot * 6 + mt_rand(0, 5); // 0-5, 6-11, 12-17, 18-23
-      $minute = mt_rand(0, 59);
-      $second = mt_rand(0, 59);
+      $hour = $slot * 6 + random_int(0, 5); // 0-5, 6-11, 12-17, 18-23
+      $minute = random_int(0, 59);
+      $second = random_int(0, 59);
 
       $scheduleDate = clone $baseDate;
       $scheduleDate->setTime($hour, $minute, $second);
@@ -79,11 +79,11 @@ class LogCleanup extends SimpleWorker {
     $date = Carbon::now()->millisecond(0);
 
     // Choose one of four 6-hour time slots
-    $timeSlot = mt_rand(0, 3);
-    $hour = $timeSlot * 6 + mt_rand(0, 5); // 0-5, 6-11, 12-17, 18-23
-    $minute = mt_rand(0, 59);
+    $timeSlot = random_int(0, 3);
+    $hour = $timeSlot * 6 + random_int(0, 5); // 0-5, 6-11, 12-17, 18-23
+    $minute = random_int(0, 59);
 
-    $date->setTime($hour, $minute, mt_rand(0, 59));
+    $date->setTime($hour, $minute, random_int(0, 59));
 
     // If the chosen time has already passed today, schedule for tomorrow
     if ($date->isPast()) {

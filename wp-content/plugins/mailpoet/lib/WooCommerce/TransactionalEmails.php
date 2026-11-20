@@ -15,6 +15,22 @@ use MailPoet\WP\Functions as WPFunctions;
 class TransactionalEmails {
   const SETTING_EMAIL_ID = 'woocommerce.transactional_email_id';
 
+  /**
+   * Tokens resolvable by resolvePlaceholdersInFooterText(). Deliberately excludes
+   * {order_date}/{order_number}: those are only meaningful in email headings
+   * (see replacePlaceholders()), and resolving them in footer/migrated content
+   * would bake a fixed, wrong value into saved template text.
+   */
+  const FOOTER_PLACEHOLDER_TOKENS = [
+    '{site_title}',
+    '{site_address}',
+    '{site_url}',
+    '{store_address}',
+    '{store_email}',
+    '{woocommerce}',
+    '{WooCommerce}',
+  ];
+
   /** @var WPFunctions */
   private $wp;
 
@@ -51,19 +67,19 @@ class TransactionalEmails {
     $this->emailHeadings = [
       'new_account' => [
         'option_name' => 'woocommerce_new_order_settings',
-        'default' => __('New Order: #{order_number}', 'woocommerce'),
+        'default' => __('New Order: #{order_number}', 'woocommerce'), // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch -- WooCommerce's default heading, with WooCommerce's translation.
       ],
       'processing_order' => [
         'option_name' => 'woocommerce_customer_processing_order_settings',
-        'default' => __('Thank you for your order', 'woocommerce'),
+        'default' => __('Thank you for your order', 'woocommerce'), // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch -- WooCommerce's default heading, with WooCommerce's translation.
       ],
       'completed_order' => [
         'option_name' => 'woocommerce_customer_completed_order_settings',
-        'default' => __('Thanks for shopping with us', 'woocommerce'),
+        'default' => __('Thanks for shopping with us', 'woocommerce'), // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch -- WooCommerce's default heading, with WooCommerce's translation.
       ],
       'customer_note' => [
         'option_name' => 'woocommerce_customer_note_settings',
-        'default' => __('A note has been added to your order', 'woocommerce'),
+        'default' => __('A note has been added to your order', 'woocommerce'), // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch -- WooCommerce's default heading, with WooCommerce's translation.
       ],
     ];
   }
@@ -106,14 +122,31 @@ class TransactionalEmails {
   }
 
   private function replacePlaceholders($text) {
+    $text = $this->resolveSitePlaceholders($text);
+    $text = str_replace(['{woocommerce}', '{WooCommerce}'], 'WooCommerce', $text);
+    $replacements = [
+      '{order_date}' => gmdate('Y-m-d'),
+      '{order_number}' => '0001',
+    ];
+    return str_replace(array_keys($replacements), array_values($replacements), $text);
+  }
+
+  private function resolveSitePlaceholders(string $text): string {
     $title = $this->wp->wpSpecialcharsDecode($this->wp->getOption('blogname'), ENT_QUOTES);
-    $address = $this->wp->wpParseUrl($this->wp->homeUrl(), PHP_URL_HOST);
-    $orderDate = date('Y-m-d');
-    return str_replace(
-      ['{site_title}', '{site_address}', '{order_date}', '{order_number}'],
-      [$title, $address, $orderDate, '0001'],
-      $text
-    );
+    $address = (string)$this->wp->wpParseUrl($this->wp->homeUrl(), PHP_URL_HOST);
+    $replacements = [
+      '{site_title}' => $title,
+      '{site_address}' => $address,
+      '{site_url}' => $address,
+    ];
+    // Resolved lazily: they require WooCommerce to be loaded, unlike the placeholders above.
+    if (strpos($text, '{store_address}') !== false) {
+      $replacements['{store_address}'] = $this->woocommerceHelper->wcGetStoreAddress();
+    }
+    if (strpos($text, '{store_email}') !== false) {
+      $replacements['{store_email}'] = $this->woocommerceHelper->wcGetStoreEmail();
+    }
+    return str_replace(array_keys($replacements), array_values($replacements), $text);
   }
 
   public function getWCEmailSettings() {
@@ -132,14 +165,36 @@ class TransactionalEmails {
       $result[$key] = $value ?: $default;
     }
     $result['base_text_color'] = $this->woocommerceHelper->wcLightOrDark($result['base_color'], '#202020', '#ffffff');
-    if ($this->woocommerceHelper->wcHexIsLight($result['body_background_color'])) {
+    // A cleared content background shows the global background behind the text.
+    $contentBackgroundColor = $result['body_background_color'] === 'transparent' ? $result['background_color'] : $result['body_background_color'];
+    if ($this->woocommerceHelper->wcHexIsLight($contentBackgroundColor)) {
       $result['link_color'] = $this->woocommerceHelper->wcHexIsLight($result['base_color']) ? $result['base_text_color'] : $result['base_color'];
     } else {
       $result['link_color'] = $this->woocommerceHelper->wcHexIsLight($result['base_color']) ? $result['base_color'] : $result['base_text_color'];
     }
-    $result['footer_text'] = $this->replacePlaceholders($result['footer_text']);
+    $result['footer_text'] = $this->resolvePlaceholdersInFooterText($result['footer_text']);
     // The footer text is placed inside a paragraph in a text block so we keep only tags we allow in the text block in the newsletter editor
     $result['footer_text'] = strip_tags($result['footer_text'], '<em><strong><br><a><span><s><del>');
     return $result;
+  }
+
+  /**
+   * Only replaces placeholder tokens, without strip_tags(). getWCEmailSettings() applies
+   * strip_tags() separately for newly-generated footer settings; Migration_20260826_120000_App
+   * also calls this directly on already-persisted, already-formatted footer blocks, where
+   * strip_tags() would strip surrounding markup (e.g. the wrapping <p style="...">) that was
+   * never meant to be re-sanitized.
+   *
+   * Deliberately uses resolveSitePlaceholders() rather than replacePlaceholders(): footer/migrated
+   * content must never have {order_date}/{order_number} rewritten into it (see FOOTER_PLACEHOLDER_TOKENS).
+   */
+  public function resolvePlaceholdersInFooterText(string $text): string {
+    // WooCommerce's own WC_Emails::replace_placeholders() links these; matched here so footer text stays consistent with core.
+    $text = str_replace(
+      ['{woocommerce}', '{WooCommerce}'],
+      '<a href="https://woocommerce.com">WooCommerce</a>',
+      $text
+    );
+    return $this->resolveSitePlaceholders($text);
   }
 }

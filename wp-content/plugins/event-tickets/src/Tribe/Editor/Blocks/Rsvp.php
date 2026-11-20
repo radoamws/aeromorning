@@ -1,20 +1,30 @@
 <?php
+/**
+ * RSVP Block.
+ *
+ * @since 4.9
+ */
 
+// phpcs:disable StellarWP.Classes.ValidClassName.NotSnakeCase
+
+/**
+ * Class Tribe__Tickets__Editor__Blocks__Rsvp
+ *
+ * @since 4.9
+ */
 class Tribe__Tickets__Editor__Blocks__Rsvp extends Tribe__Editor__Blocks__Abstract {
 
 	/**
-	 * Init class
+	 * Deprecated hook method.
 	 *
-	 * @since 4.9
+	 * @deprecated 5.30.0 Hooks are now registered by TEC\Tickets\RSVP\V1\Controller.
+	 *
+	 * @since 5.30.0
 	 *
 	 * @return void
 	 */
 	public function hook() {
-		// Add AJAX calls.
-		add_action( 'wp_ajax_rsvp-form', [ $this, 'rsvp_form' ] );
-		add_action( 'wp_ajax_nopriv_rsvp-form', [ $this, 'rsvp_form' ] );
-		add_action( 'wp_ajax_rsvp-process', [ $this, 'rsvp_process' ] );
-		add_action( 'wp_ajax_nopriv_rsvp-process', [ $this, 'rsvp_process' ] );
+		_deprecated_function( __METHOD__, '5.30.0', 'TEC\\Tickets\\RSVP\\V1\\Controller' );
 	}
 
 	/**
@@ -60,9 +70,11 @@ class Tribe__Tickets__Editor__Blocks__Rsvp extends Tribe__Editor__Blocks__Abstra
 	}
 
 	/**
-	 * Method to get all RSVP tickets
+	 * Method to get all RSVP tickets.
 	 *
 	 * @since 4.9
+	 *
+	 * @param int $post_id The post ID.
 	 *
 	 * @return array
 	 */
@@ -72,6 +84,10 @@ class Tribe__Tickets__Editor__Blocks__Rsvp extends Tribe__Editor__Blocks__Abstra
 		// Bail if there's no event id.
 		if ( ! $post_id ) {
 			return $tickets;
+		}
+
+		if ( did_action( 'tec_tickets_rsvp_v2_registered' ) ) {
+			return $this->get_v2_tickets( $post_id );
 		}
 
 		/** @var Tribe__Tickets__RSVP $rsvp */
@@ -87,7 +103,7 @@ class Tribe__Tickets__Editor__Blocks__Rsvp extends Tribe__Editor__Blocks__Abstra
 
 		// We only want RSVP tickets.
 		foreach ( $ticket_ids as $post ) {
-			// Get the ticket
+			// Get the ticket.
 			$ticket = $rsvp->get_ticket( $post_id, $post );
 
 			if (
@@ -104,9 +120,41 @@ class Tribe__Tickets__Editor__Blocks__Rsvp extends Tribe__Editor__Blocks__Abstra
 	}
 
 	/**
-	 * Method to get the active RSVP tickets
+	 * Get TC-RSVP tickets for the RSVP block when V2 is enabled.
+	 *
+	 * @since 5.30.0
+	 *
+	 * @param int $post_id The post ID.
+	 *
+	 * @return Tribe__Tickets__Ticket_Object[]
+	 */
+	protected function get_v2_tickets( $post_id ) {
+		$tickets = [];
+
+		/** @var Tribe__Tickets__RSVP $rsvp */
+		$rsvp = tribe( 'tickets.rsvp' );
+
+		foreach ( tribe( 'tickets.ticket-repository.rsvp' )->by( 'event', $post_id )->all() as $ticket_post ) {
+			if ( ! $ticket_post instanceof WP_Post ) {
+				continue;
+			}
+
+			$ticket = $rsvp->get_ticket( $post_id, $ticket_post->ID );
+
+			if ( $ticket instanceof Tribe__Tickets__Ticket_Object ) {
+				$tickets[] = $ticket;
+			}
+		}
+
+		return $tickets;
+	}
+
+	/**
+	 * Method to get the active RSVP tickets.
 	 *
 	 * @since 4.9
+	 *
+	 * @param array $tickets The tickets array.
 	 *
 	 * @return array
 	 */
@@ -126,11 +174,13 @@ class Tribe__Tickets__Editor__Blocks__Rsvp extends Tribe__Editor__Blocks__Abstra
 	}
 
 	/**
-	 * Method to get the all RSVPs past flag
-	 * All RSVPs past flag is true if all RSVPs end date is earlier than current date
-	 * If there are no RSVPs, false is returned
+	 * Method to get the all RSVPs past flag.
+	 * All RSVPs past flag is true if all RSVPs end date is earlier than current date.
+	 * If there are no RSVPs, false is returned.
 	 *
 	 * @since 4.9
+	 *
+	 * @param array $tickets The tickets array.
 	 *
 	 * @return bool
 	 */
@@ -153,7 +203,7 @@ class Tribe__Tickets__Editor__Blocks__Rsvp extends Tribe__Editor__Blocks__Abstra
 	 *
 	 * @since 4.12.3
 	 *
-	 * @param int $post_id
+	 * @param int $post_id The post ID.
 	 *
 	 * @return int
 	 */
@@ -180,7 +230,7 @@ class Tribe__Tickets__Editor__Blocks__Rsvp extends Tribe__Editor__Blocks__Abstra
 	 *
 	 * @since 4.12.3
 	 *
-	 * @param bool $is_unlimited
+	 * @param bool $is_unlimited Whether the ticket is unlimited.
 	 *
 	 * @return bool
 	 */
@@ -217,7 +267,7 @@ class Tribe__Tickets__Editor__Blocks__Rsvp extends Tribe__Editor__Blocks__Abstra
 					'data' => fn() => [
 						'ajaxurl' => admin_url( 'admin-ajax.php', ( is_ssl() ? 'https' : 'http' ) ),
 						'nonces'  => [
-							'rsvpHandle' => wp_create_nonce( 'tribe_tickets_rsvp_handle' )
+							'rsvpHandle' => wp_create_nonce( 'tribe_tickets_rsvp_handle' ),
 						],
 					],
 				],
@@ -239,12 +289,12 @@ class Tribe__Tickets__Editor__Blocks__Rsvp extends Tribe__Editor__Blocks__Abstra
 			[
 				'groups'       => 'tribe-tickets-rsvp',
 				'conditionals' => [ $this, 'should_enqueue_ari' ],
-				'localize' => [
+				'localize'     => [
 					'name' => 'TribeRsvp',
 					'data' => fn() => [
 						'ajaxurl' => admin_url( 'admin-ajax.php', ( is_ssl() ? 'https' : 'http' ) ),
 						'nonces'  => [
-							'rsvpHandle' => wp_create_nonce( 'tribe_tickets_rsvp_handle' )
+							'rsvpHandle' => wp_create_nonce( 'tribe_tickets_rsvp_handle' ),
 						],
 					],
 				],
@@ -380,6 +430,9 @@ class Tribe__Tickets__Editor__Blocks__Rsvp extends Tribe__Editor__Blocks__Abstra
 	 * Function that process the RSVP
 	 *
 	 * @since 4.9
+	 * @since 5.29.1 Reject the request unless the requesting user can access the ticket's event.
+	 * @since 5.29.3.1 Reject requests without a valid nonce and tickets outside their sale window.
+	 * @since 5.31.1.1 Reply with the error when no attendee could be generated, such as for a logged-out visitor when login is required.
 	 *
 	 * @return void
 	 */
@@ -388,6 +441,11 @@ class Tribe__Tickets__Editor__Blocks__Rsvp extends Tribe__Editor__Blocks__Abstra
 			'html' => '',
 			'view' => 'rsvp-process',
 		];
+
+		// Reject requests without a valid nonce; the RSVP form renders one.
+		if ( ! wp_verify_nonce( tribe_get_request_var( 'nonce', '' ), 'tribe_tickets_rsvp_handle' ) ) {
+			wp_send_json_error( $response );
+		}
 
 		$ticket_id = absint( tribe_get_request_var( 'ticket_id', 0 ) );
 
@@ -399,8 +457,24 @@ class Tribe__Tickets__Editor__Blocks__Rsvp extends Tribe__Editor__Blocks__Abstra
 		$rsvp        = tribe( 'tickets.rsvp' );
 		$has_tickets = false;
 		$event       = $rsvp->get_event_for_ticket( $ticket_id );
-		$post_id     = $event->ID;
-		$ticket      = $rsvp->get_ticket( $post_id, $ticket_id );
+
+		if ( ! $event instanceof WP_Post ) {
+			wp_send_json_error( $response );
+		}
+
+		$post_id = $event->ID;
+
+		// Block processing RSVPs for events the requesting user cannot currently see.
+		if ( ! $rsvp->is_event_accessible( $post_id ) ) {
+			wp_send_json_error( $response );
+		}
+
+		$ticket = $rsvp->get_ticket( $post_id, $ticket_id );
+
+		// Reject requests for tickets outside their sale window or that cannot be resolved.
+		if ( ! $ticket instanceof Tribe__Tickets__Ticket_Object || ! $ticket->date_in_range() ) {
+			wp_send_json_error( $response );
+		}
 
 		/**
 		 * RSVP specific action fired just before a RSVP-driven attendee tickets for an order are generated
@@ -417,20 +491,47 @@ class Tribe__Tickets__Editor__Blocks__Rsvp extends Tribe__Editor__Blocks__Abstra
 
 		$products = [];
 
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['tribe_tickets'] ) ) {
-			$products = wp_list_pluck( $_POST['tribe_tickets'], 'ticket_id' );
+			$products = wp_list_pluck(
+				array_map( 'tribe_sanitize_deep', (array) $_POST['tribe_tickets'] ),
+				'ticket_id'
+			);
 		} elseif ( isset( $_POST['product_id'] ) ) {
-			$products = (array) $_POST['product_id'];
+			$products = array_map( 'tribe_sanitize_deep', (array) $_POST['product_id'] );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		$products = array_map( 'absint', $products );
+		$products = array_filter( $products );
+
+		$error = null;
 
 		// Iterate over each product.
 		foreach ( $products as $product_id ) {
-			if ( ! $ticket_qty = $rsvp->parse_ticket_quantity( $product_id ) ) {
-				// if there were no RSVP tickets for the product added to the cart, continue.
+			$ticket_qty = $rsvp->parse_ticket_quantity( $product_id );
+
+			if ( ! $ticket_qty ) {
+				// If there were no RSVP tickets for the product added to the cart, continue.
 				continue;
 			}
 
-			$has_tickets = ! is_wp_error( $rsvp->generate_tickets_for( $product_id, $ticket_qty, $attendee_details ) );
+			$generated = $rsvp->generate_tickets_for( $product_id, $ticket_qty, $attendee_details );
+
+			if ( is_wp_error( $generated ) ) {
+				$error ??= $generated;
+
+				continue;
+			}
+
+			$has_tickets = true;
+		}
+
+		// Nothing was created, for example a logged-out visitor when login is required: say why instead of confirming.
+		if ( ! $has_tickets && $error instanceof WP_Error ) {
+			$response['html'] = sprintf( '<div class="tribe-block__rsvp__message__error" role="alert">%s</div>', esc_html( $error->get_error_message() ) );
+
+			wp_send_json_error( $response );
 		}
 
 		$order_id              = $attendee_details['order_id'];
@@ -475,7 +576,7 @@ class Tribe__Tickets__Editor__Blocks__Rsvp extends Tribe__Editor__Blocks__Abstra
 				$attendee_order_status
 			);
 
-			// No point sending tickets if their current intention is not to attend
+			// No point sending tickets if their current intention is not to attend.
 			if ( in_array( $attendee_order_status, $send_mail_stati, true ) ) {
 				$rsvp->send_tickets_email( $order_id, $post_id );
 			} else {

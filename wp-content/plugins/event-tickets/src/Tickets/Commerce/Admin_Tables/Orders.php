@@ -143,6 +143,7 @@ class Orders extends WP_List_Table {
 	 * Prepares the list of items for displaying.
 	 *
 	 * @since 5.2.0
+	 * @since 5.29.5.1 Only a sortable column and an `ASC`/`DESC` direction are read from the request.
 	 */
 	public function prepare_items() {
 		$post_id = tribe_get_request_var( 'post_id', 0 );
@@ -154,8 +155,8 @@ class Orders extends WP_List_Table {
 
 		$search    = tribe_get_request_var( $this->search_box_input_name );
 		$page      = absint( tribe_get_request_var( 'paged', 0 ) );
-		$orderby   = tribe_get_request_var( 'orderby' );
-		$order     = tribe_get_request_var( 'order' );
+		$orderby   = $this->get_requested_orderby();
+		$order     = $this->get_requested_order();
 		$arguments = [
 			'status'         => 'any',
 			'paged'          => $page,
@@ -207,11 +208,11 @@ class Orders extends WP_List_Table {
 			$arguments['tickets'] = $product_ids;
 		}
 
-		if ( ! empty( $orderby ) ) {
+		if ( $orderby ) {
 			$arguments['orderby'] = $orderby;
 		}
 
-		if ( ! empty( $order ) ) {
+		if ( $order ) {
 			$arguments['order'] = $order;
 		}
 
@@ -317,6 +318,7 @@ class Orders extends WP_List_Table {
 	 * Handler for the purchased column.
 	 *
 	 * @since 5.2.0
+	 * @since 5.30.1 Line items whose ticket no longer exists fall back to a generic label.
 	 *
 	 * @param WP_Post $item The current item.
 	 *
@@ -338,9 +340,12 @@ class Orders extends WP_List_Table {
 			}
 
 			$ticket   = Tickets::load_ticket_object( $cart_item['ticket_id'] );
-			$name     = esc_html( $ticket->name );
-			$quantity = esc_html( (int) $cart_item['quantity'] );
-			$output   .= "<div class='tribe-line-item'>{$quantity} - {$name}</div>";
+			$quantity = absint( $cart_item['quantity'] );
+
+			/* An order keeps its items when the ticket behind them is deleted, so there may be no ticket to name. */
+			$name = $ticket ? $ticket->name : _n( 'Ticket', 'Tickets', $quantity, 'event-tickets' );
+
+			$output .= sprintf( "<div class='tribe-line-item'>%1\$d - %2\$s</div>", $quantity, esc_html( $name ) );
 		}
 
 		return $output;
@@ -582,6 +587,7 @@ class Orders extends WP_List_Table {
 	 * If conditions are met, it generates a CSV file with order data and outputs it for download.
 	 *
 	 * @since 5.8.1
+	 * @since 5.29.5.1 Only a sortable column and an `ASC`/`DESC` direction are read from the request.
 	 *
 	 * @return void
 	 */
@@ -627,8 +633,8 @@ class Orders extends WP_List_Table {
 			'status'  => 'any',
 			'events'  => $post_id,
 			'tickets' => ! empty( $product_ids ) ? $product_ids : null,
-			'orderby' => tribe_get_request_var( 'orderby', '' ),
-			'order'   => tribe_get_request_var( 'order', '' ),
+			'orderby' => $this->get_requested_orderby(),
+			'order'   => $this->get_requested_order(),
 		];
 
 		/**
@@ -764,7 +770,10 @@ class Orders extends WP_List_Table {
 		foreach ( $formatted_data as $row ) {
 			fputcsv(
 				$output,
-				$row
+				$row,
+				',',
+				'"',
+				'\\'
 			); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_fputcsv
 		}
 
@@ -789,5 +798,41 @@ class Orders extends WP_List_Table {
 				'orders_csv_nonce' => wp_create_nonce( 'orders_csv_nonce' ),
 			]
 		);
+	}
+
+	/**
+	 * Returns the request-provided sort key when the report advertises it, or an empty string.
+	 *
+	 * @since 5.29.5.1
+	 *
+	 * @return string The requested sort key, or an empty string when it is not a sortable column.
+	 */
+	private function get_requested_orderby(): string {
+		$orderby = tribe_get_request_var( 'orderby' );
+
+		if ( ! is_string( $orderby ) ) {
+			return '';
+		}
+
+		return in_array( $orderby, array_values( $this->get_sortable_columns() ), true ) ? $orderby : '';
+	}
+
+	/**
+	 * Returns the request-provided sort direction when it is `ASC` or `DESC`, or an empty string.
+	 *
+	 * @since 5.29.5.1
+	 *
+	 * @return string The requested direction, or an empty string when it is neither `ASC` nor `DESC`.
+	 */
+	private function get_requested_order(): string {
+		$order = tribe_get_request_var( 'order' );
+
+		if ( ! is_string( $order ) ) {
+			return '';
+		}
+
+		$order = strtoupper( $order );
+
+		return in_array( $order, [ 'ASC', 'DESC' ], true ) ? $order : '';
 	}
 }

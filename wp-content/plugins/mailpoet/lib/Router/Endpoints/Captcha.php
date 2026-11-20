@@ -44,7 +44,7 @@ class Captcha {
 
   public function image($data) {
     $sessionId = $data['captcha_session_id'] ?? null;
-    if (!$sessionId) {
+    if (!is_string($sessionId) || $sessionId === '') {
       return;
     }
 
@@ -54,7 +54,7 @@ class Captcha {
 
   public function audio($data) {
     $sessionId = $data['captcha_session_id'] ?? null;
-    if (!$sessionId) {
+    if (!is_string($sessionId) || $sessionId === '') {
       return;
     }
 
@@ -64,7 +64,7 @@ class Captcha {
 
   public function refresh($data) {
     $sessionId = $data['captcha_session_id'] ?? null;
-    if (!$sessionId) {
+    if (!is_string($sessionId) || $sessionId === '') {
       return;
     }
 

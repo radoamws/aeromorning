@@ -28,6 +28,9 @@ trait With_Filtered_Ticket_Params {
 	 * Filters the upsert params.
 	 *
 	 * @since 5.26.0
+	 * @since 5.29.3 Hardened sale price handling.
+	 * @since 5.30.3 Rejects a negative price or sale price.
+	 * @since 5.31.0 Moves the params the `tec_tickets_rest_ticket_data_params` filter names into the ticket data.
 	 *
 	 * @param array $params The params to filter.
 	 *
@@ -36,6 +39,7 @@ trait With_Filtered_Ticket_Params {
 	 * @throws InvalidRestArgumentException If the event ID is missing.
 	 * @throws InvalidRestArgumentException If the event's post type is not enabled for tickets.
 	 * @throws InvalidRestArgumentException If the ticket price is not a number.
+	 * @throws InvalidRestArgumentException If the ticket price or sale price is negative.
 	 */
 	public function filter_upsert_params( array $params ): array {
 		$ticket_post = ! empty( $params['id'] ) ? get_post( $params['id'] ) : new stdClass();
@@ -131,27 +135,55 @@ trait With_Filtered_Ticket_Params {
 		}
 
 		$new_params = [
-			'id'                      => (int) ( $params['id'] ?? null ),
-			'event'                   => $event_id,
-			'ticket_id'               => $params['id'] ?? null,
-			'ticket_name'             => $params['title'] ?? $ticket_post->post_title ?? null,
-			'ticket_description'      => $params['content'] ?? $params['excerpt'] ?? $ticket_post->post_excerpt ?? null,
-			'ticket_price'            => $params['price'] ?? $ticket_data[ $orm->get_update_fields_aliases()['price'] ]['0'] ?? null,
-			'ticket_show_description' => $params['show_description'] ?? $ticket_data[ $orm->get_update_fields_aliases()['show_description'] ]['0'] ?? null,
-			'ticket_type'             => $params['type'] ?? $ticket_data[ $orm->get_update_fields_aliases()['type'] ]['0'] ?? null,
-			'ticket_sku'              => $params['sku'] ?? $ticket_data[ $orm->get_update_fields_aliases()['sku'] ]['0'] ?? null,
-			'ticket_start_date'       => $params['ticket_start_date'] ?? $ticket_data[ $orm->get_update_fields_aliases()['start_date'] ] ?? null,
-			'ticket_start_time'       => $params['ticket_start_time'] ?? $ticket_data[ $orm->get_update_fields_aliases()['start_time'] ] ?? null,
-			'ticket_end_date'         => $params['ticket_end_date'] ?? $ticket_data[ $orm->get_update_fields_aliases()['end_date'] ] ?? null,
-			'ticket_end_time'         => $params['ticket_end_time'] ?? $ticket_data[ $orm->get_update_fields_aliases()['end_time'] ] ?? null,
-			'tribe-ticket'            => array_filter( $tribe_ticket, fn( $value ) => null !== $value ),
-			'ticket_add_sale_price'   => isset( $params['sale_price'] ) || ! empty( $ticket_data[ $orm->get_update_fields_aliases()['sale_price_enabled'] ]['0'] ),
-			'ticket_sale_price'       => $params['sale_price'] ?? $ticket_data[ $orm->get_update_fields_aliases()['sale_price'] ]['0'] ?? null,
-			'ticket_sale_start_date'  => $params['sale_price_start_date'] ?? $ticket_data[ $orm->get_update_fields_aliases()['sale_price_start_date'] ]['0'] ?? null,
-			'ticket_sale_end_date'    => $params['sale_price_end_date'] ?? $ticket_data[ $orm->get_update_fields_aliases()['sale_price_end_date'] ]['0'] ?? null,
+			'id'                           => (int) ( $params['id'] ?? null ),
+			'event'                        => $event_id,
+			'ticket_id'                    => $params['id'] ?? null,
+			'ticket_name'                  => $params['title'] ?? $ticket_post->post_title ?? null,
+			'ticket_description'           => $params['content'] ?? $params['excerpt'] ?? $ticket_post->post_excerpt ?? null,
+			'ticket_price'                 => $params['price'] ?? $ticket_data[ $orm->get_update_fields_aliases()['price'] ]['0'] ?? null,
+			'ticket_show_description'      => $params['show_description'] ?? $ticket_data[ $orm->get_update_fields_aliases()['show_description'] ]['0'] ?? null,
+			'ticket_type'                  => $params['type'] ?? $ticket_data[ $orm->get_update_fields_aliases()['type'] ]['0'] ?? null,
+			'ticket_sku'                   => $params['sku'] ?? $ticket_data[ $orm->get_update_fields_aliases()['sku'] ]['0'] ?? null,
+			'ticket_start_date'            => $params['ticket_start_date'] ?? $ticket_data[ $orm->get_update_fields_aliases()['start_date'] ] ?? null,
+			'ticket_start_time'            => $params['ticket_start_time'] ?? $ticket_data[ $orm->get_update_fields_aliases()['start_time'] ] ?? null,
+			'ticket_end_date'              => $params['ticket_end_date'] ?? $ticket_data[ $orm->get_update_fields_aliases()['end_date'] ] ?? null,
+			'ticket_end_time'              => $params['ticket_end_time'] ?? $ticket_data[ $orm->get_update_fields_aliases()['end_time'] ] ?? null,
+			'tribe-ticket'                 => array_filter( $tribe_ticket, fn( $value ) => null !== $value ),
+			'ticket_add_sale_price'        => isset( $params['sale_price'] ) || ! empty( $ticket_data[ $orm->get_update_fields_aliases()['sale_price_enabled'] ]['0'] ),
+			'ticket_sale_price'            => $params['sale_price'] ?? $ticket_data[ $orm->get_update_fields_aliases()['sale_price'] ]['0'] ?? null,
+			'ticket_sale_start_date'       => $params['sale_price_start_date'] ?? $ticket_data[ $orm->get_update_fields_aliases()['sale_price_start_date'] ]['0'] ?? null,
+			'ticket_sale_end_date'         => $params['sale_price_end_date'] ?? $ticket_data[ $orm->get_update_fields_aliases()['sale_price_end_date'] ]['0'] ?? null,
+			'ticket_rsvp_enable_cannot_go' => $params['show_not_going'] ?? null,
 		];
 
-		$new_params['ticket_sale_price']      = maybe_unserialize( $new_params['ticket_sale_price'] );
+		/**
+		 * Filters the REST params that are saved as ticket data under a key of their own, keyed by the REST param.
+		 *
+		 * A param sent as `null` is passed on as `''` and one left out is not passed on, so the save can tell a removal
+		 * from a field the update does not touch. The params are taken out of the post params.
+		 *
+		 * @since 5.31.0
+		 *
+		 * @param array<string,string> $ticket_data_keys The ticket data keys, keyed by the REST param they are sent in.
+		 * @param array<string,mixed>  $params           The REST params.
+		 */
+		$ticket_data_keys = apply_filters( 'tec_tickets_rest_ticket_data_params', [], $params );
+
+		foreach ( is_array( $ticket_data_keys ) ? $ticket_data_keys : [] as $param => $data_key ) {
+			if ( ! is_string( $param ) || ! is_string( $data_key ) || ! array_key_exists( $param, $params ) ) {
+				continue;
+			}
+
+			$new_params[ $data_key ] = $params[ $param ] ?? '';
+			unset( $params[ $param ] );
+		}
+
+		$sale_price = $new_params['ticket_sale_price'];
+		if ( is_string( $sale_price ) && is_serialized( $sale_price ) ) {
+			$sale_price = @unserialize( $sale_price, [ 'allowed_classes' => [ Value::class ] ] );  // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+		}
+
+		$new_params['ticket_sale_price']      = $sale_price;
 		$new_params['ticket_sale_start_date'] = is_numeric( $new_params['ticket_sale_start_date'] ) ? gmdate( 'Y-m-d', (int) $new_params['ticket_sale_start_date'] ) : $new_params['ticket_sale_start_date'];
 		$new_params['ticket_sale_end_date']   = is_numeric( $new_params['ticket_sale_end_date'] ) ? gmdate( 'Y-m-d', (int) $new_params['ticket_sale_end_date'] ) : $new_params['ticket_sale_end_date'];
 
@@ -169,6 +201,9 @@ trait With_Filtered_Ticket_Params {
 				sprintf( __( 'The argument `{%1$s}` must be a number.', 'event-tickets' ), 'sale_price' )
 			);
 		}
+
+		$this->assert_non_negative_price( $new_params['ticket_price'], 'price' );
+		$this->assert_non_negative_price( $new_params['ticket_sale_price'], 'sale_price' );
 
 		unset(
 			$params['sku'],
@@ -191,6 +226,16 @@ trait With_Filtered_Ticket_Params {
 		$post_params = $params;
 
 		$ticket_params = array_filter( $new_params, fn( $value ) => null !== $value );
+
+		/**
+		 * Filter the ticket params before they are returned.
+		 *
+		 * @since 5.30.0
+		 *
+		 * @param array $ticket_params The filtered ticket params.
+		 * @param array $params        The original REST params.
+		 */
+		$ticket_params = apply_filters( 'tec_tickets_rest_ticket_upsert_params', $ticket_params, $params );
 
 		return compact( 'post_params', 'ticket_params' );
 	}
@@ -219,5 +264,38 @@ trait With_Filtered_Ticket_Params {
 	 */
 	public function filter_create_params( array $params ): array {
 		return $this->filter_upsert_params( $params );
+	}
+
+	/**
+	 * Throws when a numeric price is negative or not finite.
+	 *
+	 * Non-numeric values are left to the provider, which already strips them to a price.
+	 *
+	 * @since 5.30.3
+	 *
+	 * @param mixed  $price    The price to check.
+	 * @param string $argument The name of the REST argument the price came from.
+	 *
+	 * @return void
+	 *
+	 * @throws InvalidRestArgumentException If the price is negative or not finite.
+	 */
+	private function assert_non_negative_price( $price, string $argument ): void {
+		if ( ! is_numeric( $price ) ) {
+			return;
+		}
+
+		if ( $price >= 0 && is_finite( $price + 0 ) ) {
+			return;
+		}
+
+		throw InvalidRestArgumentException::create(
+			// translators: 1) is the name of the parameter.
+			sprintf( __( 'The argument `{%1$s}` must be a number greater than or equal to 0.', 'event-tickets' ), $argument ),
+			$argument,
+			'tec_rest_invalid_' . $argument . '_argument',
+			// translators: 1) is the name of the parameter.
+			sprintf( __( 'The argument `{%1$s}` must be a number greater than or equal to 0.', 'event-tickets' ), $argument )
+		);
 	}
 }

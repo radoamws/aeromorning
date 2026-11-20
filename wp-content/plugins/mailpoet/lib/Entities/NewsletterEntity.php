@@ -55,6 +55,15 @@ class NewsletterEntity {
   ];
 
   /**
+   * Emails MailPoet creates on the user's behalf. Their presence does not mean
+   * the user has any emails of their own.
+   */
+  const AUTO_CREATED_TYPES = [
+    NewsletterEntity::TYPE_WC_TRANSACTIONAL_EMAIL,
+    NewsletterEntity::TYPE_CONFIRMATION_EMAIL_CUSTOMIZER,
+  ];
+
+  /**
    * Newsletters that have additional restrictions for activation and sending
    */
   const CAMPAIGN_TYPES = [
@@ -548,7 +557,10 @@ class NewsletterEntity {
     if ($body === null) {
       return null;
     }
-    return $body['globalStyles'][$category][$style] ?? null;
+    $value = $body['globalStyles'][$category][$style] ?? null;
+    // A saved style can be any JSON type; honor the ?string contract instead of
+    // letting an array-valued style throw a TypeError during rendering.
+    return is_scalar($value) ? (string)$value : null;
   }
 
   public function setGlobalStyle(string $category, string $style, $value): void {

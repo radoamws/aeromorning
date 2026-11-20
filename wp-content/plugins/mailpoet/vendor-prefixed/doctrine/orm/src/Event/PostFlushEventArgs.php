@@ -7,9 +7,9 @@ use MailPoetVendor\Doctrine\ORM\EntityManagerInterface;
 use MailPoetVendor\Doctrine\Persistence\Event\ManagerEventArgs;
 class PostFlushEventArgs extends ManagerEventArgs
 {
- public function getEntityManager()
- {
- Deprecation::trigger('doctrine/orm', 'https://github.com/doctrine/orm/issues/9875', 'Method %s() is deprecated and will be removed in Doctrine ORM 3.0. Use getObjectManager() instead.', __METHOD__);
- return $this->getObjectManager();
- }
+public function getEntityManager()
+{
+Deprecation::trigger('doctrine/orm', 'https://github.com/doctrine/orm/issues/9875', 'Method %s() is deprecated and will be removed in Doctrine ORM 3.0. Use getObjectManager() instead.', __METHOD__);
+return $this->getObjectManager();
+}
 }

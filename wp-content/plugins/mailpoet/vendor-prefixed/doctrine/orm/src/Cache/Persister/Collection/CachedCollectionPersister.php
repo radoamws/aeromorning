@@ -10,8 +10,8 @@ use MailPoetVendor\Doctrine\ORM\PersistentCollection;
 use MailPoetVendor\Doctrine\ORM\Persisters\Collection\CollectionPersister;
 interface CachedCollectionPersister extends CachedPersister, CollectionPersister
 {
- public function getSourceEntityMetadata();
- public function getTargetEntityMetadata();
- public function loadCollectionCache(PersistentCollection $collection, CollectionCacheKey $key);
- public function storeCollectionCache(CollectionCacheKey $key, $elements);
+public function getSourceEntityMetadata();
+public function getTargetEntityMetadata();
+public function loadCollectionCache(PersistentCollection $collection, CollectionCacheKey $key);
+public function storeCollectionCache(CollectionCacheKey $key, $elements);
 }

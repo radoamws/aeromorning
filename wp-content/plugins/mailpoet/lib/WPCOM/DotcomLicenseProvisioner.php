@@ -57,7 +57,7 @@ class DotcomLicenseProvisioner {
     $apiKey = $this->getKeyFromPayload($licensePayload);
     if (is_wp_error($apiKey)) {
       $this->loggerFactory->getLogger(LoggerFactory::TOPIC_PROVISIONING)->error(
-        'key was not found in license payload'
+        'The license was not provisioned because the key was not found in the license payload (key was not found in license payload).'
       );
       return $apiKey;
     }
@@ -87,7 +87,7 @@ class DotcomLicenseProvisioner {
     $response = $this->settings->setKeyAndSetupMss($apiKey);
     if ($response instanceof ErrorResponse) {
       $this->loggerFactory->getLogger(LoggerFactory::TOPIC_PROVISIONING)->error(
-        'Setting sending method and key failed',
+        'The license was not provisioned because saving the key and setting up the sending method failed (Setting sending method and key failed).',
         ['$response' => $response]
       );
       return new WP_Error('Provisioning failed setting the data', $this->concatMessages($response));
@@ -97,7 +97,7 @@ class DotcomLicenseProvisioner {
     $response = $this->services->refreshMSSKeyStatus();
     if ($response instanceof ErrorResponse) {
       $this->loggerFactory->getLogger(LoggerFactory::TOPIC_PROVISIONING)->error(
-        'Refreshing the key failed',
+        'The license was not provisioned because refreshing the MailPoet Sending Service key status failed (Refreshing the key failed).',
         ['$response' => $response]
       );
       return new WP_Error('Provisioning failed activating the data', $this->concatMessages($response));
@@ -106,14 +106,14 @@ class DotcomLicenseProvisioner {
     $response = $this->services->refreshPremiumKeyStatus();
     if ($response instanceof ErrorResponse) {
       $this->loggerFactory->getLogger(LoggerFactory::TOPIC_PROVISIONING)->error(
-        'Refreshing Premium key failed',
+        'The license was not provisioned because refreshing the MailPoet Premium key status failed (Refreshing Premium key failed).',
         ['$response' => $response]
       );
       return new WP_Error('Provisioning failed to verify api key access for MSS/premium', $this->concatMessages($response));
     }
 
     $this->loggerFactory->getLogger(LoggerFactory::TOPIC_PROVISIONING)->info(
-      'License was provisioned'
+      'The license was provisioned and the MailPoet Sending Service key was saved (License was provisioned).'
     );
     return true;
   }

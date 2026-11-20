@@ -4,11 +4,11 @@ namespace MailPoetVendor\Doctrine\ORM\Mapping;
 if (!defined('ABSPATH')) exit;
 final class AttributeOverride implements MappingAttribute
 {
- public $name;
- public $column;
- public function __construct(string $name, Column $column)
- {
- $this->name = $name;
- $this->column = $column;
- }
+public $name;
+public $column;
+public function __construct(string $name, Column $column)
+{
+$this->name = $name;
+$this->column = $column;
+}
 }

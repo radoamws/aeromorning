@@ -37,21 +37,13 @@ trait Img_Optm_Send {
 		// Load gathered images
 		if ( ! $this->_existed_src_list ) {
 			// To aavoid extra query when recalling this function
-			self::debug( 'SELECT src from img_optm table' );
-			if ( $this->__data->tb_exist( 'img_optm' ) ) {
-				$q = "SELECT src FROM `$this->_table_img_optm` WHERE post_id = %d";
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
-				$list = $wpdb->get_results( $wpdb->prepare( $q, $post_id ) );
-				foreach ( $list as $v ) {
-					$this->_existed_src_list[] = $post_id . '.' . $v->src;
-				}
-			}
+			self::debug( 'SELECT src from img_optming table' );
 			if ( $this->__data->tb_exist( 'img_optming' ) ) {
 				$q = "SELECT src FROM `$this->_table_img_optming` WHERE post_id = %d";
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
 				$list = $wpdb->get_results( $wpdb->prepare( $q, $post_id ) );
 				foreach ( $list as $v ) {
-					$this->_existed_src_list[] = $post_id . '.' . $v->src;
+					$this->_existed_src_list[] = $post_id . '.' . self::normalize_src( $v->src );
 				}
 			} else {
 				$this->__data->tb_create( 'img_optming' );
@@ -74,7 +66,9 @@ trait Img_Optm_Send {
 		}
 
 		// Save to DB
-		$this->_save_raw();
+		if ( ! $this->_save_raw() ) {
+			Admin_Display::error( __( 'Could not save image optimization data.', 'litespeed-cache' ) );
+		}
 
 		// $this->_send_request();
 	}
@@ -126,6 +120,11 @@ trait Img_Optm_Send {
 	 */
 	public function new_req() {
 		global $wpdb;
+
+		if ( ! $this->_format && ! $this->conf( self::O_IMG_OPTM_ORI ) ) {
+			Admin_Display::error( __( 'Please enable Optimize Original Images or WebP/AVIF before sending an optimization request.', 'litespeed-cache' ) );
+			return;
+		}
 
 		// check if is running
 		if ( ! empty( $this->_summary['is_running'] ) && time() - $this->_summary['is_running'] < apply_filters( 'litespeed_imgoptm_new_req_interval', 3600 ) ) {
@@ -204,7 +203,8 @@ trait Img_Optm_Send {
 		$list = [];
 		$more = $allowance - $total_new;
 		if ( $more > 0 ) {
-			$q = "SELECT b.post_id, b.meta_value
+			$previous_post_id = $this->_summary['next_post_id'];
+			$q                = "SELECT b.post_id, b.meta_value
 				FROM `$wpdb->posts` a
 				LEFT JOIN `$wpdb->postmeta` b ON b.post_id = a.ID
 				WHERE b.meta_key = '_wp_attachment_metadata'
@@ -246,24 +246,27 @@ trait Img_Optm_Send {
 				}
 			}
 
-			self::save_summary();
-
 			$num_a = count( $this->_img_in_queue );
 			self::debug( 'Images found: ' . $num_a );
 			$this->_filter_duplicated_src();
 			self::debug( 'Images after duplicated: ' . count( $this->_img_in_queue ) );
 			$this->_filter_invalid_src();
 			self::debug( 'Images after invalid: ' . count( $this->_img_in_queue ) );
-			// Check w/ legacy imgoptm table, bypass finished images
-			$this->_filter_legacy_src();
 
 			$num_b = count( $this->_img_in_queue );
 			if ( $num_b !== $num_a ) {
-				self::debug( 'Images after filtered duplicated/invalid/legacy src: ' . $num_b );
+				self::debug( 'Images after filtered duplicated/invalid src: ' . $num_b );
 			}
 
 			// Save to DB
-			$this->_save_raw();
+			if ( ! $this->_save_raw() ) {
+				// Keep the cursor before images that were never queued; _finished_running() persists it.
+				$this->_summary['next_post_id'] = $previous_post_id;
+				Admin_Display::error( __( 'Could not save image optimization data.', 'litespeed-cache' ) );
+				$this->_finished_running();
+				return;
+			}
+			self::save_summary();
 		}
 
 		// Push to Cloud server
@@ -319,6 +322,9 @@ trait Img_Optm_Send {
 			}
 		}
 
+		// Legacy metadata may still hold `./` paths; queue and dedupe only normalized src values.
+		$short_file_path = self::normalize_src( $short_file_path );
+
 		// Check if src is gathered already or not
 		if ( in_array( $this->tmp_pid . '.' . $short_file_path, $this->_existed_src_list, true ) ) {
 			// Debug2::debug2( '[Img_Optm] bypass image due to gathered: pid ' . $this->tmp_pid . ' ' . $short_file_path );
@@ -372,10 +378,11 @@ trait Img_Optm_Send {
 	 *
 	 * @since  3.0
 	 * @access private
+	 * @return bool Whether gathered rows were inserted.
 	 */
 	private function _save_raw() {
 		if ( empty( $this->_img_in_queue ) ) {
-			return;
+			return true;
 		}
 		$data     = [];
 		$pid_list = [];
@@ -395,6 +402,9 @@ trait Img_Optm_Send {
 		}
 
 		global $wpdb;
+		if ( ! $data ) {
+			return true;
+		}
 		$fields = 'post_id, optm_status, src';
 		$q      = "INSERT INTO `$this->_table_img_optming` ( $fields ) VALUES ";
 
@@ -403,7 +413,9 @@ trait Img_Optm_Send {
 
 		// Store data
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
-		$wpdb->query( $wpdb->prepare( $q, $data ) );
+		if ( false === $wpdb->query( $wpdb->prepare( $q, $data ) ) ) {
+			return false;
+		}
 
 		$count = count( $this->_img_in_queue );
 		self::debug( 'Added raw images [total] ' . $count );
@@ -420,7 +432,12 @@ trait Img_Optm_Send {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
 		$existed_meta = $wpdb->get_results( "SELECT * FROM `$wpdb->postmeta` WHERE post_id IN ('" . implode( "','", $pid_list ) . "') AND meta_key='" . self::DB_SET . "'" );
-		$existed_pid  = [];
+		if ( '' !== $wpdb->last_error ) {
+			// RAW rows are already saved; an unknown metadata state must not trigger duplicate inserts.
+			self::debug( 'Skipped thumbnail metadata after a failed lookup' );
+			return true;
+		}
+		$existed_pid = [];
 		if ( $existed_meta ) {
 			foreach ( $existed_meta as $v ) {
 				$existed_pid[] = $v->post_id;
@@ -447,6 +464,7 @@ trait Img_Optm_Send {
 				$wpdb->query( $wpdb->prepare( $q, [ $v, self::DB_SET, $this->_thumbnail_set ] ) );
 			}
 		}
+		return true;
 	}
 
 	/**
@@ -484,7 +502,7 @@ trait Img_Optm_Send {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$list = $wpdb->get_results( "SELECT src FROM `$this->_table_img_optming`" );
 		foreach ( $list as $v ) {
-			$srcpath_list[] = $v->src;
+			$srcpath_list[] = self::normalize_src( $v->src );
 		}
 
 		foreach ( $this->_img_in_queue as $k => $v ) {
@@ -495,46 +513,6 @@ trait Img_Optm_Send {
 
 			$srcpath_list[] = $v['src'];
 		}
-	}
-
-	/**
-	 * Filter legacy finished ones
-	 *
-	 * @since 5.4
-	 * @access private
-	 */
-	private function _filter_legacy_src() {
-		global $wpdb;
-
-		if ( ! $this->__data->tb_exist( 'img_optm' ) ) {
-			return;
-		}
-
-		if ( ! $this->_img_in_queue ) {
-			return;
-		}
-
-		$finished_ids = [];
-
-		Utility::compatibility();
-		$post_ids = array_unique( array_column( $this->_img_in_queue, 'pid' ) );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$list = $wpdb->get_results( "SELECT post_id FROM `$this->_table_img_optm` WHERE post_id in (" . implode( ',', $post_ids ) . ') GROUP BY post_id' );
-		foreach ( $list as $v ) {
-			$finished_ids[] = $v->post_id;
-		}
-
-		foreach ( $this->_img_in_queue as $k => $v ) {
-			if ( in_array( $v['pid'], $finished_ids, true ) ) {
-				self::debug( 'Legacy image optimized [pid] ' . $v['pid'] );
-				unset( $this->_img_in_queue[ $k ] );
-				continue;
-			}
-		}
-
-		// Drop all existing legacy records
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( "DELETE FROM `$this->_table_img_optm` WHERE post_id in (" . implode( ',', $post_ids ) . ')' );
 	}
 
 	/**
@@ -591,7 +569,7 @@ trait Img_Optm_Send {
 
 		$list = [];
 		foreach ( $_img_in_queue as $v ) {
-			$_img_info = $this->__media->info( $v->src, $v->post_id );
+			$_img_info = $this->_local_pull_file( $v ) ? $this->__media->info( $v->src, $v->post_id ) : false;
 			// If record is invalid, remove from img_optming table
 			if ( empty( $_img_info['url'] ) || empty( $_img_info['md5'] ) ) {
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -605,10 +583,13 @@ trait Img_Optm_Send {
 				'md5' => $_img_info['md5'],
 			];
 			// Build the needed image types for request as we now support soft reset counter
+			$target_needed = false;
 			if ( $this->_format ) {
 				$target_file_path = $v->src . '.' . $this->_format;
 				if ( $this->__media->info( $target_file_path, $v->post_id ) ) {
 					$img[ 'optm_' . $this->_format ] = 0;
+				} else {
+					$target_needed = true;
 				}
 			}
 			if ( $this->conf( self::O_IMG_OPTM_ORI ) ) {
@@ -616,7 +597,17 @@ trait Img_Optm_Send {
 				$target_file_path = substr( $v->src, 0, -strlen( $extension ) ) . 'bk.' . $extension;
 				if ( $this->__media->info( $target_file_path, $v->post_id ) ) {
 					$img['optm_ori'] = 0;
+				} else {
+					$target_needed = true;
 				}
+			}
+
+			// Drop the queued row if all optimization targets already exist, mirroring the gather-time test in _append_img_queue()
+			if ( ! $target_needed ) {
+				self::debug( 'Drop queued image as all optimized files exist: pid ' . $v->post_id . ' ' . $v->src );
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$wpdb->query( $wpdb->prepare( "DELETE FROM `$this->_table_img_optming` WHERE id=%d", $v->id ) );
+				continue;
 			}
 
 			$list[] = $img;
@@ -645,26 +636,35 @@ trait Img_Optm_Send {
 			return;
 		}
 
-		// Check data format
-		if ( empty( $json['ids'] ) ) {
+		// Accept only ids that were sent in this request.
+		$sent_ids     = array_map( 'intval', array_column( $list, 'id' ) );
+		$accepted_ids = [];
+		$returned_ids = ! empty( $json['ids'] ) && is_array( $json['ids'] ) ? $json['ids'] : [];
+		foreach ( $returned_ids as $id ) {
+			$id = $this->_normalize_notify_row_id( $id );
+			if ( false !== $id && in_array( $id, $sent_ids, true ) ) {
+				$accepted_ids[ $id ] = $id;
+			}
+		}
+		if ( ! $accepted_ids ) {
 			self::debug( 'Failed to parse response data from Cloud server ', $json );
-			$msg = __( 'No valid image found by Cloud server in the current request.', 'litespeed-cache' );
-			Admin_Display::error( $msg );
+			Admin_Display::error( __( 'No valid image found by Cloud server in the current request.', 'litespeed-cache' ) );
 			return;
 		}
-
-		self::debug( 'Returned data from Cloud server count: ' . count( $json['ids'] ) );
-
-		$ids = implode( ',', array_map( 'intval', $json['ids'] ) );
+		self::debug( 'Returned data from Cloud server count: ' . count( $accepted_ids ) );
+		$ids = implode( ',', $accepted_ids );
 		// Update img table
 		$q = "UPDATE `$this->_table_img_optming` SET optm_status = '" . self::STATUS_REQUESTED . "' WHERE id IN ( $ids )";
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
-		$wpdb->query( $q );
+		if ( false === $wpdb->query( $q ) ) {
+			Admin_Display::error( __( 'Could not save image optimization data.', 'litespeed-cache' ) );
+			return;
+		}
 
 		$this->_summary['last_requested'] = time();
 		self::save_summary();
 
-		return [ count( $list ), count( $json['ids'] ) ];
+		return [ count( $list ), count( $accepted_ids ) ];
 	}
 
 	/**

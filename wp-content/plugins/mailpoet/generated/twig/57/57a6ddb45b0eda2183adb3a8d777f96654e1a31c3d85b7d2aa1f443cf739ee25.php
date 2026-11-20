@@ -46,36 +46,36 @@ class __TwigTemplate_02deb84769839d0a6212d921e633c1fa1d1daa6b34177426293099b2197
         yield "\" />
     </div>
     <div class=\"mailpoet_post_selection_filter_row\"><select name=\"mailpoet_posts_content_type\" class=\"mailpoet_select mailpoet_select_half_width mailpoet_settings_posts_content_type\">
-            <option value=\"post\" {{#ifCond model.contentType '==' 'post'}}SELECTED{{/ifCond}}>";
+            <option value=\"post\" {{#ifCond model.contentType \x27==\x27 \x27post\x27}}SELECTED{{/ifCond}}>";
         // line 6
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Posts");
         yield "</option>
-            <option value=\"page\" {{#ifCond model.contentType '==' 'page'}}SELECTED{{/ifCond}}>";
+            <option value=\"page\" {{#ifCond model.contentType \x27==\x27 \x27page\x27}}SELECTED{{/ifCond}}>";
         // line 7
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Pages");
         yield "</option>
-            <option value=\"mailpoet_page\" {{#ifCond model.contentType '==' 'mailpoet_page'}}SELECTED{{/ifCond}}>";
+            <option value=\"mailpoet_page\" {{#ifCond model.contentType \x27==\x27 \x27mailpoet_page\x27}}SELECTED{{/ifCond}}>";
         // line 8
         yield $this->extensions['MailPoet\Twig\I18n']->translate("MailPoet pages");
         yield "</option>
         </select><select class=\"mailpoet_select mailpoet_select_half_width mailpoet_posts_post_status\">
-            <option value=\"publish\" {{#ifCond model.postStatus '==' 'publish'}}SELECTED{{/ifCond}}>";
+            <option value=\"publish\" {{#ifCond model.postStatus \x27==\x27 \x27publish\x27}}SELECTED{{/ifCond}}>";
         // line 10
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Published");
         yield "</option>
-            <option value=\"future\" {{#ifCond model.postStatus '==' 'future'}}SELECTED{{/ifCond}}>";
+            <option value=\"future\" {{#ifCond model.postStatus \x27==\x27 \x27future\x27}}SELECTED{{/ifCond}}>";
         // line 11
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Scheduled");
         yield "</option>
-            <option value=\"draft\" {{#ifCond model.postStatus '==' 'draft'}}SELECTED{{/ifCond}}>";
+            <option value=\"draft\" {{#ifCond model.postStatus \x27==\x27 \x27draft\x27}}SELECTED{{/ifCond}}>";
         // line 12
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Draft");
         yield "</option>
-            <option value=\"pending\" {{#ifCond model.postStatus '==' 'pending'}}SELECTED{{/ifCond}}>";
+            <option value=\"pending\" {{#ifCond model.postStatus \x27==\x27 \x27pending\x27}}SELECTED{{/ifCond}}>";
         // line 13
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Pending Review");
         yield "</option>
-            <option value=\"private\" {{#ifCond model.postStatus '==' 'private'}}SELECTED{{/ifCond}}>";
+            <option value=\"private\" {{#ifCond model.postStatus \x27==\x27 \x27private\x27}}SELECTED{{/ifCond}}>";
         // line 14
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Private");
         yield "</option>

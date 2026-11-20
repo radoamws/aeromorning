@@ -35,6 +35,9 @@ class Crawler extends Root {
 	const STATUS_BLACKLIST = 'B';
 	const STATUS_NOCACHE   = 'N';
 
+	// Number of consecutive crawl failures before a URL is given up (dropped from the sitemap).
+	const BLACKLIST_THRESHOLD = 3;
+
 	/**
 	 * Sitemeta file slug.
 	 *
@@ -120,13 +123,6 @@ class Crawler extends Root {
 		'B' => [],
 		'N' => [],
 	];
-
-	/**
-	 * Summary cache.
-	 *
-	 * @var array
-	 */
-	protected $_summary;
 
 	/**
 	 * Initialize crawler, assign sitemap path.
@@ -299,7 +295,7 @@ class Crawler extends Root {
 
 		parent::save_summary( $data, $reload, $overwrite );
 
-		File::save( LITESPEED_STATIC_DIR . '/crawler/' . $instance->_sitemeta, wp_json_encode( $data ), true );
+		File::save( LITESPEED_STATIC_DIR . '/crawler/' . $instance->_sitemeta, wp_json_encode( $instance->_summary ), true );
 	}
 
 	/**
@@ -382,7 +378,12 @@ class Crawler extends Root {
 
 		// for the first time running.
 		if ( ! $this->_summary || ! Data::cls()->tb_exist( 'crawler' ) || ! Data::cls()->tb_exist( 'crawler_blacklist' ) ) {
-			$this->cls( 'Crawler_Map' )->gen();
+			if ( ! $this->cls( 'Crawler_Map' )->gen() ) {
+				$this->_end_reason = 'sitemap_failed';
+				$this->_terminate_running();
+				$this->Release_lane();
+				return;
+			}
 		}
 
 		// if finished last time, regenerate sitemap.
@@ -395,7 +396,12 @@ class Crawler extends Root {
 				return;
 			}
 			self::debug( 'TouchedEnd. regenerate sitemap....' );
-			$this->cls( 'Crawler_Map' )->gen();
+			if ( ! $this->cls( 'Crawler_Map' )->gen() ) {
+				$this->_end_reason = 'sitemap_failed';
+				$this->_terminate_running();
+				$this->Release_lane();
+				return;
+			}
 		}
 
 		$crawlers       = $this->list_crawlers();
@@ -414,7 +420,7 @@ class Crawler extends Root {
 		}
 
 		// In case crawlers are all done but not reload, reload it.
-		if ( empty( $this->_summary['curr_crawler'] ) || empty( $this->_crawlers[ $this->_summary['curr_crawler'] ] ) ) {
+		if ( ! isset( $this->_summary['curr_crawler'], $this->_crawlers[ $this->_summary['curr_crawler'] ] ) ) {
 			$this->_summary['curr_crawler']                                     = 0;
 			$this->_summary['crawler_stats'][ $this->_summary['curr_crawler'] ] = [];
 		}
@@ -443,7 +449,7 @@ class Crawler extends Root {
 	 * @return bool True on success.
 	 */
 	private function load_conf() {
-		$this->_crawler_conf['base'] = site_url();
+		$this->_crawler_conf['base'] = rtrim( get_option( 'home' ), '/' );
 
 		$current_crawler = $this->_crawlers[ $this->_summary['curr_crawler'] ];
 
@@ -467,7 +473,8 @@ class Crawler extends Root {
 
 		// Mobile crawler.
 		if ( ! empty( $current_crawler['mobile'] ) ) {
-			$this->_crawler_conf['ua'] = 'Mobile iPhone';
+			$mobile_rules              = Htaccess::filter_list( $this->conf( Base::O_CACHE_MOBILE_RULES ), Htaccess::PATTERN_REGEX_LITERAL, Base::O_CACHE_MOBILE_RULES, false );
+			$this->_crawler_conf['ua'] = $mobile_rules ? $mobile_rules[0] : 'Mobile iPhone';
 		}
 
 		// Limit delay to use server setting.
@@ -769,6 +776,7 @@ class Crawler extends Root {
 			return false;
 		}
 		$this->_summary['test_port_tts'] = time();
+		$this->_summary['test_port']     = 0; // Clear prior result so a failed probe cannot reuse a stale port.
 		self::save_summary();
 
 		$options = $this->_get_curl_options();
@@ -792,14 +800,16 @@ class Crawler extends Root {
 		curl_setopt_array( $ch, $options );
 		curl_setopt( $ch, CURLOPT_URL, $url );
 		$result      = curl_exec( $ch );
+		$errno       = curl_errno( $ch );
 		$test_result = false;
-		if ( curl_errno( $ch ) || $result !== $home ) {
-			if ( curl_errno( $ch ) ) {
-				self::debug( '❌ Test port curl error: [errNo] ' . curl_errno( $ch ) . ' [err] ' . curl_error( $ch ) );
-			} elseif ( $result !== $home ) {
-				self::debug( '❌ Test port response is wrong: ' . $result );
-			}
-			self::debug( '❌ Test local 443 port failed, try port 80' );
+		if ( 0 === $errno && $result === $home ) {
+			self::debug( '✅ Tested local 443 port successfully' );
+			define( 'LITESPEED_CRAWLER_LOCAL_PORT', 443 );
+			$this->_summary['test_port'] = 443;
+			$test_result                 = true;
+		} elseif ( CURLE_COULDNT_CONNECT === $errno ) {
+			// Fall back only on connection failure; this does not prove ports 80 and 443 share a cache.
+			self::debug( '❌ Test local 443 port could not connect, try port 80' );
 
 			// Try port 80.
 			$resolved                   = $parsed_url['host'] . ':80:' . $this->_server_ip;
@@ -822,11 +832,10 @@ class Crawler extends Root {
 				$this->_summary['test_port'] = 80;
 				$test_result                 = true;
 			}
+		} elseif ( $errno ) {
+			self::debug( '❌ Test local 443 port failed, no fallback: [errNo] ' . $errno . ' [err] ' . curl_error( $ch ) );
 		} else {
-			self::debug( '✅ Tested local 443 port successfully' );
-			define( 'LITESPEED_CRAWLER_LOCAL_PORT', 443 );
-			$this->_summary['test_port'] = 443;
-			$test_result                 = true;
+			self::debug( '❌ Test local 443 port failed, no fallback, response is wrong: ' . $result );
 		}
 		self::save_summary();
 		unset( $ch );
@@ -1167,6 +1176,8 @@ class Crawler extends Root {
 			CURLOPT_HEADER           => true,
 			CURLOPT_CUSTOMREQUEST    => 'GET',
 			CURLOPT_FOLLOWLOCATION   => false,
+			CURLOPT_PROTOCOLS        => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+			CURLOPT_REDIR_PROTOCOLS  => CURLPROTO_HTTP | CURLPROTO_HTTPS,
 			CURLOPT_ENCODING         => 'gzip',
 			CURLOPT_CONNECTTIMEOUT   => 10,
 			CURLOPT_TIMEOUT          => $crawler_timeout, // Larger timeout to avoid incorrect blacklist addition #900171.
@@ -1208,60 +1219,6 @@ class Crawler extends Root {
 		}
 
 		return $options;
-	}
-
-	/**
-	 * Self curl to get HTML content.
-	 *
-	 * @since 3.3
-	 *
-	 * @param string       $url URL.
-	 * @param string       $ua  User agent.
-	 * @param int|false    $uid Optional user ID for simulation.
-	 * @param string|false $accept Optional Accept header value.
-	 * @return string|false HTML on success, false on failure.
-	 */
-	public function self_curl( $url, $ua, $uid = false, $accept = false ) {
-		$this->_crawler_conf['base'] = site_url();
-		$this->_crawler_conf['ua']   = $ua;
-		if ( $accept ) {
-			$this->_crawler_conf['headers'] = [ 'Accept: ' . $accept ];
-		}
-		$options = $this->_get_curl_options();
-
-		if ( $uid ) {
-			$this->_crawler_conf['cookies']['litespeed_flash_hash'] = Router::cls()->get_flash_hash( $uid );
-			$parsed_url = wp_parse_url( $url );
-
-			if ( ! empty( $parsed_url['host'] ) ) {
-				$dom                                     = $parsed_url['host'];
-				$port                                    = defined( 'LITESPEED_CRAWLER_LOCAL_PORT' ) ? (int) LITESPEED_CRAWLER_LOCAL_PORT : 443;
-				$resolved                                = $dom . ':' . $port . ':' . $this->_server_ip;
-				$options[ CURLOPT_RESOLVE ]              = [ $resolved ];
-				$options[ CURLOPT_DNS_USE_GLOBAL_CACHE ] = false;
-				$options[ CURLOPT_PORT ]                 = $port;
-				self::debug( 'Resolved DNS for ' . $resolved );
-			}
-		}
-
-		$options[ CURLOPT_HEADER ]         = false;
-		$options[ CURLOPT_FOLLOWLOCATION ] = true;
-
-		// phpcs:disable WordPress.WP.AlternativeFunctions
-		$ch = curl_init();
-		curl_setopt_array( $ch, $options );
-		curl_setopt( $ch, CURLOPT_URL, $url );
-		$result = curl_exec( $ch );
-		$code   = (int) curl_getinfo( $ch, CURLINFO_HTTP_CODE );
-		unset( $ch );
-		// phpcs:enable
-
-		if ( 200 !== $code ) {
-			self::debug( '❌ Response code is not 200 in self_curl() [code] ' . $code );
-			return false;
-		}
-
-		return $result;
 	}
 
 	/**
@@ -1319,19 +1276,19 @@ class Crawler extends Root {
 
 		// Guest Mode on/off.
 		if ( $this->conf( Base::O_GUEST ) ) {
-			$vary_name = $this->cls( 'Vary' )->get_vary_name();
-			$vary_val  = 'guest_mode:1';
-			if ( ! defined( 'LSCWP_LOG' ) ) {
-				$vary_val = md5( $this->conf( Base::HASH ) . $vary_val );
+			$guest_vary = $this->cls( 'Vary' )->guest_vary();
+			if ( false !== $guest_vary ) {
+				$vary_name = $this->cls( 'Vary' )->get_vary_name();
+				// Always hashed, matching Vary::finalize_default_vary() and guest.vary.php in every mode.
+				$crawler_factors[ 'cookie:' . $vary_name ] = [
+					$guest_vary => '',
+					'_null'    => '<font data-balloon-pos="up" aria-label="Guest Mode">👒</font>',
+				];
 			}
-			$crawler_factors[ 'cookie:' . $vary_name ] = [
-				$vary_val => '',
-				'_null'   => '<font data-balloon-pos="up" aria-label="Guest Mode">👒</font>',
-			];
 		}
 
 		// Mobile crawler.
-		if ( $this->conf( Base::O_CACHE_MOBILE ) ) {
+		if ( ( $this->conf( Base::O_CACHE_MOBILE ) || $this->conf( Base::O_GUEST ) ) && Htaccess::filter_list( $this->conf( Base::O_CACHE_MOBILE_RULES ), Htaccess::PATTERN_REGEX_LITERAL, Base::O_CACHE_MOBILE_RULES, false ) ) {
 			$crawler_factors['mobile'] = [
 				1 => '<font data-balloon-pos="up" aria-label="Mobile">📱</font>',
 				0 => '',
@@ -1353,17 +1310,28 @@ class Crawler extends Root {
 			$crawler_factors['uid'][ $v ] = ucfirst( $role_title );
 		}
 
-		// Cookie crawler.
-		foreach ( $this->conf( Base::O_CRAWLER_COOKIES ) as $v ) {
+		// Cookie crawler. Filter lets 3rd-party integrations inject crawler-scoped cookie rows (e.g. WCML _lscache_vary per-currency)
+		$cookie_list = apply_filters( 'litespeed_crawler_cookies', $this->conf( Base::O_CRAWLER_COOKIES ) );
+		if ( ! is_array( $cookie_list ) ) {
+			$cookie_list = [];
+		}
+		foreach ( $cookie_list as $v ) {
 			if ( empty( $v['name'] ) ) {
 				continue;
 			}
 
 			$this_cookie_key = 'cookie:' . $v['name'];
 
-			$crawler_factors[ $this_cookie_key ] = [];
+			// Preserves Guest Mode preset when same-name cookie row arrives.
+			if ( ! isset( $crawler_factors[ $this_cookie_key ] ) ) {
+				$crawler_factors[ $this_cookie_key ] = [];
+			}
 
 			foreach ( $v['vals'] as $v2 ) {
+				// Preserve existing labels (e.g. Guest Mode 👒 marker on `_null`) — skip if value already mapped.
+				if ( isset( $crawler_factors[ $this_cookie_key ][ $v2 ] ) ) {
+					continue;
+				}
 				$crawler_factors[ $this_cookie_key ][ $v2 ] =
 					( '_null' === $v2 ? '' : '<font data-balloon-pos="up" aria-label="Cookie">🍪</font>' . esc_html( $v['name'] ) . '=' . esc_html( $v2 ) );
 			}
@@ -1489,8 +1457,17 @@ class Crawler extends Root {
 			if ( 'Existed' === $reason ) {
 				$reason = __( 'Previously existed in blocklist', 'litespeed-cache' );
 			}
+			if ( ctype_digit( (string) $v ) ) {
+				// Counting marker: failed N time(s), still retrying.
+				$class  = 'warning';
+				$reason = $reason
+					? sprintf( __( 'Failed %1$s time(s) (HTTP %2$s), still retrying', 'litespeed-cache' ), $v, $reason )
+					: sprintf( __( 'Failed %s time(s), still retrying', 'litespeed-cache' ), $v );
+			} else {
+				$class = isset( $_status_list[ $v ] ) ? $_status_list[ $v ] : 'default';
+			}
 			$reason_attr = $reason ? 'data-balloon-pos="up" aria-label="' . esc_attr( $reason ) . '"' : '';
-			$status     .= '<i class="litespeed-dot litespeed-bg-' . esc_attr( $_status_list[ $v ] ) . '" ' . $reason_attr . '>' . ( $k + 1 ) . '</i>';
+			$status     .= '<i class="litespeed-dot litespeed-bg-' . esc_attr( $class ) . '" ' . $reason_attr . '>' . ( $k + 1 ) . '</i>';
 		}
 
 		return $status;

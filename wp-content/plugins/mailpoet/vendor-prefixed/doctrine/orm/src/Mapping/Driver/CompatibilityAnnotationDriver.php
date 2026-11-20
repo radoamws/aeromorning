@@ -6,11 +6,11 @@ use MailPoetVendor\Doctrine\Persistence\Mapping\Driver\AnnotationDriver as Persi
 use MailPoetVendor\Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use function class_exists;
 if (!class_exists(PersistenceAnnotationDriver::class)) {
- abstract class CompatibilityAnnotationDriver implements MappingDriver
- {
- }
+abstract class CompatibilityAnnotationDriver implements MappingDriver
+{
+}
 } else {
- abstract class CompatibilityAnnotationDriver extends PersistenceAnnotationDriver
- {
- }
+abstract class CompatibilityAnnotationDriver extends PersistenceAnnotationDriver
+{
+}
 }

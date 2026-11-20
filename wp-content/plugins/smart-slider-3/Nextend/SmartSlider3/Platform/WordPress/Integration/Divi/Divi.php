@@ -7,6 +7,7 @@ namespace Nextend\SmartSlider3\Platform\WordPress\Integration\Divi;
 use Nextend\Framework\Request\Request;
 use Nextend\SmartSlider3\Platform\WordPress\Integration\Divi\V31ge\DiviExtensionSmartSlider3;
 use Nextend\SmartSlider3\Platform\WordPress\Integration\Divi\V31lt\DiviV31lt;
+use Nextend\SmartSlider3\Platform\WordPress\Integration\Divi\V5\DiviV5;
 use Nextend\SmartSlider3\Platform\WordPress\Shortcode\Shortcode;
 
 class Divi {
@@ -22,6 +23,14 @@ class Divi {
             $this,
             'action_divi_extensions_init'
         ));
+
+        /**
+         * Divi 5 introduced a new module framework, so the Divi 4 module cannot be reused.
+         * Register a dedicated native Divi 5 module instead.
+         *
+         * @see SSDEV-4184
+         */
+        new DiviV5();
 
         add_action('et_fb_framework_loaded', array(
             $this,

@@ -41,7 +41,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
         yield "<div class=\"mailpoet_form_field\">
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"mailpoet_products_display_type\" class=\"mailpoet_products_display_type\" value=\"titleOnly\" {{#ifCond model.displayType '==' 'titleOnly'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"mailpoet_products_display_type\" class=\"mailpoet_products_display_type\" value=\"titleOnly\" {{#ifCond model.displayType \x27==\x27 \x27titleOnly\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 5
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Title only");
@@ -50,7 +50,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"mailpoet_products_display_type\" class=\"mailpoet_products_display_type\" value=\"excerpt\" {{#ifCond model.displayType '==' 'excerpt'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"mailpoet_products_display_type\" class=\"mailpoet_products_display_type\" value=\"excerpt\" {{#ifCond model.displayType \x27==\x27 \x27excerpt\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 11
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Title and a short description");
@@ -59,7 +59,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"mailpoet_products_display_type\" class=\"mailpoet_products_display_type\" value=\"full\" {{#ifCond model.displayType '==' 'full'}}CHECKED{{/ifCond}} />
+            <input type=\"radio\" name=\"mailpoet_products_display_type\" class=\"mailpoet_products_display_type\" value=\"full\" {{#ifCond model.displayType \x27==\x27 \x27full\x27}}CHECKED{{/ifCond}} />
             ";
         // line 17
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Title and description");
@@ -77,7 +77,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
         yield "</div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"mailpoet_products_title_format\" class=\"mailpoet_products_title_format\" value=\"h1\" {{#ifCond model.titleFormat '==' 'h1'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"mailpoet_products_title_format\" class=\"mailpoet_products_title_format\" value=\"h1\" {{#ifCond model.titleFormat \x27==\x27 \x27h1\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 29
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Heading 1");
@@ -86,7 +86,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"mailpoet_products_title_format\" class=\"mailpoet_products_title_format\" value=\"h2\" {{#ifCond model.titleFormat '==' 'h2'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"mailpoet_products_title_format\" class=\"mailpoet_products_title_format\" value=\"h2\" {{#ifCond model.titleFormat \x27==\x27 \x27h2\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 35
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Heading 2");
@@ -95,7 +95,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"mailpoet_products_title_format\" class=\"mailpoet_products_title_format\" value=\"h3\" {{#ifCond model.titleFormat '==' 'h3'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"mailpoet_products_title_format\" class=\"mailpoet_products_title_format\" value=\"h3\" {{#ifCond model.titleFormat \x27==\x27 \x27h3\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 41
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Heading 3");
@@ -111,7 +111,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
         yield "</div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"mailpoet_products_title_alignment\" class=\"mailpoet_products_title_alignment\" value=\"left\" {{#ifCond model.titleAlignment '==' 'left'}}CHECKED{{/ifCond}} />
+            <input type=\"radio\" name=\"mailpoet_products_title_alignment\" class=\"mailpoet_products_title_alignment\" value=\"left\" {{#ifCond model.titleAlignment \x27==\x27 \x27left\x27}}CHECKED{{/ifCond}} />
             ";
         // line 51
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Left");
@@ -120,7 +120,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"mailpoet_products_title_alignment\" class=\"mailpoet_products_title_alignment\" value=\"center\" {{#ifCond model.titleAlignment '==' 'center'}}CHECKED{{/ifCond}} />
+            <input type=\"radio\" name=\"mailpoet_products_title_alignment\" class=\"mailpoet_products_title_alignment\" value=\"center\" {{#ifCond model.titleAlignment \x27==\x27 \x27center\x27}}CHECKED{{/ifCond}} />
             ";
         // line 57
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Center");
@@ -129,7 +129,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"mailpoet_products_title_alignment\" class=\"mailpoet_products_title_alignment\" value=\"right\" {{#ifCond model.titleAlignment '==' 'right'}}CHECKED{{/ifCond}} />
+            <input type=\"radio\" name=\"mailpoet_products_title_alignment\" class=\"mailpoet_products_title_alignment\" value=\"right\" {{#ifCond model.titleAlignment \x27==\x27 \x27right\x27}}CHECKED{{/ifCond}} />
             ";
         // line 63
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Right");
@@ -165,14 +165,14 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
 
 <hr class=\"mailpoet_separator\" />
 
-<div class=\"mailpoet_form_field mailpoet_products_title_position {{#ifCond model.displayType '===' 'titleOnly'}}mailpoet_hidden{{/ifCond}}\">
+<div class=\"mailpoet_form_field mailpoet_products_title_position {{#ifCond model.displayType \x27===\x27 \x27titleOnly\x27}}mailpoet_hidden{{/ifCond}}\">
     <div class=\"mailpoet_form_field_title\">";
         // line 87
         yield $this->extensions['MailPoet\Twig\I18n']->translateWithContext("Product title position", "Setting in the email designer to position an ecommerce product title");
         yield "</div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"mailpoet_products_title_position\" class=\"mailpoet_products_title_position\" value=\"abovePost\" {{#ifCond model.titlePosition '!=' 'aboveExcerpt'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"mailpoet_products_title_position\" class=\"mailpoet_products_title_position\" value=\"abovePost\" {{#ifCond model.titlePosition \x27!=\x27 \x27aboveExcerpt\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 91
         yield $this->extensions['MailPoet\Twig\I18n']->translateWithContext("Above the product", "Display the product title above the product block");
@@ -181,7 +181,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"mailpoet_products_title_position\" class=\"mailpoet_products_title_position\" value=\"aboveExcerpt\" {{#ifCond model.titlePosition '==' 'aboveExcerpt'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"mailpoet_products_title_position\" class=\"mailpoet_products_title_position\" value=\"aboveExcerpt\" {{#ifCond model.titlePosition \x27==\x27 \x27aboveExcerpt\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 97
         yield $this->extensions['MailPoet\Twig\I18n']->translateWithContext("Above the product description", "Display the product title above the product description");
@@ -190,7 +190,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
     </div>
 </div>
 
-<hr class=\"mailpoet_separator mailpoet_products_title_position_separator {{#ifCond model.displayType '===' 'titleOnly'}}mailpoet_hidden{{/ifCond}}\" />
+<hr class=\"mailpoet_separator mailpoet_products_title_position_separator {{#ifCond model.displayType \x27===\x27 \x27titleOnly\x27}}mailpoet_hidden{{/ifCond}}\" />
 
 <div> <!-- empty div for better git diff -->
     <div class=\"mailpoet_form_field mailpoet_products_featured_image_position_container\">
@@ -200,7 +200,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
         yield "</div>
         <div class=\"mailpoet_form_field_radio_option\">
             <label>
-                <input type=\"radio\" name=\"mailpoet_products_featured_image_position\" class=\"mailpoet_products_featured_image_position\" value=\"centered\" {{#ifCond model.featuredImagePosition '==' 'centered' }}CHECKED{{/ifCond}}/>
+                <input type=\"radio\" name=\"mailpoet_products_featured_image_position\" class=\"mailpoet_products_featured_image_position\" value=\"centered\" {{#ifCond model.featuredImagePosition \x27==\x27 \x27centered\x27 }}CHECKED{{/ifCond}}/>
                 ";
         // line 110
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Centered");
@@ -209,7 +209,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
         </div>
         <div class=\"mailpoet_form_field_radio_option\">
             <label>
-                <input type=\"radio\" name=\"mailpoet_products_featured_image_position\" class=\"mailpoet_products_featured_image_position\" value=\"left\" {{#ifCond model.featuredImagePosition '==' 'left' }}CHECKED{{/ifCond}}/>
+                <input type=\"radio\" name=\"mailpoet_products_featured_image_position\" class=\"mailpoet_products_featured_image_position\" value=\"left\" {{#ifCond model.featuredImagePosition \x27==\x27 \x27left\x27 }}CHECKED{{/ifCond}}/>
                 ";
         // line 116
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Left");
@@ -218,7 +218,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
         </div>
         <div class=\"mailpoet_form_field_radio_option\">
             <label>
-                <input type=\"radio\" name=\"mailpoet_products_featured_image_position\" class=\"mailpoet_products_featured_image_position\" value=\"right\" {{#ifCond model.featuredImagePosition '==' 'right' }}CHECKED{{/ifCond}}/>
+                <input type=\"radio\" name=\"mailpoet_products_featured_image_position\" class=\"mailpoet_products_featured_image_position\" value=\"right\" {{#ifCond model.featuredImagePosition \x27==\x27 \x27right\x27 }}CHECKED{{/ifCond}}/>
                 ";
         // line 122
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Right");
@@ -227,7 +227,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
         </div>
         <div class=\"mailpoet_form_field_radio_option\">
             <label>
-                <input type=\"radio\" name=\"mailpoet_products_featured_image_position\" class=\"mailpoet_products_featured_image_position\" value=\"alternate\" {{#ifCond model.featuredImagePosition '==' 'alternate' }}CHECKED{{/ifCond}}/>
+                <input type=\"radio\" name=\"mailpoet_products_featured_image_position\" class=\"mailpoet_products_featured_image_position\" value=\"alternate\" {{#ifCond model.featuredImagePosition \x27==\x27 \x27alternate\x27 }}CHECKED{{/ifCond}}/>
                 ";
         // line 128
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Alternate");
@@ -236,7 +236,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
         </div>
         <div class=\"mailpoet_form_field_radio_option\">
             <label>
-                <input type=\"radio\" name=\"mailpoet_products_featured_image_position\" class=\"mailpoet_products_featured_image_position\" value=\"none\" {{#ifCond model.featuredImagePosition '==' 'none' }}CHECKED{{/ifCond}}/>
+                <input type=\"radio\" name=\"mailpoet_products_featured_image_position\" class=\"mailpoet_products_featured_image_position\" value=\"none\" {{#ifCond model.featuredImagePosition \x27==\x27 \x27none\x27 }}CHECKED{{/ifCond}}/>
                 ";
         // line 134
         yield $this->extensions['MailPoet\Twig\I18n']->translate("None");
@@ -245,7 +245,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
         </div>
     </div>
 
-    <div class=\"mailpoet_form_field mailpoet_products_image_full_width_option {{#ifCond model.displayType '==' 'titleOnly'}}mailpoet_hidden{{/ifCond}}\">
+    <div class=\"mailpoet_form_field mailpoet_products_image_full_width_option {{#ifCond model.displayType \x27==\x27 \x27titleOnly\x27}}mailpoet_hidden{{/ifCond}}\">
         <div class=\"mailpoet_form_field_title\">";
         // line 140
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Image width");
@@ -279,7 +279,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
         yield "</div>
         <div class=\"mailpoet_form_field_radio_option\">
             <label>
-                <input type=\"radio\" name=\"mailpoet_products_price_position\" class=\"mailpoet_products_price_position\" value=\"below\" {{#ifCond model.pricePosition '==' 'below'}}CHECKED{{/ifCond}} />
+                <input type=\"radio\" name=\"mailpoet_products_price_position\" class=\"mailpoet_products_price_position\" value=\"below\" {{#ifCond model.pricePosition \x27==\x27 \x27below\x27}}CHECKED{{/ifCond}} />
                 ";
         // line 162
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Below text");
@@ -288,7 +288,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
         </div>
         <div class=\"mailpoet_form_field_radio_option\">
             <label>
-                <input type=\"radio\" name=\"mailpoet_products_price_position\" class=\"mailpoet_products_price_position\" value=\"above\" {{#ifCond model.pricePosition '==' 'above'}}CHECKED{{/ifCond}} />
+                <input type=\"radio\" name=\"mailpoet_products_price_position\" class=\"mailpoet_products_price_position\" value=\"above\" {{#ifCond model.pricePosition \x27==\x27 \x27above\x27}}CHECKED{{/ifCond}} />
                 ";
         // line 168
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Above text");
@@ -297,7 +297,7 @@ class __TwigTemplate_06eb69614e63782dbf212c517de98466ef764932657f95db41872addc4e
         </div>
         <div class=\"mailpoet_form_field_radio_option\">
             <label>
-                <input type=\"radio\" name=\"mailpoet_products_price_position\" class=\"mailpoet_products_price_position\" value=\"hidden\" {{#ifCond model.pricePosition '==' 'hidden'}}CHECKED{{/ifCond}} />
+                <input type=\"radio\" name=\"mailpoet_products_price_position\" class=\"mailpoet_products_price_position\" value=\"hidden\" {{#ifCond model.pricePosition \x27==\x27 \x27hidden\x27}}CHECKED{{/ifCond}} />
                 ";
         // line 174
         yield $this->extensions['MailPoet\Twig\I18n']->translate("No");

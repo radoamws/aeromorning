@@ -5,7 +5,6 @@ namespace MailPoet\Config;
 if (!defined('ABSPATH')) exit;
 
 
-use MailPoet\Config\Env;
 use MailPoet\Services\Bridge;
 use MailPoet\Services\Release\API;
 use MailPoet\Settings\SettingsController;
@@ -43,7 +42,7 @@ class Updater {
 
     $latestVersion = $this->getLatestVersion();
 
-    if (!isset($latestVersion->new_version)) { // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
+    if (!$latestVersion instanceof \stdClass || !isset($latestVersion->new_version)) { // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
       return $updateTransient; // no latest version found.
     }
 
@@ -51,14 +50,11 @@ class Updater {
       unset($updateTransient->response[$this->plugin]); // remove the cached version from the transient.
     }
 
-    $latestFreeVersion = null;
-    if (property_exists($updateTransient, 'response') && isset($updateTransient->response[Env::$pluginPath]->new_version)) {
-      $latestFreeVersion = $updateTransient->response[Env::$pluginPath]->new_version;
+    if (empty($this->currentFreeVersion)) {
+      return $updateTransient;
     }
 
-    if (!$this->shouldShowUpdateNotice($latestVersion->new_version, $latestFreeVersion)) { // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
-      return $updateTransient; // skip update notice.
-    }
+    $latestVersion = $this->getCompatibleVersion($latestVersion);
 
     if (version_compare((string)$this->version, $latestVersion->new_version, '<')) { // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
       $updateTransient->response[$this->plugin] = $latestVersion;
@@ -99,13 +95,18 @@ class Updater {
     return version_compare($currentMainVersion, $requiredMainVersion, '>=');
   }
 
-  public function shouldShowUpdateNotice($premiumLatestVersion, $latestFreeVersion = null): bool {
-    // first check if the free version in the update transient is compatible with the premium latest version
-    if (!empty($latestFreeVersion) && $this->isVersionCompatible($premiumLatestVersion, $latestFreeVersion)) {
-      return true;
+  public function getCompatibleVersion(\stdClass $latest): \stdClass {
+    // wordpress.org holds new free releases for up to 24h (https://wordpress.org/news/2026/06/pts/),
+    // so clamp to the installed free version to keep Premium from getting ahead of it.
+    if ($this->isVersionCompatible($latest->new_version, $this->currentFreeVersion)) { // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
+      return $latest;
     }
 
-    // then check if the current free version is compatible with the premium latest version
-    return $this->isVersionCompatible($premiumLatestVersion, $this->currentFreeVersion);
+    $compatible = clone $latest;
+    $compatible->new_version = Installer::getMinorVersionZero((string)$this->currentFreeVersion); // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
+    $compatible->package = empty($latest->package)
+      ? ''
+      : Installer::buildDownloadUrlForVersion($compatible->new_version); // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
+    return $compatible;
   }
 }

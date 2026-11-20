@@ -17,6 +17,7 @@
   <div id="mailpoet_notice_success" class="mailpoet_notice" style="display:none;"></div>
   <!-- React notices -->
   <div id="mailpoet_notices"></div>
+  <div id="mailpoet_held_campaigns"></div>
 
   <!-- Set FROM address modal React root -->
   <div id="mailpoet_set_from_address_modal"></div>
@@ -72,6 +73,7 @@
   var mailpoet_admin_plugins_url = '<%= admin_plugins_url %>';
   var mailpoet_is_dotcom = <%= json_encode(is_dotcom()) %>;
   var mailpoet_cron_trigger_method = <%= json_encode(cron_trigger_method) %>;
+  var mailpoet_held_campaigns = <%= json_encode(held_campaigns) %>;
 
   var mailpoet_site_name = '<%= site_name %>';
   var mailpoet_site_url = "<%= site_url %>";
@@ -82,7 +84,6 @@
   var mailpoet_premium_link = <%= json_encode(link_premium) %>;
   var mailpoet_premium_plugin_installed = <%= json_encode(premium_plugin_installed) %>;
   var mailpoet_premium_active = <%= json_encode(premium_plugin_active) %>;
-  var mailpoet_premium_plugin_download_url = <%= json_encode(premium_plugin_download_url) %>;
   var mailpoet_premium_plugin_activation_url = <%= json_encode(premium_plugin_activation_url) %>;
   var mailpoet_has_valid_api_key = <%= json_encode(has_valid_api_key) %>;
   var mailpoet_has_valid_premium_key = <%= json_encode(has_valid_premium_key) %>;
@@ -109,13 +110,13 @@
   <% endif %>
 </script>
 
+<%= localize(ajax_error_messages) %>
+
 <%= localize({
   'topBarLogoTitle': __('Back to section root'),
   'topBarUpdates': __('Updates'),
   'whatsNew': __("What’s new"),
   'updateMailPoetNotice': __('[link]Update MailPoet[/link] to see the latest changes'),
-  'ajaxFailedErrorMessage': __('An error has happened while performing a request, the server has responded with response code %d'),
-  'ajaxTimeoutErrorMessage': __('An error has happened while performing a request, the server request has timed out after %d seconds'),
   'dismissNotice': __('Dismiss this notice.'),
   'confirmEdit': __('Sending is in progress. Do you want to pause sending and edit the newsletter?'),
   'confirmAutomaticNewsletterEdit': __('To edit this email, it needs to be deactivated. You can activate it again after you make the changes.'),

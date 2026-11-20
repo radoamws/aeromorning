@@ -5,8 +5,8 @@ if (!defined('ABSPATH')) exit;
 use MailPoetVendor\Doctrine\ORM\Exception\ORMException;
 final class UnknownGeneratorType extends ORMException
 {
- public static function create(int $generatorType) : self
- {
- return new self('Unknown generator type: ' . $generatorType);
- }
+public static function create(int $generatorType): self
+{
+return new self('Unknown generator type: ' . $generatorType);
+}
 }

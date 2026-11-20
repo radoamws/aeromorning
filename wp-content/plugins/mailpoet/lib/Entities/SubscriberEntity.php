@@ -29,6 +29,7 @@ class SubscriberEntity {
   public const HOOK_SUBSCRIBER_DELETED = 'mailpoet_subscriber_deleted';
   public const HOOK_SUBSCRIBER_UPDATED = 'mailpoet_subscriber_updated';
   public const HOOK_SUBSCRIBER_STATUS_CHANGED = 'mailpoet_subscriber_status_changed';
+  public const HOOK_SUBSCRIBER_TRACKING_CONSENT_CHANGED = 'mailpoet_subscriber_tracking_consent_changed';
   public const HOOK_MULTIPLE_SUBSCRIBERS_CREATED = 'mailpoet_multiple_subscribers_created';
   public const HOOK_MULTIPLE_SUBSCRIBERS_DELETED = 'mailpoet_multiple_subscribers_deleted';
   public const HOOK_MULTIPLE_SUBSCRIBERS_UPDATED = 'mailpoet_multiple_subscribers_updated';
@@ -41,12 +42,41 @@ class SubscriberEntity {
   const STATUS_UNCONFIRMED = 'unconfirmed';
   const STATUS_UNSUBSCRIBED = 'unsubscribed';
 
+  // tracking consent
+  const TRACKING_CONSENT_UNKNOWN = 'unknown';
+  const TRACKING_CONSENT_GRANTED = 'granted';
+  const TRACKING_CONSENT_DENIED = 'denied';
+
+  const TRACKING_CONSENT_VALUES = [
+    self::TRACKING_CONSENT_UNKNOWN,
+    self::TRACKING_CONSENT_GRANTED,
+    self::TRACKING_CONSENT_DENIED,
+  ];
+
+  const TRACKING_CONSENT_METHOD_FOOTER_LINK = 'footer_link';
+  const TRACKING_CONSENT_METHOD_MANAGE_PAGE = 'manage_page';
+  const TRACKING_CONSENT_METHOD_FORM = 'form';
+  const TRACKING_CONSENT_METHOD_ADMIN = 'admin';
+  const TRACKING_CONSENT_METHOD_IMPORT = 'import';
+  const TRACKING_CONSENT_METHOD_WOOCOMMERCE_CHECKOUT = 'woocommerce_checkout';
+  const TRACKING_CONSENT_METHOD_REGISTRATION = 'registration';
+  const TRACKING_CONSENT_METHOD_COMMENT = 'comment';
+  /**
+   * A caller of the public PHP API is itself the collection point: it rendered
+   * its own consent control, so only it knows what the subscriber was shown.
+   * Kept separate from METHOD_ADMIN so a consent record can tell "recorded by
+   * an integration" apart from "changed by a person in wp-admin".
+   */
+  const TRACKING_CONSENT_METHOD_API = 'api';
+
   public const OBSOLETE_LINK_TOKEN_LENGTH = 6;
   public const LINK_TOKEN_LENGTH = 32;
   public const TIME_ZONE_FIELD_NAME = 'mailpoet_subscriber_timezone';
   public const TIME_ZONE_SOURCE_FORM = 'form';
+  public const TIME_ZONE_SOURCE_MANUAL = 'manual';
   public const TIME_ZONE_SOURCE_SITE_FALLBACK = 'site_fallback';
   public const TIME_ZONE_CONFIDENCE_BROWSER = 90;
+  public const TIME_ZONE_CONFIDENCE_MANUAL = 100;
 
   /** @var array<string,bool>|null */
   private static $validTimeZones = null;
@@ -68,6 +98,46 @@ class SubscriberEntity {
    * @var bool
    */
   private $isWoocommerceUser = false;
+
+  /**
+   * CNIL/Garante: three states are legally distinct. `unknown` means we never
+   * asked — it is NOT consent, and under the opt-in regime it must not be
+   * treated as consent. How `unknown` is handled is a site setting; see
+   * TrackingConsentController.
+   *
+   * Validated in setTrackingConsent(), not by a validation constraint on this
+   * property. A constraint runs at flush, so a row that already holds a bad value —
+   * hand-edited column, incomplete migration, restored backup — would throw the moment
+   * anything flushed it, even an unrelated field. That took the whole mailpoet/v1
+   * namespace down for one customer. A caller trying to WRITE a bad value still fails,
+   * immediately, in the setter.
+   *
+   * @ORM\Column(type="string", length=20)
+   * @var string
+   */
+  private $trackingConsent = self::TRACKING_CONSENT_UNKNOWN;
+
+  /**
+   * @ORM\Column(type="datetimetz", nullable=true)
+   * @var DateTimeInterface|null
+   */
+  private $trackingConsentUpdatedAt;
+
+  /**
+   * @ORM\Column(type="string", length=40, nullable=true)
+   * @var string|null
+   */
+  private $trackingConsentMethod;
+
+  /**
+   * The exact wording shown when the choice was made. Required for proof of
+   * consent (CNIL §6: a record of each person's consent "as well as the
+   * conditions under which that consent was obtained").
+   *
+   * @ORM\Column(type="text", nullable=true)
+   * @var string|null
+   */
+  private $trackingConsentCopy;
 
   /**
    * @ORM\Column(type="string")
@@ -162,10 +232,31 @@ class SubscriberEntity {
   private $source = 'unknown';
 
   /**
+   * @ORM\Column(type="string", length=191, nullable=true)
+   * @var string|null
+   */
+  private $sourcePlugin;
+
+  /**
+   * @ORM\Column(type="text", nullable=true)
+   * @var string|null
+   */
+  private $sourceUrl;
+
+  /**
    * @ORM\Column(type="integer")
    * @var int
    */
   private $countConfirmations = 0;
+
+  /**
+   * Denormalized number of subscribed memberships in non-deleted segments.
+   * Maintained by SegmentsCountRecalculator; used to quickly find subscribers
+   * without a list (segments_count = 0).
+   * @ORM\Column(type="integer", options={"unsigned":true})
+   * @var int
+   */
+  private $segmentsCount = 0;
 
   /**
    * @ORM\Column(type="string", nullable=true)
@@ -300,6 +391,45 @@ class SubscriberEntity {
    */
   public function setIsWoocommerceUser($isWoocommerceUser) {
     $this->isWoocommerceUser = $isWoocommerceUser;
+  }
+
+  public function getTrackingConsent(): string {
+    return $this->trackingConsent;
+  }
+
+  /**
+   * Setting the state also stamps when, how, and against what wording it
+   * changed (CNIL/Garante record-keeping).
+   */
+
+  /**
+   * @throws \InvalidArgumentException if $consent is not one of the three
+   *   TRACKING_CONSENT_* constants. This is the only place the value is validated;
+   *   see the property docblock for why it is not a flush-time constraint.
+   */
+  public function setTrackingConsent(string $consent, ?string $method = null, ?string $copy = null): void {
+    if (!in_array($consent, [self::TRACKING_CONSENT_UNKNOWN, self::TRACKING_CONSENT_GRANTED, self::TRACKING_CONSENT_DENIED], true)) {
+      throw new \InvalidArgumentException("Invalid tracking consent value: {$consent}");
+    }
+    if ($this->trackingConsent === $consent) {
+      return;
+    }
+    $this->trackingConsent = $consent;
+    $this->trackingConsentUpdatedAt = new \DateTimeImmutable();
+    $this->trackingConsentMethod = $method;
+    $this->trackingConsentCopy = $copy;
+  }
+
+  public function getTrackingConsentUpdatedAt(): ?DateTimeInterface {
+    return $this->trackingConsentUpdatedAt;
+  }
+
+  public function getTrackingConsentMethod(): ?string {
+    return $this->trackingConsentMethod;
+  }
+
+  public function getTrackingConsentCopy(): ?string {
+    return $this->trackingConsentCopy;
   }
 
   /**
@@ -539,6 +669,25 @@ class SubscriberEntity {
       throw new \InvalidArgumentException("Invalid source '{$source}' given to subscriber!");
     }
     $this->source = $source;
+    if ($source !== 'api') {
+      $this->sourcePlugin = null;
+    }
+  }
+
+  public function getSourcePlugin(): ?string {
+    return $this->sourcePlugin;
+  }
+
+  public function setSourcePlugin(?string $sourcePlugin): void {
+    $this->sourcePlugin = $sourcePlugin ?: null;
+  }
+
+  public function getSourceUrl(): ?string {
+    return $this->sourceUrl;
+  }
+
+  public function setSourceUrl(?string $sourceUrl): void {
+    $this->sourceUrl = $sourceUrl ?: null;
   }
 
   /**
@@ -553,6 +702,14 @@ class SubscriberEntity {
    */
   public function setConfirmationsCount($countConfirmations) {
     $this->countConfirmations = $countConfirmations;
+  }
+
+  public function getSegmentsCount(): int {
+    return $this->segmentsCount;
+  }
+
+  public function setSegmentsCount(int $segmentsCount): void {
+    $this->segmentsCount = $segmentsCount;
   }
 
   /**
@@ -668,8 +825,24 @@ class SubscriberEntity {
     return $this->lastEngagementAt;
   }
 
+  /**
+   * Sets the raw engagement timestamp without touching status. Prefer markEngaged() when
+   * recording a real engagement event (open, click, purchase, page view) so inactive
+   * subscribers are reactivated immediately instead of waiting for the maintenance cron.
+   */
   public function setLastEngagementAt(DateTimeInterface $lastEngagementAt): void {
     $this->lastEngagementAt = $lastEngagementAt;
+  }
+
+  /**
+   * Records engagement and immediately reactivates the subscriber if they were inactive,
+   * so they don't wait for the InactiveSubscribersMaintenance cron to be reactivated.
+   */
+  public function markEngaged(DateTimeInterface $engagedAt): void {
+    $this->setLastEngagementAt($engagedAt);
+    if ($this->getStatus() === self::STATUS_INACTIVE) {
+      $this->setStatus(self::STATUS_SUBSCRIBED);
+    }
   }
 
   public function getLastSendingAt(): ?DateTimeInterface {

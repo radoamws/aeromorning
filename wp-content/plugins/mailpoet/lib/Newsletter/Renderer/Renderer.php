@@ -29,6 +29,16 @@ class Renderer {
   const NEWSLETTER_TEMPLATE = 'Template.html';
   const FILTER_POST_PROCESS = 'mailpoet_rendering_post_process';
 
+  private const GLOBAL_STYLES_SELECTORS = [
+    'text' => 'td.mailpoet_paragraph, td.mailpoet_blockquote, li.mailpoet_paragraph, td.mailpoet_footer',
+    'body' => 'body, .mailpoet-wrapper',
+    'link' => '.mailpoet-wrapper a',
+    'wrapper' => '.mailpoet_content-wrapper',
+    'h1' => 'h1',
+    'h2' => 'h2',
+    'h3' => 'h3',
+  ];
+
   /** @var BodyRenderer */
   private $bodyRenderer;
 
@@ -170,13 +180,17 @@ class Renderer {
       $renderedBody = "";
       try {
         $content = $this->preprocessor->process($newsletter, $content, $preview, $sendingQueue);
+        if (is_array($content)) {
+          $content = StylesHelper::sanitizeBlockStyles($content);
+        }
         $renderedBody = $this->bodyRenderer->renderBody($newsletter, $content, $isRtl);
       } catch (NewsletterProcessingException $e) {
         $this->loggerFactory->getLogger(LoggerFactory::TOPIC_COUPONS)->error(
           $e->getMessage(),
           ['newsletter_id' => $newsletter->getId()]
         );
-        if (!$sendingQueue || !NewsletterReplayMetadata::isLatestNewsletterReplayMeta($sendingQueue->getMeta())) {
+        // only a render for sending changes the email's status; previews just log
+        if ($sendingQueue && !NewsletterReplayMetadata::isLatestNewsletterReplayMeta($sendingQueue->getMeta())) {
           $this->newslettersRepository->setAsCorrupt($newsletter);
         }
         if ($sendingQueue) {
@@ -224,27 +238,11 @@ class Renderer {
    */
   private function renderStyles(array $styles) {
     $css = '';
-    foreach ($styles as $selector => $style) {
-      switch ($selector) {
-        case 'text':
-          $selector = 'td.mailpoet_paragraph, td.mailpoet_blockquote, li.mailpoet_paragraph, td.mailpoet_footer';
-          break;
-        case 'body':
-          $selector = 'body, .mailpoet-wrapper';
-          break;
-        case 'link':
-          $selector = '.mailpoet-wrapper a';
-          break;
-        case 'wrapper':
-          $selector = '.mailpoet_content-wrapper';
-          break;
-      }
-
-      if (!is_array($style)) {
+    foreach ($styles as $key => $style) {
+      if (!isset(self::GLOBAL_STYLES_SELECTORS[$key]) || !is_array($style)) {
         continue;
       }
-
-      $css .= StylesHelper::setStyle($style, $selector);
+      $css .= StylesHelper::setStyle($style, self::GLOBAL_STYLES_SELECTORS[$key]);
     }
     return $css;
   }
@@ -256,7 +254,7 @@ class Renderer {
    */
   private function injectContentIntoTemplate($template, $content) {
     return preg_replace_callback('/{{\w+}}/', function($matches) use (&$content) {
-      return array_shift($content);
+      return array_shift($content) ?? '';
     }, $template);
   }
 
@@ -287,9 +285,15 @@ class Renderer {
   private function postProcessTemplate(DomNode $templateDom) {
     // replace spaces in image tag URLs
     foreach ($templateDom->query('img') as $image) {
+      if ($image->src === null) {
+        continue;
+      }
       $image->src = str_replace(' ', '%20', $image->src);
     }
     foreach ($templateDom->query('a') as $anchor) {
+      if ($anchor->href === null) {
+        continue;
+      }
       // Fix for a TinyMCE bug in smart paste which encodes & as &amp; which is then additionally encoded to &amp;amp;
       // when saving the text block content in the editor
       $href = str_replace('&amp;amp;', '&amp;', $anchor->href);

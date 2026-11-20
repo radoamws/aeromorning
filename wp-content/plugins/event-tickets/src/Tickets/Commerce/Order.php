@@ -18,6 +18,7 @@ use TEC\Tickets\Commerce\Status\Refunded;
 use TEC\Tickets\Commerce\Status\Reversed;
 use TEC\Tickets\Commerce\Status\Status_Interface;
 use TEC\Tickets\Commerce\Utils\Value;
+use TEC\Tickets\RSVP\V2\Constants as RSVP_Constants;
 use Tribe__Tickets__Ticket_Object as Ticket_Object;
 use WP_Post;
 
@@ -394,7 +395,7 @@ class Order extends Abstract_Order {
 		 *
 		 * @param array $post_type_args Post type arguments, passed to register_post_type()
 		 *
-		 * @see   register_post_type
+		 * @see register_post_type
 		 */
 		$post_type_args = apply_filters( 'tec_tickets_commerce_order_post_type_args', $post_type_args );
 
@@ -406,7 +407,7 @@ class Order extends Abstract_Order {
 	 *
 	 * @since 5.1.9
 	 *
-	 * @param Status\Status_Interface $status
+	 * @param Status\Status_Interface $status The order status object.
 	 *
 	 * @return string
 	 */
@@ -419,7 +420,7 @@ class Order extends Abstract_Order {
 	 *
 	 * @since 5.1.10
 	 *
-	 * @param Status\Status_Interface $status
+	 * @param Status\Status_Interface $status The order status object.
 	 *
 	 * @return string
 	 */
@@ -432,8 +433,8 @@ class Order extends Abstract_Order {
 	 *
 	 * @since 5.1.10
 	 *
-	 * @param string $flag   Which flag we are getting the meta key for.
-	 * @param string $status Which status ID we are getting the meta key for.
+	 * @param string                  $flag   Which flag we are getting the meta key for.
+	 * @param Status\Status_Interface $status Which status ID we are getting the meta key for.
 	 *
 	 * @return string
 	 */
@@ -609,12 +610,27 @@ class Order extends Abstract_Order {
 	 *
 	 * @since 5.1.9
 	 * @since 5.18.1 Now it will only create one order per cart hash. Every next time it will update the existing order.
+	 * @since 5.30.0 - Add parameter to specify the ticket type to filter the cart items.
+	 * @since 5.30.0 Resolves the cart repository by passing `$ticket_type` directly into
+	 *            `Cart::get_repository()`, so TC-RSVP orders read from `RSVP_Cart` instead of the
+	 *            generic cart.
+	 * @since 5.31.1.1 Returns false for a logged-out visitor when the login setting of the ticket type requires login.
+	 *
+	 * @param Gateway_Interface $gateway     The payment gateway.
+	 * @param array|null        $purchaser   The purchaser information.
+	 * @param string            $ticket_type The type of ticket to filter cart items.
 	 *
 	 * @return false|WP_Post
-	 * @throws \Tribe__Repository__Usage_Error
+	 * @throws \Tribe__Repository__Usage_Error When there is a repository usage error.
 	 */
-	public function create_from_cart( Gateway_Interface $gateway, $purchaser = null ) {
-		$cart = tribe( Cart::class );
+	public function create_from_cart( Gateway_Interface $gateway, $purchaser = null, $ticket_type = 'ticket' ) {
+		// Every gateway and the RSVP flow create their order here, so the login setting holds even on a path that skipped its own check.
+		if ( $this->must_login( (string) $ticket_type ) ) {
+			return false;
+		}
+
+		$cart        = tribe( Cart::class );
+		$cart_reader = $cart->get_repository( $ticket_type );
 
 		// Prepare the items for the order.
 		$items = array_filter(
@@ -629,7 +645,12 @@ class Order extends Abstract_Order {
 					}
 
 					// Ensure we have the properties we need on the ticket object.
-					if ( ! isset( $ticket->price, $ticket->regular_price ) ) {
+					if ( ! isset( $ticket->price ) ) {
+						// A ticket must have a price, that price could bo `0`.
+						return null;
+					}
+					if ( ! empty( $ticket->price ) && ! isset( $ticket->regular_price ) ) {
+						// If the prices is not `0`, then the ticket must have a regular price.
 						return null;
 					}
 
@@ -649,12 +670,12 @@ class Order extends Abstract_Order {
 						'type'              => $item['type'] ?? 'ticket',
 					];
 				},
-				$cart->get_items_in_cart( true )
+				$cart_reader->get_items_in_cart( true, $ticket_type )
 			)
 		);
 
 		// Get the subtotal calculation from the cart.
-		$cart_subtotal = Value::create( $cart->get_cart_subtotal() );
+		$cart_subtotal = Value::create( $cart_reader->get_cart_subtotal() );
 
 		$original_cart_items = $items;
 
@@ -686,7 +707,7 @@ class Order extends Abstract_Order {
 		);
 
 		// Get the total calculation from the cart.
-		$cart_total = Value::create( $cart->get_cart_total() );
+		$cart_total = Value::create( $cart_reader->get_cart_total() );
 
 		/**
 		 * Filter the cart total before creating an order.
@@ -756,11 +777,11 @@ class Order extends Abstract_Order {
 	 *
 	 * @since 5.2.0
 	 *
-	 * @param Gateway_Interface $gateway
-	 * @param array             $args
+	 * @param Gateway_Interface $gateway The payment gateway.
+	 * @param array             $args    The order creation arguments.
 	 *
 	 * @return false|WP_Post
-	 * @throws \Tribe__Repository__Usage_Error
+	 * @throws \Tribe__Repository__Usage_Error When there is a repository usage error.
 	 *
 	 * @internal Use `upsert` instead.
 	 */
@@ -902,7 +923,8 @@ class Order extends Abstract_Order {
 	 *
 	 * @since 5.1.9
 	 *
-	 * @param array $items List of events form.
+	 * @param array       $items List of events form.
+	 * @param string|null $hash  The cart hash.
 	 *
 	 * @return string
 	 */
@@ -954,16 +976,17 @@ class Order extends Abstract_Order {
 	 * @param bool $redirect   Whether to really redirect or not.
 	 * @param int  $post_id    A post ID.
 	 *
-	 * @todo  Deprecate tpp_error
+	 * @todo Deprecate tpp_error
 	 *
-	 * @see   \Tribe__Tickets__Commerce__PayPal__Errors for error codes translations.
-	 * @todo  Determine if redirecting should be something relegated to some other method, and here we only generate
+	 * @see \Tribe__Tickets__Commerce__PayPal__Errors for error codes translations.
+	 * @todo Determine if redirecting should be something relegated to some other method, and here we only generate
 	 *        generate the order/Attendees.
 	 */
 	protected function redirect_after_error( $error_code, $redirect, $post_id ) {
 		$url = add_query_arg( 'tpp_error', $error_code, get_permalink( $post_id ) );
 		if ( $redirect ) {
-			wp_redirect( esc_url_raw( $url ) );
+			wp_safe_redirect( esc_url_raw( $url ) );
+			die;
 		}
 		tribe_exit();
 	}
@@ -1653,5 +1676,47 @@ class Order extends Abstract_Order {
 		 * @param string $created_by The order created by.
 		 */
 		return apply_filters( 'tec_tickets_commerce_order_created_by', $translated, $order_id );
+	}
+
+	/**
+	 * Returns whether the current visitor must log in before ordering tickets of a type.
+	 *
+	 * The one place the login settings are read for orders: the create-order routes, the cart and
+	 * order creation all ask here. TC-RSVP orders follow the RSVP setting; any other order follows the
+	 * purchase setting, plus the RSVP setting when the cart holds a TC-RSVP ticket.
+	 *
+	 * @since 5.31.1.1
+	 *
+	 * @param string $ticket_type The type of ticket in the order.
+	 *
+	 * @return bool Whether the visitor must log in first.
+	 */
+	public function must_login( string $ticket_type = 'ticket' ): bool {
+		if ( is_user_logged_in() ) {
+			return false;
+		}
+
+		$rsvp_login_required = in_array( 'event-tickets_rsvp', (array) tribe_get_option( 'ticket-authentication-requirements', [] ), true );
+
+		if ( RSVP_Constants::TC_RSVP_TYPE === $ticket_type ) {
+			return $rsvp_login_required;
+		}
+
+		if ( tribe( Module::class )->login_required() ) {
+			return true;
+		}
+
+		if ( ! $rsvp_login_required ) {
+			return false;
+		}
+
+		// The generic cart takes any ticket ID, so a TC-RSVP ticket can reach a gateway order through it.
+		foreach ( tribe( Cart::class )->get_repository( $ticket_type )->get_items_in_cart() as $item ) {
+			if ( RSVP_Constants::TC_RSVP_TYPE === get_post_meta( (int) ( $item['ticket_id'] ?? 0 ), Ticket::$type_meta_key, true ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

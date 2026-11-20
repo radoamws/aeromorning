@@ -1,10 +1,30 @@
 <?php
 // don't load directly
+use TEC\Tickets\RSVP\V2\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	die( '-1' );
 }
 
 class Tribe__Tickets__Tickets_View {
+
+	/**
+	 * The nonce action that guards attendee updates from the My Tickets page.
+	 *
+	 * @since 5.30.3
+	 *
+	 * @var string
+	 */
+	private const MY_TICKETS_NONCE_ACTION = 'tec_tickets_my_tickets_update';
+
+	/**
+	 * The name of the field that carries the My Tickets nonce.
+	 *
+	 * @since 5.30.3
+	 *
+	 * @var string
+	 */
+	private const MY_TICKETS_NONCE_FIELD = 'tec_tickets_my_tickets_nonce';
 
 	/**
 	 * Get (and instantiate, if necessary) the instance of the class.
@@ -27,6 +47,7 @@ class Tribe__Tickets__Tickets_View {
 
 		add_action( 'template_redirect', [ $myself, 'authorization_redirect' ] );
 		add_action( 'template_redirect', [ $myself, 'update_tickets' ] );
+		add_action( 'tribe_tickets_orders_before_submit', [ $myself, 'render_my_tickets_nonce_field' ] );
 
 		// Generate Non TEC Permalink.
 		add_action( 'generate_rewrite_rules', [ $myself, 'add_non_event_permalinks' ] );
@@ -180,6 +201,9 @@ class Tribe__Tickets__Tickets_View {
 	 * Update the RSVP and Tickets values for each Attendee.
 	 *
 	 * @since 5.8.2 Removed optional param from get_tickets_page_url call.
+	 * @since 5.30.3 Refuses the update unless the user is logged in and the My Tickets nonce verifies.
+	 *
+	 * @return void
 	 */
 	public function update_tickets() {
 		$is_correct_page = $this->is_edit_page();
@@ -204,6 +228,19 @@ class Tribe__Tickets__Tickets_View {
 		}
 
 		$post_id = get_the_ID();
+
+		/*
+		 * The ownership checks downstream compare against the current user id, which is 0 for every
+		 * logged-out visitor and for every guest-checkout attendee, so a logged-out request is refused
+		 * here rather than relying on `authorization_redirect()` running first.
+		 */
+		if (
+			! is_user_logged_in()
+			|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST[ self::MY_TICKETS_NONCE_FIELD ] ?? '' ) ), self::MY_TICKETS_NONCE_ACTION )
+		) {
+			wp_safe_redirect( esc_url_raw( $this->get_tickets_page_url( $post_id ) ) );
+			exit;
+		}
 
 		$attendees = [];
 
@@ -247,6 +284,19 @@ class Tribe__Tickets__Tickets_View {
 	}
 
 	/**
+	 * Prints the nonce that `update_tickets()` requires inside the My Tickets form.
+	 *
+	 * Printed from an action rather than the template so theme overrides of `tickets/orders.php` get it too.
+	 *
+	 * @since 5.30.3
+	 *
+	 * @return void
+	 */
+	public function render_my_tickets_nonce_field(): void {
+		wp_nonce_field( self::MY_TICKETS_NONCE_ACTION, self::MY_TICKETS_NONCE_FIELD, false );
+	}
+
+	/**
 	 * Helper function to generate the Link to the tickets page of an event.
 	 *
 	 * @since 4.7.1
@@ -284,7 +334,7 @@ class Tribe__Tickets__Tickets_View {
 		// Handle pretty permalinks for non-event posts.
 		$bases        = $this->add_rewrite_base_slug();
 		$tickets_slug = $bases['tickets'][0] ?? 'tickets';
-		
+
 		return home_url( untrailingslashit( "{$tickets_slug}/{$event_id}" ) );
 	}
 
@@ -299,8 +349,9 @@ class Tribe__Tickets__Tickets_View {
 		 */
 		$is_event_query = ! empty( $GLOBALS['wp_query']->tribe_is_event_query );
 
-		// When it's not Events Query and we have TEC active we dont care
-		if ( class_exists( 'Tribe__Events__Main' ) && ! $is_event_query ) {
+		// When it's not Events Query and we have TEC active we don't care.
+		// Non-event queries can still be tickets pages (e.g. pretty permalink `/tickets/{id}`), so let those through.
+		if ( class_exists( 'Tribe__Events__Main', false ) && ! $is_event_query && ! $this->is_edit_page() ) {
 			return;
 		}
 
@@ -319,8 +370,10 @@ class Tribe__Tickets__Tickets_View {
 			return;
 		}
 
-		// Loop back to the Event, this page is only for Logged users
-		wp_redirect( get_permalink() );
+		// Loop back to the Event, this page is only for Logged users.
+		// The `tribe_redirected` query arg prevents TEC from stopping the redirect on non-view URLs
+		// (see `Tribe\Events\Views\V2\Hooks::filter_redirect_canonical`).
+		wp_safe_redirect( add_query_arg( 'tribe_redirected', 1, get_permalink() ) );
 		exit;
 	}
 
@@ -408,7 +461,7 @@ class Tribe__Tickets__Tickets_View {
 	 *
 	 * @since 4.11.2 Avoid running when it shouldn't by bailing if not in main query loop on a single post.
 	 * @since 5.25.0 Added filter to preserve tribe-edit-orders parameter in canonical redirect.
-	 * 
+	 *
 	 * @param string $content Normally the_content of a post.
 	 *
 	 * @return string
@@ -787,11 +840,18 @@ class Tribe__Tickets__Tickets_View {
 	/**
 	 * Counts the Amount of Tickets attendees.
 	 *
-	 * @param int       $event_id     The Event ID we're checking.
-	 * @param int|null  $user_id      An Optional User ID.
-	 * @return int
+	 * @since 4.10.8
+	 * @since 5.30.0 Added the `$context` parameter and arguments filtering.
+	 * @since 5.30.0 Excluded RSVP V2 (TC-RSVP) attendees, which share the Tickets Commerce
+	 *        attendee/provider with regular tickets and were not caught by `provider__not_in`.
+	 *
+	 * @param int      $event_id The Event ID we're checking.
+	 * @param int|null $user_id  An Optional User ID.
+	 * @param string   $context  The Context of the call, used to filter the attendees count.
+	 *
+	 * @return int The Amount of Tickets attendees.
 	 */
-	public function count_ticket_attendees( $event_id, $user_id = null ) {
+	public function count_ticket_attendees( $event_id, $user_id = null, string $context = '' ) {
 		if ( ! $user_id && null !== $user_id ) {
 			// No attendees for this user.
 			return 0;
@@ -799,8 +859,9 @@ class Tribe__Tickets__Tickets_View {
 
 		$args = [
 			'by' => [
-				'provider__not_in' => 'rsvp',
-				'status'           => 'publish',
+				'provider__not_in'    => 'rsvp',
+				'ticket_type__not_in' => Constants::TC_RSVP_TYPE,
+				'status'              => 'publish',
 			],
 		];
 
@@ -808,6 +869,30 @@ class Tribe__Tickets__Tickets_View {
 		if ( $user_id ) {
 			$args['by']['user'] = $user_id;
 		}
+
+		/**
+		 * Filters the arguments used to count the Tickets attendees.
+		 *
+		 * @since 5.30.0
+		 *
+		 * @param array $args    {
+		 *      List of arguments to filter attendees by.
+		 *
+		 *      @type array $by          List of ORM->by() filters to use. [what=>[args...]], [what=>arg], or
+		 *                               [[what,args...]] format.
+		 *      @type array $where_multi List of ORM->where_multi() filters to use. [[what,args...]] format.
+		 * }
+		 * @param int   $event_id   The Event ID we're checking.
+		 * @param int   $user_id    An Optional User ID.
+		 * @param string $context    The Context of the call, used to filter the attendees count.
+		 */
+		$args = apply_filters(
+			'tec_tickets_view_count_ticket_attendees_args',
+			$args,
+			$event_id,
+			$user_id,
+			$context
+		);
 
 		return Tribe__Tickets__Tickets::get_event_attendees_count( $event_id, $args );
 	}
@@ -837,6 +922,27 @@ class Tribe__Tickets__Tickets_View {
 	}
 
 	/**
+	 * Verifies if we have RSVP V2 (Tickets Commerce backed) attendees for this user and event.
+	 *
+	 * RSVP V2 attendees are Tickets Commerce attendees (provider `tc`), so they are not caught
+	 * by `has_ticket_attendees()` (which excludes the TC-RSVP ticket type) nor by the RSVP V1
+	 * templates. This check lets the My Tickets page route them through the Tickets Commerce
+	 * templates that render the RSVP V2 UI.
+	 *
+	 * @since 5.30.0
+	 *
+	 * @param int      $event_id The Event ID we're checking.
+	 * @param int|null $user_id  An Optional User ID.
+	 *
+	 * @return bool Whether the user has RSVP V2 attendees for the event.
+	 */
+	public function has_rsvp_v2_attendees( $event_id, $user_id = null ) {
+		$attendees = $this->get_event_rsvp_attendees( $event_id, $user_id );
+
+		return ! empty( $attendees ) && 'tc' === ( $attendees[0]['provider_slug'] ?? '' );
+	}
+
+	/**
 	 * Gets the name(s) of the type(s) of ticket(s) the specified user (optional) has for the specified event.
 	 *
 	 * @since 4.2
@@ -853,7 +959,7 @@ class Tribe__Tickets__Tickets_View {
 
 		$rsvp_count = $this->count_rsvp_attendees( $event_id, $user_id );
 
-		$ticket_count = $this->count_ticket_attendees( $event_id, $user_id );
+		$ticket_count = $this->count_ticket_attendees( $event_id, $user_id, 'get_description_rsvp_ticket' );
 
 		if ( 1 === $rsvp_count ) {
 			$descriptions[] = tribe_get_rsvp_label_singular( 'tickets_view_description' );
@@ -1078,6 +1184,22 @@ class Tribe__Tickets__Tickets_View {
 
 		$tickets = $provider->get_tickets( $post_id );
 
+		$rsvp = null;
+
+		foreach ( $tickets as $index => $ticket ) {
+			if ( Constants::TC_RSVP_TYPE === $ticket->type ) {
+				$rsvp = $ticket;
+				unset( $tickets[ $index ] );
+				// Reindex $tickets array to avoid gaps in keys.
+				$tickets = array_values( $tickets );
+			}
+		}
+
+		// RSVPs are rendered by get_rsvp_block(); if no non-RSVP tickets remain, there is nothing to render here.
+		if ( empty( $tickets ) ) {
+			return '';
+		}
+
 		$args = [
 			'post_id'                     => $post_id,
 			'provider'                    => $provider,
@@ -1221,6 +1343,7 @@ class Tribe__Tickets__Tickets_View {
 	 * Gets the RSVP block template "out of context" and makes it usable for Classic views.
 	 *
 	 * @since 4.12.3
+	 * @since 5.30.1 Filters `$include_tickets` without Event Tickets Plus and computes the active and all-past RSVP state from the included tickets only.
 	 *
 	 * @param WP_Post|int $post The post object or ID.
 	 * @param boolean     $echo Whether to echo the output or not.
@@ -1270,15 +1393,20 @@ class Tribe__Tickets__Tickets_View {
 		// Load assets manually.
 		$blocks_rsvp->assets();
 
-		$tickets        = $blocks_rsvp->get_tickets( $post_id );
+		$tickets = $blocks_rsvp->get_tickets( $post_id );
+
+		if ( $include_tickets ) {
+			$include_tickets = wp_parse_id_list( $include_tickets );
+			$tickets         = array_values(
+				array_filter(
+					$tickets,
+					static fn( $ticket ) => in_array( absint( $ticket->ID ), $include_tickets, true )
+				)
+			);
+		}
+
 		$active_tickets = $blocks_rsvp->get_active_tickets( $tickets );
 		$past_tickets   = $blocks_rsvp->get_all_tickets_past( $tickets );
-
-		if( class_exists( 'Tribe__Tickets_Plus__Main' ) && ! empty( $include_tickets ) ) {
-			$tickets        = Tribe__Tickets_Plus__Tickets::filter_tickets_by_ids( $tickets, $include_tickets );
-			$active_tickets = Tribe__Tickets_Plus__Tickets::filter_tickets_by_ids( $active_tickets, $include_tickets );
-			$past_tickets   = Tribe__Tickets_Plus__Tickets::filter_tickets_by_ids( $past_tickets, $include_tickets );
-		}
 
 		$args = [
 			'post_id'             => $post_id,
@@ -1367,7 +1495,35 @@ class Tribe__Tickets__Tickets_View {
 
 		// Maybe render the new views.
 		if ( tribe_tickets_rsvp_new_views_is_enabled() ) {
-			// Enqueue new assets.
+			/**
+			 * Filters the content for RSVP templates within the RSVP block.
+			 *
+			 * Allows customization of RSVP rendering, including V2 RSVP tickets which
+			 * render with their own specialized UI.
+			 *
+			 * @since 5.30.0
+			 *
+			 * @param string                           $content  The template content to be rendered.
+			 * @param array<string,mixed>              $args     The RSVP block arguments.
+			 * @param Tribe__Tickets__Editor__Template $template The template object.
+			 * @param WP_Post                          $post     The post object.
+			 * @param bool                             $echo     Whether to echo the output.
+			 */
+			$rendered_content = apply_filters(
+				'tec_tickets_front_end_rsvp_form_template_content',
+				$before_content,
+				$args,
+				$template,
+				$post,
+				$echo
+			);
+
+			// If the filter returned content, use it (V2 RSVP enqueues its own assets).
+			if ( $rendered_content !== $before_content ) {
+				return $rendered_content;
+			}
+
+			// Enqueue legacy RSVP assets only if the render was not overridden.
 			tribe_asset_enqueue_group( 'tribe-tickets-rsvp' );
 			tribe_asset_enqueue( 'tribe-tickets-rsvp-style' );
 			tribe_asset_enqueue( 'tribe-tickets-forms-style' );
@@ -1401,7 +1557,7 @@ class Tribe__Tickets__Tickets_View {
 		$post_type_singular = $post_type ? $post_type->labels->singular_name : _x( 'Post', 'fallback post type singular name', 'event-tickets' );
 		$counters           = [];
 		$rsvp_count         = $this->count_rsvp_attendees( $event_id, $user_id );
-		$ticket_count       = $this->count_ticket_attendees( $event_id, $user_id );
+		$ticket_count       = $this->count_ticket_attendees( $event_id, $user_id, 'get_my_tickets_link_data' );
 
 		$count_by_type = [
 			'rsvp'   => [
@@ -1532,7 +1688,7 @@ class Tribe__Tickets__Tickets_View {
 			$query_vars['page_id'] = $post->ID;
 			unset( $query_vars['p'] );
 		}
-		
+
 		return $query_vars;
 	}
 }

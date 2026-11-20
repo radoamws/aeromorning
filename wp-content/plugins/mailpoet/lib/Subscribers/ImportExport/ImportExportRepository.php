@@ -272,7 +272,12 @@ class ImportExportRepository {
         {$subscriberTable}.confirmed_ip,
         {$subscriberTable}.created_at,
         {$subscriberTable}.last_subscribed_at,
+        {$subscriberTable}.tracking_consent,
+        {$subscriberTable}.tracking_consent_updated_at,
+        {$subscriberTable}.tracking_consent_method,
+        {$subscriberTable}.tracking_consent_copy,
         {$subscriberTable}.status AS global_status,
+        {$subscriberTable}.source,
         {$subscriberSegmentTable}.status AS list_status
       ")
       ->from($subscriberTable)
@@ -309,6 +314,19 @@ class ImportExportRepository {
       ->leftJoin($subscriberCustomFieldTable, $customFieldsTable, $customFieldsTable, "{$customFieldsTable}.id = {$subscriberCustomFieldTable}.custom_field_id");
 
     return $qb;
+  }
+
+  /**
+   * Bulk consent writes go straight to SQL, so Doctrine's lifecycle listener never
+   * sees them and the consent-changed hook would not fire. Import reports the
+   * transitions it made here instead.
+   *
+   * @param array<int, array{0: string, 1: string}> $changes old and new consent, keyed by subscriber id
+   */
+  public function notifyTrackingConsentChanges(array $changes): void {
+    foreach ($changes as $subscriberId => list($oldConsent, $newConsent)) {
+      $this->subscriberChangesNotifier->subscriberTrackingConsentChanged((int)$subscriberId, $oldConsent, $newConsent);
+    }
   }
 
   private function notifyCreations(string $className, array $columns, array $data): void {

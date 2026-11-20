@@ -41,6 +41,7 @@ class BulletProof {
         "png",
         "gif",
         "webp",
+        "avif",
         "svg"
     );
 
@@ -154,7 +155,7 @@ class BulletProof {
             "xmb",
             "ico",
             "webp",
-            "svg"
+            "avif"
         );
 
         $imageType = ImageEdit::exif_imagetype($imageName);

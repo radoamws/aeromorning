@@ -102,14 +102,14 @@ class __TwigTemplate_8a6f0398fffc82506ba46e70538b728a453c02bea83ac685560c22b44c4
             // line 28
             yield $this->extensions['MailPoet\Twig\Functions']->jsonEncode(($context["current_wp_user"] ?? null));
             yield ";
-      var mailpoet_current_wp_user_firstname = '";
+      var mailpoet_current_wp_user_firstname = \x27";
             // line 29
             yield $this->env->getRuntime('MailPoetVendor\Twig\Runtime\EscaperRuntime')->escape(($context["current_wp_user_firstname"] ?? null), "html", null, true);
-            yield "';
-      var mailpoet_review_request_illustration_url = '";
+            yield "\x27;
+      var mailpoet_review_request_illustration_url = \x27";
             // line 30
             yield $this->extensions['MailPoet\Twig\Assets']->generateCdnUrl("review-request/review-request-illustration.20190815-1427.svg");
-            yield "';
+            yield "\x27;
     ";
         }
         // line 32
@@ -123,8 +123,8 @@ class __TwigTemplate_8a6f0398fffc82506ba46e70538b728a453c02bea83ac685560c22b44c4
     {
         $macros = $this->macros;
         yield "<script type=\"text/javascript\">
-  jQuery('#mailpoet_helper_link').on('click', function() {
-    MailPoet.trackEvent('Forms page > link to doc page');
+  jQuery(\x27#mailpoet_helper_link\x27).on(\x27click\x27, function() {
+    MailPoet.trackEvent(\x27Forms page > link to doc page\x27);
   });
 </script>
 ";

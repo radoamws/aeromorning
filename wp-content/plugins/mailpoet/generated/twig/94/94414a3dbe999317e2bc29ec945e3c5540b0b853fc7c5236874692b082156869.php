@@ -42,32 +42,32 @@ class __TwigTemplate_52b5c9ea631c938881f989f0726722fe169a98767c0b2a4158d04455a1e
   <div class=\"mailpoet-deactivate-survey-wrap\">
     <div class=\"mailpoet-deactivate-survey\">
       <script type=\"text/javascript\">
-        window.addEventListener('load', function() {
-          var deactivateLink = document.querySelector('#the-list [data-slug=\"mailpoet\"] span.deactivate a');
-          var overlay = document.querySelector('#mailpoet-deactivate-survey-modal');
-          var closeButton = document.querySelector('#mailpoet-deactivate-survey-close');
+        window.addEventListener(\x27load\x27, function() {
+          var deactivateLink = document.querySelector(\x27#the-list [data-slug=\"mailpoet\"] span.deactivate a\x27);
+          var overlay = document.querySelector(\x27#mailpoet-deactivate-survey-modal\x27);
+          var closeButton = document.querySelector(\x27#mailpoet-deactivate-survey-close\x27);
           var formOpen = false;
 
           if (!deactivateLink || !overlay || !closeButton) {
             return;
           }
 
-          deactivateLink.addEventListener('click', function (event) {
+          deactivateLink.addEventListener(\x27click\x27, function (event) {
             event.preventDefault();
-            overlay.style.display = 'table';
+            overlay.style.display = \x27table\x27;
             formOpen = true;
           });
 
-          closeButton.addEventListener('click', function (event) {
+          closeButton.addEventListener(\x27click\x27, function (event) {
             event.preventDefault();
-            overlay.style.display = 'none';
+            overlay.style.display = \x27none\x27;
             formOpen = false;
-            location.href = deactivateLink.getAttribute('href');
+            location.href = deactivateLink.getAttribute(\x27href\x27);
           });
 
-          document.addEventListener('keyup', function (event) {
+          document.addEventListener(\x27keyup\x27, function (event) {
             if ((event.keyCode === 27) && formOpen) {
-              location.href = deactivateLink.getAttribute('href');
+              location.href = deactivateLink.getAttribute(\x27href\x27);
             }
           });
         });
@@ -75,11 +75,11 @@ class __TwigTemplate_52b5c9ea631c938881f989f0726722fe169a98767c0b2a4158d04455a1e
         // This callback is by docs, and guarantees that the modal window is closed and deactivated only after the vote has been submitted
         var pd_callback = function(json) {
           var obj = JSON.parse(json);
-          var deactivateLink = document.querySelector('#the-list [data-slug=\"mailpoet\"] span.deactivate a');
-          var overlay = document.querySelector('#mailpoet-deactivate-survey-modal');
-          if (obj.result === 'already-registered' || obj.result === 'registered') {
-            overlay.style.display = 'none';
-            location.href = deactivateLink.getAttribute('href');
+          var deactivateLink = document.querySelector(\x27#the-list [data-slug=\"mailpoet\"] span.deactivate a\x27);
+          var overlay = document.querySelector(\x27#mailpoet-deactivate-survey-modal\x27);
+          if (obj.result === \x27already-registered\x27 || obj.result === \x27registered\x27) {
+            overlay.style.display = \x27none\x27;
+            location.href = deactivateLink.getAttribute(\x27href\x27);
           }
         };
       </script>
@@ -87,7 +87,7 @@ class __TwigTemplate_52b5c9ea631c938881f989f0726722fe169a98767c0b2a4158d04455a1e
 
       <noscript><a href=\"https://poll.fm/11161195\">";
         // line 48
-        yield $this->extensions['MailPoet\Twig\I18n']->translate("We're sorry to see you leave. Could you tell us more why are you deactivating MailPoet?");
+        yield $this->extensions['MailPoet\Twig\I18n']->translate("We\x27re sorry to see you leave. Could you tell us more why are you deactivating MailPoet?");
         yield "</a></noscript>
 
       <a class=\"button\" id=\"mailpoet-deactivate-survey-close\">";

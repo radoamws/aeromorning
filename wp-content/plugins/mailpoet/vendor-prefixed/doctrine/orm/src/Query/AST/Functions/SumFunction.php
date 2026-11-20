@@ -7,13 +7,13 @@ use MailPoetVendor\Doctrine\ORM\Query\Parser;
 use MailPoetVendor\Doctrine\ORM\Query\SqlWalker;
 final class SumFunction extends FunctionNode
 {
- private $aggregateExpression;
- public function getSql(SqlWalker $sqlWalker) : string
- {
- return $this->aggregateExpression->dispatch($sqlWalker);
- }
- public function parse(Parser $parser) : void
- {
- $this->aggregateExpression = $parser->AggregateExpression();
- }
+private $aggregateExpression;
+public function getSql(SqlWalker $sqlWalker): string
+{
+return $this->aggregateExpression->dispatch($sqlWalker);
+}
+public function parse(Parser $parser): void
+{
+$this->aggregateExpression = $parser->AggregateExpression();
+}
 }

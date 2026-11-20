@@ -131,12 +131,9 @@ class Admin_Settings extends Base {
 							}
 
 							if ( self::CDN_MAPPING_URL === $child ) {
-								// If not a valid URL, turn off CDN.
-								if ( 0 !== strpos( $v, 'https://' ) ) {
-									self::debug( '❌ CDN mapping set to OFF due to invalid URL' );
-									$the_matrix[ self::O_CDN ] = false;
+								if ( '' !== $v ) {
+									$v = trailingslashit( $v );
 								}
-								$v = trailingslashit( $v );
 							}
 
 							if ( in_array( $child, [ self::CDN_MAPPING_INC_IMG, self::CDN_MAPPING_INC_CSS, self::CDN_MAPPING_INC_JS ], true ) ) {
@@ -215,11 +212,29 @@ class Admin_Settings extends Base {
 					}
 					$data = $data2;
 					break;
-					
+
 				case self::O_IMG_OPTM_SIZES_SKIPPED: // Skip image sizes
 					$image_sizes = Utility::prepare_image_sizes_array();
 					$saved_sizes = isset( $raw_data[$id] ) ? $raw_data[$id] : [];
 					$data        = array_diff( $image_sizes, $saved_sizes );
+					break;
+
+				case self::O_OBJECT_HOST: // Accepts an IP, a hostname, or an absolute UNIX socket path.
+					$data  = trim( (string) $data );
+					$first = substr( $data, 0, 1 );
+
+					if ( '' === $data || '/' === $first ) {
+						// Empty means unset/use default; a leading slash is an absolute UNIX socket path.
+						$valid = true;
+					} else {
+						// Validates both hostname and IP; values starting with ~ are rejected by filter_var.
+						$valid = false !== filter_var( $data, FILTER_VALIDATE_IP ) || false !== filter_var( $data, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME );
+					}
+
+					if ( ! $valid ) {
+						Admin_Display::error( __( 'Object Cache: Invalid host. Use an IP address, a hostname or an absolute UNIX socket path. Old value was restored.', 'litespeed-cache' ) );
+						$data = $this->conf( $id ); // Revert to existing value to avoid saving invalid data.
+					}
 					break;
 
 				default:
@@ -249,6 +264,27 @@ class Admin_Settings extends Base {
 					}
 					// All empty.
 					unset( $the_matrix[ $id ][ $k ] );
+				}
+			}
+
+			// Auto-strip filetypes whose row toggle is ON, mirroring CDN::init() so the saved list stays clean while preserving opt-out for toggles that are OFF.
+			if ( self::O_CDN_MAPPING === $id ) {
+				$auto_managed = CDN::auto_managed_filetypes();
+				foreach ( $the_matrix[ $id ] as $k => $row ) {
+					if ( empty( $row[ self::CDN_MAPPING_FILETYPE ] ) || ! is_array( $row[ self::CDN_MAPPING_FILETYPE ] ) ) {
+						continue;
+					}
+					$strip = [];
+					foreach ( $auto_managed as $toggle => $exts ) {
+						if ( ! empty( $row[ $toggle ] ) ) {
+							$strip = array_merge( $strip, $exts );
+						}
+					}
+					if ( ! empty( $strip ) ) {
+						$the_matrix[ $id ][ $k ][ self::CDN_MAPPING_FILETYPE ] = array_values(
+							array_diff( $row[ self::CDN_MAPPING_FILETYPE ], $strip )
+						);
+					}
 				}
 			}
 

@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the WordPress - 7.1.x - Development - Continents & Cities package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-07-03 15:47:00+0000\n"
+"PO-Revision-Date: 2026-10-22 08:38:49+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -238,10 +238,6 @@ msgstr "Saint Thomas"
 #: wp-admin/includes/continents-cities.php:219
 msgid "St Vincent"
 msgstr "Saint Vincent"
-
-#: wp-admin/includes/continents-cities.php:234
-msgid "Antarctica"
-msgstr "Antartique"
 
 #: wp-admin/includes/continents-cities.php:243
 msgid "South Pole"
@@ -1611,6 +1607,10 @@ msgstr "Shanghai"
 msgid "Qatar"
 msgstr "Qatar"
 
+#: wp-admin/includes/continents-cities.php:234
+msgid "Antarctica"
+msgstr "Antarctique"
+
 #: wp-admin/includes/continents-cities.php:12
 msgid "Africa"
 msgstr "Afrique"
@@ -2121,4 +2121,4 @@ msgstr "N’Djamena"
 
 #: wp-admin/includes/continents-cities.php:135
 msgid "Guyana"
-msgstr "Guyane"
+msgstr "Guyana"

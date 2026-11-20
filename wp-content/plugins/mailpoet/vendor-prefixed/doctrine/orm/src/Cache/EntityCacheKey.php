@@ -8,13 +8,13 @@ use function str_replace;
 use function strtolower;
 class EntityCacheKey extends CacheKey
 {
- public $identifier;
- public $entityClass;
- public function __construct($entityClass, array $identifier)
- {
- ksort($identifier);
- $this->identifier = $identifier;
- $this->entityClass = $entityClass;
- parent::__construct(str_replace('\\', '.', strtolower($entityClass) . '_' . implode(' ', $identifier)));
- }
+public $identifier;
+public $entityClass;
+public function __construct($entityClass, array $identifier)
+{
+ksort($identifier);
+$this->identifier = $identifier;
+$this->entityClass = $entityClass;
+parent::__construct(str_replace('\\', '.', strtolower($entityClass) . '_' . implode(' ', $identifier)));
+}
 }

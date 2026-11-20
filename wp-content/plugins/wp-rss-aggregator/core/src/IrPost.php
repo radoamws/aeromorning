@@ -51,6 +51,8 @@ class IrPost {
 	public ?DateTime $datePublished = null;
 	/** The date the post was last modified, if any. */
 	public ?DateTime $dateModified = null;
+	/** The date the post was imported by WPRA, if any. */
+	public ?DateTime $dateImported = null;
 	/** The featured image of the post, if any. */
 	public ?IrImage $ftImage = null;
 	/** Whether comments on the post are open. */
@@ -69,6 +71,10 @@ class IrPost {
 	// These properties are not saved in the database
 	public string $attribution = '';
 	public string $audio = '';
+	public string $preContent = '';
+	public string $postContent = '';
+	public string $preTitle = '';
+	public string $postTitle = '';
 
 	/**
 	 * Constructor.
@@ -169,8 +175,9 @@ class IrPost {
 			'rawContent' => $this->content,
 			'excerpt' => $this->excerpt,
 			'author' => $this->author ? $this->author->toArray() : null,
-			'datePublished' => $this->datePublished ? Time::toHumanFormat( $this->datePublished ) : null,
-			'dateModified' => $this->dateModified ? Time::toHumanFormat( $this->dateModified ) : null,
+			'datePublished' => $this->datePublished ? $this->datePublished->format( DATE_ATOM ) : null,
+			'dateModified' => $this->dateModified ? $this->dateModified->format( DATE_ATOM ) : null,
+			'dateImported' => $this->dateImported ? $this->dateImported->format( DATE_ATOM ) : null,
 			'commentsOpen' => $this->commentsOpen,
 			'ftImage' => $this->ftImage ? $this->ftImage->toArray() : null,
 			'images' => Arrays::toArrayAll( $this->images ),
@@ -180,6 +187,10 @@ class IrPost {
 			'extra' => array(
 				'attribution' => $this->attribution,
 				'audio' => $this->audio,
+				'preContent' => $this->preContent,
+				'postContent' => $this->postContent,
+				'preTitle' => $this->preTitle,
+				'postTitle' => $this->postTitle,
 			),
 		);
 	}
@@ -202,8 +213,10 @@ class IrPost {
 			}
 		}
 
-		$dateModified = wp_resolve_post_date( $post->post_modified, $post->post_modified_gmt ) ?? current_time( 'mysql' );
-		$datePublished = wp_resolve_post_date( $post->post_date, $post->post_date_gmt ) ?? $dateModified;
+		$dateModified = Time::fromWpPostDate( $post->post_modified, $post->post_modified_gmt );
+		$datePublished = Time::fromWpPostDate( $post->post_date, $post->post_date_gmt ) ?? $dateModified;
+		$importDateStr = get_post_meta( $post->ID, ImportedPost::IMPORT_DATE, true );
+		$dateImported = is_string( $importDateStr ) && $importDateStr !== '' ? Time::createAndCatch( $importDateStr ) : null;
 
 		$irPost = new IrPost( $guid, $post->ID, $sources, $url );
 		$irPost->type = $post->post_type;
@@ -213,8 +226,9 @@ class IrPost {
 		$irPost->title = $post->post_title;
 		$irPost->excerpt = $post->post_excerpt;
 		$irPost->content = $post->post_content;
-		$irPost->datePublished = Time::createAndCatch( $datePublished );
-		$irPost->dateModified = Time::createAndCatch( $dateModified );
+		$irPost->datePublished = $datePublished;
+		$irPost->dateModified = $dateModified;
+		$irPost->dateImported = $dateImported;
 		$irPost->commentsOpen = ( strtolower( $post->comment_status ) === 'open' );
 		$irPost->password = $post->post_password;
 		$irPost->images = array();

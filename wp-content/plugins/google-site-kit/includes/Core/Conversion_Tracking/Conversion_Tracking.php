@@ -15,6 +15,7 @@ namespace Google\Site_Kit\Core\Conversion_Tracking;
 use Google\Site_Kit\Context;
 use Google\Site_Kit\Core\Assets\Script;
 use Google\Site_Kit\Core\Conversion_Tracking\Conversion_Event_Providers\Contact_Form_7;
+use Google\Site_Kit\Core\Conversion_Tracking\Conversion_Event_Providers\Content_Events;
 use Google\Site_Kit\Core\Conversion_Tracking\Conversion_Event_Providers\Easy_Digital_Downloads;
 use Google\Site_Kit\Core\Conversion_Tracking\Conversion_Event_Providers\Mailchimp;
 use Google\Site_Kit\Core\Conversion_Tracking\Conversion_Event_Providers\Ninja_Forms;
@@ -23,6 +24,7 @@ use Google\Site_Kit\Core\Conversion_Tracking\Conversion_Event_Providers\PopupMak
 use Google\Site_Kit\Core\Conversion_Tracking\Conversion_Event_Providers\WooCommerce;
 use Google\Site_Kit\Core\Conversion_Tracking\Conversion_Event_Providers\WPForms;
 use Google\Site_Kit\Core\Storage\Options;
+use Google\Site_Kit\Core\Tags\Enhanced_Conversions\Enhanced_Conversions;
 use Google\Site_Kit\Core\Tags\GTag;
 use Google\Site_Kit\Core\Tracking\Feature_Metrics_Trait;
 use Google\Site_Kit\Core\Tracking\Provides_Feature_Metrics;
@@ -70,10 +72,12 @@ class Conversion_Tracking implements Provides_Feature_Metrics {
 	 *
 	 * @since 1.126.0
 	 * @since 1.130.0 Added Ninja Forms class.
+	 * @since 1.186.0 Added Content_Events class.
 	 * @var array
 	 */
 	public static $providers = array(
 		Contact_Form_7::CONVERSION_EVENT_PROVIDER_SLUG => Contact_Form_7::class,
+		Content_Events::CONVERSION_EVENT_PROVIDER_SLUG => Content_Events::class,
 		Easy_Digital_Downloads::CONVERSION_EVENT_PROVIDER_SLUG => Easy_Digital_Downloads::class,
 		Mailchimp::CONVERSION_EVENT_PROVIDER_SLUG      => Mailchimp::class,
 		Ninja_Forms::CONVERSION_EVENT_PROVIDER_SLUG    => Ninja_Forms::class,
@@ -108,9 +112,13 @@ class Conversion_Tracking implements Provides_Feature_Metrics {
 		$this->rest_conversion_tracking_controller->register();
 		$this->register_feature_metrics();
 
-		add_action( 'wp_enqueue_scripts', fn () => $this->maybe_enqueue_scripts(), 30 );
-
 		add_filter( 'googlesitekit_inline_base_data', $this->get_method_proxy( 'inline_js_base_data' ) );
+
+		if ( ! $this->conversion_tracking_settings->is_conversion_tracking_enabled() ) {
+			return;
+		}
+
+		add_action( 'wp_enqueue_scripts', fn () => $this->maybe_enqueue_scripts(), 30 );
 
 		$active_providers = $this->get_active_providers();
 
@@ -129,7 +137,6 @@ class Conversion_Tracking implements Provides_Feature_Metrics {
 		if (
 			// Do nothing if neither Ads nor Analytics *web* snippet has been inserted.
 			! ( did_action( 'googlesitekit_ads_init_tag' ) || did_action( 'googlesitekit_analytics-4_init_tag' ) )
-			|| ! $this->conversion_tracking_settings->is_conversion_tracking_enabled()
 		) {
 			return;
 		}
@@ -146,7 +153,12 @@ class Conversion_Tracking implements Provides_Feature_Metrics {
 			}
 		);
 
-		$gtag_event = '
+		$user_data_params = wp_json_encode(
+			array( 'developer_id.' . Enhanced_Conversions::USER_DATA_DEVELOPER_ID => true )
+		);
+
+		$gtag_event = sprintf(
+			'
 			window._googlesitekit = window._googlesitekit || {};
 			window._googlesitekit.throttledEvents = [];
 			window._googlesitekit.gtagEvent = (name, data) => {
@@ -160,13 +172,11 @@ class Conversion_Tracking implements Provides_Feature_Metrics {
 					delete window._googlesitekit.throttledEvents[ key ];
 				}, 5 );
 
-				gtag( "event", name, { ...data, event_source: "site-kit" } );
+				gtag( "event", name, { ...data, event_source: "site-kit", ...( data && data.user_data ? %s : {} ) } );
 			};
-		';
-
-		if ( function_exists( 'edd_get_currency' ) ) {
-			$gtag_event .= "window._googlesitekit.easyDigitalDownloadsCurrency = '" . edd_get_currency() . "';";
-		}
+			',
+			$user_data_params
+		);
 
 		if ( Feature_Flags::enabled( 'gtagUserData' ) ) {
 			$gtag_event .= 'window._googlesitekit.gtagUserData = true;';
@@ -176,27 +186,31 @@ class Conversion_Tracking implements Provides_Feature_Metrics {
 	}
 
 	/**
-	 * Adds active event provider category flags to the inline base data.
+	 * Adds the active event provider flags and slugs to the inline base data.
 	 *
 	 * @since 1.181.0
+	 * @since 1.187.0 Added the slugs of the active conversion event providers.
 	 *
 	 * @param array $data Inline base data.
 	 * @return array Filtered $data.
 	 */
 	protected function inline_js_base_data( $data ) {
 		$active_categories = $this->get_active_provider_categories();
+		$active_providers  = $this->get_active_providers();
 
 		$data['hasActiveLeadEventProviders']      = in_array( Conversion_Events_Provider::CATEGORY_LEAD, $active_categories, true );
 		$data['hasActiveEcommerceEventProviders'] = in_array( Conversion_Events_Provider::CATEGORY_ECOMMERCE, $active_categories, true );
 
 		$active_ecommerce_providers = count(
 			array_filter(
-				$this->get_active_providers(),
+				$active_providers,
 				fn( $provider ) => Conversion_Events_Provider::CATEGORY_ECOMMERCE === $provider->get_category()
 			)
 		);
 
 		$data['hasMultipleActiveEcommerceEventProviders'] = $active_ecommerce_providers > 1;
+
+		$data['activeConversionEventProviders'] = array_keys( $active_providers );
 
 		return $data;
 	}
@@ -216,9 +230,8 @@ class Conversion_Tracking implements Provides_Feature_Metrics {
 			if ( ! is_string( $provider_class ) || ! $provider_class ) {
 				throw new LogicException(
 					sprintf(
-						/* translators: %s: provider slug */
-						__( 'A conversion event provider class name is required to instantiate a provider: %s', 'google-site-kit' ),
-						$provider_slug
+						'A conversion event provider class name is required to instantiate a provider: %s',
+						esc_html( $provider_slug )
 					)
 				);
 			}
@@ -226,9 +239,8 @@ class Conversion_Tracking implements Provides_Feature_Metrics {
 			if ( ! class_exists( $provider_class ) ) {
 				throw new LogicException(
 					sprintf(
-						/* translators: %s: provider classname */
-						__( "The '%s' class does not exist", 'google-site-kit' ),
-						$provider_class
+						"The '%s' class does not exist",
+						esc_html( $provider_class )
 					)
 				);
 			}
@@ -236,9 +248,8 @@ class Conversion_Tracking implements Provides_Feature_Metrics {
 			if ( ! is_subclass_of( $provider_class, Conversion_Events_Provider::class ) ) {
 				throw new LogicException(
 					sprintf(
-						/* translators: 1: provider classname 2: Conversion_Events_Provider classname */
-						__( "The '%1\$s' class must extend the base conversion event provider class: %2\$s", 'google-site-kit' ),
-						$provider_class,
+						"The '%1\$s' class must extend the base conversion event provider class: %2\$s",
+						esc_html( $provider_class ),
 						Conversion_Events_Provider::class
 					)
 				);
@@ -281,6 +292,7 @@ class Conversion_Tracking implements Provides_Feature_Metrics {
 	 * Returns events supported by active providers from the conversion tracking infrastructure.
 	 *
 	 * @since 1.163.0 Moved this method here from the Ads class.
+	 * @since 1.190.0 Reindexed the events, so they are JSON-encoded as an array rather than an object.
 	 *
 	 * @return array Array of supported conversion events, or empty array.
 	 */
@@ -297,7 +309,8 @@ class Conversion_Tracking implements Provides_Feature_Metrics {
 			$events = array_merge( $events, array_values( $provider->get_event_names() ) );
 		}
 
-		return array_unique( $events );
+		// `array_unique()` keeps the keys, so a duplicate followed by another event leaves a gap.
+		return array_values( array_unique( $events ) );
 	}
 
 	/**

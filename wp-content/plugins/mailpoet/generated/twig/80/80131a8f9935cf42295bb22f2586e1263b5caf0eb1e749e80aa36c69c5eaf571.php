@@ -43,7 +43,7 @@ class __TwigTemplate_912232d8d98ec89992f5e6290c3740bfaa82c9b5be05df35d42defcaf1c
         yield "</h3>
 <div class=\"mailpoet_divider_selector\" data-automation-id=\"divider_selector\">
 {{#each availableStyles.dividers}}
-    <div class=\"mailpoet_field_divider_style{{#ifCond this '==' ../model.styles.block.borderStyle}} mailpoet_active_divider_style{{/ifCond}}\" data-style=\"{{ this }}\">
+    <div class=\"mailpoet_field_divider_style{{#ifCond this \x27==\x27 ../model.styles.block.borderStyle}} mailpoet_active_divider_style{{/ifCond}}\" data-style=\"{{ this }}\">
         <div style=\"border-top-width: 5px; border-top-style: {{ this }}; border-top-color: {{ ../model.styles.block.borderColor }};\"></div>
     </div>
 {{/each}}
@@ -78,7 +78,7 @@ class __TwigTemplate_912232d8d98ec89992f5e6290c3740bfaa82c9b5be05df35d42defcaf1c
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Background");
         yield "</div>
 </div>
-{{#ifCond renderOptions.hideApplyToAll '!==' true}}
+{{#ifCond renderOptions.hideApplyToAll \x27!==\x27 true}}
 <div class=\"mailpoet_form_field\">
     <input type=\"button\" name=\"apply-to-all-dividers\" class=\"button button-secondary mailpoet_button_full mailpoet_button_divider_apply_to_all\" value=\"";
         // line 32

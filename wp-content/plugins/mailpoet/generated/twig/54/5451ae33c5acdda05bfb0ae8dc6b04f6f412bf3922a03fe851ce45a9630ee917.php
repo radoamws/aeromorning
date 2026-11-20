@@ -54,56 +54,30 @@ class __TwigTemplate_1a503b1b477150cebe094ddd70d8a9f0f9df76c4d7e651ce72ce81dad2c
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Cheers,");
         yield "
 
-";
+<p>";
         // line 9
-        if ($this->extensions['MailPoet\Twig\Functions']->isGarden()) {
-            // line 10
-            yield "<p>";
-            yield $this->env->getRuntime('MailPoetVendor\Twig\Runtime\EscaperRuntime')->escape(get_option("blogname"), "html");
-            yield "
-";
-        } else {
-            // line 12
-            yield "<p>";
-            yield $this->extensions['MailPoet\Twig\I18n']->translate("The MailPoet Plugin");
-            yield "
-";
-        }
-        // line 14
+        yield $this->extensions['MailPoet\Twig\I18n']->translate("The MailPoet Plugin");
         yield "
+
+<p><small>";
+        // line 11
+        yield $this->extensions['MailPoet\Twig\I18n']->translate(MailPoet\Util\Helpers::replaceLinkTags("You can disable these emails in your [link]MailPoet Settings.[/link]",         // line 12
+($context["link_settings"] ?? null)));
+        // line 13
+        yield "</small>
+
 ";
         // line 15
-        if ($this->extensions['MailPoet\Twig\Functions']->isGarden()) {
-            // line 16
-            yield "<p><small>";
-            yield $this->extensions['MailPoet\Twig\I18n']->translate(MailPoet\Util\Helpers::replaceLinkTags("You can disable these emails in your [link]email settings.[/link]",             // line 17
-($context["link_settings"] ?? null)));
-            // line 18
-            yield "</small>
-";
-        } else {
-            // line 20
-            yield "<p><small>";
-            yield $this->extensions['MailPoet\Twig\I18n']->translate(MailPoet\Util\Helpers::replaceLinkTags("You can disable these emails in your [link]MailPoet Settings.[/link]",             // line 21
-($context["link_settings"] ?? null)));
-            // line 22
-            yield "</small>
-";
-        }
-        // line 24
-        yield "
-";
-        // line 25
         if (($this->extensions['MailPoetVendor\Twig\Extension\CoreExtension']->formatDate("now", "Y-m-d") < $this->extensions['MailPoetVendor\Twig\Extension\CoreExtension']->formatDate("2018-11-30", "Y-m-d"))) {
-            // line 26
+            // line 16
             yield "  <p>
     <small>
       ";
-            // line 28
+            // line 18
             yield $this->extensions['MailPoet\Twig\I18n']->translate(MailPoet\Util\Helpers::replaceLinkTags("PS. MailPoet annual plans are nearly half price for a limited time.
-      [link]Find out more in the Premium page in your admin.[/link]",             // line 30
+      [link]Find out more in the Premium page in your admin.[/link]",             // line 20
 ($context["link_premium"] ?? null)));
-            // line 31
+            // line 21
             yield "
   </small>
 ";
@@ -132,7 +106,7 @@ class __TwigTemplate_1a503b1b477150cebe094ddd70d8a9f0f9df76c4d7e651ce72ce81dad2c
      */
     public function getDebugInfo()
     {
-        return array (  104 => 31,  102 => 30,  100 => 28,  96 => 26,  94 => 25,  91 => 24,  87 => 22,  85 => 21,  83 => 20,  79 => 18,  77 => 17,  75 => 16,  73 => 15,  70 => 14,  64 => 12,  58 => 10,  56 => 9,  51 => 7,  47 => 5,  45 => 4,  44 => 3,  38 => 1,);
+        return array (  78 => 21,  76 => 20,  74 => 18,  70 => 16,  68 => 15,  64 => 13,  62 => 12,  61 => 11,  56 => 9,  51 => 7,  47 => 5,  45 => 4,  44 => 3,  38 => 1,);
     }
 
     public function getSourceContext()

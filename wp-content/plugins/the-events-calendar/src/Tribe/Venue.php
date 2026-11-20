@@ -399,6 +399,9 @@ class Tribe__Events__Venue extends Tribe__Events__Linked_Posts__Base { // phpcs:
 	/**
 	 * Saves the event venue information passed via an event
 	 *
+	 * @since 4.2
+	 * @since 6.18.4.1 An existing venue is only updated when the current user can edit it.
+	 *
 	 * @param int|null $id          ID of event venue
 	 * @param array    $data        The venue data.
 	 * @param string   $post_type   Venue Post Type
@@ -410,6 +413,10 @@ class Tribe__Events__Venue extends Tribe__Events__Linked_Posts__Base { // phpcs:
 		if ( isset( $data['VenueID'] ) && $data['VenueID'] > 0 ) {
 			if ( count( $data ) == 1 ) {
 				// Only an ID was passed and we should do nothing.
+				return $data['VenueID'];
+			}
+
+			if ( ! current_user_can( 'edit_post', $data['VenueID'] ) ) {
 				return $data['VenueID'];
 			}
 
@@ -502,6 +509,9 @@ class Tribe__Events__Venue extends Tribe__Events__Linked_Posts__Base { // phpcs:
 	/**
 	 * Creates a new venue
 	 *
+	 * @since 4.2
+	 * @since 6.18.4.1 A duplicate is only reused when the current user can edit it; otherwise a new venue is created.
+	 *
 	 * @param array  $data             The venue data.
 	 * @param string $post_status      the intended post status.
 	 * @param bool   $avoid_duplicates Whether a check to avoid the insertion of a duplicate venue
@@ -567,6 +577,11 @@ class Tribe__Events__Venue extends Tribe__Events__Linked_Posts__Base { // phpcs:
 				);
 
 				$found = $duplicates->find_for( $candidate_data );
+
+				// Reusing a match writes the submitted data onto it, so only reuse one the user may edit.
+				if ( false !== $found && ! current_user_can( 'edit_post', $found ) ) {
+					$found = false;
+				}
 			}
 
 			$venue_id = false === $found
@@ -861,11 +876,24 @@ class Tribe__Events__Venue extends Tribe__Events__Linked_Posts__Base { // phpcs:
 	/**
 	 *  Returns a string version of the full address of an event
 	 *
-	 * @param int|WP_Post The post object or post id.
+	 * @since 6.0.0
+	 * @since 6.18.3 Returns an empty string when the current user may not see the venue.
+	 *
+	 * @param int|WP_Post|null $post_id The event or venue post object or ID. Defaults to the current post.
 	 *
 	 * @return string The event's address.
 	 */
 	public static function get_address_full_string( $post_id = null ) {
+		$venue_id = absint( tribe_get_venue_id( $post_id ) );
+
+		/*
+		 * This feeds the iCal/Outlook export and the add-to-calendar links, which unlike the
+		 * templates and the REST API have no check of their own on the venue.
+		 */
+		if ( $venue_id && ! Tribe__Events__Linked_Posts::instance()->is_linked_post_visible( $venue_id ) ) {
+			return '';
+		}
+
 		$address = '';
 		if ( tribe_get_venue( $post_id ) ) {
 			$address .= tribe_get_venue( $post_id );

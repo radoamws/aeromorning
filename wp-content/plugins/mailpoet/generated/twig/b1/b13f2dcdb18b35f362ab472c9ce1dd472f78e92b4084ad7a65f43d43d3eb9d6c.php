@@ -112,18 +112,18 @@ class __TwigTemplate_9d7d54bedf6441cbe953e9a6b449b96ffb6a0f20629323115059cbdd682
             // line 27
             yield "    <script>
       (function() {
-        var form = document.currentScript.closest('form');
+        var form = document.currentScript.closest(\x27form\x27);
         if (!form) return;
-        var textField = form.querySelector('.mailpoet-unsubscribe-reason-text');
+        var textField = form.querySelector(\x27.mailpoet-unsubscribe-reason-text\x27);
         if (!textField) return;
         var update = function() {
-          var selected = form.querySelector('input[name=\"reason\"]:checked');
-          textField.hidden = !selected || selected.value !== '";
+          var selected = form.querySelector(\x27input[name=\"reason\"]:checked\x27);
+          textField.hidden = !selected || selected.value !== \x27";
             // line 35
             yield $this->env->getRuntime('MailPoetVendor\Twig\Runtime\EscaperRuntime')->escape($this->env->getRuntime('MailPoetVendor\Twig\Runtime\EscaperRuntime')->escape(($context["otherReason"] ?? null), "js"), "html", null, true);
-            yield "';
+            yield "\x27;
         };
-        form.addEventListener('change', update);
+        form.addEventListener(\x27change\x27, update);
         update();
       }());
     </script>

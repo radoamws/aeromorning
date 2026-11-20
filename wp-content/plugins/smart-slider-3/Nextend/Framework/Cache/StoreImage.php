@@ -31,6 +31,7 @@ class StoreImage extends AbstractCache {
             'mp4',
             'mp3',
             'webp',
+            'avif',
             'svg'
         );
 

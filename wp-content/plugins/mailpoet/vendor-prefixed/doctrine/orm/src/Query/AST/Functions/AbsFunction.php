@@ -8,16 +8,16 @@ use MailPoetVendor\Doctrine\ORM\Query\SqlWalker;
 use MailPoetVendor\Doctrine\ORM\Query\TokenType;
 class AbsFunction extends FunctionNode
 {
- public $simpleArithmeticExpression;
- public function getSql(SqlWalker $sqlWalker)
- {
- return 'ABS(' . $sqlWalker->walkSimpleArithmeticExpression($this->simpleArithmeticExpression) . ')';
- }
- public function parse(Parser $parser)
- {
- $parser->match(TokenType::T_IDENTIFIER);
- $parser->match(TokenType::T_OPEN_PARENTHESIS);
- $this->simpleArithmeticExpression = $parser->SimpleArithmeticExpression();
- $parser->match(TokenType::T_CLOSE_PARENTHESIS);
- }
+public $simpleArithmeticExpression;
+public function getSql(SqlWalker $sqlWalker)
+{
+return 'ABS(' . $sqlWalker->walkSimpleArithmeticExpression($this->simpleArithmeticExpression) . ')';
+}
+public function parse(Parser $parser)
+{
+$parser->match(TokenType::T_IDENTIFIER);
+$parser->match(TokenType::T_OPEN_PARENTHESIS);
+$this->simpleArithmeticExpression = $parser->SimpleArithmeticExpression();
+$parser->match(TokenType::T_CLOSE_PARENTHESIS);
+}
 }

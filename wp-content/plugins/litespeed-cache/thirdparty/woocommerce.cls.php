@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * The Third Party integration with the WooCommerce plugin.
  *
@@ -14,6 +14,7 @@ defined('WPINC') || exit();
 
 use LiteSpeed\API;
 use LiteSpeed\Base;
+use LiteSpeed\Control;
 use LiteSpeed\ESI;
 
 /**
@@ -77,6 +78,7 @@ class WooCommerce extends Base {
 
 		add_action('litespeed_control_finalize', [ $this, 'set_control' ]);
 		add_action('litespeed_tag_finalize', [ $this, 'set_tag' ]);
+		add_filter( 'rest_pre_dispatch', [ $this, 'nocache_store_api' ], 1, 3 );
 
 		// Purge affected product caches when WooCommerce stock changes, including cancellation restocks.
 		add_action('woocommerce_product_set_stock', [ $this, 'purge_product' ]);
@@ -85,21 +87,24 @@ class WooCommerce extends Base {
 		add_action( 'woocommerce_variation_set_stock_status', [ $this, 'purge_product_stock_status' ], 10, 3 );
 		add_action( 'woocommerce_order_status_cancelled', [ $this, 'purge_cancelled_order_products' ], 20 );
 
+		// Purge product pages when WooCommerce scheduled sales flip prices (#941).
+		// Daily cron after-hooks (WC < 10.5 path, and post-10.5 safety net for products missed by AS):
+		add_action( 'wc_after_products_starting_sales', [ $this, 'purge_products_on_sale_change' ] );
+		add_action( 'wc_after_products_ending_sales', [ $this, 'purge_products_on_sale_change' ] );
+		// Per-product Action Scheduler events (WC 10.5+, main path — fire at exact sale times).
+		// Priority 99 runs after WC's default-10 callback so the price flip is committed before we purge.
+		add_action( 'wc_product_start_scheduled_sale', [ $this, 'purge_products_on_sale_change' ], 99 );
+		add_action( 'wc_product_end_scheduled_sale', [ $this, 'purge_products_on_sale_change' ], 99 );
+
 		add_action('comment_post', [ $this, 'add_review' ], 10, 3);
+		add_action('litespeed_api_purge_post', [ $this, 'backend_purge' ]);
+		add_action('delete_term_relationships', [ $this, 'delete_rel' ], 10, 2);
 
 		if ( $this->esi_enabled ) {
-			if ( function_exists('is_shop') && ! is_shop() ) {
-				add_action('litespeed_tpl_normal', [ $this, 'set_block_template' ]);
-				// No need for add-to-cart button
-				// add_action( 'litespeed_esi_load-wc-add-to-cart-form', [ $this, 'load_add_to_cart_form_block' ] ) ;
-
-				add_action('litespeed_esi_load-storefront-cart-header', [ $this, 'load_cart_header' ]);
-				add_action('litespeed_esi_load-widget', [ $this, 'register_post_view' ]);
-			}
-
-			if ( function_exists('is_product') && is_product() ) {
-				add_filter('litespeed_esi_params', [ $this, 'add_post_id' ], 10, 2);
-			}
+			add_action( 'template_redirect', [ $this, 'register_templates' ] );
+			add_action('litespeed_esi_load-storefront-cart-header', [ $this, 'load_cart_header' ]);
+			add_action('litespeed_esi_load-widget', [ $this, 'register_post_view' ]);
+			add_filter('litespeed_esi_params', [ $this, 'add_post_id' ], 10, 2);
 
 			// #612331 - remove WooCommerce geolocation redirect on ESI page (PR#708)
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- ESI parameter detection, not processing user input.
@@ -109,8 +114,6 @@ class WooCommerce extends Base {
 		}
 
 		if ( is_admin() ) {
-			add_action('litespeed_api_purge_post', [ $this, 'backend_purge' ]); // todo
-			add_action('delete_term_relationships', [ $this, 'delete_rel' ], 10, 2);
 			add_action('litespeed_settings_tab', [ $this, 'settings_add_tab' ]);
 			add_action('litespeed_settings_content', [ $this, 'settings_add_content' ]);
 			add_filter('litespeed_widget_default_options', [ $this, 'wc_widget_default' ], 10, 2);
@@ -134,6 +137,23 @@ class WooCommerce extends Base {
 	}
 
 	/**
+	 * Keep the session-bound WooCommerce Store API out of the public page cache.
+	 *
+	 * @since 7.9.2
+	 * @param mixed            $result  Pre-dispatch result.
+	 * @param \WP_REST_Server  $server  REST server instance.
+	 * @param \WP_REST_Request $request Current REST request.
+	 * @return mixed
+	 */
+	public function nocache_store_api( $result, $server, $request ) {
+		$route = is_object( $request ) && is_callable( [ $request, 'get_route' ] ) ? $request->get_route() : '';
+		if ( is_string( $route ) && ( '/wc/store/' === substr( $route, 0, 10 ) || '/wc/store' === $route ) ) {
+			Control::set_nocache_hard( 'WooCommerce Store API' );
+		}
+		return $result;
+	}
+
+	/**
 	 * Purge esi private tag.
 	 *
 	 * @since  1.6.3
@@ -143,6 +163,17 @@ class WooCommerce extends Base {
 	public function purge_esi() {
 		do_action('litespeed_debug', '3rd woo purge ESI in action: ' . current_filter());
 		do_action('litespeed_purge_private_esi', 'storefront-cart-header');
+	}
+
+	/**
+	 * Register page-specific templates after the main query is available.
+	 *
+	 * @return void
+	 */
+	public function register_templates() {
+		if ( function_exists( 'is_shop' ) && ! is_shop() ) {
+			add_action( 'litespeed_tpl_normal', [ $this, 'set_block_template' ] );
+		}
 	}
 
 	/**
@@ -450,7 +481,7 @@ class WooCommerce extends Base {
 	 * @return array
 	 */
 	public function add_post_id( $params, $block_id ) {
-		if ( 'widget' === $block_id ) {
+		if ( 'widget' === $block_id && function_exists( 'is_product' ) && is_product() ) {
 			if ( 'WC_Widget_Recently_Viewed' === $params[ API::PARAM_NAME ] ) {
 				$params[ self::ESI_PARAM_POSTID ] = get_the_ID();
 			}
@@ -504,9 +535,8 @@ class WooCommerce extends Base {
 		// Check if product has a cache ttl limit or not.
 		$sale_from = (int) get_post_meta( $id, '_sale_price_dates_from', true );
 		$sale_to   = (int) get_post_meta( $id, '_sale_price_dates_to', true );
-		// phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- Need local timestamp for WooCommerce sale dates.
-		$now = current_time('timestamp');
-		$ttl = false;
+		$now       = time();
+		$ttl       = false;
 
 		if ( $sale_from && $now < $sale_from ) {
 			$ttl = $sale_from - $now;
@@ -569,6 +599,10 @@ class WooCommerce extends Base {
 		}
 
 		$woocom = WC();
+		if ( ! $esi_id && ! $this->conf( self::O_CART_VARY ) && $woocom && ! empty( $woocom->cart ) && $woocom->cart->get_cart_contents_count() > 0 ) {
+			Control::set_nocache_hard( 'WooCommerce cart without a cart vary' );
+			return;
+		}
 		if ( ! $woocom || empty( $woocom->session ) ) {
 			return;
 		}
@@ -694,6 +728,34 @@ class WooCommerce extends Base {
 	}
 
 	/**
+	 * Purge products whose sale status flipped (#941).
+	 *
+	 * Handles both WC paths:
+	 * - Daily cron after-hooks (`wc_after_products_starting_sales` / `wc_after_products_ending_sales`) → array of IDs.
+	 * - Per-product Action Scheduler events (`wc_product_start_scheduled_sale` / `wc_product_end_scheduled_sale`, WC 10.5+) → single ID.
+	 *
+	 * Force purge via `$stock_status_changed = true` so a price flip is not gated by the stock-update interval config.
+	 *
+	 * @since 7.9
+	 * @param int|int[] $product_ids Single product ID (per-product AS callback) or array of IDs (daily cron after-hook).
+	 * @return void
+	 */
+	public function purge_products_on_sale_change( $product_ids ) {
+		if ( ! function_exists( 'wc_get_product' ) ) {
+			return;
+		}
+
+		foreach ( (array) $product_ids as $product_id ) {
+			$product = wc_get_product( $product_id );
+			if ( ! $product ) {
+				continue;
+			}
+			do_action( 'litespeed_debug', '[3rd] Woo Purge sale change [pid] ' . $product->get_id() );
+			$this->purge_product( $product, true );
+		}
+	}
+
+	/**
 	 * Purge a product page and related pages (based on settings) on checkout.
 	 *
 	 * @since 1.0.9
@@ -800,7 +862,10 @@ class WooCommerce extends Base {
 			return;
 		}
 		foreach ( $term_ids as $term_id ) {
-			do_action( 'litespeed_purge', self::CACHETAG_TERM . $term_id );
+			$term = get_term_by( 'term_taxonomy_id', (int) $term_id );
+			if ( $term && ! is_wp_error( $term ) ) {
+				do_action( 'litespeed_purge', self::CACHETAG_TERM . $term->term_id );
+			}
 		}
 	}
 
@@ -819,8 +884,14 @@ class WooCommerce extends Base {
 			return;
 		}
 
-		if ( ! isset( $post_id ) || false === wc_get_product( $post_id ) ) {
+		$product = isset( $post_id ) ? wc_get_product( $post_id ) : false;
+		if ( ! $product ) {
 			return;
+		}
+
+		// A variation's post type is not public; its product page lives under the parent.
+		if ( $product->is_type( 'variation' ) && $product->get_parent_id() ) {
+			do_action( 'litespeed_purge_post', $product->get_parent_id() );
 		}
 
 		$cats = $this->get_cats( $post_id );
@@ -871,7 +942,7 @@ class WooCommerce extends Base {
 
 		$recent_reviews = $wp_widget_factory->widgets['WC_Widget_Recent_Reviews'];
 		if ( ! is_null( $recent_reviews ) ) {
-			do_action( 'litespeed_tag_add_widget', $recent_reviews->id );
+			do_action( 'litespeed_purge_widget', $recent_reviews->id );
 		}
 	}
 
@@ -971,8 +1042,13 @@ class WooCommerce extends Base {
 	 * @return void
 	 */
 	public static function bulk_edit_purge() {
+		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- `edit_products` is registered by WooCommerce, whose presence is checked first.
+		if ( ! function_exists( 'wc_get_product' ) || ! current_user_can( 'edit_products' ) ) {
+			return;
+		}
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Third-party plugin action; cannot enforce here.
-		if ( empty( $_POST['type'] ) || 'saveproducts' !== $_POST['type'] || empty( $_POST['data'] ) ) {
+		if ( empty( $_POST['type'] ) || 'saveproducts' !== $_POST['type'] || empty( $_POST['data'] ) || ! is_array( $_POST['data'] ) ) {
 			return;
 		}
 
@@ -986,25 +1062,33 @@ class WooCommerce extends Base {
 		 *      )
 		 *  )
 		 */
-		$stock_string_arr = [];
+		$product_ids = [];
 
 		// Ensure data is unslashed before processing.
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Third-party plugin may not send nonce. Data format defined by third-party plugin.
 		$data = isset( $_POST['data'] ) ? wp_unslash( $_POST['data'] ) : [];
 
 		foreach ( (array) $data as $stock_value ) {
-			$stock_string_arr = array_merge( $stock_string_arr, explode( '#^#', (string) $stock_value ) );
+			if ( ! is_string( $stock_value ) ) {
+				continue;
+			}
+			foreach ( explode( '#^#', $stock_value ) as $edited_stock ) {
+				$product_id = (int) strtok( $edited_stock, '$' );
+				if ( $product_id > 0 ) {
+					$product_ids[ $product_id ] = true;
+				}
+			}
+		}
+
+		if ( ! $product_ids ) {
+			return;
 		}
 
 		$lscwp_3rd_woocommerce = new self();
 
-		if ( count( $stock_string_arr ) < 1 ) {
-			return;
-		}
-
-		foreach ( $stock_string_arr as $edited_stock ) {
-			$product_id = (int) strtok( (string) $edited_stock, '$' );
-			$product    = wc_get_product( $product_id );
+		// The same product can appear in several edited columns; purge it once per request.
+		foreach ( array_keys( $product_ids ) as $product_id ) {
+			$product = wc_get_product( $product_id );
 
 			if ( empty( $product ) ) {
 				do_action( 'litespeed_debug', '3rd woo purge: ' . $product_id . ' not found.' );

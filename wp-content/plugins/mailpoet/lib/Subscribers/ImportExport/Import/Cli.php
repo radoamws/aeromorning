@@ -14,9 +14,11 @@ use MailPoet\Segments\SegmentSaveController;
 use MailPoet\Segments\SegmentsRepository;
 use MailPoet\Segments\WP as SegmentsWP;
 use MailPoet\Services\Validator;
+use MailPoet\Subscribers\ImportExport\ImportExportFactory;
 use MailPoet\Subscribers\ImportExport\ImportExportRepository;
 use MailPoet\Subscribers\SubscribersRepository;
 use MailPoet\Tags\TagRepository;
+use MailPoet\Util\SpreadsheetCellFormatter;
 use WP_CLI;
 
 class Cli {
@@ -29,6 +31,9 @@ class Cli {
     'created_at',
     'confirmed_at',
     'confirmed_ip',
+    'tracking_consent',
+    'tracking_consent_method',
+    'tracking_consent_copy',
   ];
 
   private const NEW_SUBSCRIBER_STATUSES = [
@@ -46,6 +51,8 @@ class Cli {
   ];
 
   private const DEFAULT_BATCH_SIZE = 2000;
+
+  private const UTF8_BOM = "\xEF\xBB\xBF";
 
   /** @var SegmentsWP */
   private $wpSegment;
@@ -73,6 +80,12 @@ class Cli {
 
   /** @var SegmentSaveController */
   private $segmentSaveController;
+
+  /** @var array<string, string>|null Lowercased exported column label => canonical field name. */
+  private $exportedLabelMap = null;
+
+  /** @var array<string, true> Status values already reported as unusable, to warn once each. */
+  private $warnedStatuses = [];
 
   public function __construct(
     SegmentsWP $wpSegment,
@@ -107,7 +120,7 @@ class Cli {
         [
           'type' => 'positional',
           'name' => 'file',
-          'description' => 'Path to the CSV file. The header row must use MailPoet field names (email, first_name, last_name, subscribed_ip, created_at, confirmed_at, confirmed_ip) or existing custom field names. An "email" column is required.',
+          'description' => 'Path to the CSV file. The header row must use MailPoet field names (email, first_name, last_name, subscribed_ip, created_at, confirmed_at, confirmed_ip, tracking_consent, tracking_consent_method, tracking_consent_copy), existing custom field names, or the column labels MailPoet\'s own export writes. An "email" column is required. tracking_consent accepts granted, denied or unknown; a blank cell leaves the stored value alone.',
           'optional' => false,
         ],
         [
@@ -119,7 +132,7 @@ class Cli {
         [
           'type' => 'assoc',
           'name' => 'status',
-          'description' => 'Status for newly created subscribers.',
+          'description' => 'Status for newly created subscribers. A "status" column in the file, or the status column of a MailPoet export, takes precedence for the rows that fill it in.',
           'optional' => true,
           'default' => SubscriberEntity::STATUS_SUBSCRIBED,
           'options' => self::NEW_SUBSCRIBER_STATUSES,
@@ -187,20 +200,31 @@ class Cli {
       return;
     }
 
+    $rowsRead = $totals['rows'] + $totals['skipped'];
+    $skippedNotice = '';
+    if ($totals['skipped'] > 0) {
+      $skippedTemplate = $totals['skipped'] === 1
+        ? ' %d row was skipped because its column count did not match the header.'
+        : ' %d rows were skipped because their column count did not match the header.';
+      $skippedNotice = sprintf($skippedTemplate, $totals['skipped']);
+    }
+
     if ($options['dry_run']) {
       WP_CLI::success(sprintf(
-        'Dry run: %d rows read, %d subscribers with a valid email. Nothing was written.',
-        $totals['rows'],
-        $totals['valid']
+        'Dry run: %d rows read, %d subscribers with a valid email. Nothing was written.%s',
+        $rowsRead,
+        $totals['valid'],
+        $skippedNotice
       ));
       return;
     }
 
     WP_CLI::success(sprintf(
-      'Import finished: %d created, %d updated (out of %d rows).',
+      'Import finished: %d created, %d updated (out of %d rows).%s',
       $totals['created'],
       $totals['updated'],
-      $totals['rows']
+      $rowsRead,
+      $skippedNotice
     ));
   }
 
@@ -210,7 +234,7 @@ class Cli {
    *
    * @param array{segments: string[], status: string, existing_status: string, update_existing: bool, tags: string[], batch_size: int, dry_run: bool} $options
    * @param callable(string): void|null $logger
-   * @return array{created: int, updated: int, valid: int, rows: int}
+   * @return array{created: int, updated: int, valid: int, rows: int, skipped: int}
    * @throws \RuntimeException
    */
   public function run(string $file, array $options, ?callable $logger = null): array {
@@ -232,36 +256,70 @@ class Cli {
 
     $segmentIds = $this->resolveSegments($options['segments'], $options['dry_run'], $log);
 
-    $handle = fopen($file, 'r');
+    $handle = fopen($file, 'r'); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Reads the CSV line by line; WP_Filesystem has no streaming API.
     if ($handle === false) {
       throw new \RuntimeException(sprintf('Unable to open file "%s".', $file));
     }
 
+    // generateCSV starts the file with a UTF-8 BOM so Excel detects the encoding. Skip it
+    // before parsing rather than trimming it off the first column afterwards: a BOM sitting
+    // in front of a quoted first column stops fgetcsv reading that field as enclosed, so
+    // the quotes would survive into the column name.
+    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread -- Reading the local CSV the user pointed the command at, through the handle opened above.
+    if (fread($handle, 3) !== self::UTF8_BOM) {
+      rewind($handle);
+    }
+
     try {
-      $header = fgetcsv($handle, 0, ',', '"', '\\');
+      // Escaping is disabled so quotes are read as RFC 4180 doubled quotes, the same
+      // convention Export::writeCSVRow writes with. PHP's proprietary backslash escape
+      // would misread a backslash sitting directly before a quote.
+      $header = fgetcsv($handle, 0, ',', '"', '');
       if (!is_array($header)) {
         throw new \RuntimeException('The CSV file is empty or has no header row.');
       }
-      $columns = $this->buildColumns($header);
+      $header = array_map([$this, 'unformatCell'], $header);
+      $statusColumn = $this->findStatusColumn($header);
+      $columns = $this->buildColumns($header, $log, $statusColumn);
+      if ($statusColumn !== null) {
+        $log(sprintf(
+          'Taking the status of new subscribers from the "%s" column; --status covers rows that leave it blank.',
+          trim((string)$header[$statusColumn])
+        ));
+      }
+      $this->warnedStatuses = [];
 
-      $totals = ['created' => 0, 'updated' => 0, 'valid' => 0, 'rows' => 0];
+      $headerColumnCount = count($header);
+      $totals = ['created' => 0, 'updated' => 0, 'valid' => 0, 'rows' => 0, 'skipped' => 0];
       $batch = [];
-      while (is_array($row = fgetcsv($handle, 0, ',', '"', '\\'))) {
+      $lineNumber = 1; // header is line 1
+      while (is_array($row = fgetcsv($handle, 0, ',', '"', ''))) {
+        $lineNumber++;
         if ($row === [null]) {
           continue; // skip blank lines
         }
+        // fgetcsv does not pad short rows or trim long ones. A row whose column
+        // count differs from the header would misalign the per-column arrays built
+        // in Import (a value landing on the wrong subscriber), so skip it and warn
+        // rather than guessing which columns are missing.
+        if (count($row) !== $headerColumnCount) {
+          $totals['skipped']++;
+          $log(sprintf('  Skipped line %d: expected %d column(s) but found %d.', $lineNumber, $headerColumnCount, count($row)));
+          continue;
+        }
+        $row = array_map([$this, 'unformatCell'], $row);
         $totals['rows']++;
         $batch[] = $row;
         if (count($batch) >= $options['batch_size']) {
-          $this->processBatch($batch, $columns, $segmentIds, $options, $totals, $log);
+          $this->processBatch($batch, $columns, $segmentIds, $options, $totals, $log, $statusColumn);
           $batch = [];
         }
       }
       if ($batch) {
-        $this->processBatch($batch, $columns, $segmentIds, $options, $totals, $log);
+        $this->processBatch($batch, $columns, $segmentIds, $options, $totals, $log, $statusColumn);
       }
     } finally {
-      fclose($handle);
+      fclose($handle); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Reads the CSV line by line; WP_Filesystem has no streaming API.
     }
 
     return $totals;
@@ -272,10 +330,44 @@ class Cli {
    * @param array<string|int, array{index: int}> $columns
    * @param int[] $segmentIds
    * @param array{segments: string[], status: string, existing_status: string, update_existing: bool, tags: string[], batch_size: int, dry_run: bool} $options
-   * @param array{created: int, updated: int, valid: int, rows: int} $totals
+   * @param array{created: int, updated: int, valid: int, rows: int, skipped: int} $totals
    * @param callable(string): void $log
    */
   private function processBatch(
+    array $batch,
+    array $columns,
+    array $segmentIds,
+    array $options,
+    array &$totals,
+    callable $log,
+    ?int $statusColumn = null
+  ): void {
+    if ($statusColumn === null) {
+      $this->importGroup($batch, $columns, $segmentIds, $options, $totals, $log);
+      return;
+    }
+
+    // Import takes one status for a whole batch, so rows are grouped by the status their
+    // own row asks for and each group is imported with that as the new-subscriber status.
+    $groups = [];
+    foreach ($batch as $row) {
+      $status = $this->resolveRowStatus($row[$statusColumn] ?? null, $options['status'], $log);
+      $groups[$status][] = $row;
+    }
+    foreach ($groups as $status => $rows) {
+      $this->importGroup($rows, $columns, $segmentIds, ['status' => $status] + $options, $totals, $log);
+    }
+  }
+
+  /**
+   * @param array<int, array<int, string|null>> $batch
+   * @param array<string|int, array{index: int}> $columns
+   * @param int[] $segmentIds
+   * @param array{segments: string[], status: string, existing_status: string, update_existing: bool, tags: string[], batch_size: int, dry_run: bool} $options
+   * @param array{created: int, updated: int, valid: int, rows: int, skipped: int} $totals
+   * @param callable(string): void $log
+   */
+  private function importGroup(
     array $batch,
     array $columns,
     array $segmentIds,
@@ -319,24 +411,41 @@ class Cli {
   }
 
   /**
+   * MailPoet's own export prefixes a value a spreadsheet would read as a formula with
+   * an apostrophe. Take it back off so exporting and re-importing returns the original
+   * value, and so a column heading still matches its custom field.
+   */
+  private function unformatCell(?string $value): ?string {
+    $unformatted = SpreadsheetCellFormatter::unformat($value);
+    return is_string($unformatted) ? $unformatted : null;
+  }
+
+  /**
    * Maps each CSV header to a subscriber field or custom field id.
    *
    * @param array<int, string|null> $header
+   * @param callable(string):void|null $log
+   * @param int|null $statusColumn Index consumed as the subscriber status, not as a field.
    * @return array<string|int, array{index: int}>
    * @throws \RuntimeException
    */
-  private function buildColumns(array $header): array {
+  private function buildColumns(array $header, ?callable $log = null, ?int $statusColumn = null): array {
     $columns = [];
     $unknown = [];
+    $ignored = [];
     $duplicates = [];
     $namesByField = [];
     foreach ($header as $index => $name) {
       $name = trim((string)$name);
-      if ($name === '') {
+      if ($name === '' || $index === $statusColumn) {
         continue;
       }
       $field = $this->resolveField($name);
       if ($field === null) {
+        if ($this->isExportOnlyColumn($name)) {
+          $ignored[] = $name;
+          continue;
+        }
         $unknown[] = $name;
         continue;
       }
@@ -370,6 +479,13 @@ class Cli {
       throw new \RuntimeException('The CSV file must contain an "email" column.');
     }
 
+    if ($ignored && $log) {
+      $log(sprintf(
+        'Ignored column(s) MailPoet exports but cannot import: %s. Use --segments to choose the lists, and --status / --existing-status to choose the subscription status.',
+        implode(', ', $ignored)
+      ));
+    }
+
     return $columns;
   }
 
@@ -384,7 +500,88 @@ class Cli {
     if ($customField instanceof CustomFieldEntity) {
       return $customField->getId();
     }
+    // A custom field of the same name wins above, so this only catches the labels
+    // MailPoet's own export writes, such as "First name" for first_name.
+    $field = $this->getExportedLabelMap()[strtolower($header)] ?? null;
+    return in_array($field, self::BASE_FIELDS, true) ? $field : null;
+  }
+
+  /**
+   * Finds the column holding the subscriber's own status: the label MailPoet's export
+   * writes for it, or a plain "status" column in a hand-written file.
+   *
+   * @param array<int, string|null> $header
+   */
+  private function findStatusColumn(array $header): ?int {
+    $labelMap = $this->getExportedLabelMap();
+    foreach ($header as $index => $name) {
+      $name = trim((string)$name);
+      $normalized = strtolower($name);
+      $isStatus = $normalized === 'status'
+        || $normalized === 'global_status'
+        || ($labelMap[$normalized] ?? null) === 'global_status';
+      if (!$isStatus) {
+        continue;
+      }
+      // A custom field of this exact name wins, the same way it does in resolveField.
+      // Otherwise a field someone named "Status" would stop being imported and would
+      // start deciding who is subscribed.
+      if ($this->customFieldsRepository->findOneBy(['name' => $name]) instanceof CustomFieldEntity) {
+        continue;
+      }
+      return $index;
+    }
     return null;
+  }
+
+  /**
+   * A blank cell, or one holding a status that cannot be set on import such as bounced,
+   * falls back to --status. Each unusable value is reported once.
+   */
+  private function resolveRowStatus(?string $value, string $fallback, callable $log): string {
+    $status = strtolower(trim((string)$value));
+    if ($status === '') {
+      return $fallback;
+    }
+    if (in_array($status, self::NEW_SUBSCRIBER_STATUSES, true)) {
+      return $status;
+    }
+    if (!isset($this->warnedStatuses[$status])) {
+      $this->warnedStatuses[$status] = true;
+      $log(sprintf('  Status "%s" cannot be set by an import; those rows use --status=%s instead.', $status, $fallback));
+    }
+    return $fallback;
+  }
+
+  /**
+   * Columns MailPoet's export writes that hold no importable field: the export-only
+   * fields, and the "List" column, whose lists are chosen with --segments instead.
+   */
+  private function isExportOnlyColumn(string $header): bool {
+    $normalized = strtolower($header);
+    if ($normalized === strtolower(__('List', 'mailpoet'))) {
+      return true;
+    }
+    $field = $this->getExportedLabelMap()[$normalized] ?? null;
+    return $field !== null && !in_array($field, self::BASE_FIELDS, true);
+  }
+
+  /**
+   * MailPoet's export writes translated column labels rather than canonical field names,
+   * so accept both. Built from the same source the exporter writes its header from.
+   *
+   * @return array<string, string> Lowercased exported label => canonical field name.
+   */
+  private function getExportedLabelMap(): array {
+    if ($this->exportedLabelMap === null) {
+      $map = [];
+      $exportFactory = new ImportExportFactory(ImportExportFactory::EXPORT_ACTION);
+      foreach ($exportFactory->getSubscriberFields() as $field => $label) {
+        $map[strtolower((string)$label)] = (string)$field;
+      }
+      $this->exportedLabelMap = $map;
+    }
+    return $this->exportedLabelMap;
   }
 
   /**

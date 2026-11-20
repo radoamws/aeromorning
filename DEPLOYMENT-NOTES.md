@@ -774,3 +774,13 @@ La news « Japan Airlines Selects Embraer E190-E2 » n'existe ni dans `wp_amnp_n
 - Les 149 fichiers suivis de `extract_news/` (API Laravel + Nuxt) sont retirés du dépôt ; ils restent récupérables dans l'historique git (dernier commit les contenant : `74f102ac`).
 - Les fichiers locaux non versionnés (`.env` avec les secrets prod, `vendor/`, `node_modules/`, `storage/`) ont été déplacés hors du webroot local dans `C:\xampp8\archives\extract_news-2026-11-16`.
 - L'exclusion `/extract_news/` est retirée du rsync WordPress (le dossier n'existe plus).
+
+### 2026-11-20 — Mises à jour de sécurité (suite aux vulnérabilités remontées par l'admin système)
+- **Rappel important :** le déploiement `rsync --delete` recopie le dépôt sur la prod. Une mise à jour faite depuis l'admin WordPress de prod serait **écrasée au push suivant** : les mises à jour se font en local, via WP-CLI (`AMNP_ALLOW_HTTP=1` lève `WP_HTTP_BLOCK_EXTERNAL` en CLI), puis commit + push.
+- Cœur WordPress 7.1.3 → **7.1.5** (fr_FR) ; schéma de base inchangé (61833), aucune migration.
+- Extensions (15) : Contact Form 7 6.1.6→6.2.5, Event Tickets 5.28.5.1→5.31.1.1 (inactive), EWWW 8.7.2→8.9.2, Internal Links 2.26.0→2.26.1, LiteSpeed Cache 7.8.1→7.9.3, MailPoet 5.33.0→5.45.2, Name Directory 1.33.1→1.34.3, Post Types Order 2.4.8→2.5.9, Site Kit 1.182.0→1.192.0, Smart Slider 3 3.5.1.37→3.5.1.40, The Events Calendar 6.16.5.1→6.18.4.1, ThreeWP Broadcast 52.05→52.12 (inactive), WP Mail SMTP 4.9.0→4.10.4, WP RSS Aggregator 5.2.0→5.8.0 (inactive), Yoast SEO 28.0→28.9.
+- Thème Twenty Twenty-One 2.8→2.9 (inactif) ; traductions core + 12 traductions d'extensions.
+- **Seraphinite Accelerator retiré du dépôt** : supprimé en prod le 23/09, mais toujours versionné, donc recopié par chaque déploiement.
+- Non mis à jour : Events Calendar Pro 7.4.1 (premium, inactif, pas de mise à jour sans licence).
+- Migrations de base des extensions (MailPoet, Yoast, The Events Calendar) : exécutées automatiquement au premier passage dans l'admin.
+- Tests locaux : accueil FR/EN, articles FR/EN, agenda, événement, contact, recherche, flux, sitemap, REST, wp-login, admin (tableau de bord, extensions, MailPoet, Yoast, événements, Smart Slider, CF7, WP Mail SMTP, Site Kit, Statistiques, éditeur FR/EN) : tous en 200, sans erreur PHP.

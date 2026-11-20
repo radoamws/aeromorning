@@ -8,7 +8,6 @@ if (!defined('ABSPATH')) exit;
 use MailPoet\Router\Endpoints\CronDaemon as CronDaemonEndpoint;
 use MailPoet\Router\Router;
 use MailPoet\Settings\SettingsController;
-use MailPoet\Util\Security;
 use MailPoet\WP\Functions as WPFunctions;
 
 class CronHelper {
@@ -17,6 +16,7 @@ class CronHelper {
   const DAEMON_SETTING = 'cron_daemon';
   const DAEMON_STATUS_ACTIVE = 'active';
   const DAEMON_STATUS_INACTIVE = 'inactive';
+  const DAEMON_TOKEN_BYTES = 16;
 
   // Error codes
   const DAEMON_EXECUTION_LIMIT_REACHED = 1001;
@@ -106,7 +106,7 @@ class CronHelper {
   }
 
   public function createToken() {
-    return Security::generateRandomString();
+    return bin2hex(random_bytes(self::DAEMON_TOKEN_BYTES));
   }
 
   public function pingDaemon() {
@@ -165,7 +165,7 @@ class CronHelper {
   public function queryCronUrl($url) {
     $defaultArgs = [
       'blocking' => true,
-      'sslverify' => false,
+      'sslverify' => $this->wp->applyFilters('https_local_ssl_verify', false, $url),
       'timeout' => self::DAEMON_REQUEST_TIMEOUT,
       'user-agent' => 'MailPoet Cron',
     ];
@@ -193,7 +193,7 @@ class CronHelper {
     if (!$siteUrl) {
       $siteUrl = defined('MAILPOET_CRON_SITE_URL') ? MAILPOET_CRON_SITE_URL : $this->wp->homeUrl();
     }
-    $parsedUrl = parse_url($siteUrl);
+    $parsedUrl = $this->wp->wpParseUrl($siteUrl);
     if (!is_array($parsedUrl)) {
       throw new \Exception(__('Site URL is unreachable.', 'mailpoet'));
     }
@@ -207,13 +207,13 @@ class CronHelper {
     if (!isset($parsedUrl['port']) || empty($parsedUrl['port'])) return $siteUrl;
     // 2. if site URL contains valid port, try connecting to it
     $urlHost = $parsedUrl['host'] ?? '';
-    $fp = @fsockopen($callScheme . $urlHost, $parsedUrl['port'], $errno, $errstr, 2);
+    $fp = @fsockopen($callScheme . $urlHost, $parsedUrl['port'], $errno, $errstr, 2); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fsockopen -- Checks the port accepts a connection; the HTTP API has no plain socket check.
     if ($fp) return $siteUrl;
     // 3. if connection fails, attempt to connect the standard port derived from URL
     // schema
     $urlScheme = $parsedUrl['scheme'] ?? '';
     $port = (strtolower($urlScheme) === 'http') ? 80 : 443;
-    $fp = @fsockopen($callScheme . $urlHost, $port, $errno, $errstr, 2);
+    $fp = @fsockopen($callScheme . $urlHost, $port, $errno, $errstr, 2); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fsockopen -- Checks the port accepts a connection; the HTTP API has no plain socket check.
     if ($fp) return sprintf('%s://%s', $urlScheme, $urlHost);
     // 4. throw an error if all connection attempts failed
     throw new \Exception(__('Site URL is unreachable.', 'mailpoet'));

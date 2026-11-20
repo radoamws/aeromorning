@@ -76,7 +76,7 @@ class __TwigTemplate_b2e90aa663ee76ef09938814932102214bf0368922c2c205f621d8de927
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Simply click on this link to stop receiving emails from us.");
         yield "
     <br>
-    <a href=\"#\" onclick=\"this.closest('form').submit(); return false;\" rel=\"nofollow\">";
+    <a href=\"#\" onclick=\"this.closest(\x27form\x27).submit(); return false;\" rel=\"nofollow\">";
         // line 15
         yield $this->extensions['MailPoet\Twig\I18n']->translateWithContext("Yes, unsubscribe me", "Text in unsubscribe link");
         yield "</a>

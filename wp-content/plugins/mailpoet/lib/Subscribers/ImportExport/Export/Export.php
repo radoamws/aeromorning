@@ -11,7 +11,9 @@ use MailPoet\Router\Endpoints\ExportDownload;
 use MailPoet\Segments\SegmentsRepository;
 use MailPoet\Subscribers\ImportExport\ImportExportFactory;
 use MailPoet\Subscribers\ImportExport\ImportExportRepository;
-use MailPoetVendor\XLSXWriter;
+use MailPoet\Util\FormulaFreeXLSXWriter;
+use MailPoet\Util\SpreadsheetCellFormatter;
+use MailPoet\WP\Functions as WPFunctions;
 
 class Export {
   const SUBSCRIBER_BATCH_SIZE = 1000;
@@ -44,15 +46,20 @@ class Export {
   /** @var SegmentsRepository */
   private $segmentsRepository;
 
+  /** @var WPFunctions */
+  private $wp;
+
   public function __construct(
     CustomFieldsRepository $customFieldsRepository,
     ImportExportRepository $importExportRepository,
     SegmentsRepository $segmentsRepository,
+    WPFunctions $wp,
     array $data
   ) {
     $this->customFieldsRepository = $customFieldsRepository;
     $this->importExportRepository = $importExportRepository;
     $this->segmentsRepository = $segmentsRepository;
+    $this->wp = $wp;
     if (strpos((string)@ini_get('disable_functions'), 'set_time_limit') === false) {
       set_time_limit(0);
     }
@@ -86,8 +93,8 @@ class Export {
     $processedSubscribers = 0;
     $this->resetCounters();
     try {
-      ExportDownload::ensureExportDirectory();
-      if (is_writable($this->exportPath) === false) {
+      ExportDownload::ensureExportDirectory($this->wp);
+      if ($this->wp->wpIsWritable($this->exportPath) === false) {
         throw new \Exception(__('The export file could not be saved on the server.', 'mailpoet'));
       }
       if (!extension_loaded('zip') && ($this->exportFormatOption === 'xlsx')) {
@@ -112,42 +119,45 @@ class Export {
   public function generateCSV(): int {
     $processedSubscribers = 0;
     $formattedSubscriberFields = $this->formattedSubscriberFieldsWithList;
-    $cSVFile = fopen($this->exportFile, 'w');
+    $cSVFile = fopen($this->exportFile, 'w'); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Writes the CSV row by row; WP_Filesystem has no streaming API.
     if ($cSVFile === false) {
       throw new \Exception(__('Failed opening file for export.', 'mailpoet'));
     }
-    $formatCSV = function($row) {
-      return '"' . str_replace('"', '\"', (string)$row) . '"';
-    };
     // add UTF-8 BOM (3 bytes, hex EF BB BF) at the start of the file for
     // Excel to automatically recognize the encoding
-    fwrite($cSVFile, chr(0xEF) . chr(0xBB) . chr(0xBF));
-    fwrite(
-      $cSVFile,
-      implode(
-        ',',
-        array_map(
-          $formatCSV,
-          $formattedSubscriberFields
-        )
-      ) . PHP_EOL
-    );
+    fwrite($cSVFile, chr(0xEF) . chr(0xBB) . chr(0xBF)); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Writes the CSV row by row; WP_Filesystem has no streaming API.
+    $this->writeCSVRow($cSVFile, $formattedSubscriberFields);
 
     while (($subscribers = $this->getSubscribers()) !== null) {
       $processedSubscribers += count($subscribers);
       foreach ($subscribers as $subscriber) {
         $row = $this->formatSubscriberData($subscriber);
         $row[] = ucwords($subscriber['segment_name']);
-        fwrite($cSVFile, implode(',', array_map($formatCSV, $row)) . "\n");
+        $this->writeCSVRow($cSVFile, $row);
       }
     }
-    fclose($cSVFile);
+    // Remote storage can fail to save on close and still report success.
+    if (!fclose($cSVFile) || !is_file($this->exportFile)) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Writes the CSV row by row; WP_Filesystem has no streaming API.
+      throw new \Exception(__('The export file could not be saved on the server.', 'mailpoet'));
+    }
     return $processedSubscribers;
+  }
+
+  /**
+   * @param resource $file
+   * @param array<int|string, mixed> $row
+   */
+  private function writeCSVRow($file, array $row): void {
+    $cells = array_map(function($value): string {
+      return is_scalar($value) ? (string)$value : '';
+    }, $row);
+    // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_fputcsv -- Export files are created under MailPoet's own export directory.
+    fputcsv($file, SpreadsheetCellFormatter::formatRow($cells), ',', '"', '');
   }
 
   public function generateXLSX(): int {
     $processedSubscribers = 0;
-    $xLSXWriter = new XLSXWriter();
+    $xLSXWriter = new FormulaFreeXLSXWriter();
     $xLSXWriter->setAuthor('MailPoet (www.mailpoet.com)');
     $lastSegment = false;
     $processedSegments = [];

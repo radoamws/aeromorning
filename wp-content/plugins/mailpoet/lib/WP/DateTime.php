@@ -62,13 +62,13 @@ class DateTime {
   public function formatTime($timestamp, $format = false) {
     if (empty($format)) $format = $this->getTimeFormat();
 
-    return date($format, $timestamp);
+    return gmdate($format, $timestamp);
   }
 
   public function formatDate($timestamp, $format = false) {
     if (empty($format)) $format = $this->getDateFormat();
 
-    return date($format, $timestamp);
+    return gmdate($format, $timestamp);
   }
 
   /**

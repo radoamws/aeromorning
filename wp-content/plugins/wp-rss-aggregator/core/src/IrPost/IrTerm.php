@@ -33,7 +33,7 @@ class IrTerm {
 	 * @param string|null $label Optional label for the term.
 	 * @param IrTerm|null $parent Optional parent term.
 	 */
-	public function __construct( string $taxonomy, string $slug, ?string $label = null, IrTerm $parent = null ) {
+	public function __construct( string $taxonomy, string $slug, ?string $label = null, ?IrTerm $parent = null ) {
 		$this->taxonomy = $taxonomy;
 		$this->slug = $slug;
 		$this->label = $label;
@@ -62,7 +62,7 @@ class IrTerm {
 					$extra['parent'] = $result->get()->term_id;
 				} else {
 					$err = $result->error();
-					Logger::warning( sprintf( __( 'Could not get or create parent term: %s', 'wprss' ), $err->getMessage() ) );
+					Logger::warning( sprintf( __( 'Could not get or create parent term: %s', 'wp-rss-aggregator' ), $err->getMessage() ) );
 				}
 			}
 
@@ -74,7 +74,7 @@ class IrTerm {
 
 			$term = get_term_by( 'id', $info['term_id'], $this->taxonomy );
 			if ( ! ( $term instanceof WP_Term ) ) {
-				return Result::Err( sprintf( __( 'Could not get WordPress term "%s".', 'wprss' ), $info['term_id'] ) );
+				return Result::Err( sprintf( __( 'Could not get WordPress term "%s".', 'wp-rss-aggregator' ), $info['term_id'] ) );
 			}
 		}
 

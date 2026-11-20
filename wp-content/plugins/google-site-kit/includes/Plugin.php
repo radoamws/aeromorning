@@ -175,6 +175,12 @@ final class Plugin {
 				$modules = new Core\Modules\Modules( $this->context, $options, $user_options, $authentication, $assets );
 				$modules->register();
 
+				// Modules add their intent listeners during $modules->register() above, so collecting intents earlier would come up empty.
+				$intents = new Core\Intents\Intents();
+				$intents->register();
+
+				( new Core\Intents\REST_Intents_Controller( $intents, $authentication ) )->register();
+
 				$dismissals = new Core\Dismissals\Dismissals( $this->context, $user_options );
 				$dismissals->register();
 
@@ -197,11 +203,13 @@ final class Plugin {
 				// Assets must be registered after Modules instance is registered.
 				$assets->register();
 
-				$screens = new Core\Admin\Screens( $this->context, $assets, $modules, $authentication );
+				$screens = new Core\Admin\Screens( $this->context, $assets, $modules, $authentication, $intents );
 				$screens->register();
 
 				$user_surveys = new Core\User_Surveys\User_Surveys( $authentication, $user_options, $survey_queue );
 				$user_surveys->register();
+
+				( new Core\User_Feedback\REST_User_Feedback_Controller( $authentication ) )->register();
 
 				( new Core\Authentication\Setup( $this->context, $user_options, $authentication ) )->register();
 
@@ -230,6 +238,9 @@ final class Plugin {
 				( new Core\Util\Migration_1_150_0( $this->context, $options ) )->register();
 				( new Core\Util\Migration_1_163_0( $this->context, $options ) )->register();
 				( new Core\Util\Migration_1_177_0( $this->context, $options ) )->register();
+				( new Core\Util\Migration_1_185_0( $this->context, $options ) )->register();
+				( new Core\Util\Migration_1_192_0( $this->context, $options ) )->register();
+				( new Core\Util\Plugin_Update( $this->context, $options ) )->register();
 				( new Core\Dashboard_Sharing\Dashboard_Sharing( $this->context ) )->register();
 				( new Core\Key_Metrics\Key_Metrics( $this->context, $user_options, $options ) )->register();
 				( new Core\Prompts\Prompts( $this->context, $user_options ) )->register();
@@ -239,16 +250,14 @@ final class Plugin {
 				$conversion_tracking = new Core\Conversion_Tracking\Conversion_Tracking( $this->context, $options );
 				$conversion_tracking->register();
 
-				if ( Feature_Flags::enabled( 'proactiveUserEngagement' ) ) {
-					$data_requests = new Core\Email_Reporting\Email_Reporting_Data_Requests(
-						$this->context,
-						$modules,
-						$transients,
-						$user_options,
-					);
+				$data_requests = new Core\Email_Reporting\Email_Reporting_Data_Requests(
+					$this->context,
+					$modules,
+					$transients,
+					$user_options,
+				);
 
-					( new Core\Email_Reporting\Email_Reporting( $this->context, $modules, $data_requests, $golinks, $authentication, $options, $user_options ) )->register();
-				}
+				( new Core\Email_Reporting\Email_Reporting( $this->context, $modules, $data_requests, $golinks, $authentication, $options, $user_options ) )->register();
 
 				if ( Feature_Flags::enabled( 'googleTagGateway' ) ) {
 					( new Core\Tags\Google_Tag_Gateway\Google_Tag_Gateway( $this->context, $options ) )->register();
@@ -308,6 +317,25 @@ final class Plugin {
 	 */
 	public static function instance() {
 		return self::$instance;
+	}
+
+	/**
+	 * Forces the Setup Flow Refresh Phase 4 feature flag to be enabled.
+	 *
+	 * @since 1.183.0
+	 * @since 1.185.0 Force-enable the `setupFlowRefreshPhase4` flag in addition to the initial Setup Flow Refresh flag.
+	 * @since 1.190.0 Renamed from `force_setup_flow_refresh_feature_enabled()`, and now only force-enables the `setupFlowRefreshPhase4` flag.
+	 *
+	 * @param bool   $feature_enabled The current status of this feature flag.
+	 * @param string $feature_name    The feature name.
+	 * @return bool True for setupFlowRefreshPhase4, otherwise the original value.
+	 */
+	public function force_setup_flow_refresh_phase4_feature_enabled( $feature_enabled, $feature_name ) {
+		if ( 'setupFlowRefreshPhase4' === $feature_name ) {
+			return true;
+		}
+
+		return $feature_enabled;
 	}
 
 	/**

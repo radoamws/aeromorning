@@ -5,5 +5,5 @@ if (!defined('ABSPATH')) exit;
 use MailPoetVendor\Doctrine\ORM\Query\Exec\SqlFinalizer;
 interface OutputWalker
 {
- public function getFinalizer($AST) : SqlFinalizer;
+public function getFinalizer($AST): SqlFinalizer;
 }

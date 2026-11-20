@@ -43,27 +43,14 @@ class __TwigTemplate_aab054d1ce71cebb286bd048e43bc4591e33d0913d0f18c524b7aaf2e00
 
 ";
         // line 3
-        if ($this->extensions['MailPoet\Twig\Functions']->isGarden()) {
-            // line 4
-            yield $this->extensions['MailPoet\Twig\I18n']->translate("Your emails are now being sent");
-            yield "
+        yield $this->extensions['MailPoet\Twig\I18n']->translate("MailPoet is now sending your emails");
+        yield "
 
 ";
-            // line 6
-            yield $this->extensions['MailPoet\Twig\I18n']->translate("This email was sent automatically after you activated your email sending key in your settings.");
-            yield "
+        // line 5
+        yield $this->extensions['MailPoet\Twig\I18n']->translate("This email was sent automatically with the MailPoet Sending Service after you activated your key in your MailPoet settings.");
+        yield "
 ";
-        } else {
-            // line 8
-            yield $this->extensions['MailPoet\Twig\I18n']->translate("MailPoet is now sending your emails");
-            yield "
-
-";
-            // line 10
-            yield $this->extensions['MailPoet\Twig\I18n']->translate("This email was sent automatically with the MailPoet Sending Service after you activated your key in your MailPoet settings.");
-            yield "
-";
-        }
         return; yield '';
     }
 
@@ -88,7 +75,7 @@ class __TwigTemplate_aab054d1ce71cebb286bd048e43bc4591e33d0913d0f18c524b7aaf2e00
      */
     public function getDebugInfo()
     {
-        return array (  60 => 10,  55 => 8,  50 => 6,  45 => 4,  43 => 3,  38 => 1,);
+        return array (  48 => 5,  43 => 3,  38 => 1,);
     }
 
     public function getSourceContext()

@@ -69,6 +69,19 @@ class Tool extends Root {
 	}
 
 	/**
+	 * Disable heartbeat by deregistering it together with its dependents (wp-auth-check, autosave), which are inert without it. Leaving them enqueued triggers the WP 6.9.1+ unregistered-dependency notice.
+	 *
+	 * @since  7.9
+	 * @access private
+	 */
+	private function _disable_heartbeat() {
+		foreach ( [ 'heartbeat', 'wp-auth-check', 'autosave' ] as $handle ) {
+			wp_dequeue_script( $handle );
+			wp_deregister_script( $handle );
+		}
+	}
+
+	/**
 	 * Heartbeat Control frontend control
 	 *
 	 * Manages heartbeat settings for the frontend.
@@ -82,7 +95,7 @@ class Tool extends Root {
 		}
 
 		if ( ! $this->conf( Base::O_MISC_HEARTBEAT_FRONT_TTL ) ) {
-			wp_deregister_script( 'heartbeat' );
+			$this->_disable_heartbeat();
 			Debug2::debug( '[Tool] Deregistered frontend heartbeat' );
 		}
 	}
@@ -102,8 +115,9 @@ class Tool extends Root {
 			}
 
 			if ( ! $this->conf( Base::O_MISC_HEARTBEAT_EDITOR_TTL ) ) {
-				wp_deregister_script( 'heartbeat' );
+				$this->_disable_heartbeat();
 				Debug2::debug( '[Tool] Deregistered editor heartbeat' );
+				return;
 			}
 		} else {
 			if ( ! $this->conf( Base::O_MISC_HEARTBEAT_BACK ) ) {
@@ -111,10 +125,25 @@ class Tool extends Root {
 			}
 
 			if ( ! $this->conf( Base::O_MISC_HEARTBEAT_BACK_TTL ) ) {
-				wp_deregister_script( 'heartbeat' );
+				$this->_disable_heartbeat();
 				Debug2::debug( '[Tool] Deregistered backend heartbeat' );
+				return;
 			}
 		}
+
+		// WordPress sets 10 seconds on post lists and editors after load; apply the configured interval again then and on each tick.
+		wp_add_inline_script(
+			'heartbeat',
+			'jQuery( function ( $ ) {
+				var apply = function () {
+					if ( window.heartbeatSettings && heartbeatSettings.interval ) {
+						wp.heartbeat.interval( parseInt( heartbeatSettings.interval, 10 ) );
+					}
+				};
+				setTimeout( apply );
+				$( document ).on( "heartbeat-tick", apply );
+			} );'
+		);
 	}
 
 	/**

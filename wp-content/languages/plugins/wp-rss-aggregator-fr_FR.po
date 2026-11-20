@@ -1,17 +1,17 @@
-# Translation of Plugins - RSS Aggregator &#8211; RSS Import, News Feeds, Feed to Post, and Autoblogging - Stable (latest release) in French (France)
-# This file is distributed under the same license as the Plugins - RSS Aggregator &#8211; RSS Import, News Feeds, Feed to Post, and Autoblogging - Stable (latest release) package.
+# Translation of Plugins - WP RSS Aggregator &#8211; Import RSS Feeds, Feed to Post, Autoblogging - Stable (latest release) in French (France)
+# This file is distributed under the same license as the Plugins - WP RSS Aggregator &#8211; Import RSS Feeds, Feed to Post, Autoblogging - Stable (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-11-24 13:23:33+0000\n"
+"PO-Revision-Date: 2026-09-18 05:39:06+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: GlotPress/4.0.3\n"
+"X-Generator: GlotPress/4.1.0\n"
 "Language: fr\n"
-"Project-Id-Version: Plugins - RSS Aggregator &#8211; RSS Import, News Feeds, Feed to Post, and Autoblogging - Stable (latest release)\n"
+"Project-Id-Version: Plugins - WP RSS Aggregator &#8211; Import RSS Feeds, Feed to Post, Autoblogging - Stable (latest release)\n"
 
-#: core/modules/admin.php:129 v4/src/Modules/LogsToolModule.php:33
+#: v4/src/Modules/LogsToolModule.php:33
 msgid "Logs"
 msgstr "Journaux"
 
@@ -31,12 +31,12 @@ msgstr "WP RSS OPML"
 msgid "OK"
 msgstr "OK"
 
-#: v4/includes/scripts.php:37 core/js/dist/admin.js:37 core/js/dist/admin.js:38
-#: core/js/dist/admin.js:108
+#: v4/includes/scripts.php:37 core/js/dist/admin.js:42
+#: core/js/dist/admin.js:112 core/js/dist/admin.js:130
 msgid "Cancel"
 msgstr "Annuler"
 
-#: v4/includes/scripts.php:53 core/js/dist/admin.js:37 core/js/dist/admin.js:38
+#: v4/includes/scripts.php:53 core/js/dist/admin.js:42
 msgid "Pause"
 msgstr "Pause"
 
@@ -79,14 +79,16 @@ msgstr "No Follow"
 
 #: core/edd-sl-updater.php:516
 #: v4/includes/libraries/EDD_licensing/EDD_SL_Plugin_Updater.php:519
+#: core/js/dist/admin.js:42
 msgid "Error"
 msgstr "Erreur "
 
 #: v4/includes/Aventura/Wprss/Core/Licensing/Settings.php:346
+#: core/js/dist/admin.js:42
 msgid "Status"
 msgstr "État"
 
-#: core/src/Utils/Strings.php:152 v4/includes/misc-functions.php:312
+#: core/src/Utils/Strings.php:158 v4/includes/misc-functions.php:312
 msgid "&hellip;"
 msgstr "&hellip;"
 
@@ -143,7 +145,7 @@ msgid "Follow"
 msgstr "Follow"
 
 #: v4/includes/Aventura/Wprss/Core/Licensing/Settings.php:242
-#: core/js/dist/admin.js:37 core/js/dist/admin.js:108 core/js/dist/admin.js:112
+#: core/js/dist/admin.js:42 core/js/dist/admin.js:130 core/js/dist/admin.js:135
 msgid "Enter your license key"
 msgstr "Entrez votre clé de licence"
 
@@ -221,7 +223,7 @@ msgstr "Aucun ID de module"
 msgid "You do not have permission to install plugin updates"
 msgstr "Vous n’avez pas les droits suffisants pour installer les mises à jour de l’extension"
 
-#: v4/includes/admin.php:136 core/js/dist/admin.js:37
+#: v4/includes/admin.php:136 core/js/dist/admin.js:42
 msgid "Documentation"
 msgstr "Documentation"
 
@@ -245,8 +247,8 @@ msgstr "Afficher la source"
 msgid "Show date"
 msgstr "Afficher la date"
 
-#: v4/includes/admin-options.php:31 core/js/dist/admin.js:38
-#: core/js/dist/admin.js:108
+#: v4/includes/admin-options.php:31 core/js/dist/admin.js:42
+#: core/js/dist/admin.js:130
 msgid "General"
 msgstr "Général"
 
@@ -269,8 +271,9 @@ msgstr[1] "%s mois"
 msgid "Feed Source"
 msgstr "Source du flux"
 
-#: core/modules/feedItems.php:86 v4/includes/opml-importer.php:202
-#: v4/includes/opml-importer.php:233 core/js/dist/admin.js:37
+#: core/modules/feedItems.php:88 v4/includes/opml-importer.php:202
+#: v4/includes/opml-importer.php:233 core/js/dist/admin.js:42
+#: core/js/dist/admin.js:130
 msgid "Title"
 msgstr "Titre"
 
@@ -298,7 +301,7 @@ msgstr "Détails de la source du flux"
 msgid "Limit"
 msgstr "Limite"
 
-#: v4/includes/admin-metaboxes.php:106 core/js/dist/admin.js:108
+#: v4/includes/admin-metaboxes.php:106 core/js/dist/admin.js:130
 msgid "Link to enclosure"
 msgstr "Lien à utiliser"
 
@@ -310,7 +313,8 @@ msgstr "il y a"
 msgid "No feed URL defined yet"
 msgstr "Encore aucune URL de flux de définie"
 
-#: v4/includes/admin-metaboxes.php:633 core/js/dist/admin.js:108
+#: v4/includes/admin-metaboxes.php:633 core/js/dist/admin.js:42
+#: core/js/dist/admin.js:130
 msgid "Active"
 msgstr "Actif"
 
@@ -330,7 +334,7 @@ msgstr "La limite d’éléments de flux stockée"
 msgid "Link source"
 msgstr "Lier la source"
 
-#: v4/includes/admin-options-legacy.php:24 core/js/dist/admin.js:37
+#: v4/includes/admin-options-legacy.php:24 core/js/dist/admin.js:42
 msgid "Link title"
 msgstr "Titre du lien"
 
@@ -362,7 +366,7 @@ msgstr "Réglages de WP RSS Aggregator"
 msgid "Save Settings"
 msgstr "Enregistrer les réglages"
 
-#: v4/includes/admin-options.php:449 core/js/dist/admin.js:38
+#: v4/includes/admin-options.php:449 core/js/dist/admin.js:42
 msgid "If you would like to disable all styles used in this plugin, tick the checkbox."
 msgstr "Si vous voulez désactiver tous les styles utilisés dans l'extension, cochez la case."
 
@@ -438,7 +442,7 @@ msgstr "Aucune source de flux trouvée"
 msgid "RSS Aggregator"
 msgstr "RSS Aggregator"
 
-#: core/src/Display/LayoutTrait.php:249 v4/includes/legacy-feed-display.php:425
+#: core/src/Display/LayoutTrait.php:277 v4/includes/legacy-feed-display.php:425
 msgid "No feed items found."
 msgstr "Aucun élément de flux trouvé."
 
@@ -462,7 +466,7 @@ msgstr "Forums de support"
 msgid "Pagination type"
 msgstr "Type de pagination "
 
-#: v4/includes/admin-options-legacy.php:48 core/js/dist/admin.js:37
+#: v4/includes/admin-options-legacy.php:48 core/js/dist/admin.js:42
 msgid "Open links behaviour"
 msgstr "Comportement pour l'ouverture des liens"
 
@@ -470,11 +474,11 @@ msgstr "Comportement pour l'ouverture des liens"
 msgid "No Limit"
 msgstr "Illimité"
 
-#: core/src/Renderer.php:364 v4/includes/legacy-feed-display.php:479
+#: core/src/Renderer.php:367 v4/includes/legacy-feed-display.php:479
 msgid "Older posts"
 msgstr "Articles plus anciens"
 
-#: core/src/Renderer.php:375 v4/includes/legacy-feed-display.php:483
+#: core/src/Renderer.php:368 v4/includes/legacy-feed-display.php:483
 msgid "Newer posts"
 msgstr "Articles plus récents"
 
@@ -487,7 +491,7 @@ msgid "No Date"
 msgstr "Pas de date"
 
 #: v4/includes/admin-options-legacy.php:177 v4/includes/admin-options.php:466
-#: core/js/dist/admin.js:37 core/js/dist/admin.js:108
+#: core/js/dist/admin.js:42 core/js/dist/admin.js:130
 msgid "No limit"
 msgstr "Pas de limitation"
 
@@ -515,17 +519,11 @@ msgstr "Liens \"Articles plus anciens\" et \"Articles plus récents\""
 msgid "Page numbers with \"Next\" and \"Previous\" page links"
 msgstr "Numéros de page avec liens \"Suivants\" et \"Précédents\""
 
-#: v4/includes/admin-metaboxes.php:81 v4/includes/opml-importer.php:203
-#: v4/includes/opml-importer.php:234 v4/src/Ui/BlacklistTable.php:74
-#: core/js/dist/admin.js:38
-msgid "URL"
-msgstr "Adresse web"
-
 #: v4/includes/admin-metaboxes.php:99 v4/includes/admin-metaboxes.php:278
 #: v4/includes/admin-metaboxes.php:638 v4/includes/admin-metaboxes.php:774
 #: v4/includes/admin-options.php:655 v4/includes/admin-options.php:761
 #: v4/includes/admin-options.php:874 v4/includes/feed-access.php:275
-#: v4/src/Modules/FeedTemplatesModule.php:390 core/js/dist/admin.js:38
+#: v4/src/Modules/FeedTemplatesModule.php:390 core/js/dist/admin.js:42
 msgid "Default"
 msgstr "Par défaut"
 
@@ -570,35 +568,31 @@ msgstr "Veuillez saisir une adresse e-mail valide."
 msgid "Options that control how the feed item's date is displayed."
 msgstr "Options qui régissent l&rsquo;affichage de la date de l'article"
 
-#: core/modules/admin.php:122 v4/includes/admin.php:30
-#: v4/includes/admin.php:130 core/js/dist/admin.js:37 core/js/dist/admin.js:38
-#: core/js/dist/admin.js:114
+#: core/modules/admin.php:129 v4/includes/admin.php:30
+#: v4/includes/admin.php:130 core/js/dist/admin.js:42 core/js/dist/admin.js:130
+#: core/js/dist/admin.js:137
 msgid "Settings"
 msgstr "Réglages"
 
-#: core/modules/feedItems.php:33 v4/src/Modules/FeedItemsModule.php:153
+#: core/modules/feedItems.php:35 v4/src/Modules/FeedItemsModule.php:153
 msgid "Feed Item"
 msgstr "Elément du flux"
 
-#: core/modules/feedItems.php:32 core/modules/feedItems.php:34
+#: core/modules/feedItems.php:34 core/modules/feedItems.php:36
 #: v4/src/Modules/FeedItemsModule.php:152
 #: v4/src/Modules/FeedItemsModule.php:154
 msgid "Feed Items"
 msgstr "Eléments du flux "
 
-#: v4/includes/admin-options.php:239
-msgid "Import Settings"
-msgstr "Importation des réglages"
-
 #: v4/includes/admin-options-legacy.php:224
 msgid "This will not affect already imported feed items."
 msgstr "Cela n'affectera pas les éléments de flux déjà importés"
 
-#: core/modules/feedItems.php:40 v4/src/Modules/FeedItemsModule.php:155
+#: core/modules/feedItems.php:42 v4/src/Modules/FeedItemsModule.php:155
 msgid "View Feed Items"
 msgstr "Voir les éléments du flux"
 
-#: core/modules/feedItems.php:41 v4/src/Modules/FeedItemsModule.php:156
+#: core/modules/feedItems.php:43 v4/src/Modules/FeedItemsModule.php:156
 msgid "Search Feed Items"
 msgstr "Chercher parmi les éléments"
 
@@ -664,7 +658,17 @@ msgstr "Longueur max. du titre"
 msgid "Options that control how the feed item's source is displayed."
 msgstr "Options qui régissent l&rsquo;affichage de la source"
 
-#: v4/includes/admin-display.php:41 core/js/dist/admin.js:108
+#: v4/includes/admin-options.php:239
+msgid "Import Settings"
+msgstr "Importer les réglages"
+
+#: v4/includes/admin-metaboxes.php:81 v4/includes/opml-importer.php:203
+#: v4/includes/opml-importer.php:234 v4/src/Ui/BlacklistTable.php:74
+#: core/js/dist/admin.js:42
+msgid "URL"
+msgstr "URL"
+
+#: v4/includes/admin-display.php:41 core/js/dist/admin.js:130
 msgid "Updates"
 msgstr "Mises à jour"
 
@@ -672,24 +676,19 @@ msgstr "Mises à jour"
 msgid "None"
 msgstr "Aucun"
 
-#: v4/includes/admin-metaboxes.php:634 core/js/dist/admin.js:108
+#: v4/includes/admin-metaboxes.php:634 core/js/dist/admin.js:130
 msgid "Paused"
 msgstr "En pause"
 
 #: v4/includes/admin-display.php:36 v4/includes/admin-display.php:299
 #: v4/includes/admin-help.php:187 v4/src/Ui/BlacklistTable.php:73
-#: core/js/dist/admin.js:37 core/js/dist/admin.js:108
+#: core/js/dist/admin.js:42 core/js/dist/admin.js:130
 msgid "Name"
 msgstr "Nom"
 
 #: v4/includes/admin-editor.php:134
 msgid "All feed sources"
 msgstr "Toutes les sources"
-
-#: v4/includes/admin-help.php:25 v4/includes/admin.php:40
-#: v4/includes/admin.php:41
-msgid "Help & Support"
-msgstr "Aide & support"
 
 #: v4/includes/admin-intro-page.php:29 v4/includes/admin-intro-page.php:30
 msgid "Welcome to WP RSS Aggregator"
@@ -723,9 +722,9 @@ msgstr "Source du flux sauvegardée."
 msgid "Feed source submitted."
 msgstr "Source du flux envoyée."
 
-#: v4/includes/scripts.php:52 core/js/dist/admin.js:37 core/js/dist/admin.js:38
-#: core/js/dist/admin.js:108 core/js/dist/admin.js:112
-#: core/js/dist/admin.js:114
+#: v4/includes/scripts.php:52 core/js/dist/admin.js:42
+#: core/js/dist/admin.js:130 core/js/dist/admin.js:135
+#: core/js/dist/admin.js:137
 msgid "Activate"
 msgstr "Activer"
 
@@ -747,7 +746,7 @@ msgid "Feeds are being updated in the background."
 msgstr "Les flux sont mis à jour en arrière-plan"
 
 #: core/modules/debugInfo.php:37 v4/includes/admin-display.php:33
-#: core/js/dist/admin.js:108
+#: core/js/dist/admin.js:130
 msgid "State"
 msgstr "&Eacute;tat"
 
@@ -755,8 +754,8 @@ msgstr "&Eacute;tat"
 msgid "Permalink"
 msgstr "Permalien"
 
-#: core/modules/feedItems.php:88 v4/includes/admin-display.php:302
-#: core/js/dist/admin.js:37
+#: core/modules/feedItems.php:90 v4/includes/admin-display.php:302
+#: core/js/dist/admin.js:42
 msgid "Source"
 msgstr "Source"
 
@@ -837,3 +836,8 @@ msgstr "Le journal des erreurs a été effacé."
 #: v4/includes/Aventura/Wprss/Core/Model/AdminAjaxNotice/ServiceProvider.php:264
 msgid "Feeds deleted and are being re-imported in the background."
 msgstr "Les flux ont été supprimés et sont en cours de réimportation en arrière-plan."
+
+#: v4/includes/admin-help.php:25 v4/includes/admin.php:40
+#: v4/includes/admin.php:41
+msgid "Help & Support"
+msgstr "Aide et support"

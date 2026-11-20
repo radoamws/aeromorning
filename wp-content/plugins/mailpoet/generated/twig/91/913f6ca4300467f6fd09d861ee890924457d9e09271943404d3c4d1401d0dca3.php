@@ -54,19 +54,19 @@ class __TwigTemplate_a6bc3737d02c4217a15108cd3f8addf2e33ea8546e47c75fe38c1b5ca5b
     <div class=\"mailpoet_social_icon_settings_row\">
         <label>
         <div class=\"mailpoet_social_icon_settings_label mailpoet_social_icon_image_label\">
-            <img src=\"{{ model.image }}\" onerror=\"if (this.src != '{{ allIconSets.default.custom }}') this.src = '{{ allIconSets.default.custom }}';\" alt=\"{{ model.text }}\" class=\"mailpoet_social_icon_image\" />
+            <img src=\"{{ model.image }}\" onerror=\"if (this.src != \x27{{ allIconSets.default.custom }}\x27) this.src = \x27{{ allIconSets.default.custom }}\x27;\" alt=\"{{ model.text }}\" class=\"mailpoet_social_icon_image\" />
         </div>
         <div class=\"mailpoet_social_icon_settings_form_element\">
             <select name=\"iconType\" class=\"mailpoet_social_icon_field_type\">
             {{#each iconTypes}}
-                <option value=\"{{ iconType }}\" {{#ifCond iconType '==' ../model.iconType}}SELECTED{{/ifCond}}>{{ title }}</option>
+                <option value=\"{{ iconType }}\" {{#ifCond iconType \x27==\x27 ../model.iconType}}SELECTED{{/ifCond}}>{{ title }}</option>
             {{/each}}
             </select>
         </div>
         </label>
     </div>
 
-    {{#ifCond iconType '==' 'custom'}}
+    {{#ifCond iconType \x27==\x27 \x27custom\x27}}
     <div class=\"mailpoet_social_icon_settings_row\">
         <label>
         <div class=\"mailpoet_social_icon_settings_label\">
@@ -95,7 +95,7 @@ class __TwigTemplate_a6bc3737d02c4217a15108cd3f8addf2e33ea8546e47c75fe38c1b5ca5b
             {{/if}}
         </div>
         <div class=\"mailpoet_social_icon_settings_form_element\">
-            {{#ifCond iconType '==' 'email'}}
+            {{#ifCond iconType \x27==\x27 \x27email\x27}}
             <input type=\"text\" name=\"link\" class=\"mailpoet_social_icon_field_link\" value=\"{{emailFromMailto model.link }}\" placeholder=\"example@example.org\" /><br />
             {{else}}
             <input type=\"text\" name=\"link\" class=\"mailpoet_social_icon_field_link\" value=\"{{ model.link }}\" placeholder=\"http://\" /><br />
@@ -104,7 +104,7 @@ class __TwigTemplate_a6bc3737d02c4217a15108cd3f8addf2e33ea8546e47c75fe38c1b5ca5b
         </label>
     </div>
 
-    {{#ifCond iconType '==' 'custom'}}
+    {{#ifCond iconType \x27==\x27 \x27custom\x27}}
     <div class=\"mailpoet_social_icon_settings_row\">
         <label>
         <div class=\"mailpoet_social_icon_settings_label\">

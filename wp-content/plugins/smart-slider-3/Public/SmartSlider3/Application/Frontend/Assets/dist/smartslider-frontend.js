@@ -1086,6 +1086,9 @@ fixCriticalCSS('rocket-critical-css');_N2.d('SmartSliderLoad', function () {
     SmartSliderApi.prototype.openUrl = function (e, target) {
         if (this.isClickAllowed(e)) {
             var href = _NodeGetData(e.currentTarget, 'href');
+            if (!n2const.isUrlSafe(href)) {
+                return;
+            }
             if (target === undefined) {
                 target = _NodeGetData(e.currentTarget, 'target');
             }
@@ -2061,12 +2064,32 @@ _N2.d('SmartSliderAbstract', function () {
      * Change is carousel if:
      * - first slide -> -1 slide not exists
      * - last slide -> +1 slide not exists
+     *
+     * The current device visibility (isVisible) must be taken into account: slides
+     * hidden for the active breakpoint still occupy a slot in this.slides, so a raw
+     * index/length comparison would treat a trailing hidden slide as if it were a
+     * real next/previous slide. That makes the wheel/keyboard/touch handlers call
+     * preventDefault() on an event that produces no slide change, trapping the scroll
+     * on the last visible slide (SSDEV-4185). We instead look for the nearest visible
+     * slide in the requested direction, mirroring getSlideCount()'s visibility loop.
+     * Note: we intentionally do NOT use getNext()/getPrevious() here, because those
+     * wrap around in carousel (loop) mode and would disable blockCarouselInteraction.
      */
     SmartSliderAbstract.prototype.isChangeCarousel = function (direction) {
         if (direction === 'next') {
-            return this.currentSlide.index + 1 >= this.slides.length;
+            for (var i = this.currentSlide.index + 1; i < this.slides.length; i++) {
+                if (this.slides[i].isVisible) {
+                    return false;
+                }
+            }
+            return true;
         } else if (direction === 'previous') {
-            return this.currentSlide.index - 1 < 0;
+            for (var j = this.currentSlide.index - 1; j >= 0; j--) {
+                if (this.slides[j].isVisible) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         return false;

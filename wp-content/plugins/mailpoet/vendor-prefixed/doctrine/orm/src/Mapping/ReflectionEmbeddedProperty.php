@@ -7,35 +7,35 @@ use ReflectionProperty;
 use ReturnTypeWillChange;
 class ReflectionEmbeddedProperty extends ReflectionProperty
 {
- private $parentProperty;
- private $childProperty;
- private $embeddedClass;
- private $instantiator;
- public function __construct(ReflectionProperty $parentProperty, ReflectionProperty $childProperty, $embeddedClass)
- {
- $this->parentProperty = $parentProperty;
- $this->childProperty = $childProperty;
- $this->embeddedClass = (string) $embeddedClass;
- parent::__construct($childProperty->class, $childProperty->name);
- }
- #[\ReturnTypeWillChange]
- public function getValue($object = null)
- {
- $embeddedObject = $this->parentProperty->getValue($object);
- if ($embeddedObject === null) {
- return null;
- }
- return $this->childProperty->getValue($embeddedObject);
- }
- #[\ReturnTypeWillChange]
- public function setValue($object, $value = null)
- {
- $embeddedObject = $this->parentProperty->getValue($object);
- if ($embeddedObject === null) {
- $this->instantiator = $this->instantiator ?: new Instantiator();
- $embeddedObject = $this->instantiator->instantiate($this->embeddedClass);
- $this->parentProperty->setValue($object, $embeddedObject);
- }
- $this->childProperty->setValue($embeddedObject, $value);
- }
+private $parentProperty;
+private $childProperty;
+private $embeddedClass;
+private $instantiator;
+public function __construct(ReflectionProperty $parentProperty, ReflectionProperty $childProperty, $embeddedClass)
+{
+$this->parentProperty = $parentProperty;
+$this->childProperty = $childProperty;
+$this->embeddedClass = (string) $embeddedClass;
+parent::__construct($childProperty->class, $childProperty->name);
+}
+#[ReturnTypeWillChange]
+public function getValue($object = null)
+{
+$embeddedObject = $this->parentProperty->getValue($object);
+if ($embeddedObject === null) {
+return null;
+}
+return $this->childProperty->getValue($embeddedObject);
+}
+#[ReturnTypeWillChange]
+public function setValue($object, $value = null)
+{
+$embeddedObject = $this->parentProperty->getValue($object);
+if ($embeddedObject === null) {
+$this->instantiator = $this->instantiator ?: new Instantiator();
+$embeddedObject = $this->instantiator->instantiate($this->embeddedClass);
+$this->parentProperty->setValue($object, $embeddedObject);
+}
+$this->childProperty->setValue($embeddedObject, $value);
+}
 }

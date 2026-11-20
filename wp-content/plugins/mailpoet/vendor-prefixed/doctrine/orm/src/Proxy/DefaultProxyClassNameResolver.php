@@ -9,16 +9,16 @@ use function strrpos;
 use function substr;
 final class DefaultProxyClassNameResolver implements ProxyClassNameResolver
 {
- public function resolveClassName(string $className) : string
- {
- $pos = strrpos($className, '\\' . Proxy::MARKER . '\\');
- if ($pos === \false) {
- return $className;
- }
- return substr($className, $pos + Proxy::MARKER_LENGTH + 2);
- }
- public static function getClass($object) : string
- {
- return (new self())->resolveClassName(get_class($object));
- }
+public function resolveClassName(string $className): string
+{
+$pos = strrpos($className, '\\' . Proxy::MARKER . '\\');
+if ($pos === \false) {
+return $className;
+}
+return substr($className, $pos + Proxy::MARKER_LENGTH + 2);
+}
+public static function getClass($object): string
+{
+return (new self())->resolveClassName(get_class($object));
+}
 }

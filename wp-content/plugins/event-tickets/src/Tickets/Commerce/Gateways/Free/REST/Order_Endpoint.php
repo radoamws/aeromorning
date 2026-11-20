@@ -11,6 +11,7 @@ namespace TEC\Tickets\Commerce\Gateways\Free\REST;
 
 use TEC\Tickets\Commerce\Cart;
 use TEC\Tickets\Commerce\Gateways\Contracts\Abstract_REST_Endpoint;
+use TEC\Tickets\Commerce\Gateways\Contracts\Traits\Requires_Login_To_Purchase;
 use TEC\Tickets\Commerce\Gateways\Free\Gateway;
 use TEC\Tickets\Commerce\Order;
 use TEC\Tickets\Commerce\Stock_Validator;
@@ -18,8 +19,10 @@ use TEC\Tickets\Commerce\Stock_Validator;
 use TEC\Tickets\Commerce\Status\Completed;
 use TEC\Tickets\Commerce\Status\Pending;
 use TEC\Tickets\Commerce\Success;
+use TEC\Tickets\Commerce\Utils\Value;
 
 use WP_Error;
+use WP_Post;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -33,6 +36,8 @@ use WP_REST_Server;
  * @package TEC\Tickets\Commerce\Gateways\Free\REST
  */
 class Order_Endpoint extends Abstract_REST_Endpoint {
+	use Requires_Login_To_Purchase;
+
 
 	/**
 	 * The REST API endpoint path.
@@ -58,7 +63,7 @@ class Order_Endpoint extends Abstract_REST_Endpoint {
 			[
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'handle_create_order' ],
-				'permission_callback' => '__return_true',
+				'permission_callback' => [ $this, 'can_purchase' ],
 			]
 		);
 
@@ -70,6 +75,8 @@ class Order_Endpoint extends Abstract_REST_Endpoint {
 	 *
 	 * @since 5.10.0
 	 * @since 5.26.6 Added cart validation to reject empty carts and carts containing paid tickets.
+	 * @since 5.30.3 Rejects carts containing a negative-priced ticket.
+	 * @since 5.31.1.1 Returns an error when the order could not be created.
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
@@ -87,8 +94,18 @@ class Order_Endpoint extends Abstract_REST_Endpoint {
 		// Check if cart has any items.
 		$cart_items = $cart->get_repository()->get_items_in_cart();
 
+		// The total alone is not enough: every ticket line must be free, not below zero.
+		$has_negative_item = [] !== array_filter(
+			$cart->get_items_in_cart( true ),
+			static function ( array $item ): bool {
+				$sub_total = $item['sub_total'] instanceof Value ? $item['sub_total']->get_decimal() : $item['sub_total'];
+
+				return is_numeric( $sub_total ) && $sub_total < 0;
+			}
+		);
+
 		// If cart is empty or has any cost > 0, reject the request.
-		if ( ! ( $cart_items && $cart_total <= 0 ) ) {
+		if ( ! ( $cart_items && $cart_total <= 0 ) || $has_negative_item ) {
 			return new WP_Error(
 				'tec_tickets_commerce_free_order_invalid_cart',
 				__( 'This endpoint can only be used for carts with a total of 0. Carts with paid tickets require payment.', 'event-tickets' ),
@@ -111,6 +128,14 @@ class Order_Endpoint extends Abstract_REST_Endpoint {
 		}
 
 		$order = tribe( Order::class )->create_from_cart( tribe( Gateway::class ), $purchaser );
+
+		if ( ! $order instanceof WP_Post ) {
+			return new WP_Error(
+				'tec_tickets_commerce_free_order_creation_failed',
+				__( 'The order could not be created.', 'event-tickets' ),
+				[ 'status' => 400 ]
+			);
+		}
 
 		$created = tribe( Order::class )->modify_status(
 			$order->ID,

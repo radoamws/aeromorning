@@ -14,6 +14,7 @@ use MailPoet\Logging\LoggerFactory;
 use MailPoet\Newsletter\AutomaticEmailsRepository;
 use MailPoet\Newsletter\Scheduler\AutomaticEmailScheduler;
 use MailPoet\Subscribers\SubscribersRepository;
+use MailPoet\Util\Helpers;
 use MailPoet\WooCommerce\Helper as WCHelper;
 use MailPoet\WP\Functions as WPFunctions;
 
@@ -136,7 +137,7 @@ class FirstPurchase {
       }
 
       $this->loggerFactory->getLogger(self::SLUG)->info(
-        'handleOrderDateShortcode called',
+        'MailPoet replaced the order date shortcode in an email (handleOrderDateShortcode called).',
         [
           'newsletter_id' => ($newsletter instanceof NewsletterEntity) ? $newsletter->getId() : null,
           'subscriber_id' => ($subscriber instanceof SubscriberEntity) ? $subscriber->getId() : null,
@@ -161,7 +162,7 @@ class FirstPurchase {
       }
 
       $this->loggerFactory->getLogger(self::SLUG)->info(
-        'handleOrderTotalShortcode called',
+        'MailPoet replaced the order total shortcode in an email (handleOrderTotalShortcode called).',
         [
           'newsletter_id' => ($newsletter instanceof NewsletterEntity) ? $newsletter->getId() : null,
           'subscriber_id' => ($subscriber instanceof SubscriberEntity) ? $subscriber->getId() : null,
@@ -191,7 +192,7 @@ class FirstPurchase {
         'Email not scheduled because this is not the first order of the customer',
         [
           'order_id' => $orderId,
-          'customer_email' => $customerEmail,
+          'customer_email' => Helpers::maskEmail($customerEmail),
           'order_count' => $customerOrderCount,
         ]
       );
@@ -209,7 +210,7 @@ class FirstPurchase {
     if (!$subscriber instanceof SubscriberEntity) {
       $this->loggerFactory->getLogger(self::SLUG)->info(
         'Email not scheduled because the customer was not found as WooCommerce list subscriber',
-        ['order_id' => $orderId, 'customer_email' => $customerEmail]
+        ['order_id' => $orderId, 'customer_email' => Helpers::maskEmail($customerEmail)]
       );
       return;
     }
@@ -219,10 +220,10 @@ class FirstPurchase {
     };
 
     $this->loggerFactory->getLogger(self::SLUG)->info(
-      'Email scheduled',
+      'MailPoet tried to schedule the automatic email for the customer of this order (previously logged as: Email scheduled).',
       [
         'order_id' => $orderId,
-        'customer_email' => $customerEmail,
+        'customer_email' => Helpers::maskEmail($customerEmail),
         'subscriber_id' => $subscriber->getId(),
       ]
     );

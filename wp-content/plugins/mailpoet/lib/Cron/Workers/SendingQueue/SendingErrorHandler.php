@@ -12,6 +12,7 @@ use MailPoet\Mailer\MailerError;
 use MailPoet\Mailer\MailerLog;
 use MailPoet\Newsletter\Sending\ScheduledTaskSubscribersRepository;
 use MailPoet\Newsletter\Sending\SendingQueuesRepository;
+use MailPoet\Services\AuthorizedSenderDomainController;
 
 class SendingErrorHandler {
   /** @var ScheduledTaskSubscribersRepository */
@@ -26,16 +27,21 @@ class SendingErrorHandler {
   /** @var LoggerFactory */
   private $loggerFactory;
 
+  /** @var AuthorizedSenderDomainController */
+  private $senderDomainController;
+
   public function __construct(
     ScheduledTaskSubscribersRepository $scheduledTaskSubscribersRepository,
     SendingThrottlingHandler $throttlingHandler,
     SendingQueuesRepository $sendingQueuesRepository,
-    LoggerFactory $loggerFactory
+    LoggerFactory $loggerFactory,
+    AuthorizedSenderDomainController $senderDomainController
   ) {
     $this->scheduledTaskSubscribersRepository = $scheduledTaskSubscribersRepository;
     $this->throttlingHandler = $throttlingHandler;
     $this->sendingQueuesRepository = $sendingQueuesRepository;
     $this->loggerFactory = $loggerFactory;
+    $this->senderDomainController = $senderDomainController;
   }
 
   public function processError(
@@ -74,10 +80,11 @@ class SendingErrorHandler {
     if ($queue instanceof SendingQueueEntity) {
       if ($error->getOperation() === MailerError::OPERATION_DOMAIN_AUTHORIZATION) {
         $this->loggerFactory->getLogger(LoggerFactory::TOPIC_NEWSLETTERS)->info(
-          'Paused task in sending queue due to sender domain authorization error',
+          'A sender domain authorization error happened, so MailPoet pauses the sending task (Paused task in sending queue due to sender domain authorization error).',
           ['task_id' => $task->getId()]
         );
-        $this->sendingQueuesRepository->pause($queue);
+        $this->senderDomainController->clearCache();
+        $this->sendingQueuesRepository->pause($queue, ScheduledTaskEntity::PAUSE_REASON_SENDER_DOMAIN);
         return;
       }
       $this->sendingQueuesRepository->updateCounts($queue);

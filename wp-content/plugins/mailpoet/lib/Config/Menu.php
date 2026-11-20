@@ -8,8 +8,6 @@ if (!defined('ABSPATH')) exit;
 use MailPoet\AdminPages\Pages\Automation;
 use MailPoet\AdminPages\Pages\AutomationAnalytics;
 use MailPoet\AdminPages\Pages\AutomationEditor;
-use MailPoet\AdminPages\Pages\AutomationFlowEmbed;
-use MailPoet\AdminPages\Pages\AutomationPreviewEmbed;
 use MailPoet\AdminPages\Pages\AutomationTemplates;
 use MailPoet\AdminPages\Pages\CustomFields as CustomFieldsPage;
 use MailPoet\AdminPages\Pages\DynamicSegments;
@@ -37,7 +35,6 @@ use MailPoet\Form\Util\CustomFonts;
 use MailPoet\Newsletter\NewslettersRepository;
 use MailPoet\Util\License\Features\CapabilitiesManager;
 use MailPoet\WP\Functions as WPFunctions;
-use MailPoet\WPCOM\DotcomHelperFunctions;
 
 class Menu {
   const MAIN_PAGE_SLUG = self::HOMEPAGE_PAGE_SLUG;
@@ -67,8 +64,6 @@ class Menu {
   const AUTOMATION_EDITOR_PAGE_SLUG = 'mailpoet-automation-editor';
   const AUTOMATION_ANALYTICS_PAGE_SLUG = 'mailpoet-automation-analytics';
   const AUTOMATION_TEMPLATES_PAGE_SLUG = 'mailpoet-automation-templates';
-  const AUTOMATION_PREVIEW_EMBED_PAGE_SLUG = 'mailpoet-automation-preview-embed';
-  const AUTOMATION_FLOW_EMBED_PAGE_SLUG = 'mailpoet-automation-flow-embed';
 
   const LANDINGPAGE_PAGE_SLUG = 'mailpoet-landingpage';
 
@@ -76,6 +71,7 @@ class Menu {
 
   public $mpApiKeyValid;
   public $premiumKeyValid;
+  public $mssKeyExpiring;
 
   /** @var AccessControl */
   private $accessControl;
@@ -100,8 +96,6 @@ class Menu {
 
   private CapabilitiesManager $capabilitiesManager;
 
-  private DotcomHelperFunctions $dotcomHelperFunctions;
-
   public function __construct(
     AccessControl $accessControl,
     WPFunctions $wp,
@@ -110,8 +104,7 @@ class Menu {
     Router $router,
     CustomFonts $customFonts,
     CapabilitiesManager $capabilitiesManager,
-    EmailEditor $emailEditor,
-    DotcomHelperFunctions $dotcomHelperFunctions
+    EmailEditor $emailEditor
   ) {
     $this->accessControl = $accessControl;
     $this->wp = $wp;
@@ -121,14 +114,12 @@ class Menu {
     $this->customFonts = $customFonts;
     $this->capabilitiesManager = $capabilitiesManager;
     $this->emailEditor = $emailEditor;
-    $this->dotcomHelperFunctions = $dotcomHelperFunctions;
   }
 
   public function init() {
+    // Runs first: checkPremiumKey() suppresses its expiring notice when this one already covered it.
+    $this->checkMSSKey();
     $this->checkPremiumKey();
-
-    $this->wp->addAction('admin_init', [$this, 'maybeRenderAutomationPreviewEmbed'], 1);
-    $this->wp->addAction('admin_init', [$this, 'maybeRenderAutomationFlowEmbed'], 1);
 
     $this->wp->addAction(
       'admin_menu',
@@ -156,11 +147,8 @@ class Menu {
     $this->wp->doAction('mailpoet_conflict_resolver_styles');
     $this->wp->doAction('mailpoet_conflict_resolver_scripts');
 
-    if (
-      !isset($_REQUEST['page'])
-      || !is_string($_REQUEST['page'])
-      || sanitize_text_field(wp_unslash($_REQUEST['page'])) !== 'mailpoet-newsletter-editor'
-    ) {
+    // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized through WPFunctions below.
+    if (self::sanitizeRequestValue($this->wp, $_REQUEST['page'] ?? null) !== 'mailpoet-newsletter-editor') {
       return;
     }
     // Disable WP emojis to not interfere with the newsletter editor emoji handling
@@ -184,7 +172,7 @@ class Menu {
         . '|Raleway:400,400i,700,700i'
         . '|Permanent+Marker:400,400i,700,700i'
         . '|Pacifico:400,400i,700,700i'
-        . '" rel="stylesheet">';
+        . '" rel="stylesheet">'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- An enqueued style would be dequeued by the ConflictResolver on this page.
     });
   }
 
@@ -206,7 +194,7 @@ class Menu {
       self::NO_PARENT_PAGE_SLUG,
       $this->setPageTitle(__('Welcome Wizard', 'mailpoet')),
       esc_html__('Welcome Wizard', 'mailpoet'),
-      AccessControl::PERMISSION_ACCESS_PLUGIN_ADMIN,
+      AccessControl::PERMISSION_MANAGE_SETTINGS,
       self::WELCOME_WIZARD_PAGE_SLUG,
       [
         $this,
@@ -522,26 +510,6 @@ class Menu {
       [$this, 'automationTemplates']
     );
 
-    // Automation preview embed (hidden from menu, used for iframe embedding)
-    $this->wp->addSubmenuPage(
-      self::NO_PARENT_PAGE_SLUG,
-      $this->setPageTitle(__('Automation Preview', 'mailpoet')),
-      '',
-      AccessControl::PERMISSION_ACCESS_PLUGIN_ADMIN,
-      self::AUTOMATION_PREVIEW_EMBED_PAGE_SLUG,
-      [$this, 'automationPreviewEmbed']
-    );
-
-    // Automation flow embed (hidden from menu, used for iframe embedding)
-    $this->wp->addSubmenuPage(
-      self::NO_PARENT_PAGE_SLUG,
-      $this->setPageTitle(__('Automation Flow', 'mailpoet')),
-      '',
-      AccessControl::PERMISSION_ACCESS_PLUGIN_ADMIN,
-      self::AUTOMATION_FLOW_EMBED_PAGE_SLUG,
-      [$this, 'automationFlowEmbed']
-    );
-
     // add body class for automation editor page
     $this->wp->addAction('load-' . $automationPage, function() {
       $this->wp->addFilter('admin_body_class', function ($classes) {
@@ -551,9 +519,6 @@ class Menu {
     $this->wp->addAction('load-' . $automationEditorPage, function() {
       $this->wp->addFilter('admin_body_class', function ($classes) {
         $classes .= ' site-editor-php';
-        if ($this->dotcomHelperFunctions->isGarden()) {
-          $classes .= ' admin-color-modern';
-        }
         return ltrim($classes);
       });
     });
@@ -606,48 +571,6 @@ class Menu {
 
   public function automationAnalytics() {
     $this->container->get(AutomationAnalytics::class)->render();
-  }
-
-  public function automationPreviewEmbed() {
-    $this->container->get(AutomationPreviewEmbed::class)->render();
-  }
-
-  public function automationFlowEmbed() {
-    $this->container->get(AutomationFlowEmbed::class)->render();
-  }
-
-  /**
-   * Render automation preview embed page early, before WordPress outputs admin chrome.
-   * This allows the embed page to be a clean, standalone HTML page without menus/sidebars.
-   */
-  public function maybeRenderAutomationPreviewEmbed(): void {
-    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-    if (!isset($_GET['page']) || $_GET['page'] !== self::AUTOMATION_PREVIEW_EMBED_PAGE_SLUG) {
-      return;
-    }
-
-    if (!$this->accessControl->validatePermission(AccessControl::PERMISSION_ACCESS_PLUGIN_ADMIN)) {
-      return;
-    }
-
-    $this->container->get(AutomationPreviewEmbed::class)->render();
-  }
-
-  /**
-   * Render automation flow embed page early, before WordPress outputs admin chrome.
-   * This allows the embed page to be a clean, standalone HTML page without menus/sidebars.
-   */
-  public function maybeRenderAutomationFlowEmbed(): void {
-    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-    if (!isset($_GET['page']) || $_GET['page'] !== self::AUTOMATION_FLOW_EMBED_PAGE_SLUG) {
-      return;
-    }
-
-    if (!$this->accessControl->validatePermission(AccessControl::PERMISSION_ACCESS_PLUGIN_ADMIN)) {
-      return;
-    }
-
-    $this->container->get(AutomationFlowEmbed::class)->render();
   }
 
   public function experimentalFeatures() {
@@ -809,11 +732,14 @@ class Menu {
    * to display admin notices only
    */
   public static function addErrorPage(AccessControl $accessControl) {
-    if (!self::isOnMailPoetAdminPage() || !isset($_REQUEST['page']) || !is_string($_REQUEST['page'])) {
+    if (!self::isOnMailPoetAdminPage()) {
       return false;
     }
-
-    $page = sanitize_text_field(wp_unslash($_REQUEST['page']));
+    // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized through WPFunctions below.
+    $page = self::sanitizeRequestValue(WPFunctions::get(), $_REQUEST['page'] ?? null);
+    if ($page === null) {
+      return false;
+    }
     // Check if page already exists
     if (
       get_plugin_page_hook($page, '')
@@ -839,14 +765,40 @@ class Menu {
   }
 
   public function checkPremiumKey(?ServicesChecker $checker = null) {
-    $showNotices = self::isOnMailPoetAdminPage() || (isset($_SERVER['SCRIPT_NAME']) && is_string($_SERVER['SCRIPT_NAME'])
-      && stripos(sanitize_text_field(wp_unslash($_SERVER['SCRIPT_NAME'])), 'plugins.php') !== false);
     $checker = $checker ?: $this->servicesChecker;
-    $this->premiumKeyValid = $checker->isPremiumKeyValid($showNotices);
+    // Same key, same expiry: don't tell the customer to "renew" when the sending-plan notice already covers it.
+    $suppressExpiringNotice = $this->mssKeyExpiring && $checker->isSameKeyUsedForMSSAndPremium();
+    $this->premiumKeyValid = $checker->isPremiumKeyValid($this->shouldShowKeyNotices(), $suppressExpiringNotice);
+  }
+
+  public function checkMSSKey(?ServicesChecker $checker = null) {
+    $checker = $checker ?: $this->servicesChecker;
+    $this->mssKeyExpiring = $checker->isMailPoetAPIKeyExpiring($this->shouldShowKeyNotices());
+  }
+
+  private function shouldShowKeyNotices(): bool {
+    if (self::isOnMailPoetAdminPage()) {
+      return true;
+    }
+    // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized through WPFunctions below.
+    $scriptName = self::sanitizeRequestValue($this->wp, $_SERVER['SCRIPT_NAME'] ?? null);
+    return $scriptName !== null && stripos($scriptName, 'plugins.php') !== false;
+  }
+
+  /**
+   * @param mixed $raw
+   */
+  private static function sanitizeRequestValue(WPFunctions $wp, $raw): ?string {
+    if (!is_string($raw)) {
+      return null;
+    }
+    $unslashed = $wp->wpUnslash($raw);
+    return is_string($unslashed) ? $wp->sanitizeTextField($unslashed) : null;
   }
 
   public function getPageFromContext(): ?string {
-    $context = isset($_GET['context']) && is_string($_GET['context']) ? sanitize_text_field(wp_unslash($_GET['context'])) : null;
+    // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized through WPFunctions below.
+    $context = self::sanitizeRequestValue($this->wp, $_GET['context'] ?? null);
     if ($context === 'automation') {
       return self::AUTOMATIONS_PAGE_SLUG;
     }

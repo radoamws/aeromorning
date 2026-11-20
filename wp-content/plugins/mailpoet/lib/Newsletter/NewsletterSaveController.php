@@ -5,6 +5,7 @@ namespace MailPoet\Newsletter;
 if (!defined('ABSPATH')) exit;
 
 
+use MailPoet\API\JSON\Error as APIError;
 use MailPoet\Cron\Workers\SendingQueue\Tasks\Newsletter as NewsletterQueueTask;
 use MailPoet\EmailEditor\Integrations\MailPoet\EmailEditor;
 use MailPoet\Entities\NewsletterEntity;
@@ -129,6 +130,12 @@ class NewsletterSaveController {
     $this->shareVisibility = $shareVisibility;
   }
 
+  public function decodeAndSanitizeBody(string $body): ?array {
+    $newslettersTableName = $this->newslettersRepository->getTableName();
+    $decodedBody = json_decode($this->emoji->encodeForUTF8Column($newslettersTableName, 'body', $body), true);
+    return is_array($decodedBody) ? $this->dataSanitizer->sanitizeBody($decodedBody) : null;
+  }
+
   public function save(array $data = []): NewsletterEntity {
     if (!empty($data['template_id'])) {
       $template = $this->newsletterTemplatesRepository->findOneById($data['template_id']);
@@ -138,11 +145,7 @@ class NewsletterSaveController {
     }
 
     if (!empty($data['body'])) {
-      $newslettersTableName = $this->newslettersRepository->getTableName();
-      $body = $this->emoji->encodeForUTF8Column($newslettersTableName, 'body', $data['body']);
-      $decodedBody = json_decode($body, true);
-      $body = $this->dataSanitizer->sanitizeBody(is_array($decodedBody) ? $decodedBody : []);
-      $data['body'] = json_encode($body);
+      $data['body'] = $this->decodeAndSanitizeBody($data['body']) ?? [];
     }
 
     $newsletter = isset($data['id']) ? $this->getNewsletter($data) : $this->createNewsletter($data);
@@ -285,6 +288,9 @@ class NewsletterSaveController {
     $ignoredOptions = [
       NewsletterOptionFieldEntity::NAME_IS_SCHEDULED,
       NewsletterOptionFieldEntity::NAME_SCHEDULED_AT,
+      NewsletterOptionFieldEntity::NAME_SCHEDULE_MODE,
+      NewsletterOptionFieldEntity::NAME_SCHEDULED_LOCAL_DATE,
+      NewsletterOptionFieldEntity::NAME_SCHEDULED_LOCAL_TIME,
       NewsletterOptionFieldEntity::NAME_EXCLUDE_FROM_ARCHIVE,
     ];
     foreach ($newsletter->getOptions() as $newsletterOption) {
@@ -312,7 +318,8 @@ class NewsletterSaveController {
 
     $newsletter = $this->newslettersRepository->findOneById((int)$data['id']);
     if (!$newsletter) {
-      throw new NotFoundException('Newsletter not found');
+      throw (new NotFoundException('Newsletter not found'))
+        ->withError(APIError::NOT_FOUND, __('This email does not exist.', 'mailpoet'));
     }
     return $newsletter;
   }
@@ -354,12 +361,12 @@ class NewsletterSaveController {
     }
 
     if (array_key_exists('body', $data)) {
-      $decodedBody = json_decode($data['body'], true);
-      $newsletter->setBody(is_array($decodedBody) ? $decodedBody : null);
+      $body = is_string($data['body']) ? json_decode($data['body'], true) : $data['body'];
+      $newsletter->setBody(is_array($body) ? $body : null);
     }
 
     if (array_key_exists('ga_campaign', $data)) {
-      $newsletter->setGaCampaign($data['ga_campaign']);
+      $newsletter->setGaCampaign($this->wp->wpStripAllTags((string)$data['ga_campaign'], true));
     }
 
     if (array_key_exists('sender_name', $data)) {

@@ -8,6 +8,7 @@ if (!defined('ABSPATH')) exit;
 use MailPoet\Listing\Handler as ListingHandler;
 use MailPoet\Listing\ListingDefinition;
 use MailPoet\Listing\ListingRepository;
+use MailPoet\Listing\PageLimit;
 use MailPoet\Validator\Builder;
 
 /**
@@ -23,7 +24,7 @@ use MailPoet\Validator\Builder;
  */
 abstract class AbstractListingEndpoint extends Endpoint {
   public const DEFAULT_PER_PAGE = 20;
-  public const MAX_PER_PAGE = 100;
+  public const MAX_PER_PAGE = PageLimit::MAX_LIMIT_PER_PAGE;
   // Sentinel cap on `page`. Keeps `(page-1) * per_page` from producing
   // huge OFFSETs that would push MySQL through millions of skipped rows
   // when a client (or fuzzer) sends `page=999999999`.
@@ -51,7 +52,8 @@ abstract class AbstractListingEndpoint extends Endpoint {
     $repository = $this->getListingRepository();
 
     $rows = $repository->getData($definition);
-    $count = $repository->getCount($definition);
+    $countAndGroups = $this->getCountAndGroups($repository, $definition);
+    $count = $countAndGroups['count'];
     $perPage = $definition->getLimit() ?: self::DEFAULT_PER_PAGE;
     $pages = $count === 0 ? 0 : (int)ceil($count / max(1, $perPage));
 
@@ -62,8 +64,23 @@ abstract class AbstractListingEndpoint extends Endpoint {
         'pages' => $pages,
       ],
       'filters' => $repository->getFilters($definition),
-      'groups' => $repository->getGroups($definition),
+      'groups' => $countAndGroups['groups'],
     ]);
+  }
+
+  /**
+   * Returns `['count' => int, 'groups' => array]`. Split into a hook so an
+   * endpoint can read the count from cached statistics instead of running
+   * getCount(). The default keeps the two independent queries, unchanged for
+   * every other listing.
+   *
+   * @return array{count: int, groups: array<int, array<string, mixed>>}
+   */
+  protected function getCountAndGroups(ListingRepository $repository, ListingDefinition $definition): array {
+    return [
+      'count' => $repository->getCount($definition),
+      'groups' => $repository->getGroups($definition),
+    ];
   }
 
   public static function getRequestSchema(): array {

@@ -16,9 +16,12 @@ use RebelCode\Aggregator\Core\Source\ImportOrder;
 use RebelCode\Aggregator\Core\RssReader\RssItem;
 use RebelCode\Aggregator\Core\Importer\WpPostBuilder;
 use RebelCode\Aggregator\Core\Importer\IrPostBuilder;
+use RebelCode\Aggregator\Core\Importer\SourceFetchPolicy;
 use DateTime;
 
 class Importer {
+
+	public const STRICT_SYNC_BATCH_SIZE = 500;
 
 	public RssReader $rssReader;
 	public SourcesStore $sources;
@@ -27,13 +30,30 @@ class Importer {
 	public IrPostBuilder $postBuilder;
 	public ProgressStore $progress;
 
+	/** @since 5.2.1 */
+	protected SourceFetchPolicy $sourceFetchPolicy;
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 5.2.1 Added the source fetch policy dependency.
+	 *
+	 * @param RssReader              $rssReader The RSS reader.
+	 * @param SourcesStore           $sources The sources store.
+	 * @param WpPostsStore           $wpPosts The WordPress posts store.
+	 * @param RejectListStore        $rejectList The reject list store.
+	 * @param IrPostBuilder          $postBuilder The IR post builder.
+	 * @param ProgressStore          $progress The progress store.
+	 * @param SourceFetchPolicy|null $sourceFetchPolicy Optional source fetch policy.
+	 */
 	public function __construct(
 		RssReader $rssReader,
 		SourcesStore $sources,
 		WpPostsStore $wpPosts,
 		RejectListStore $rejectList,
 		IrPostBuilder $postBuilder,
-		ProgressStore $progress
+		ProgressStore $progress,
+		?SourceFetchPolicy $sourceFetchPolicy = null
 	) {
 		$this->rssReader = $rssReader;
 		$this->sources = $sources;
@@ -41,6 +61,7 @@ class Importer {
 		$this->rejectList = $rejectList;
 		$this->postBuilder = $postBuilder;
 		$this->progress = $progress;
+		$this->sourceFetchPolicy = $sourceFetchPolicy ?? new SourceFetchPolicy();
 	}
 
 	/**
@@ -69,7 +90,7 @@ class Importer {
 			return Result::Err( 'RSS feed URL is empty' );
 		}
 
-		$this->progress->setMessage( $pid, __( 'Reading RSS feed', 'wprss' ) );
+		$this->progress->setMessage( $pid, __( 'Reading RSS feed', 'wp-rss-aggregator' ) );
 
 		Logger::info( "Reading RSS feed at {$url}" );
 
@@ -91,7 +112,7 @@ class Importer {
 			$this->progress->setMessage(
 				$pid,
 				sprintf(
-					_n( 'Found %d item in the RSS feed', 'Found %d items in the RSS feed', $num, 'wprss' ),
+					_n( 'Found %d item in the RSS feed', 'Found %d items in the RSS feed', $num, 'wp-rss-aggregator' ),
 					$num
 				)
 			);
@@ -176,6 +197,9 @@ class Importer {
 	/**
 	 * Generates a preview of the items what would be imported for a source.
 	 *
+	 * @since 5.2.1 Added policy-driven preview caching.
+	 * @since 5.4.0 Reads the full feed before applying the effective preview/import limit.
+	 *
 	 * @param Source      $src The source.
 	 * @param int|null    $num Optional number of items to preview.
 	 * @param int         $page The page number to preview.
@@ -183,28 +207,93 @@ class Importer {
 	 * @return Result<array{posts:IrPost[],total:int}> The list of items.
 	 */
 	public function preview( Source $src, ?int $num = null, int $page = 1, ?string $pid = null ): Result {
-		$this->progress->touch( $pid, 1 );
-
-		$res = $this->read( $src->url, $num, $page, $pid );
-		if ( $res->isErr() ) {
-			return Result::Err( $res->error() );
+		$cacheTtl = $this->sourceFetchPolicy->getPreviewCacheTtl( $src->url );
+		$cacheKey = $cacheTtl === null ? null : $this->getPreviewCacheKey( $src, $num, $page );
+		if ( $cacheKey !== null ) {
+			$cached = get_transient( $cacheKey );
+			if ( is_array( $cached ) && isset( $cached['posts'], $cached['total'] ) ) {
+				return Result::Ok( $cached );
+			}
 		}
 
-		[$items, $total] = $res->get();
+		$this->progress->touch( $pid, 1 );
 
-		$posts = $this->convert( $src, $items, true, $pid, $num, $page );
-		$posts = apply_filters( 'wpra.importer.preview', $posts, $src );
+		// Like an import, I tag the preview's log messages with the source, so they show under its filter.
+		Logger::setContext( array( 'source' => $src->id ) );
+
+		try {
+			$res = $this->read( $src->url, null, $page, $pid );
+			if ( $res->isErr() ) {
+				return Result::Err( $res->error() );
+			}
+
+			[$items, $total] = $res->get();
+
+			$posts = $this->convert( $src, $items, true, $pid, null, $page, $this->getPreviewLimit( $src, $num, $page ) );
+			$posts = $this->paginatePreviewPosts( Arrays::fromIterable( $posts ), $num, $page );
+			$posts = apply_filters( 'wpra.importer.preview', $posts, $src );
+		} finally {
+			Logger::clearContext();
+		}
 		remove_filter( 'the_content', 'wpautop' );
-		return Result::Ok(
-			array(
-				'posts' => Arrays::fromIterable( $posts ),
-				'total' => $total,
-			)
+
+		$preview = array(
+			'posts' => Arrays::fromIterable( $posts ),
+			'total' => $total,
 		);
+
+		if ( $cacheKey !== null && $cacheTtl !== null ) {
+			set_transient( $cacheKey, $preview, $cacheTtl );
+		}
+
+		return Result::Ok( $preview );
 	}
 
 	/**
-	 * Imports items using {@link fetch()}, {@link convert()}, and {@link store()}.
+	 * Gets the effective item limit for a source preview.
+	 *
+	 * @since 5.4.0
+	 *
+	 * @param Source   $src The source being previewed.
+	 * @param int|null $num Optional number of items requested for the preview.
+	 * @param int      $page The preview page number.
+	 * @return int The effective preview item limit.
+	 */
+	protected function getPreviewLimit( Source $src, ?int $num, int $page ): int {
+		if ( $num === null || $num <= 0 ) {
+			return $src->settings->importLimit;
+		}
+
+		$numRequested = $num * max( 1, $page );
+		$storedItemsLimit = $src->settings->importLimit;
+		return $storedItemsLimit > 0
+			? min( $storedItemsLimit, $numRequested )
+			: $numRequested;
+	}
+
+	/**
+	 * Slices preview posts according to the requested preview page.
+	 *
+	 * @since 5.4.0
+	 *
+	 * @param list<IrPost> $posts The preview posts that passed source filters.
+	 * @param int|null     $num Optional number of items requested for the preview.
+	 * @param int          $page The preview page number.
+	 * @return list<IrPost> The paginated preview posts.
+	 */
+	protected function paginatePreviewPosts( array $posts, ?int $num, int $page ): array {
+		if ( $num === null || $num <= 0 ) {
+			return $posts;
+		}
+
+		$offset = max( 0, $page - 1 ) * $num;
+		return array_slice( $posts, $offset, $num );
+	}
+
+	/**
+	 * Imports items using {@link read()}, {@link convert()}, and {@link store()}.
+	 *
+	 * @since 5.3.0 Adds filterable strict source sync before storing current feed items.
 	 *
 	 * @param Source      $src The source.
 	 * @param int|null    $num The maximum number of items to import.
@@ -214,7 +303,7 @@ class Importer {
 	 */
 	public function import( Source $src, ?int $num = null, int $page = 1, ?string $pid = null ): Result {
 		if ( trim( $src->url ) === '' ) {
-			return Result::Err( __( 'The source does not have a URL.', 'wprss' ) );
+			return Result::Err( __( 'The source does not have a URL.', 'wp-rss-aggregator' ) );
 		}
 
 		Logger::setContext(
@@ -226,7 +315,7 @@ class Importer {
 
 		$this->progress->touch( $pid, 1 );
 
-		$res = $this->fetch( $src, $num, $page, false, $pid );
+		$res = $this->read( $src->url, $num, $page, $pid );
 
 		if ( $src->id ) {
 			$newError = $res->isErr() ? $res->error()->getMessage() : null;
@@ -237,9 +326,16 @@ class Importer {
 			return $res;
 		}
 
-		$items = $res->get();
+		[$items] = $res->get();
 
-		$this->progress->setMessage( $pid, __( 'Saving items', 'wprss' ) );
+		$res = $this->maybeStrictSync( $src, $num, $page, $pid );
+		if ( $res->isErr() ) {
+			return $res;
+		}
+
+		$items = $this->convert( $src, $items, false, $pid );
+
+		$this->progress->setMessage( $pid, __( 'Saving items', 'wp-rss-aggregator' ) );
 
 		$res = $this->store( $src, $items, $pid );
 
@@ -264,6 +360,38 @@ class Importer {
 	}
 
 	/**
+	 * Removes a source's previously imported posts before a full import, when enabled by filter.
+	 *
+	 * @since 5.3.0
+	 *
+	 * @param Source      $src The source being imported.
+	 * @param int|null    $num The import limit for this request.
+	 * @param int         $page The import page for this request.
+	 * @param string|null $pid Optional ID of the progress to update.
+	 * @return Result<int> The number of removed posts.
+	 */
+	protected function maybeStrictSync( Source $src, ?int $num, int $page, ?string $pid ): Result {
+		$enabled = (bool) apply_filters( 'wpra.importer.source.strict_sync', false, $src, $num, $page, $pid );
+
+		if ( ! $enabled || $src->id === null || $num !== null || $page !== 1 ) {
+			return Result::Ok( 0 );
+		}
+
+		Logger::info( sprintf( 'Strict-sync removing existing items for source #%d', $src->id ) );
+
+		$result = $this->wpPosts->deleteFromSourceInBatches(
+			$src->id,
+			self::STRICT_SYNC_BATCH_SIZE
+		);
+
+		if ( $result->isOk() ) {
+			Logger::debug( sprintf( 'Strict-sync removed %d existing items', $result->get() ) );
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Same as {@link import()} but fetches the source by ID.
 	 *
 	 * @param int         $srcId The ID of the source.
@@ -285,7 +413,12 @@ class Importer {
 	/**
 	 * Imports items for all sources that are currently pending an update.
 	 *
-	 * @return Result<int> The number of updated sources.
+	 * Failures on a single source are logged and recorded against that source via {@link Importer::import()}, but do
+	 * not abort the run. Healthy sources are always imported regardless of whether other sources fail.
+	 *
+	 * @since 5.3.0 Isolated per-source failures so healthy pending sources continue importing.
+	 *
+	 * @return Result<int> The number of sources that were successfully imported.
 	 */
 	public function importPending(): Result {
 		$res = $this->sources->getPendingUpdate();
@@ -300,13 +433,37 @@ class Importer {
 		foreach ( $srcs as $src ) {
 			set_time_limit( 600 );
 
-			$res = $this->import( $src );
+			try {
+				$importRes = $this->import( $src );
 
-			if ( $res->isErr() ) {
-				return $res;
+				if ( $importRes->isErr() ) {
+					// Log only the source ID — the verbose message can carry source URL fragments (incl. auth
+					// tokens) on SimplePie failures and is already captured against the source row in `last_error`.
+					Logger::error(
+						sprintf( 'Failed to import source #%d (details in source last_error)', $src->id ?? 0 ),
+						array( 'source' => $src->id )
+					);
+					continue;
+				}
+
+				$num++;
+			} catch ( Throwable $err ) {
+				// Defence-in-depth: import() returns a Result, but underlying calls (RSS reader, DB, third-party
+				// filters) can still raise. Catch here so a single misbehaving source can't take down the whole batch.
+				// The verbose error message is recorded against the source row via `updateLastError()` and not
+				// passed to the global logger, since SimplePie / cURL messages can include the source URL with
+				// auth tokens.
+				Logger::error(
+					sprintf( 'Unexpected error importing source #%d (details in source last_error)', $src->id ?? 0 ),
+					array( 'source' => $src->id )
+				);
+
+				if ( $src->id ) {
+					$this->sources->updateLastError( array( $src->id ), $err->getMessage() );
+				}
+			} finally {
+				Logger::clearContext();
 			}
-
-			$num++;
 		}
 
 		return Result::Ok( $num );
@@ -315,82 +472,127 @@ class Importer {
 	/**
 	 * Converts RSS items into IR posts.
 	 *
+	 * @since 5.4.0 Applies stored-items limits after item and final post filters.
+	 *
 	 * @param Source            $source The source that fetched the items.
 	 * @param iterable<RssItem> $items The fetched RSS items.
 	 * @param bool              $all If true, existing items will not be reconciled.
 	 * @param string|null       $pid Optional ID of the progress to update.
 	 * @param int|null          $num The maximum number of items to fetch.
 	 * @param int               $page The page number to fetch.
+	 * @param int|null          $limit Optional item limit to apply after filters.
 	 * @return iterable<IrPost> A list of IR posts.
 	 */
-	public function convert( Source $source, iterable $items, bool $all = false, ?string $pid = null, ?int $num = null, ?int $page = 1 ): iterable {
+	public function convert( Source $source, iterable $items, bool $all = false, ?string $pid = null, ?int $num = null, ?int $page = 1, ?int $limit = null ): iterable {
 		$items = Arrays::fromIterable( $items );
 		$items_count_before_dup = count( $items );
 		$items = $this->filterDuplicateItems( $source, $items, $all );
 		$items = $this->maybeLoadMoreItems( $source, $items, $items_count_before_dup, $all, $pid, $num, $page );
 		$items = $this->sortItems( $source, $items );
 		$items = $this->rejectListFilter( $source, $items );
-		$items = $this->limitItems( $source, $items );
+		$items = $this->ageFilter( $source, $items );
 
 		$this->progress->setTotal( $pid, count( $items ) );
 
-		if ( $all ) {
-			$existingMap = array();
-		} else {
-			$existingMap = $this->getExistingItemsMap( $items );
-		}
-
 		$count = count( $items );
+		$limit = $limit ?? $source->settings->importLimit;
+		$yielded = 0;
+		$chunks = ( $all || $limit <= 0 )
+			? array( $items )
+			: array_chunk( $items, 50, true );
 
-		foreach ( $items as $i => $item ) {
-			$this->progress->advance(
-				$pid,
-				1,
-				sprintf( _x( '%1$d/%2$d', 'Progress bar', 'wprss' ), $i + 1, $count )
-			);
-
-			$id = $item->getId();
-
-			if ( $id === null ) {
-				Logger::warning( __( 'Ignoring RSS item with no GUID or permalink.', 'wprss' ) );
-				continue;
+		foreach ( $chunks as $chunk ) {
+			if ( $limit > 0 && $yielded >= $limit ) {
+				break;
 			}
 
-			$existingPost = $existingMap[ $id ] ?? null;
+			$existingMap = $all ? array() : $this->getExistingItemsMap( $chunk );
 
-			$strat = $source->settings->reconcileStrategy;
+			foreach ( $chunk as $i => $item ) {
+				if ( $limit > 0 && $yielded >= $limit ) {
+					break 2;
+				}
 
-			// On preview or import button we will change the ReconcileStrategy to OVERWRITE to force the import items regardless of actual settings.
-			if (null === $existingPost) {
-				$strat = ReconcileStrategy::OVERWRITE;
-			}
+				// Give each item a fresh execution budget. Building an item can do
+				// per-item network work (remote `getimagesize()` against enclosures,
+				// fetching social meta tags, etc.) that's individually fast but
+				// accumulates past the global `max_execution_time` on a slow feed.
+				// Without this, a slow item N+1 kills the whole batch and the user
+				// gets an HTML 500 from PHP instead of a JSON RPC response.
+				set_time_limit( 60 );
 
-			switch ( $strat ) {
-				default:
-					Logger::warning( "Unknown reconciliation strategy: \"{$strat}\". Ignoring item." );
-					break;
+				$this->progress->advance(
+					$pid,
+					1,
+					sprintf( _x( '%1$d/%2$d', 'Progress bar', 'wp-rss-aggregator' ), $i + 1, $count )
+				);
 
-				case ReconcileStrategy::PRESERVE:
-					Logger::debug( "Item already exists: {$item->getId()}" );
-					break;
+				$id = $this->resolveItemId( $item );
 
-				case ReconcileStrategy::OVERWRITE:
-					Logger::debug( "Converting item: {$item->getId()}" );
-					$newPost = $this->postBuilder->build( $item, $source );
+				if ( $id === null ) {
+					Logger::warning( __( 'Ignoring RSS item with no GUID or permalink.', 'wp-rss-aggregator' ) );
+					continue;
+				}
 
-					if ( $existingPost !== null ) {
-						$newPost->sources = array_merge( $existingPost->sources, $newPost->sources );
-						$newPost->sources = array_unique( $newPost->sources );
-						$newPost->postId = $existingPost->postId;
-						$newPost->id = $existingPost->id;
-					}
+				$existingPost = $existingMap[ $id ] ?? null;
 
-					/** @var IrPost|null $finalPost */
-					$finalPost = apply_filters( 'wpra.importer.post.final', $newPost, $item, $source );
+				$strat = $source->settings->reconcileStrategy;
 
-					if ( $finalPost !== null ) {
-						yield $newPost;
-					}
+				// On preview or import button we will change the ReconcileStrategy to OVERWRITE to force the import items regardless of actual settings.
+				if ( null === $existingPost ) {
+					$strat = ReconcileStrategy::OVERWRITE;
+				}
+
+				switch ( $strat ) {
+					default:
+						Logger::warning( "Unknown reconciliation strategy: \"{$strat}\". Ignoring item." );
+						break;
+
+					case ReconcileStrategy::PRESERVE:
+						Logger::debug( "Item already exists: {$id}" );
+						break;
+
+					case ReconcileStrategy::OVERWRITE:
+						Logger::debug( "Converting item: {$id}" );
+
+						// Isolate per-item conversion. A throw from `postBuilder->build()`
+						// (e.g. a malformed enclosure URL crashing the image finder,
+						// HTML5 parser hitting a deeply-nested DOM, a fatal in a
+						// third-party `wpra.importer.post.*` filter) used to abort the
+						// entire request — which on `admin-ajax.php` returns an HTML
+						// error page that the RPC client surfaces as the user-visible
+						// "Unexpected token '<' is not valid JSON". Catching here lets
+						// the rest of the batch import and reports the bad item in the
+						// log.
+						try {
+							$newPost = $this->postBuilder->build( $item, $source );
+						} catch ( Throwable $e ) {
+							Logger::error(
+								sprintf(
+									/* translators: 1: item GUID/permalink, 2: error message */
+									__( 'Failed to convert RSS item %1$s: %2$s', 'wp-rss-aggregator' ),
+									$id,
+									$e->getMessage()
+								)
+							);
+							break;
+						}
+
+						if ( $existingPost !== null ) {
+							$newPost->sources = array_merge( $existingPost->sources, $newPost->sources );
+							$newPost->sources = array_unique( $newPost->sources );
+							$newPost->postId = $existingPost->postId;
+							$newPost->id = $existingPost->id;
+						}
+
+						/** @var IrPost|null $finalPost */
+						$finalPost = apply_filters( 'wpra.importer.post.final', $newPost, $item, $source );
+
+						if ( $finalPost !== null ) {
+							$yielded++;
+							yield $finalPost;
+						}
+				}
 			}
 		}
 	}
@@ -421,7 +623,7 @@ class Importer {
 			if ( $result->isOk() ) {
 				$newPost = $result->get();
 				$newPosts[] = $newPost;
-				Logger::info( sprintf( __( 'Imported post (#%1$d) "%2$s"', 'wprss' ), $newPost->postId ?? 0, $newPost->title ) );
+				Logger::info( sprintf( __( 'Imported post (#%1$d) "%2$s"', 'wp-rss-aggregator' ), $newPost->postId ?? 0, $newPost->title ) );
 			} else {
 				Logger::error( $result->error() );
 			}
@@ -484,6 +686,19 @@ class Importer {
 	 * @return Result<IrPost>
 	 */
 	public function createWpPost( IrPost $post ): Result {
+		/**
+		 * Filters the final title of an imported post, right before it is saved.
+		 *
+		 * This runs after any title rewriting, such as AI Rewriting, WordAi and
+		 * SpinnerChief, so text added here is never rewritten.
+		 *
+		 * @since 5.7.0
+		 *
+		 * @param string $title The title.
+		 * @param IrPost $post The post being saved.
+		 */
+		$post->title = (string) apply_filters( 'wpra.importer.post.finalTitle', $post->title, $post );
+
 		do_action( 'wpra.importer.post.beforeCreate', $post );
 
 		$result = WpPostBuilder::buildWpPost( $post );
@@ -539,7 +754,7 @@ class Importer {
 			$id = $item->getId() ?? $url;
 
 			if ( empty( $id ) ) {
-				Logger::warning( 'Item has no ID or permalink', array( 'source' => $source ) );
+				Logger::warning( 'Item has no ID or permalink', array( 'source' => $source->id ) );
 				continue;
 			}
 
@@ -549,7 +764,7 @@ class Importer {
 				$rejected = $result->get();
 			} else {
 				$rejected = false;
-				Logger::warning( $result->error(), array( 'source' => $source ) );
+				Logger::warning( $result->error(), array( 'source' => $source->id ) );
 			}
 
 			if ( $rejected ) {
@@ -665,21 +880,15 @@ class Importer {
 	}
 
 	/**
-	 * Trims the list of items to the maximum number of items allowed by the source.
+	 * Filters out items that are older than the source's age limit.
+	 *
+	 * @since 5.4.0
 	 *
 	 * @param  Source        $source The feed source.
-	 * @param  list<RssItem> $items  The items to trim.
-	 * @return list<RssItem> The trimmed items.
+	 * @param  list<RssItem> $items  The items to filter.
+	 * @return list<RssItem> The filtered items.
 	 */
-	protected function limitItems( Source $source, array $items ): array {
-		$limit = $source->settings->importLimit;
-		$numItems = count( $items );
-
-		if ( $limit > 0 && $numItems > $limit ) {
-			Logger::debug( "Applying limit of {$limit} items" );
-			$items = array_slice( $items, 0, $limit );
-		}
-
+	protected function ageFilter( Source $source, array $items ): array {
 		$ageLimit = $source->settings->ageLimit;
 		$ageUnit = $source->settings->ageLimitUnit;
 		$minDate = strtotime( "- $ageLimit $ageUnit" );
@@ -704,6 +913,49 @@ class Importer {
 	}
 
 	/**
+	 * Trims and filters the list of items according to source limits.
+	 *
+	 * @since 5.4.0 Restored as a deprecated compatibility wrapper.
+	 * @deprecated 5.4.0 Use Importer::ageFilter() instead.
+	 *
+	 * @param  Source        $source The feed source.
+	 * @param  list<RssItem> $items  The items to trim.
+	 * @return list<RssItem> The filtered items.
+	 */
+	protected function limitItems( Source $source, array $items ): array {
+		_deprecated_function( __METHOD__, '5.4.0', __CLASS__ . '::ageFilter()' );
+
+		return $this->ageFilter( $source, $items );
+	}
+
+	/**
+	 * Gets a cache key for a source preview request.
+	 *
+	 * @since 5.2.1
+	 *
+	 * @param Source   $src The source.
+	 * @param int|null $num Optional number of preview items.
+	 * @param int      $page The preview page number.
+	 * @return string The preview cache key.
+	 */
+	protected function getPreviewCacheKey( Source $src, ?int $num, int $page ): string {
+		$data = wp_json_encode(
+			array(
+				'url' => $src->url,
+				'settings' => $src->settings->toArray(),
+				'num' => $num,
+				'page' => $page,
+			)
+		);
+
+		if ( ! is_string( $data ) ) {
+			$data = serialize( array( $src->url, $src->settings->toArray(), $num, $page ) );
+		}
+
+		return 'wpra_source_preview_' . md5( $data );
+	}
+
+	/**
 	 * Gets a map of the matching existing items for a list of incoming items.
 	 *
 	 * @param list<RssItem> $items The incoming items.
@@ -711,7 +963,7 @@ class Importer {
 	 */
 	protected function getExistingItemsMap( array $items ): array {
 		/** @var list<string> $guids */
-		$guids = Arrays::map( $items, fn ( RssItem $item ) => $item->getId() ?? Arrays::skip() );
+		$guids = Arrays::map( $items, fn ( RssItem $item ) => $this->resolveItemId( $item ) ?? Arrays::skip() );
 
 		$result = $this->wpPosts->getManyByGuids( $guids );
 		$wpPosts = $result->getOr( array() );
@@ -726,5 +978,33 @@ class Importer {
 		}
 
 		return apply_filters( 'wpra.importer.existingItemsMap', $map, $guids, $items );
+	}
+
+	/**
+	 * Resolves the unique identifier for an RSS item, falling back to the item's permalink when the feed does not
+	 * provide a `<guid>` (or atom:id, dc:identifier, etc.).
+	 *
+	 * Per RSS 2.0, `<guid>` is recommended but not required; `<link>` is universally present. This fallback mirrors
+	 * the GUID that {@link IrPostBuilder::build()} stores on the resulting post, so duplicate detection on re-imports
+	 * stays consistent for feeds without `<guid>`.
+	 *
+	 * @return string|null The identifier, or null if the item has no GUID and no permalink.
+	 */
+	protected function resolveItemId( RssItem $item ): ?string {
+		$id = $item->getId();
+		if ( $id !== null ) {
+			return $id;
+		}
+
+		$permalink = $item->getPermalink();
+		if ( $permalink === null || trim( $permalink ) === '' ) {
+			return null;
+		}
+
+		// `buildGuid()` runs the permalink through `sanitize_url()`, which returns an empty string for disallowed
+		// schemes (`javascript:`, `data:`, etc.). Treat that as "no usable identifier" so the caller skips the item
+		// instead of grouping all such junk under the empty-string GUID.
+		$id = $this->postBuilder->buildGuid( $permalink );
+		return $id === '' ? null : $id;
 	}
 }

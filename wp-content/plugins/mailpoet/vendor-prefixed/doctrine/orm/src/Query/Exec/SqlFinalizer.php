@@ -5,5 +5,5 @@ if (!defined('ABSPATH')) exit;
 use MailPoetVendor\Doctrine\ORM\Query;
 interface SqlFinalizer
 {
- public function createExecutor(Query $query) : AbstractSqlExecutor;
+public function createExecutor(Query $query): AbstractSqlExecutor;
 }

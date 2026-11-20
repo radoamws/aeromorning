@@ -51,6 +51,7 @@ class CaptchaHooks {
 
   private function render($formSelector, $referrer) {
     // phpcs:disable WordPress.Security.EscapeOutput.HeredocOutputNotEscaped
+    // phpcs:ignore PluginCheck.CodeAnalysis.Heredoc.NotAllowed -- Long inline HTML and JS; a heredoc keeps it readable.
     echo <<<HTML
       <input class="mailpoet_hidden_field" type="hidden" name="action" value="mailpoet">
       <input class="mailpoet_hidden_field" type="hidden" name="endpoint" value="captcha">
@@ -86,7 +87,7 @@ class CaptchaHooks {
     try {
       // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
       $captchaData = $_POST['data'] ?? [];
-      $this->captchaValidator->validate(is_array($captchaData) ? $captchaData : []);
+      $this->captchaValidator->validateExistingChallenge(is_array($captchaData) ? $captchaData : []);
     } catch (ValidationError $e) {
       $errors->add('captcha_failed', $e->getMessage());
     }

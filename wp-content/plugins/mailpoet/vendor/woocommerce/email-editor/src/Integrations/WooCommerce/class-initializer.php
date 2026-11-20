@@ -12,61 +12,60 @@ use Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\Blocks\
 use Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\Blocks\Product_Price;
 use Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\Blocks\Product_Sale_Badge;
 class Initializer {
- const ALLOWED_BLOCK_TYPES = array(
- 'woocommerce/product-collection',
- 'woocommerce/product-image',
- 'woocommerce/product-price',
- 'woocommerce/product-button',
- 'woocommerce/product-sale-badge',
- 'woocommerce/coupon-code',
- );
- private array $renderers = array();
- public function update_block_settings( array $settings ): array {
- if ( in_array( $settings['name'], self::ALLOWED_BLOCK_TYPES, true ) ) {
- $settings['supports']['email'] = true;
- $settings['render_email_callback'] = array( $this, 'render_block' );
- }
- // Enable full-width alignment support for the product image block.
- if ( 'woocommerce/product-image' === $settings['name'] ) {
- $settings['supports']['align'] = array( 'full' );
- }
- return $settings;
- }
- public function render_block( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
- if ( isset( $parsed_block['blockName'] ) ) {
- $block_renderer = $this->get_block_renderer( $parsed_block['blockName'] );
- return $block_renderer->render( $block_content, $parsed_block, $rendering_context );
- }
- return $block_content;
- }
- private function get_block_renderer( string $block_name ): Abstract_Block_Renderer {
- if ( isset( $this->renderers[ $block_name ] ) ) {
- return $this->renderers[ $block_name ];
- }
- switch ( $block_name ) {
- case 'woocommerce/product-image':
- $renderer = new Product_Image();
- break;
- case 'woocommerce/product-price':
- $renderer = new Product_Price();
- break;
- case 'woocommerce/product-sale-badge':
- $renderer = new Product_Sale_Badge();
- break;
- case 'woocommerce/product-collection':
- $renderer = new Product_Collection();
- break;
- case 'woocommerce/product-button':
- $renderer = new Product_Button();
- break;
- case 'woocommerce/coupon-code':
- $renderer = new Coupon_Code();
- break;
- default:
- $renderer = new Fallback();
- break;
- }
- $this->renderers[ $block_name ] = $renderer;
- return $renderer;
- }
+const ALLOWED_BLOCK_TYPES = array(
+'woocommerce/product-collection',
+'woocommerce/product-image',
+'woocommerce/product-price',
+'woocommerce/product-button',
+'woocommerce/product-sale-badge',
+'woocommerce/coupon-code',
+);
+private array $renderers = array();
+public function update_block_settings( array $settings ): array {
+if ( in_array( $settings['name'], self::ALLOWED_BLOCK_TYPES, true ) ) {
+$settings['supports']['email'] = true;
+$settings['render_email_callback'] = array( $this, 'render_block' );
+}
+if ( 'woocommerce/product-image' === $settings['name'] ) {
+$settings['supports']['align'] = array( 'full' );
+}
+return $settings;
+}
+public function render_block( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+if ( isset( $parsed_block['blockName'] ) ) {
+$block_renderer = $this->get_block_renderer( $parsed_block['blockName'] );
+return $block_renderer->render( $block_content, $parsed_block, $rendering_context );
+}
+return $block_content;
+}
+private function get_block_renderer( string $block_name ): Abstract_Block_Renderer {
+if ( isset( $this->renderers[ $block_name ] ) ) {
+return $this->renderers[ $block_name ];
+}
+switch ( $block_name ) {
+case 'woocommerce/product-image':
+$renderer = new Product_Image();
+break;
+case 'woocommerce/product-price':
+$renderer = new Product_Price();
+break;
+case 'woocommerce/product-sale-badge':
+$renderer = new Product_Sale_Badge();
+break;
+case 'woocommerce/product-collection':
+$renderer = new Product_Collection();
+break;
+case 'woocommerce/product-button':
+$renderer = new Product_Button();
+break;
+case 'woocommerce/coupon-code':
+$renderer = new Coupon_Code();
+break;
+default:
+$renderer = new Fallback();
+break;
+}
+$this->renderers[ $block_name ] = $renderer;
+return $renderer;
+}
 }

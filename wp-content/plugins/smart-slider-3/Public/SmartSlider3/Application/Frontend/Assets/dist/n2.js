@@ -2580,7 +2580,26 @@ window.n2const = {
         };
         return isWaybackMachine;
     },
+    /**
+     * Rejects URLs whose scheme could execute script when assigned to window.location
+     * (javascript:, vbscript:, data:). Browsers ignore control characters and whitespace
+     * while resolving the scheme, so we strip those before testing to defeat obfuscation
+     * like "java\tscript:" or a leading control character.
+     *
+     * @param {string} url
+     * @returns {boolean} true when the URL is safe to navigate to
+     */
+    isUrlSafe: function (url) {
+        if (typeof url !== 'string') {
+            return false;
+        }
+        var normalized = url.replace(/[\x00-\x20]+/g, '').toLowerCase();
+        return !/^(javascript|vbscript|data):/.test(normalized);
+    },
     setLocation: function (l) {
+        if (!window.n2const.isUrlSafe(l)) {
+            return;
+        }
         if (typeof window.zajax_goto === 'function') {
             /**
              * @url https://wordpress.org/plugins/zajax-ajax-navigation/

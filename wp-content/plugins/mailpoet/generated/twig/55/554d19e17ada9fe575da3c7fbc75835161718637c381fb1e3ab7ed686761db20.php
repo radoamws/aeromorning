@@ -76,7 +76,7 @@ class __TwigTemplate_92fba8e0d2ff9feb9ceaa2e95d322a6e957ae3ddae6715114b7c7810b6f
 \t</div>
 \t<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">
 \t\t<tr>
-\t\t\t<td class=\"email-additional-content email-additional-content-aligned\" style='color: #3c3c3c; font-family: \"Helvetica Neue\",Helvetica,Roboto,Arial,sans-serif; padding: 32px 0 0;'>
+\t\t\t<td class=\"email-additional-content email-additional-content-aligned\" style=\x27color: #3c3c3c; font-family: \"Helvetica Neue\",Helvetica,Roboto,Arial,sans-serif; padding: 32px 0 0;\x27>
 \t\t\t\t<p style=\"text-align: left; margin: 0 0 16px;\" align=\"left\">";
         // line 20
         yield $this->extensions['MailPoet\Twig\I18n']->translate("We look forward to seeing you soon.", "woocommerce");

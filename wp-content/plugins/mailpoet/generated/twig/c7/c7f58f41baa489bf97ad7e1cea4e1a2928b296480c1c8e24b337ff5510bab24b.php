@@ -53,7 +53,7 @@ class __TwigTemplate_43903aab9ead5da2aa4fd5513357866620f7fd81d3e3f3af87287dcca14
     </label>
 </div>
 
-{{#ifCond renderOptions.hideLink '!==' true}}
+{{#ifCond renderOptions.hideLink \x27!==\x27 true}}
 <div class=\"mailpoet_form_field\">
     <label>
         <div class=\"mailpoet_form_field_title mailpoet_form_field_title_inline\">";
@@ -74,7 +74,7 @@ class __TwigTemplate_43903aab9ead5da2aa4fd5513357866620f7fd81d3e3f3af87287dcca14
         yield "</div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-        <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_button_alignment\" value=\"left\" {{#ifCond model.styles.block.textAlign '===' 'left'}}CHECKED{{/ifCond}}/>
+        <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_button_alignment\" value=\"left\" {{#ifCond model.styles.block.textAlign \x27===\x27 \x27left\x27}}CHECKED{{/ifCond}}/>
         ";
         // line 27
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Left");
@@ -83,7 +83,7 @@ class __TwigTemplate_43903aab9ead5da2aa4fd5513357866620f7fd81d3e3f3af87287dcca14
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_button_alignment\" value=\"center\" {{#ifCond model.styles.block.textAlign '===' 'center'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_button_alignment\" value=\"center\" {{#ifCond model.styles.block.textAlign \x27===\x27 \x27center\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 33
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Center");
@@ -92,7 +92,7 @@ class __TwigTemplate_43903aab9ead5da2aa4fd5513357866620f7fd81d3e3f3af87287dcca14
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_button_alignment\" value=\"right\" {{#ifCond model.styles.block.textAlign '===' 'right'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_button_alignment\" value=\"right\" {{#ifCond model.styles.block.textAlign \x27===\x27 \x27right\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 39
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Right");
@@ -113,7 +113,7 @@ class __TwigTemplate_43903aab9ead5da2aa4fd5513357866620f7fd81d3e3f3af87287dcca14
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Standard fonts");
         yield "\">
         {{#each availableStyles.fonts.standard}}
-            <option value=\"{{ this }}\" {{#ifCond this '==' ../model.styles.block.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
+            <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.styles.block.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
         {{/each}}
         </optgroup>
         <optgroup label=\"";
@@ -121,13 +121,13 @@ class __TwigTemplate_43903aab9ead5da2aa4fd5513357866620f7fd81d3e3f3af87287dcca14
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Custom fonts");
         yield "\">
         {{#each availableStyles.fonts.custom}}
-            <option value=\"{{ this }}\" {{#ifCond this '==' ../model.styles.block.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
+            <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.styles.block.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
         {{/each}}
         </optgroup>
         </select>
         <select id=\"mailpoet_field_button_font_size\" name=\"font-size\" class=\"mailpoet_select mailpoet_select_small mailpoet_field_button_font_size mailpoet_font_size\">
         {{#each availableStyles.headingSizes}}
-            <option value=\"{{ this }}\" {{#ifCond this '==' ../model.styles.block.fontSize}}SELECTED{{/ifCond}}>{{ this }}</option>
+            <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.styles.block.fontSize}}SELECTED{{/ifCond}}>{{ this }}</option>
         {{/each}}
         </select>
     </div>
@@ -135,7 +135,7 @@ class __TwigTemplate_43903aab9ead5da2aa4fd5513357866620f7fd81d3e3f3af87287dcca14
 <div class=\"mailpoet_form_field\">
     <div class=\"mailpoet_form_field_checkbox_option\">
         <label>
-            <input type=\"checkbox\" name=\"fontWeight\" class=\"mailpoet_field_button_font_weight\" value=\"bold\" {{#ifCond model.styles.block.fontWeight '===' 'bold'}}CHECKED{{/ifCond}}/>
+            <input type=\"checkbox\" name=\"fontWeight\" class=\"mailpoet_field_button_font_weight\" value=\"bold\" {{#ifCond model.styles.block.fontWeight \x27===\x27 \x27bold\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 70
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Bold");
@@ -201,7 +201,7 @@ class __TwigTemplate_43903aab9ead5da2aa4fd5513357866620f7fd81d3e3f3af87287dcca14
         </div>
     </label>
 </div>
-{{#ifCond renderOptions.hideApplyToAll '!==' true}}
+{{#ifCond renderOptions.hideApplyToAll \x27!==\x27 true}}
 <div class=\"mailpoet_form_field\">
     <input type=\"button\" name=\"replace-all-button-styles\" class=\"button button-secondary mailpoet_button_full mailpoet_field_button_replace_all_styles\" value=\"";
         // line 119
@@ -218,7 +218,7 @@ class __TwigTemplate_43903aab9ead5da2aa4fd5513357866620f7fd81d3e3f3af87287dcca14
 </div>
 
 <script type=\"text/javascript\">
-    fontsSelect('#mailpoet_field_button_font_family');
+    fontsSelect(\x27#mailpoet_field_button_font_family\x27);
 </script>
 ";
         return; yield '';

@@ -47,15 +47,15 @@ class __TwigTemplate_dfdf9f5a92a1c8ac3b2b3e97633af09605e9bf2c8350c290d8806af7dba
     </div>
     <div class=\"mailpoet_product_selection_filter_row\">
         <select class=\"mailpoet_select mailpoet_input_full mailpoet_products_post_status\">
-            <option value=\"publish\" {{#ifCond model.postStatus '==' 'publish'}}SELECTED{{/ifCond}}>";
+            <option value=\"publish\" {{#ifCond model.postStatus \x27==\x27 \x27publish\x27}}SELECTED{{/ifCond}}>";
         // line 7
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Published");
         yield "</option>
-            <option value=\"pending\" {{#ifCond model.postStatus '==' 'pending'}}SELECTED{{/ifCond}}>";
+            <option value=\"pending\" {{#ifCond model.postStatus \x27==\x27 \x27pending\x27}}SELECTED{{/ifCond}}>";
         // line 8
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Pending Review");
         yield "</option>
-            <option value=\"draft\" {{#ifCond model.postStatus '==' 'draft'}}SELECTED{{/ifCond}}>";
+            <option value=\"draft\" {{#ifCond model.postStatus \x27==\x27 \x27draft\x27}}SELECTED{{/ifCond}}>";
         // line 9
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Draft");
         yield "</option>

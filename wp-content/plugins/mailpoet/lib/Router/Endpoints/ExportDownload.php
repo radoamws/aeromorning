@@ -11,6 +11,7 @@ use MailPoet\Newsletter\Statistics\Export\StatisticsExporter;
 use MailPoet\Router\Router;
 use MailPoet\Subscribers\ImportExport\Export\Export;
 use MailPoet\Util\Helpers;
+use MailPoet\Util\RemoteStorage;
 use MailPoet\Util\Security;
 use MailPoet\WP\Functions as WPFunctions;
 
@@ -18,6 +19,7 @@ class ExportDownload {
   public const ENDPOINT = 'export_download';
   public const ACTION_SUBSCRIBER_EXPORT = 'subscriberExport';
   public const ACTION_STATISTICS_EXPORT = 'statisticsExport';
+  public const SERVER_FILES_FILTER = 'mailpoet_export_directory_server_files';
 
   private const DOWNLOAD_TOKEN_LENGTH = 32;
   private const DOWNLOAD_TOKEN_CHARACTERS = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -90,6 +92,27 @@ class ExportDownload {
     if (!is_dir($exportDirectory)) {
       throw new \RuntimeException('Could not create the export directory.');
     }
+    if (self::shouldWriteServerFiles($wp, $exportDirectory)) {
+      self::writeServerFiles($exportDirectory);
+    }
+    if ($wasJustCreated) {
+      self::purgeLegacyExportFiles($wp);
+    }
+  }
+
+  /**
+   * index.php and .htaccess only work on a local disk served by the web server,
+   * so they are skipped by default when uploads live on remote storage.
+   */
+  private static function shouldWriteServerFiles(WPFunctions $wp, string $exportDirectory): bool {
+    return (bool)$wp->applyFilters(
+      self::SERVER_FILES_FILTER,
+      !RemoteStorage::isRemotePath($exportDirectory),
+      $exportDirectory
+    );
+  }
+
+  private static function writeServerFiles(string $exportDirectory): void {
     if (!self::writeFile($exportDirectory . '/index.php', str_replace('\n', PHP_EOL, '<?php\n\n// Silence is golden'))) {
       throw new \RuntimeException('Could not protect the export directory.');
     }
@@ -108,12 +131,9 @@ class ExportDownload {
     if (!$htaccessWritten) {
       throw new \RuntimeException('Could not protect the export directory.');
     }
-    if ($wasJustCreated) {
-      self::purgeLegacyExportFiles();
-    }
   }
 
-  private static function purgeLegacyExportFiles(): void {
+  private static function purgeLegacyExportFiles(WPFunctions $wp): void {
     $patterns = [
       Env::$tempPath . '/' . Export::getFilePrefix() . '*.*',
       Env::$tempPath . '/' . StatisticsExporter::FILE_PREFIX . '*.*',
@@ -121,7 +141,7 @@ class ExportDownload {
     foreach ($patterns as $pattern) {
       foreach (glob($pattern) ?: [] as $file) {
         if (is_file($file)) {
-          unlink($file);
+          $wp->wpDeleteFile($file);
         }
       }
     }
@@ -157,9 +177,18 @@ class ExportDownload {
       return null;
     }
 
-    $realExportPath = realpath(self::getExportDirectory());
+    $exportDirectory = self::getExportDirectory();
     $filePath = self::getFilePathForToken($filePrefix, $token, $extension);
-    $realFilePath = is_file($filePath) ? realpath($filePath) : false;
+    if (!is_file($filePath)) {
+      return null;
+    }
+    // realpath() does not work on stream paths. Every part of $filePath is fixed or validated above.
+    if (RemoteStorage::isRemotePath($exportDirectory)) {
+      return $filePath;
+    }
+
+    $realExportPath = realpath(self::withoutFileScheme($exportDirectory));
+    $realFilePath = realpath(self::withoutFileScheme($filePath));
     if (!is_string($realExportPath) || !is_string($realFilePath)) {
       return null;
     }
@@ -216,6 +245,10 @@ class ExportDownload {
     return $secret !== '' ? $secret : (string)Env::$path;
   }
 
+  private static function withoutFileScheme(string $path): string {
+    return strpos($path, 'file://') === 0 ? substr($path, strlen('file://')) : $path;
+  }
+
   private static function writeFile(string $filePath, string $contents): bool {
     // phpcs:ignore WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown -- Reads protection files in MailPoet's export directory.
     if (is_file($filePath) && file_get_contents($filePath) === $contents) {
@@ -246,7 +279,7 @@ class ExportDownload {
       }
     }
 
-    // phpcs:ignore WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown -- Reads a validated local export file from Env::$tempPath.
+    // phpcs:ignore WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown, WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- Streams a validated export file to the browser.
     readfile($filePath);
     exit;
   }

@@ -9,6 +9,7 @@ use MailPoet\Doctrine\Repository;
 use MailPoet\Entities\LogEntity;
 use MailPoet\Entities\NewsletterEntity;
 use MailPoet\InvalidStateException;
+use MailPoet\Listing\ListingDateRangeFilterTrait;
 use MailPoet\Util\Helpers;
 use MailPoetVendor\Carbon\Carbon;
 use MailPoetVendor\Doctrine\DBAL\ArrayParameterType;
@@ -18,6 +19,8 @@ use MailPoetVendor\Doctrine\DBAL\ParameterType;
  * @extends Repository<LogEntity>
  */
 class LogRepository extends Repository {
+  use ListingDateRangeFilterTrait;
+
   public function saveLog(LogEntity $log): void {
     // Save log entity using DBAL to avoid calling "flush()" on the entity manager.
     // Calling "flush()" can have unintended side effects, such as saving unwanted
@@ -170,32 +173,73 @@ class LogRepository extends Repository {
    * Fetch logs matching the listing's filter shape (`from`/`to`/`name`/`level`)
    * and free-text search for export, so a download contains exactly the rows the
    * filtered listing shows. Mirrors deleteLogs()'s WHERE clause and is capped by
-   * $limit to keep memory bounded on large log tables.
+   * $limit.
+   *
+   * Yields rows in batches via keyset pagination on (`created_at`, `id`) rather
+   * than one big result set. MailPoet's WPDB-backed Doctrine driver buffers an
+   * entire result in memory (see Doctrine\WPDB\Result), so a single
+   * `LIMIT 50000` query would load every row at once and can exhaust PHP's
+   * memory on large installs. Paging keeps peak memory at one batch.
    *
    * @param array{from?: string, to?: string, name?: string[], level?: int[]} $filter
-   * @return array<int, array{created_at: string, name: string|null, message: string|null}>
+   * @return iterable<int, array{created_at: string, name: string|null, message: string|null}>
    */
-  public function getLogsForExport(array $filter, ?string $search = null, int $limit = 50000): array {
+  public function getLogsForExport(array $filter, ?string $search = null, int $limit = 50000, int $batchSize = 1000): iterable {
     $logsTable = $this->entityManager->getClassMetadata(LogEntity::class)->getTableName();
-    [$where, $parameters, $types] = $this->buildFilterSql($filter, $search);
-    $parameters['export_limit'] = $limit;
-    $types['export_limit'] = ParameterType::INTEGER;
+    [$where, $baseParameters, $baseTypes] = $this->buildFilterSql($filter, $search);
 
-    $sql = "SELECT `created_at`, `name`, `message` FROM `{$logsTable}`{$where} ORDER BY `created_at` DESC, `id` DESC LIMIT :export_limit";
+    $batchSize = $batchSize > 0 ? $batchSize : 1000;
+    $remaining = $limit;
+    $lastCreatedAt = null;
+    $lastId = null;
 
-    $rows = $this->entityManager->getConnection()
-      ->executeQuery($sql, $parameters, $types)
-      ->fetchAllAssociative();
+    while ($remaining > 0) {
+      $batch = (int)min($batchSize, $remaining);
+      $parameters = $baseParameters;
+      $types = $baseTypes;
+      $conditions = $where;
 
-    $logs = [];
-    foreach ($rows as $row) {
-      $logs[] = [
-        'created_at' => $this->castToNullableString($row['created_at']) ?? '',
-        'name' => $this->castToNullableString($row['name']),
-        'message' => $this->castToNullableString($row['message']),
-      ];
+      if ($lastCreatedAt !== null) {
+        // Keyset cursor: continue strictly after the last row in the same
+        // (`created_at` DESC, `id` DESC) order. Stable even while new rows are
+        // inserted at the top of the table during the export.
+        $keyset = '(`created_at` < :ks_created_at OR (`created_at` = :ks_created_at AND `id` < :ks_id))';
+        $conditions = $conditions === '' ? ' WHERE ' . $keyset : $conditions . ' AND ' . $keyset;
+        $parameters['ks_created_at'] = $lastCreatedAt;
+        $parameters['ks_id'] = $lastId;
+        $types['ks_created_at'] = ParameterType::STRING;
+        $types['ks_id'] = ParameterType::INTEGER;
+      }
+
+      $parameters['batch_limit'] = $batch;
+      $types['batch_limit'] = ParameterType::INTEGER;
+
+      $sql = "SELECT `id`, `created_at`, `name`, `message` FROM `{$logsTable}`{$conditions} ORDER BY `created_at` DESC, `id` DESC LIMIT :batch_limit";
+
+      $rows = $this->entityManager->getConnection()
+        ->executeQuery($sql, $parameters, $types)
+        ->fetchAllAssociative();
+
+      if ($rows === []) {
+        break;
+      }
+
+      foreach ($rows as $row) {
+        $lastCreatedAt = $this->castToNullableString($row['created_at']);
+        $lastId = (int)$this->castToNullableString($row['id']);
+        yield [
+          'created_at' => $this->castToNullableString($row['created_at']) ?? '',
+          'name' => $this->castToNullableString($row['name']),
+          'message' => $this->castToNullableString($row['message']),
+        ];
+        $remaining--;
+      }
+
+      // A short page means the table is exhausted; stop before an empty query.
+      if (count($rows) < $batch) {
+        break;
+      }
     }
-    return $logs;
   }
 
   /**
@@ -205,17 +249,52 @@ class LogRepository extends Repository {
     return is_scalar($value) ? (string)$value : null;
   }
 
-  public function getRawMessagesForNewsletter(NewsletterEntity $newsletter, string $topic): array {
-    return $this->entityManager->createQueryBuilder()
-      ->select('DISTINCT logs.rawMessage message')
+  /**
+   * Returns distinct raw messages logged under $topic for the given newsletters, keyed by
+   * newsletter ID and ordered by first occurrence. Newsletters without messages are not present
+   * in the result. A single query serves the whole listing page instead of one query per row.
+   *
+   * @param NewsletterEntity[] $newsletters
+   * @return array<int, string[]>
+   */
+  public function getRawMessagesForNewsletters(array $newsletters, string $topic): array {
+    $newsletterIdsByContext = [];
+    foreach ($newsletters as $newsletter) {
+      $newsletterIdsByContext[json_encode(['newsletter_id' => $newsletter->getId()])] = (int)$newsletter->getId();
+    }
+    if (!$newsletterIdsByContext) {
+      return [];
+    }
+
+    $rows = $this->entityManager->createQueryBuilder()
+      ->select('logs.context context, logs.rawMessage message')
+      ->addSelect('MIN(logs.createdAt) AS HIDDEN firstCreatedAt, MIN(logs.id) AS HIDDEN firstId')
       ->from(LogEntity::class, 'logs')
       ->where('logs.name = :topic')
-      ->andWhere('logs.context LIKE :context')
-      ->orderBy('logs.createdAt')
-      ->setParameter('context', json_encode(['newsletter_id' => $newsletter->getId()]))
+      ->andWhere('logs.context IN (:contexts)')
+      ->groupBy('logs.context')
+      ->addGroupBy('logs.rawMessage')
+      ->orderBy('firstCreatedAt')
+      ->addOrderBy('firstId')
       ->setParameter('topic', $topic)
+      ->setParameter('contexts', array_keys($newsletterIdsByContext))
       ->getQuery()
-      ->getSingleColumnResult();
+      ->getArrayResult();
+
+    $messages = [];
+    foreach ($rows as $row) {
+      $context = is_array($row) ? ($row['context'] ?? null) : null;
+      $message = is_array($row) ? ($row['message'] ?? null) : null;
+      if (!is_string($context) || !is_string($message)) {
+        continue;
+      }
+      $newsletterId = $newsletterIdsByContext[$context] ?? null;
+      if ($newsletterId === null) {
+        continue;
+      }
+      $messages[$newsletterId][] = $message;
+    }
+    return $messages;
   }
 
   public function persist($entity): void {
@@ -231,8 +310,8 @@ class LogRepository extends Repository {
   }
 
   /**
-   * Build the WHERE clause shared by log deletion. Day boundaries
-   * (`00:00:00`–`23:59:59`) and the literal LOCATE() search match
+   * Build the WHERE clause shared by log deletion. The `from`/`to`
+   * days are site-local days converted to UTC, and the literal LOCATE() search match
    * LogListingRepository so deleting honours the same rows the listing shows.
    *
    * @param array{from?: string, to?: string, name?: string[], level?: int[]} $filter
@@ -243,15 +322,28 @@ class LogRepository extends Repository {
     $parameters = [];
     $types = [];
 
-    if (!empty($filter['from'])) {
-      $conditions[] = '`created_at` >= :date_from';
-      $parameters['date_from'] = $filter['from'] . ' 00:00:00';
-      $types['date_from'] = ParameterType::STRING;
+    // An unparsable day matches nothing, so it can never widen a delete.
+    $from = $filter['from'] ?? '';
+    if ($from !== '') {
+      $dateFrom = $this->getSiteDayStartInUtc($from);
+      if ($dateFrom === null) {
+        $conditions[] = '1 = 0';
+      } else {
+        $conditions[] = '`created_at` >= :date_from';
+        $parameters['date_from'] = $dateFrom;
+        $types['date_from'] = ParameterType::STRING;
+      }
     }
-    if (!empty($filter['to'])) {
-      $conditions[] = '`created_at` <= :date_to';
-      $parameters['date_to'] = $filter['to'] . ' 23:59:59';
-      $types['date_to'] = ParameterType::STRING;
+    $to = $filter['to'] ?? '';
+    if ($to !== '') {
+      $dateTo = $this->getSiteDayStartInUtc($to, 1);
+      if ($dateTo === null) {
+        $conditions[] = '1 = 0';
+      } else {
+        $conditions[] = '`created_at` < :date_to';
+        $parameters['date_to'] = $dateTo;
+        $types['date_to'] = ParameterType::STRING;
+      }
     }
     if (!empty($filter['name'])) {
       $conditions[] = '`name` IN (:names)';

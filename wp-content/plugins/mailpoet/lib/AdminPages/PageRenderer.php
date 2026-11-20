@@ -6,7 +6,10 @@ if (!defined('ABSPATH')) exit;
 
 
 use MailPoet\AdminPages\Pages\WelcomeWizard;
+use MailPoet\API\JSON\AjaxErrorMessages;
+use MailPoet\API\JSON\ResponseBuilders\HeldCampaignsResponseBuilder;
 use MailPoet\Cache\TransientCache;
+use MailPoet\Config\AccessControl;
 use MailPoet\Config\Installer;
 use MailPoet\Config\Menu;
 use MailPoet\Config\Renderer;
@@ -15,6 +18,7 @@ use MailPoet\Cron\Workers\SubscribersCountCacheRecalculation;
 use MailPoet\Entities\SegmentEntity;
 use MailPoet\Entities\TagEntity;
 use MailPoet\Features\FeaturesController;
+use MailPoet\Newsletter\Sending\OverdueCampaignHold;
 use MailPoet\Referrals\ReferralDetector;
 use MailPoet\Segments\SegmentsRepository;
 use MailPoet\Services\Bridge;
@@ -88,6 +92,12 @@ class PageRenderer {
 
   private CapabilitiesManager $capabilitiesManager;
 
+  private OverdueCampaignHold $overdueCampaignHold;
+
+  private HeldCampaignsResponseBuilder $heldCampaignsResponseBuilder;
+
+  private AjaxErrorMessages $ajaxErrorMessages;
+
   public function __construct(
     Bridge $bridge,
     Renderer $renderer,
@@ -107,7 +117,10 @@ class PageRenderer {
     WooCommerce\Helper $wooCommerceHelper,
     WooCommerce\WooCommerceSubscriptions\Helper $wooCommerceSubscriptionsHelper,
     WooCommerce\WooCommerceBookings\Helper $wooCommerceBookingsHelper,
-    CapabilitiesManager $capabilitiesManager
+    CapabilitiesManager $capabilitiesManager,
+    OverdueCampaignHold $overdueCampaignHold,
+    HeldCampaignsResponseBuilder $heldCampaignsResponseBuilder,
+    AjaxErrorMessages $ajaxErrorMessages
   ) {
     $this->bridge = $bridge;
     $this->renderer = $renderer;
@@ -128,6 +141,9 @@ class PageRenderer {
     $this->wooCommerceSubscriptionsHelper = $wooCommerceSubscriptionsHelper;
     $this->wooCommerceBookingsHelper = $wooCommerceBookingsHelper;
     $this->capabilitiesManager = $capabilitiesManager;
+    $this->overdueCampaignHold = $overdueCampaignHold;
+    $this->heldCampaignsResponseBuilder = $heldCampaignsResponseBuilder;
+    $this->ajaxErrorMessages = $ajaxErrorMessages;
   }
 
   /**
@@ -137,28 +153,27 @@ class PageRenderer {
    */
   public function displayPage($template, array $data = []) {
     $installer = new Installer(Installer::PREMIUM_PLUGIN_SLUG);
-    $premiumDownloadUrl = $this->subscribersFeature->hasValidPremiumKey()
-      ? $installer->generatePluginDownloadUrl()
-      : null;
 
     $wpSegment = $this->segmentRepository->getWPUsersSegment();
     $wpSegmentState = ($wpSegment instanceof SegmentEntity) && $wpSegment->getDeletedAt() === null ?
       SegmentEntity::SEGMENT_ENABLED : SegmentEntity::SEGMENT_DISABLED;
-    $installedAtDiff = (new \DateTime($this->settings->get('installed_at')))->diff(new \DateTime());
+    $installedAtDiff = (new \DateTime((string)$this->settings->get('installed_at')))->diff(new \DateTime());
     $subscriberCount = $this->subscribersFeature->getSubscribersCount();
     $subscribersCacheCreatedAt = Carbon::now();
     if ($this->subscribersFeature->isSubscribersCountEnoughForCache($subscriberCount)) {
       $subscribersCacheCreatedAt = $this->transientCache->getOldestCreatedAt(TransientCache::SUBSCRIBERS_STATISTICS_COUNT_KEY) ?: Carbon::now();
     }
 
+    $referralId = $this->settings->get(ReferralDetector::REFERRAL_SETTING_NAME);
     $defaults = [
+      'ajax_error_messages' => $this->ajaxErrorMessages->getTranslations(),
       'current_page' => sanitize_text_field(wp_unslash(is_string($_GET['page'] ?? null) ? $_GET['page'] : '')),
       'site_name' => $this->wp->wpSpecialcharsDecode($this->wp->getOption('blogname'), ENT_QUOTES),
       'main_page' => Menu::MAIN_PAGE_SLUG,
       'site_url' => $this->wp->siteUrl(),
       'site_address' => $this->wp->wpParseUrl($this->wp->homeUrl(), PHP_URL_HOST),
       'feature_flags' => $this->featuresController->getAllFlags(),
-      'referral_id' => $this->settings->get(ReferralDetector::REFERRAL_SETTING_NAME),
+      'referral_id' => ReferralDetector::isValid($referralId) ? $referralId : null,
       'mailpoet_api_key_state' => $this->settings->get('mta.mailpoet_api_key_state'),
       'mta_method' => $this->settings->get('mta.method'),
       'premium_key_state' => $this->settings->get('premium.premium_key_state'),
@@ -180,7 +195,6 @@ class PageRenderer {
       'link_premium' => $this->wp->getSiteUrl(null, '/wp-admin/admin.php?page=mailpoet-upgrade'),
       'premium_plugin_installed' => Installer::isPluginInstalled(Installer::PREMIUM_PLUGIN_SLUG),
       'premium_plugin_active' => $this->servicesChecker->isPremiumPluginActive(),
-      'premium_plugin_download_url' => $premiumDownloadUrl,
       'premium_plugin_activation_url' => $installer->generatePluginActivationUrl(Installer::PREMIUM_PLUGIN_PATH),
       'has_valid_api_key' => $this->subscribersFeature->hasValidApiKey(),
       'has_valid_premium_key' => $this->subscribersFeature->hasValidPremiumKey(),
@@ -216,6 +230,7 @@ class PageRenderer {
       'is_woocommerce_subscriptions_active' => $this->wooCommerceSubscriptionsHelper->isWooCommerceSubscriptionsActive(),
       'is_woocommerce_bookings_active' => $this->wooCommerceBookingsHelper->isWooCommerceBookingsActive(),
       'cron_trigger_method' => $this->settings->get('cron_trigger.method'),
+      'held_campaigns' => $this->getHeldCampaigns(),
     ];
 
     if (!$defaults['premium_plugin_active']) {
@@ -245,6 +260,28 @@ class PageRenderer {
       $notice = new WPNotice(WPNotice::TYPE_ERROR, $e->getMessage());
       $notice->displayWPNotice();
     }
+  }
+
+  /**
+   * Read-only: holding happens in the worker and in the getHeld API call, never while rendering a page.
+   *
+   * @return array<int, array<string, mixed>>
+   */
+  private function getHeldCampaigns(): array {
+    if (
+      !$this->wp->currentUserCan(AccessControl::PERMISSION_MANAGE_EMAILS)
+      || !Menu::isOnMailPoetAdminPage([
+        Menu::EMAIL_EDITOR_PAGE_SLUG,
+        Menu::FORM_EDITOR_PAGE_SLUG,
+        Menu::AUTOMATION_EDITOR_PAGE_SLUG,
+        Menu::WELCOME_WIZARD_PAGE_SLUG,
+        Menu::WOOCOMMERCE_SETUP_PAGE_SLUG,
+        Menu::LANDINGPAGE_PAGE_SLUG,
+      ])
+    ) {
+      return [];
+    }
+    return $this->heldCampaignsResponseBuilder->buildAll($this->overdueCampaignHold->getHeld());
   }
 
   public function displayChatBotWidget(): bool {

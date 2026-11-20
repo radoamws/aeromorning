@@ -5,5 +5,5 @@ use Automattic\WooCommerce\EmailEditorVendor\Symfony\Component\CssSelector\Parse
 use Automattic\WooCommerce\EmailEditorVendor\Symfony\Component\CssSelector\Parser\TokenStream;
 interface HandlerInterface
 {
- public function handle(Reader $reader, TokenStream $stream): bool;
+public function handle(Reader $reader, TokenStream $stream): bool;
 }

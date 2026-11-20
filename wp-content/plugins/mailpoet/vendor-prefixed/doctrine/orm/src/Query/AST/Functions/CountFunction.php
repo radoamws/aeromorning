@@ -10,17 +10,17 @@ use MailPoetVendor\Doctrine\ORM\Query\Parser;
 use MailPoetVendor\Doctrine\ORM\Query\SqlWalker;
 final class CountFunction extends FunctionNode implements TypedExpression
 {
- private $aggregateExpression;
- public function getSql(SqlWalker $sqlWalker) : string
- {
- return $this->aggregateExpression->dispatch($sqlWalker);
- }
- public function parse(Parser $parser) : void
- {
- $this->aggregateExpression = $parser->AggregateExpression();
- }
- public function getReturnType() : Type
- {
- return Type::getType(Types::INTEGER);
- }
+private $aggregateExpression;
+public function getSql(SqlWalker $sqlWalker): string
+{
+return $this->aggregateExpression->dispatch($sqlWalker);
+}
+public function parse(Parser $parser): void
+{
+$this->aggregateExpression = $parser->AggregateExpression();
+}
+public function getReturnType(): Type
+{
+return Type::getType(Types::INTEGER);
+}
 }

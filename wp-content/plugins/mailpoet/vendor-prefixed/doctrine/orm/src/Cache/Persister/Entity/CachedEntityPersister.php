@@ -8,6 +8,6 @@ use MailPoetVendor\Doctrine\ORM\Cache\Persister\CachedPersister;
 use MailPoetVendor\Doctrine\ORM\Persisters\Entity\EntityPersister;
 interface CachedEntityPersister extends CachedPersister, EntityPersister
 {
- public function getEntityHydrator();
- public function storeEntityCache($entity, EntityCacheKey $key);
+public function getEntityHydrator();
+public function storeEntityCache($entity, EntityCacheKey $key);
 }

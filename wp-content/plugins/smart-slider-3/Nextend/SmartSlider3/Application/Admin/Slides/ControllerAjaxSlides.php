@@ -290,7 +290,7 @@ class ControllerAjaxSlides extends AdminAjaxController {
         switch ($type) {
             case 'image':
                 $images = json_decode(Base64::decode(Request::$REQUEST->getVar('images')), true);
-                $this->validateVariable(count($images), 'Images');
+                $this->validateVariable(is_array($images) && count($images), 'Images');
                 foreach ($images as $image) {
                     $createdSlidesID[] = $slidesModel->createQuickImage($image, $sliderId);
                 }
@@ -300,7 +300,7 @@ class ControllerAjaxSlides extends AdminAjaxController {
                 break;
             case 'video':
                 $videos = json_decode(urldecode(Base64::decode(Request::$REQUEST->getVar('videos'))), true);
-                $this->validateVariable(count($videos), 'Video');
+                $this->validateVariable(is_array($videos) && count($videos), 'Video');
                 foreach ($videos as $video) {
                     $createdSlidesID[] = $slidesModel->createQuickVideo($video, $sliderId);
                 }

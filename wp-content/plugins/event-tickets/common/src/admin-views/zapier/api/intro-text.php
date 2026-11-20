@@ -9,13 +9,16 @@
  *
  * @since 1.0.0
  * @since 1.4.0 - Add loader template.
+ * @since 6.14.1 Updated the Zapier knowledgebase URL.
  *
- * @version 1.4.0
+ * @version 6.14.1
  *
  * @link    http://evnt.is/1aiy
  *
  * @var array $allowed_html Which HTML elements are used for wp_kses.
  */
+
+defined( 'ABSPATH' ) || exit;
 
 ?>
 <div class="tec-settings-form__header-block tec-settings-form__header-block--horizontal tec-settings-form__header-block--no-border">
@@ -32,7 +35,7 @@
 				'Settings help text and link for Zapier API.',
 				'tribe-common'
 			),
-			'https://evnt.is/1bc8'
+			'https://evnt.is/zapier'
 		);
 		echo wp_kses_post( $content );
 		?>

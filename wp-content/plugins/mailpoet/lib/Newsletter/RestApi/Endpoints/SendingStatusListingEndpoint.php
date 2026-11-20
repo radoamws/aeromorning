@@ -7,6 +7,7 @@ if (!defined('ABSPATH')) exit;
 
 use MailPoet\API\JSON\ResponseBuilders\ScheduledTaskSubscriberResponseBuilder;
 use MailPoet\API\REST\AbstractListingEndpoint;
+use MailPoet\API\REST\ListingRequestValidationTrait;
 use MailPoet\API\REST\Request;
 use MailPoet\API\REST\Response;
 use MailPoet\Config\AccessControl;
@@ -30,6 +31,11 @@ use MailPoet\WP\Functions as WPFunctions;
  * mailer / cron envelope the page uses to surface sending notices.
  */
 class SendingStatusListingEndpoint extends AbstractListingEndpoint {
+  use ListingRequestValidationTrait;
+
+  private const ALLOWED_SORT_FIELDS = ['subscriberId', 'failed'];
+  private const ALLOWED_RESULTS = ScheduledTaskSubscribersListingRepository::ALLOWED_RESULTS;
+
   /** @var ScheduledTaskSubscribersListingRepository */
   private $taskSubscribersListingRepository;
 
@@ -71,6 +77,7 @@ class SendingStatusListingEndpoint extends AbstractListingEndpoint {
   }
 
   public function handle(Request $request): Response {
+    $this->validateRequest($request);
     /** @var Response $response */
     $response = parent::handle($request);
     $payload = $response->get_data();
@@ -95,7 +102,15 @@ class SendingStatusListingEndpoint extends AbstractListingEndpoint {
   }
 
   protected function buildItems(array $rows, ListingDefinition $definition): array {
-    return $this->responseBuilder->buildForListing($rows);
+    $items = $this->responseBuilder->buildForListing($rows);
+    $taskIds = array_values(array_unique(array_filter(array_column($items, 'taskId'))));
+    $timezones = $this->sendingQueuesRepository->getGroupTimezonesByTaskIds($taskIds);
+    foreach ($items as &$item) {
+      $group = $timezones[$item['taskId']] ?? null;
+      $item['timezone'] = $group ? $group['timezone'] : null;
+      $item['timezoneFallbackUsed'] = $group ? $group['fallbackUsed'] : false;
+    }
+    return $items;
   }
 
   protected function getDefaultSortBy(): string {
@@ -110,6 +125,10 @@ class SendingStatusListingEndpoint extends AbstractListingEndpoint {
     return 'all';
   }
 
+  protected function getListingValidationErrorPrefix(): string {
+    return 'sending_status';
+  }
+
   protected function getRequestParameters(Request $request): array {
     $idParam = $request->getParam('id');
     $newsletterId = is_numeric($idParam) ? (int)$idParam : 0;
@@ -121,5 +140,44 @@ class SendingStatusListingEndpoint extends AbstractListingEndpoint {
     // records were cleaned up) fall back to a sentinel that matches no rows so
     // the listing returns empty instead of every subscriber across all emails.
     return ['task_ids' => $taskIds ?: [0]];
+  }
+
+  private function validateRequest(Request $request): void {
+    $this->validateSortField($request->getParam('orderby'), self::ALLOWED_SORT_FIELDS);
+    $this->validateSortField($request->getParam('sort_by'), self::ALLOWED_SORT_FIELDS);
+    $this->validateSortOrder($request->getParam('order'));
+    $this->validateSortOrder($request->getParam('sort_order'));
+    $this->validateFilters($request->getParam('filter'));
+  }
+
+  /** @param mixed $filters */
+  private function validateFilters($filters): void {
+    if ($filters === null || $filters === []) {
+      return;
+    }
+    if (!is_array($filters)) {
+      throw $this->listingValidationError(__('Filters must be an object.', 'mailpoet'), 'filter');
+    }
+    foreach (array_keys($filters) as $key) {
+      if ($key !== 'result') {
+        throw $this->listingValidationError(__('Unsupported sending status filter.', 'mailpoet'), 'filter');
+      }
+    }
+    $result = $filters['result'];
+    if ($result === null || $result === '' || $result === []) {
+      return;
+    }
+    foreach (is_array($result) ? $result : [$result] as $value) {
+      if (!is_string($value) || !in_array($value, self::ALLOWED_RESULTS, true)) {
+        throw $this->listingValidationError(
+          sprintf(
+            // translators: %s is a comma-separated list of allowed sending results.
+            __('Unsupported result filter. Allowed values are: %s.', 'mailpoet'),
+            implode(', ', self::ALLOWED_RESULTS)
+          ),
+          'result'
+        );
+      }
+    }
   }
 }

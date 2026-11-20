@@ -380,23 +380,23 @@ class __TwigTemplate_c260ca698e3584b2cbf2795424a7e23a50fca4519ec42363a4acb3eb996
     {
         $macros = $this->macros;
         yield "<script type=\"text/javascript\">
-  MailPoet.trackEvent('Premium page viewed');
+  MailPoet.trackEvent(\x27Premium page viewed\x27);
 
   jQuery(function(\$) {
-    \$('#pricing_duration').on('change', function() {
-      const billingValue = \$(this).prop('checked') ? 'annual' : 'monthly';
+    \$(\x27#pricing_duration\x27).on(\x27change\x27, function() {
+      const billingValue = \$(this).prop(\x27checked\x27) ? \x27annual\x27 : \x27monthly\x27;
 
-      \$('.mailpoet-tiers-page a.mailpoet-premium-shop-link').each(function() {
-        let href = \$(this).attr('href');
+      \$(\x27.mailpoet-tiers-page a.mailpoet-premium-shop-link\x27).each(function() {
+        let href = \$(this).attr(\x27href\x27);
         if (href) {
-          let newHref = href.replace(/([?&]billing=)[^&]*/, '\$1' + billingValue);
-          \$(this).attr('href', newHref);
+          let newHref = href.replace(/([?&]billing=)[^&]*/, \x27\$1\x27 + billingValue);
+          \$(this).attr(\x27href\x27, newHref);
         }
       });
     });
 
-    \$('.mailpoet-tiers-page a.mailpoet-premium-shop-link').on('click', function() {
-      MailPoet.trackEvent('Upgrade page CTA clicked');
+    \$(\x27.mailpoet-tiers-page a.mailpoet-premium-shop-link\x27).on(\x27click\x27, function() {
+      MailPoet.trackEvent(\x27Upgrade page CTA clicked\x27);
     });
   });
 </script>

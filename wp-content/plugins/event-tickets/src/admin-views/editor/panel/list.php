@@ -11,7 +11,7 @@ $tickets_attendees = tribe( 'tickets.attendees' );
 
 $attendees_url = $tickets_attendees->get_report_link( get_post( $post_id ) );
 
-$total_capacity = (int) tribe_get_event_capacity( $post_id );
+$total_capacity = (int) tribe_get_event_capacity( $post_id, true );
 
 $container_class = 'tribe_sectionheader ticket_list_container';
 $container_class .= ( empty( $total_capacity ) ) ? ' tribe_no_capacity' : '';

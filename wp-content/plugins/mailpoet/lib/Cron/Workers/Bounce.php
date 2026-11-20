@@ -5,6 +5,8 @@ namespace MailPoet\Cron\Workers;
 if (!defined('ABSPATH')) exit;
 
 
+use MailPoet\Config\ServicesChecker;
+use MailPoet\Cron\Workers\KeyCheck\SendingServiceKeyCheck;
 use MailPoet\Entities\NewsletterEntity;
 use MailPoet\Entities\ScheduledTaskEntity;
 use MailPoet\Entities\StatisticsBounceEntity;
@@ -13,6 +15,7 @@ use MailPoet\Mailer\Mailer;
 use MailPoet\Newsletter\Sending\SendingQueuesRepository;
 use MailPoet\Services\Bridge;
 use MailPoet\Services\Bridge\API;
+use MailPoet\Services\Bridge\BouncesReportException;
 use MailPoet\Settings\SettingsController;
 use MailPoet\Statistics\StatisticsBouncesRepository;
 use MailPoet\Subscribers\SubscribersRepository;
@@ -55,12 +58,16 @@ class Bounce extends SimpleWorker {
   /** @var StatisticsBouncesRepository */
   private $statisticsBouncesRepository;
 
+  /** @var ServicesChecker */
+  private $servicesChecker;
+
   public function __construct(
     SettingsController $settings,
     SubscribersRepository $subscribersRepository,
     SendingQueuesRepository $sendingQueuesRepository,
     StatisticsBouncesRepository $statisticsBouncesRepository,
-    Bridge $bridge
+    Bridge $bridge,
+    ServicesChecker $servicesChecker
   ) {
     $this->settings = $settings;
     $this->bridge = $bridge;
@@ -68,6 +75,7 @@ class Bounce extends SimpleWorker {
     $this->subscribersRepository = $subscribersRepository;
     $this->sendingQueuesRepository = $sendingQueuesRepository;
     $this->statisticsBouncesRepository = $statisticsBouncesRepository;
+    $this->servicesChecker = $servicesChecker;
   }
 
   public function init() {
@@ -77,7 +85,20 @@ class Bounce extends SimpleWorker {
   }
 
   public function checkProcessingRequirements() {
-    return $this->bridge->isMailpoetSendingServiceEnabled();
+    // A key the service rejects can never produce a report, so stop the worker
+    // instead of requesting one on every cron tick. SendingServiceKeyCheck owns
+    // this state and flips it back once the key works again, which re-enables
+    // the worker without any bounce-specific recovery path.
+    //
+    // Returning false makes CronWorkerRunner delete the due and running tasks
+    // rather than pause them, so the in-progress range and page cursor on the
+    // task meta are lost. That costs nothing: LAST_REPORT_TO_SETTING_KEY only
+    // advances once a range is fully consumed, so the next task re-derives the
+    // same `from` and replays the range. The real cost is time — a key left
+    // rejected for longer than MAX_LOOKBACK_DAYS pushes `from` past what the
+    // service will report on, and the bounces in that gap are never recovered.
+    return $this->bridge->isMailpoetSendingServiceEnabled()
+      && $this->servicesChecker->isMailPoetAPIKeyValid(false) === true;
   }
 
   public function processTaskStrategy(ScheduledTaskEntity $task, $timer) {
@@ -88,11 +109,10 @@ class Bounce extends SimpleWorker {
       // abort if execution limit is reached
       $this->cronHelper->enforceExecutionLimit($timer);
 
-      $report = $this->api->getBouncesReport($from, $to, $page);
-      if (!is_array($report)) {
-        // Transient failure: leave the task running so it retries with the
-        // same range and page on the next cron tick.
-        return false;
+      try {
+        $report = $this->api->getBouncesReport($from, $to, $page);
+      } catch (BouncesReportException $e) {
+        return $this->handleReportFailure($task, $e);
       }
 
       $recipients = isset($report['recipients']) && is_array($report['recipients']) ? $report['recipients'] : [];
@@ -120,6 +140,27 @@ class Bounce extends SimpleWorker {
       $this->settings->set(self::LAST_REPORT_TO_SETTING_KEY, $to->format(\DateTimeInterface::ATOM));
     }
     return true;
+  }
+
+  /**
+   * Backs the task off instead of letting it retry on the very next cron tick.
+   * The report range is frozen on the task meta, so the delayed retry still
+   * covers exactly the same window.
+   */
+  private function handleReportFailure(ScheduledTaskEntity $task, BouncesReportException $e): bool {
+    $code = $e->getCode();
+    if ($code === API::RESPONSE_CODE_KEY_INVALID || $code === API::RESPONSE_CODE_CAN_NOT_SEND) {
+      // The report endpoint rejected the key, but it is not the authority on key
+      // state: it is registered on WPCOM, while keys are issued and validated by
+      // bridge.mailpoet.com. So ask the authority to re-check now rather than
+      // waiting up to a day for the scheduled check, and let the key state it
+      // stores decide (via checkProcessingRequirements) whether this worker keeps
+      // running. Writing the state from here instead would let a WPCOM-side fault
+      // pause all sending on evidence from a service that does not issue keys.
+      $this->cronWorkerScheduler->scheduleImmediatelyIfNotRunning(SendingServiceKeyCheck::TASK_TYPE);
+    }
+    $this->cronWorkerScheduler->rescheduleProgressively($task);
+    return false;
   }
 
   /**
@@ -201,16 +242,24 @@ class Bounce extends SimpleWorker {
     $date = Carbon::now()->millisecond(0);
     return $date->startOfDay()
       ->addDay()
-      ->addHours(rand(0, 5))
-      ->addMinutes(rand(0, 59))
-      ->addSeconds(rand(0, 59));
+      ->addHours(random_int(0, 5))
+      ->addMinutes(random_int(0, 59))
+      ->addSeconds(random_int(0, 59));
   }
 
   private function getReportFromDate(Carbon $now): Carbon {
     $lastReportTo = $this->settings->get(self::LAST_REPORT_TO_SETTING_KEY);
-    $from = is_string($lastReportTo) && $lastReportTo !== ''
-      ? Carbon::parse($lastReportTo)
-      : $now->copy()->subDay();
+    // A malformed stored value (corruption, manual edit, older code) would make
+    // Carbon::parse throw and crash the worker on every run, so guard it the
+    // same way the persist path above does and fall back to the default `from`.
+    $from = $now->copy()->subDay();
+    if (is_string($lastReportTo) && $lastReportTo !== '') {
+      try {
+        $from = Carbon::parse($lastReportTo);
+      } catch (\Exception $e) {
+        $from = $now->copy()->subDay();
+      }
+    }
 
     // Keep an hour of margin inside MAX_LOOKBACK_DAYS so clock skew and request
     // latency can't push the `from` past the limit the service enforces.

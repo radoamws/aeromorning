@@ -7,7 +7,6 @@ if (!defined('ABSPATH')) exit;
 
 use MailPoet\Entities\SegmentEntity;
 use MailPoet\Entities\StatisticsUnsubscribeEntity;
-use MailPoet\Entities\SubscriberEntity;
 use MailPoet\Entities\TagEntity;
 use MailPoet\Listing\ListingDefinition;
 use MailPoet\Segments\SegmentsRepository;
@@ -86,8 +85,8 @@ class BulkActionController {
   }
 
   /**
-   * @param array{segment_id?: int|string, tag_id?: int|string} $data
-   * @return array{count: int, segment?: array{id: int, name: string}, tag?: array{id: int, name: string}}
+   * @param array{segment_id?: int|string, tag_id?: int|string, trigger_automations?: bool} $data
+   * @return array{count: int, kept?: int, segment?: array{id: int, name: string}, tag?: array{id: int, name: string}}
    * @throws BulkActionException
    */
   public function execute(string $action, ListingDefinition $definition, array $data = []): array {
@@ -106,11 +105,17 @@ class BulkActionController {
     $tag = in_array($action, self::ACTIONS_REQUIRING_TAG, true) || isset($data['tag_id'])
       ? $this->resolveTag($data)
       : null;
+    $skipHooks = !($data['trigger_automations'] ?? false);
 
     $ids = $this->subscriberListingRepository->getActionableIds($definition);
-    $count = $this->dispatch($action, $ids, $segment, $tag);
+    $count = $this->dispatch($action, $ids, $segment, $tag, $skipHooks);
 
     $result = ['count' => $count];
+    if ($action === self::ACTION_DELETE) {
+      // bulkDelete keeps subscribers linked to a WordPress user or WooCommerce
+      // customer, so the remainder of the actionable set is what was kept.
+      $result['kept'] = max(0, count($ids) - $count);
+    }
     if ($segment instanceof SegmentEntity) {
       $result['segment'] = ['id' => (int)$segment->getId(), 'name' => (string)$segment->getName()];
     }
@@ -123,7 +128,13 @@ class BulkActionController {
   /**
    * @param int[] $ids
    */
-  private function dispatch(string $action, array $ids, ?SegmentEntity $segment, ?TagEntity $tag): int {
+  private function dispatch(
+    string $action,
+    array $ids,
+    ?SegmentEntity $segment,
+    ?TagEntity $tag,
+    bool $skipHooks
+  ): int {
     switch ($action) {
       case self::ACTION_TRASH:
         return $this->subscribersRepository->bulkTrash($ids);
@@ -137,15 +148,23 @@ class BulkActionController {
         $this->trackBulkUnsubscribe($ids);
         return $this->subscribersRepository->bulkUnsubscribe($ids);
       case self::ACTION_MOVE_TO_LIST:
-        return $this->subscribersRepository->bulkMoveToSegment($this->requireSegment($segment, $action), $ids);
+        return $this->subscribersRepository->bulkMoveToSegment(
+          $this->requireSegment($segment, $action),
+          $ids,
+          $skipHooks
+        );
       case self::ACTION_ADD_TO_LIST:
-        return $this->subscribersRepository->bulkAddToSegment($this->requireSegment($segment, $action), $ids);
+        return $this->subscribersRepository->bulkAddToSegment(
+          $this->requireSegment($segment, $action),
+          $ids,
+          $skipHooks
+        );
       case self::ACTION_REMOVE_FROM_LIST:
         return $this->subscribersRepository->bulkRemoveFromSegment($this->requireSegment($segment, $action), $ids);
       case self::ACTION_ADD_TAG:
-        return $this->subscribersRepository->bulkAddTag($this->requireTag($tag, $action), $ids);
+        return $this->subscribersRepository->bulkAddTag($this->requireTag($tag, $action), $ids, $skipHooks);
       case self::ACTION_REMOVE_TAG:
-        return $this->subscribersRepository->bulkRemoveTag($this->requireTag($tag, $action), $ids);
+        return $this->subscribersRepository->bulkRemoveTag($this->requireTag($tag, $action), $ids, $skipHooks);
       default:
         // Reachable only if SUPPORTED_ACTIONS and this switch drift out of sync.
         throw new BulkActionException(
@@ -229,18 +248,6 @@ class BulkActionController {
    * @param int[] $ids
    */
   private function trackBulkUnsubscribe(array $ids): void {
-    if ($ids === []) return;
-    $subscribers = $this->subscribersRepository->findBy(['id' => $ids]);
-    foreach ($subscribers as $subscriber) {
-      if (
-        $subscriber instanceof SubscriberEntity
-        && $subscriber->getStatus() !== SubscriberEntity::STATUS_UNSUBSCRIBED
-      ) {
-        $this->unsubscribesTracker->track(
-          (int)$subscriber->getId(),
-          StatisticsUnsubscribeEntity::SOURCE_ADMINISTRATOR
-        );
-      }
-    }
+    $this->unsubscribesTracker->trackBulk($ids, StatisticsUnsubscribeEntity::SOURCE_ADMINISTRATOR);
   }
 }

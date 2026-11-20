@@ -43,37 +43,37 @@ class __TwigTemplate_24e96a0e6a17ce2c93cf643ff67585ab8fe18e1a7ba8b35cfd7b474c101
     <div class=\"mailpoet-deactivate-survey\">
 
       <script type=\"text/javascript\">
-        window.addEventListener('load', function() {
-          var deactivateLink = document.querySelector('#the-list [data-slug=\"mailpoet\"] span.deactivate a');
-          var overlay = document.querySelector('#mailpoet-deactivate-survey-modal');
-          var closeButton = document.querySelector('#mailpoet-deactivate-survey-close');
-          var participateButton = document.querySelector('#mailpoet-deactivate-survey-participate');
+        window.addEventListener(\x27load\x27, function() {
+          var deactivateLink = document.querySelector(\x27#the-list [data-slug=\"mailpoet\"] span.deactivate a\x27);
+          var overlay = document.querySelector(\x27#mailpoet-deactivate-survey-modal\x27);
+          var closeButton = document.querySelector(\x27#mailpoet-deactivate-survey-close\x27);
+          var participateButton = document.querySelector(\x27#mailpoet-deactivate-survey-participate\x27);
           var formOpen = false;
 
           if (!deactivateLink || !overlay || !closeButton || !participateButton) {
             return;
           }
 
-          deactivateLink.addEventListener('click', function (event) {
+          deactivateLink.addEventListener(\x27click\x27, function (event) {
             event.preventDefault();
-            overlay.style.display = 'table';
+            overlay.style.display = \x27table\x27;
             formOpen = true;
           });
 
-          closeButton.addEventListener('click', function (event) {
+          closeButton.addEventListener(\x27click\x27, function (event) {
             event.preventDefault();
-            overlay.style.display = 'none';
+            overlay.style.display = \x27none\x27;
             formOpen = false;
-            location.href = deactivateLink.getAttribute('href');
+            location.href = deactivateLink.getAttribute(\x27href\x27);
           });
 
-          participateButton.addEventListener('click', function (event) {
+          participateButton.addEventListener(\x27click\x27, function (event) {
                 setTimeout(function() {closeButton.click(); }, 50);
           });
 
-          document.addEventListener('keyup', function (event) {
+          document.addEventListener(\x27keyup\x27, function (event) {
             if ((event.keyCode === 27) && formOpen) {
-              location.href = deactivateLink.getAttribute('href');
+              location.href = deactivateLink.getAttribute(\x27href\x27);
             }
           });
         });
@@ -83,7 +83,7 @@ class __TwigTemplate_24e96a0e6a17ce2c93cf643ff67585ab8fe18e1a7ba8b35cfd7b474c101
 
         ";
         // line 44
-        yield $this->extensions['MailPoet\Twig\I18n']->translate("We're sorry to see you go. Would you be open to sharing how MailPoet didn't work for you so we could improve it?");
+        yield $this->extensions['MailPoet\Twig\I18n']->translate("We\x27re sorry to see you go. Would you be open to sharing how MailPoet didn\x27t work for you so we could improve it?");
         yield "
       </strong><br>";
         // line 45

@@ -44,15 +44,15 @@ class __TwigTemplate_76c288e881571f95327f2e34a623307d8fe3195a3c10abf89ba8c561494
 
 window.mixpanelTrackingId = \"8cce373b255e5a76fb22d57b85db0c92\";
 window.mixpanelIsLoaded = false;
-window.mixpanelInitConfig = { 'loaded': function() {
+window.mixpanelInitConfig = { \x27loaded\x27: function() {
   window.mixpanelIsLoaded = true;
 }}
 
 mixpanel.init(window.mixpanelTrackingId, window.mixpanelInitConfig);
 
-mixpanel.register({'Platform': 'Plugin'});
+mixpanel.register({\x27Platform\x27: \x27Plugin\x27});
 
-if(typeof window.mailpoet_analytics_public_id === 'string' && window.mailpoet_analytics_public_id.length > 0) {
+if(typeof window.mailpoet_analytics_public_id === \x27string\x27 && window.mailpoet_analytics_public_id.length > 0) {
   if(window.mailpoet_analytics_new_public_id === true) {
     mixpanel.alias(window.mailpoet_analytics_public_id);
   } else {

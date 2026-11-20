@@ -14,7 +14,7 @@ use ArrayAccess;
 use Closure;
 use InvalidArgumentException;
 use ReturnTypeWillChange;
-use Serializable;
+use TEC\Events\Custom_Tables\V1\Models\Occurrence;
 use Tribe\Utils\Lazy_Events;
 use Tribe__Events__Main as TEC;
 use Tribe__Tickets__Ticket_Object as Ticket_Object;
@@ -28,7 +28,7 @@ use WP_Post;
  *
  * @package Tribe\Tickets\Events\Views\V2\Models
  */
-class Tickets implements ArrayAccess, Serializable {
+class Tickets implements ArrayAccess {
 	use Lazy_Events;
 
 	/**
@@ -88,9 +88,14 @@ class Tickets implements ArrayAccess, Serializable {
 	}
 
 	/**
-	 * Regenerates the caches for the models associated with the post ID.
+	 * Drops the cached models associated with the post ID so the next front-end request rebuilds them.
+	 *
+	 * The models are not rebuilt here. Commerce writes the Attendee posts before it writes the Ticket
+	 * stock, so a model built from this hook would capture a mid-order stock and keep serving it.
 	 *
 	 * @since 5.26.1
+	 * @since 5.29.5 Dropped the models instead of rebuilding them, so a mid-order stock is never stored.
+	 * @since 5.30.0 Cleared the Event ticket list caches when called with an Event post too.
 	 *
 	 * @param int $post_id The post ID. It could be any post type, not just events.
 	 *
@@ -121,10 +126,10 @@ class Tickets implements ArrayAccess, Serializable {
 		add_action( 'parse_query', $do_not_cache_results );
 
 		if ( $post->post_type === TEC::POSTTYPE ) {
-			// It's an Event: refresh its cache.
-			$model = new self( $post->ID );
-			$model->exist();
-		} else {
+			self::clear_event_tickets_caches( $post_id );
+		}
+
+		if ( $post->post_type !== TEC::POSTTYPE ) {
 			// These are maps from the service slug to the post type, so we keep only the post type.
 			$attendee_post_types = array_values( tribe_attendees()->attendee_types() );
 			$ticket_types        = array_values( tribe_tickets()->ticket_types() );
@@ -162,23 +167,9 @@ class Tickets implements ArrayAccess, Serializable {
 			}
 			/** @var array<int> $connected_event_ids */
 			$connected_event_ids = array_merge( ...$connected_event_ids );
-			$tribe_cache         = tribe_cache();
-			$tickets_class       = Tickets_Tickets::class;
 
 			foreach ( $connected_event_ids as $connected_event_id ) {
-				// Reset the `Tribe__Tickets__Tickets::get_tickets` method cache to get the last version of them.
-				$provider = Tickets_Tickets::get_event_ticket_provider_object( $connected_event_id );
-
-				if ( $provider ) {
-					$orm_provider                      = $provider->orm_provider;
-					$tickets_cache_key                 = "{$tickets_class}::get_tickets-{$orm_provider}-{$connected_event_id}";
-					$tribe_cache[ $tickets_cache_key ] = null;
-				}
-
-				$model = new self( $connected_event_id );
-				// The call will trigger a priming of the model cache.
-				$model->exist();
-				$model->prime_cache();
+				self::clear_event_tickets_caches( $connected_event_id );
 			}
 		}
 
@@ -220,6 +211,7 @@ class Tickets implements ArrayAccess, Serializable {
 	 * @since 5.6.3 Add support for the updated anchor link from new ticket templates.
 	 * @since 5.26.7 Fixed issue where empty arrays were being returned when data existed but was empty.
 	 * @since 5.27.5 Fixed issue where the stock display was not being refreshed from the current availability.
+	 * @since 5.29.5 Rebuilt the link from the model's own post so a shared cache entry keeps per-Occurrence permalinks.
 	 *
 	 * @return array Ticket data or empty array.
 	 */
@@ -232,6 +224,7 @@ class Tickets implements ArrayAccess, Serializable {
 			// Refresh stock display from current availability so list/archive views stay correct
 			// when event or ticket model is served from cache (e.g. tribe_get_event memoization).
 			$this->refresh_cached_stock_display();
+			$this->refresh_cached_link();
 			return $this->data;
 		}
 
@@ -373,15 +366,21 @@ class Tickets implements ArrayAccess, Serializable {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Legacy serialization method kept for backward compatibility.
+	 *
+	 * @since 5.7.0
+	 * @deprecated 5.29.0 Use __serialize() instead.
+	 *
+	 * @return string
 	 */
 	public function serialize() {
+		_deprecated_function( __METHOD__, '5.29.0', '__serialize()' );
+
 		$data            = $this->fetch_data();
 		$data['post_id'] = $this->post_id;
 
 		// Kept for back-compatibility reasons.
-		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
-		return serialize( $this->__serialize() );
+		return maybe_serialize( $this->__serialize() );
 	}
 
 	/**
@@ -411,12 +410,20 @@ class Tickets implements ArrayAccess, Serializable {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Legacy unserialization method kept for backward compatibility.
+	 *
+	 * @since 5.7.0
+	 * @deprecated 5.29.0 Use __unserialize() instead.
+	 *
+	 * @param array|string $serialized The serialized data.
+	 *
+	 * @return void
 	 */
 	public function unserialize( $serialized ) {
+		_deprecated_function( __METHOD__, '5.29.0', '__unserialize()' );
+
 		// Kept for back-compatibility reasons.
-		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
-		$data = unserialize( $serialized );
+		$data = maybe_unserialize( $serialized );
 		$this->__unserialize( $data );
 
 		unset( $data['post_id'] );
@@ -464,6 +471,8 @@ class Tickets implements ArrayAccess, Serializable {
 
 		// Use the same type that would "win" in fetch_data (last with count): prefer tickets over rsvp.
 		$data = null;
+		$type = null;
+
 		if ( ! empty( $types['tickets']['count'] ) ) {
 			$data = $types['tickets'];
 			$type = 'tickets';
@@ -472,7 +481,15 @@ class Tickets implements ArrayAccess, Serializable {
 			$type = 'rsvp';
 		}
 
-		if ( ! $data || ! $data['available'] ) {
+		if ( ! $data ) {
+			return;
+		}
+
+		if ( ! $data['available'] ) {
+			$this->data['stock']->available = '';
+			$this->data['stock']->sold_out  = 'rsvp' === $type
+				? esc_html_x( 'Currently full', 'events rsvp full (v2)', 'event-tickets' )
+				: esc_html_x( 'Sold Out', 'events stock sold out (v2)', 'event-tickets' );
 			return;
 		}
 
@@ -567,6 +584,26 @@ class Tickets implements ArrayAccess, Serializable {
 	}
 
 	/**
+	 * Points the cached link at this model's own post, keeping the anchor it was built with.
+	 *
+	 * Occurrences of a recurring Event share one cached entry but not one permalink, so the link
+	 * has to be rebuilt for whichever Occurrence is being rendered.
+	 *
+	 * @since 5.29.5
+	 *
+	 * @return void
+	 */
+	private function refresh_cached_link(): void {
+		if ( ! isset( $this->data['link'] ) || ! is_object( $this->data['link'] ) ) {
+			return;
+		}
+
+		$anchor = strstr( $this->data['link']->anchor, '#' );
+
+		$this->data['link']->anchor = get_permalink( $this->post_id ) . ( false === $anchor ? '' : $anchor );
+	}
+
+	/**
 	 * Primes the model cache from the key-value cache, if possible.
 	 *
 	 * @since 5.26.1
@@ -594,13 +631,29 @@ class Tickets implements ArrayAccess, Serializable {
 	/**
 	 * Returns the model cache key used to store it in the key-value cache.
 	 *
+	 * Views hand over the Occurrence's provisional ID while the invalidation side only ever knows the
+	 * Event post ID, so the key is built from the normalized one to make the two meet.
+	 *
 	 * @since 5.26.1
+	 * @since 5.29.5 Normalized the Occurrence ID so the views and the invalidation resolve to the same key.
 	 *
 	 * @param int $post_id The post ID to provide the cache key for.
 	 *
 	 * @return string The model cache key used to store it in the key-value cache.
 	 */
 	public static function get_cache_key( int $post_id ): string {
+		if ( class_exists( Occurrence::class, false ) ) {
+			/**
+			 * Filters the post ID to use when fetching tickets for an Occurrence.
+			 *
+			 * @since 5.8.0
+			 *
+			 * @param int $post_id The post ID to use when fetching tickets for an Occurrence; this might
+			 *                     be a real post ID, or a provisional one.
+			 */
+			$post_id = apply_filters( 'tec_tickets_normalize_occurrence_id', Occurrence::normalize_id( $post_id ) );
+		}
+
 		return 'tec_tickets_views_v2_model_ticket_' . $post_id;
 	}
 
@@ -630,5 +683,32 @@ class Tickets implements ArrayAccess, Serializable {
 		);
 
 		tec_kv_cache()->set( self::get_cache_key( $this->post_id ), $packed, DAY_IN_SECONDS );
+	}
+
+	/**
+	 * Drops the request-scoped ticket lists and the model entry of an Event, so its next model reads fresh tickets.
+	 *
+	 * @since 5.30.0
+	 *
+	 * @param int $event_id The Event post ID.
+	 *
+	 * @return void
+	 */
+	private static function clear_event_tickets_caches( int $event_id ): void {
+		$tribe_cache = tribe_cache();
+		$provider    = Tickets_Tickets::get_event_ticket_provider_object( $event_id );
+
+		if ( $provider ) {
+			$tribe_cache[ Tickets_Tickets::get_tickets_cache_key( $provider->orm_provider, $event_id ) ] = null;
+		}
+
+		/*
+		 * The model reads the aggregate list, not the per-provider one, and that list holds Ticket
+		 * objects carrying the stock they had when it was built.
+		 */
+		$tickets_class = Tickets_Tickets::class;
+		$tribe_cache[ "{$tickets_class}::get_all_event_tickets-{$event_id}" ] = null;
+
+		tec_kv_cache()->delete( self::get_cache_key( $event_id ) );
 	}
 }

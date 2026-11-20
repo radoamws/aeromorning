@@ -15,7 +15,7 @@ $this->form_action();
 
 <h3 class="litespeed-title-short">
 	<?php esc_html_e( 'Crawler General Settings', 'litespeed-cache' ); ?>
-	<?php Doc::learn_more( 'https://docs.litespeedtech.com/lscache/lscwp/crawler/#general-settings-tab' ); ?>
+	<?php Doc::learn_more( 'https://docs.litespeedtech.com/lscache/lscwp/crawler/#settings-tab' ); ?>
 </h3>
 
 <table class="wp-list-table striped litespeed-table">
@@ -123,7 +123,7 @@ $this->form_action();
 								esc_html__( 'Click here to set.', 'litespeed-cache' ),
 								true,
 								false,
-								true
+								false
 							);
 							?>
 						</div>
@@ -144,7 +144,7 @@ $this->form_action();
 								esc_html__( 'Click here to set.', 'litespeed-cache' ),
 								true,
 								false,
-								true
+								false
 							);
 							?>
 						</div>
@@ -162,11 +162,14 @@ $this->form_action();
 				<?php $this->enroll( $option_id . '[name][]' ); ?>
 				<?php $this->enroll( $option_id . '[vals][]' ); ?>
 				<div id="litespeed_crawler_simulation_div"></div>
-				<script type="text/babel">
-					ReactDOM.render(
-						<CrawlerSimulate list={ <?php echo wp_json_encode( $this->conf( $option_id ) ); ?> } />,
-						document.getElementById( 'litespeed_crawler_simulation_div' )
-					);
+				<script>
+					// Wait for localization printed in the footer.
+					jQuery( function () {
+						litespeed_crawler_simulation(
+							document.getElementById( 'litespeed_crawler_simulation_div' ),
+							<?php echo wp_json_encode( $this->conf( $option_id ), Str::JSON_HTML_FLAGS ); ?>
+						);
+					} );
 				</script>
 				<div class="litespeed-desc">
 					<?php esc_html_e( 'To crawl for a particular cookie, enter the cookie name, and the values you wish to crawl for. Values should be one per line. There will be one crawler created per cookie value, per simulated role.', 'litespeed-cache' ); ?>
@@ -181,6 +184,7 @@ $this->form_action();
 						?>
 					</p>
 				</div>
+				<?php do_action( 'litespeed_crawler_cookies_after' ); ?>
 			</td>
 		</tr>
 	</tbody>

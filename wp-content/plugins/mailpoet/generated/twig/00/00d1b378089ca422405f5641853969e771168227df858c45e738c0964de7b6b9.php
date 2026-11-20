@@ -40,16 +40,16 @@ class __TwigTemplate_c5b2baad656ba71f0ebbe0b70ca8d928767c64a4ecddb4ec13dcabe4bec
         yield "{{#if model.image.src}}
     <style type=\"text/css\">
         .mailpoet_editor_view_{{ viewCid }} {
-            background-color: {{#ifCond model.styles.block.backgroundColor '!=' 'transparent'}}{{  model.styles.block.backgroundColor }}{{else}}#ffffff{{/ifCond}} !important;
+            background-color: {{#ifCond model.styles.block.backgroundColor \x27!=\x27 \x27transparent\x27}}{{  model.styles.block.backgroundColor }}{{else}}#ffffff{{/ifCond}} !important;
             background-image: url({{ model.image.src }});
             background-position: center;
-            background-repeat: {{#ifCond model.image.display '==' 'tile'}}repeat{{else}}no-repeat{{/ifCond}};
-            background-size: {{#ifCond model.image.display '==' 'scale'}}cover{{else}}contain{{/ifCond}};
+            background-repeat: {{#ifCond model.image.display \x27==\x27 \x27tile\x27}}repeat{{else}}no-repeat{{/ifCond}};
+            background-size: {{#ifCond model.image.display \x27==\x27 \x27scale\x27}}cover{{else}}contain{{/ifCond}};
         }
         .mailpoet_editor_view_{{ viewCid }} .mailpoet_container { background: transparent; }
     </style>
 {{else}}
-    {{#ifCond model.styles.block.backgroundColor '!=' 'transparent'}}
+    {{#ifCond model.styles.block.backgroundColor \x27!=\x27 \x27transparent\x27}}
         <style type=\"text/css\">
             .mailpoet_editor_view_{{ viewCid }} { background-color: {{ model.styles.block.backgroundColor }}; }
             .mailpoet_editor_view_{{ viewCid }} .mailpoet_container { background-color: {{ model.styles.block.backgroundColor }}; }
@@ -57,7 +57,7 @@ class __TwigTemplate_c5b2baad656ba71f0ebbe0b70ca8d928767c64a4ecddb4ec13dcabe4bec
     {{/ifCond}}
 {{/if}}
 
-<div class=\"mailpoet_container {{#ifCond model.orientation '===' 'horizontal'}}mailpoet_container_horizontal{{/ifCond}}{{#ifCond model.orientation '===' 'vertical'}}mailpoet_container_vertical{{/ifCond}}\"></div>
+<div class=\"mailpoet_container {{#ifCond model.orientation \x27===\x27 \x27horizontal\x27}}mailpoet_container_horizontal{{/ifCond}}{{#ifCond model.orientation \x27===\x27 \x27vertical\x27}}mailpoet_container_vertical{{/ifCond}}\"></div>
 <div class=\"mailpoet_tools\"></div><div class=\"mailpoet_block_highlight\">
 ";
         return; yield '';

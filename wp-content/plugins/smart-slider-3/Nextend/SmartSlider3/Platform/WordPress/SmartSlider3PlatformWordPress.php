@@ -137,6 +137,19 @@ class SmartSlider3PlatformWordPress extends AbstractSmartSlider3Platform {
 
     private function initSanitize() {
         Sanitize::set_allowed_tags();
+
+        /**
+         * The slider stores the slide link URL in a "data-href" attribute, which is read by the
+         * frontend JavaScript and used for navigation. Register it as a URI attribute so that
+         * wp_kses_bad_protocol() strips dangerous schemes (e.g. javascript:) from it when post
+         * content is sanitized on save for users without the unfiltered_html capability.
+         */
+        add_filter('wp_kses_uri_attributes', function ($uri_attributes) {
+            $uri_attributes[] = 'data-href';//Link href
+            $uri_attributes[] = 'data-redirect-url';//Count Down layer - redirect
+
+            return $uri_attributes;
+        });
     }
 
     /**

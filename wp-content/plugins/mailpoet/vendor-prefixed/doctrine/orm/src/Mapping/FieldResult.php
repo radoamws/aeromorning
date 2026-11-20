@@ -4,6 +4,6 @@ namespace MailPoetVendor\Doctrine\ORM\Mapping;
 if (!defined('ABSPATH')) exit;
 final class FieldResult implements MappingAttribute
 {
- public $name;
- public $column;
+public $name;
+public $column;
 }

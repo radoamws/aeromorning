@@ -221,6 +221,10 @@ function ewww_image_optimizer_webp_loop() {
 			/* translators: %s: a webp file */
 			$output .= sprintf( esc_html__( 'Skipped %s, could not determine original image path', 'ewww-image-optimizer' ), esc_html( $image ) ) . '<br>';
 		} else {
+			if ( ! ewwwio()->is_writable( $image ) || ! ewwwio()->is_write_permitted( $image ) ) {
+				ewwwio_debug_message( "$image is not writable or is outside permitted directories" );
+				continue;
+			}
 			$new_webp_path = ewww_image_optimizer_get_webp_path( $replace_base );
 			if ( is_file( $new_webp_path ) ) {
 				ewwwio_debug_message( "$new_webp_path already exists, deleting $image" );
@@ -231,7 +235,7 @@ function ewww_image_optimizer_webp_loop() {
 			}
 			++$images_renamed;
 			ewwwio_debug_message( "renaming $image with match of $replace_base to $new_webp_path" );
-			rename( $image, $new_webp_path );
+			ewwwio()->rename( $image, $new_webp_path );
 		}
 	} // End while().
 	if ( $images_renamed ) {

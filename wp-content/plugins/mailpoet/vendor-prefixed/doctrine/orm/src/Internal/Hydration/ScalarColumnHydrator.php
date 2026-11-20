@@ -8,12 +8,12 @@ use function array_column;
 use function count;
 final class ScalarColumnHydrator extends AbstractHydrator
 {
- protected function hydrateAllData() : array
- {
- if (count($this->resultSetMapping()->fieldMappings) > 1) {
- throw MultipleSelectorsFoundException::create($this->resultSetMapping()->fieldMappings);
- }
- $result = $this->statement()->fetchAllNumeric();
- return array_column($result, 0);
- }
+protected function hydrateAllData(): array
+{
+if (count($this->resultSetMapping()->fieldMappings) > 1) {
+throw MultipleSelectorsFoundException::create($this->resultSetMapping()->fieldMappings);
+}
+$result = $this->statement()->fetchAllNumeric();
+return array_column($result, 0);
+}
 }

@@ -5,6 +5,7 @@ namespace TEC\Tickets\Commerce\Gateways\Stripe\REST;
 use TEC\Tickets\Commerce\Cart;
 use TEC\Tickets\Commerce\Checkout;
 use TEC\Tickets\Commerce\Gateways\Contracts\Abstract_REST_Endpoint;
+use TEC\Tickets\Commerce\Gateways\Contracts\Traits\Requires_Login_To_Purchase;
 use TEC\Tickets\Commerce\Gateways\Stripe\Gateway;
 use TEC\Tickets\Commerce\Gateways\Stripe\Payment_Intent;
 use TEC\Tickets\Commerce\Gateways\Stripe\Payment_Intent_Handler;
@@ -31,6 +32,8 @@ use WP_Post;
  * @package TEC\Tickets\Commerce\Gateways\Stripe\REST
  */
 class Order_Endpoint extends Abstract_REST_Endpoint {
+	use Requires_Login_To_Purchase;
+
 
 	/**
 	 * The REST API endpoint path.
@@ -57,7 +60,7 @@ class Order_Endpoint extends Abstract_REST_Endpoint {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'args'                => $this->create_order_args(),
 				'callback'            => [ $this, 'handle_create_order' ],
-				'permission_callback' => '__return_true',
+				'permission_callback' => [ $this, 'can_purchase' ],
 			]
 		);
 
@@ -68,18 +71,7 @@ class Order_Endpoint extends Abstract_REST_Endpoint {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'args'                => $this->update_order_args(),
 				'callback'            => [ $this, 'handle_update_order' ],
-				'permission_callback' => '__return_true',
-			]
-		);
-
-		register_rest_route(
-			$namespace,
-			$this->get_endpoint_path() . '/(?P<order_id>[0-9a-zA-Z_-]+)',
-			[
-				'methods'             => WP_REST_Server::DELETABLE,
-				'args'                => $this->fail_order_args(),
-				'callback'            => [ $this, 'handle_fail_order' ],
-				'permission_callback' => '__return_true',
+				'permission_callback' => [ $this, 'current_user_can_edit_order' ],
 			]
 		);
 
@@ -98,9 +90,102 @@ class Order_Endpoint extends Abstract_REST_Endpoint {
 	}
 
 	/**
+	 * Authorizes the request with the Payment Intent client secret this site issued for the order.
+	 *
+	 * The cart-bound check in the parent class is still the preferred path. It needs the visitor's cart
+	 * cookie, which does not always survive the round trip to Stripe: edge caches, proxies and
+	 * www/non-www mismatches can all drop it. Since the buyer has already been charged by the time this
+	 * route is called, losing the cookie must not strand the order.
+	 *
+	 * The client secret is a per-Payment-Intent credential Stripe issues to the buyer's browser and we
+	 * store on the order when we create the intent, so possessing it is proof the caller is the buyer
+	 * checking out. It is compared against the value stored on that specific order, never against the
+	 * request's own claims, and it travels in the request body rather than the URL.
+	 *
+	 * @since 5.29.3
+	 *
+	 * @param WP_REST_Request $request          The REST Request instance.
+	 * @param string          $gateway_order_id The Payment Intent ID.
+	 *
+	 * @return bool
+	 */
+	protected function request_carries_order_credential( WP_REST_Request $request, string $gateway_order_id ): bool {
+		$client_secret = $request->get_param( 'client_secret' );
+
+		if ( ! is_string( $client_secret ) || '' === $client_secret ) {
+			return false;
+		}
+
+		$order = tec_tc_orders()->by_args(
+			[
+				'gateway_order_id' => $gateway_order_id,
+				'gateway'          => Gateway::get_key(),
+				'status'           => 'any',
+			]
+		)->first();
+
+		// The status is verified here rather than in the query above; see order_is_in_flight().
+		if ( ! $this->order_is_in_flight( $order ) ) {
+			return false;
+		}
+
+		$stored_secret = $this->get_stored_client_secret( (int) $order->ID, $gateway_order_id );
+
+		if ( '' === $stored_secret ) {
+			return false;
+		}
+
+		return hash_equals( $stored_secret, $client_secret );
+	}
+
+	/**
+	 * Reads the client secret stored on an order for a given Payment Intent.
+	 *
+	 * The Payment Intent is saved to the order's gateway payload when the intent is created, and again
+	 * on every status change, so the same intent can appear under more than one status bucket. Only a
+	 * payload whose own id matches the requested Payment Intent is considered.
+	 *
+	 * @since 5.29.3
+	 *
+	 * @param int    $order_id         The Tickets Commerce order post ID.
+	 * @param string $gateway_order_id The Payment Intent ID.
+	 *
+	 * @return string The stored client secret, or an empty string when there is none.
+	 */
+	protected function get_stored_client_secret( int $order_id, string $gateway_order_id ): string {
+		$order = tec_tc_get_order( $order_id );
+
+		if ( empty( $order->gateway_payload ) || ! is_array( $order->gateway_payload ) ) {
+			return '';
+		}
+
+		foreach ( $order->gateway_payload as $status_payloads ) {
+			foreach ( (array) $status_payloads as $payload ) {
+				if ( ! is_array( $payload ) ) {
+					continue;
+				}
+
+				if ( ( $payload['id'] ?? '' ) !== $gateway_order_id ) {
+					continue;
+				}
+
+				$stored_secret = $payload['client_secret'] ?? '';
+
+				if ( is_string( $stored_secret ) && '' !== $stored_secret ) {
+					return $stored_secret;
+				}
+			}
+		}
+
+		return '';
+	}
+
+	/**
 	 * Handles the request that creates an order with Tickets Commerce and the Stripe gateway.
 	 *
 	 * @since 5.3.0
+	 * @since 5.29.0.1 Removed the cart hash query param from the return URL. See SVUL-L34.
+	 * @since 5.30.3.1 Return the handler's own error code and message, without its data, so the buyer sees how to recover.
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
@@ -159,7 +244,19 @@ class Order_Endpoint extends Abstract_REST_Endpoint {
 		$payment_intent = tribe( Payment_Intent_Handler::class )->update_payment_intent( $data, $order );
 
 		if ( is_wp_error( $payment_intent ) ) {
-			return new WP_Error( 'tec-tc-gateway-stripe-failed-creating-payment-intent', $messages['failed-creating-payment-intent'], $order );
+			$code    = $payment_intent->get_error_code();
+			$message = $payment_intent->get_error_message();
+
+			/*
+			 * Only the handler's own errors are written for the buyer. Stripe's messages are written for
+			 * the merchant and can name the account's keys, and an error's data can carry the request,
+			 * Authorization header included, so neither is passed on.
+			 */
+			if ( ! is_string( $code ) || 0 !== strpos( $code, 'tec-tc-gateway-stripe-' ) || ! $message ) {
+				return new WP_Error( 'tec-tc-gateway-stripe-failed-creating-payment-intent', $messages['failed-creating-payment-intent'] );
+			}
+
+			return new WP_Error( $code, $message );
 		}
 
 		if ( empty( $payment_intent['id'] ) || empty( $payment_intent['created'] ) ) {
@@ -212,11 +309,13 @@ class Order_Endpoint extends Abstract_REST_Endpoint {
 		$response['success']       = true;
 		$response['order_id']      = $order->ID;
 		$response['client_secret'] = $payment_intent['client_secret'];
-		$response['return_url']    = add_query_arg( [ Cart::$cookie_query_arg => tribe( Cart::class )->get_cart_hash() ], tribe( Checkout::class )->get_url() );
+		$response['return_url']    = tribe( Checkout::class )->get_url();
 
 		if ( $status->get_slug() === Pending::SLUG ) {
 			$response['redirect_url'] = add_query_arg( [ 'tc-order-id' => $payment_intent['id'] ], tribe( Success::class )->get_url() );
 		}
+
+		$this->pending_order->set( $payment_intent['id'] );
 
 		return new WP_REST_Response( $response );
 	}
@@ -263,6 +362,7 @@ class Order_Endpoint extends Abstract_REST_Endpoint {
 	 * Handles the request that creates an order with Tickets Commerce and the Stripe gateway.
 	 *
 	 * @since 5.3.0
+	 * @since 5.30.3.1 Refuse to complete a gateway order id held by more than one local order.
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
@@ -291,6 +391,11 @@ class Order_Endpoint extends Abstract_REST_Endpoint {
 		}
 
 		$orders = tribe( Order::class );
+
+		// A gateway order id must map to exactly one local order; never complete one of several sharing it.
+		if ( 1 !== count( $orders->get_order_ids_from_gateway_order_id( $gateway_order_id ) ) ) {
+			return new WP_Error( 'tec-tc-gateway-stripe-payment-intent-order-mismatch', $messages['payment-intent-order-mismatch'], $order );
+		}
 
 		// Flag the order as on checkout screen hold.
 		$orders->set_on_checkout_screen_hold( $order->ID );
@@ -416,12 +521,14 @@ class Order_Endpoint extends Abstract_REST_Endpoint {
 	 *
 	 * @since 5.3.0
 	 *
+	 * @deprecated 5.29.0.1
+	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
 	 * @return WP_Error|WP_REST_Response An array containing the data on success or a WP_Error instance on failure.
 	 */
 	public function handle_fail_order( WP_REST_Request $request ) {
-
+		_deprecated_function( __METHOD__, '5.29.0.1', 'This method has been deprecated without a replacement.' );
 	}
 
 	/**

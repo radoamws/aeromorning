@@ -17,6 +17,7 @@ use MailPoet\Cron\Workers\SubscribersStatsReport;
 use MailPoet\Cron\Workers\WorkersFactory;
 use MailPoet\Entities\ScheduledTaskEntity;
 use MailPoet\Mailer\MailerLog;
+use MailPoet\Mailer\SendingEnvironment;
 use MailPoet\Newsletter\Sending\ScheduledTasksRepository;
 use MailPoet\Services\Bridge;
 use MailPoet\Settings\SettingsController;
@@ -55,6 +56,8 @@ class WordPress {
   /** @var EntityManager */
   private $entityManager;
 
+  private SendingEnvironment $sendingEnvironment;
+
   public function __construct(
     CronHelper $cronHelper,
     Supervisor $supervisor,
@@ -62,7 +65,8 @@ class WordPress {
     ServicesChecker $serviceChecker,
     WPFunctions $wp,
     ScheduledTasksRepository $scheduledTasksRepository,
-    EntityManager $entityManager
+    EntityManager $entityManager,
+    SendingEnvironment $sendingEnvironment
   ) {
     $this->supervisor = $supervisor;
     $this->settings = $settings;
@@ -71,6 +75,7 @@ class WordPress {
     $this->serviceChecker = $serviceChecker;
     $this->scheduledTasksRepository = $scheduledTasksRepository;
     $this->entityManager = $entityManager;
+    $this->sendingEnvironment = $sendingEnvironment;
   }
 
   public function run() {
@@ -125,6 +130,9 @@ class WordPress {
     // Because a lot of workers has the same pattern for check if it's active we can use a loop here
     $isSimpleWorkerActive = false;
     foreach (WorkersFactory::SIMPLE_WORKER_TYPES as $simpleWorkerType) {
+      if ($this->sendingEnvironment->isTaskTypeGated($simpleWorkerType)) {
+        continue;
+      }
       $tasksCount = $this->getTasksCount([
         'type' => $simpleWorkerType,
         'scheduled_in' => [self::SCHEDULED_IN_THE_PAST],
@@ -154,6 +162,10 @@ class WordPress {
   }
 
   private function isSendingQueueActive(): bool {
+    if (!$this->sendingEnvironment->isSendingAllowed()) {
+      return false;
+    }
+
     $scheduledQueues = $this->scheduledTasksRepository->findScheduledSendingTasks(SchedulerWorker::TASK_BATCH_SIZE);
     $runningQueues = $this->scheduledTasksRepository->findRunningSendingTasks(SendingQueueWorker::TASK_BATCH_SIZE);
     $sendingLimitReached = MailerLog::isSendingLimitReached();
@@ -240,7 +252,7 @@ class WordPress {
       GROUP BY type, status, scheduled_in";
 
     $stmt = $this->entityManager->getConnection()->prepare($sql);
-    $stmt->bindValue('now', date('Y-m-d H:i:s', $this->wp->currentTime('timestamp', true)));
+    $stmt->bindValue('now', gmdate('Y-m-d H:i:s', $this->wp->currentTime('timestamp', true)));
     $stmt->bindValue('past', self::SCHEDULED_IN_THE_PAST);
     $stmt->bindValue('future', self::SCHEDULED_IN_THE_FUTURE);
     $stmt->bindValue('statusCompleted', ScheduledTaskEntity::STATUS_COMPLETED);

@@ -7,7 +7,6 @@ if (!defined('ABSPATH')) exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\DataStore;
 use MailPoet\DI\ContainerWrapper;
-use MailPoet\RuntimeException;
 use MailPoet\WP\Functions as WPFunctions;
 
 class Helper {
@@ -47,17 +46,8 @@ class Helper {
   }
 
   public function isWooCommerceCustomOrdersTableEnabled(): bool {
-    if (
-      $this->isWooCommerceActive()
-      // Stubs reflect the current WC version; the runtime check guards older WooCommerce installs that lack this helper.
-      // @phpstan-ignore-next-line function.alreadyNarrowedType
-      && method_exists('\Automattic\WooCommerce\Utilities\OrderUtil', 'custom_orders_table_usage_is_enabled')
-      && \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()
-    ) {
-      return true;
-    }
-
-    return false;
+    return $this->isWooCommerceActive()
+      && \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
   }
 
   public function WC() {
@@ -218,6 +208,20 @@ class Helper {
     return wc_hex_is_light($color);
   }
 
+  public function wcGetStoreAddress(): string {
+    if (!class_exists(\WC_Emails::class)) {
+      return '';
+    }
+    return \WC_Emails::instance()->get_store_address();
+  }
+
+  public function wcGetStoreEmail(): string {
+    if (!class_exists(\WC_Emails::class)) {
+      return '';
+    }
+    return \WC_Emails::instance()->get_from_address();
+  }
+
   public function getOrdersCountCreatedBefore(string $dateTime): int {
     $ordersCount = $this->wcGetOrders([
       'status' => 'all',
@@ -232,7 +236,7 @@ class Helper {
 
   public function getRawPrice($price, array $args = []) {
     $htmlPrice = $this->wcPrice($price, $args);
-    return html_entity_decode(strip_tags($htmlPrice), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
+    return $this->wp->wpStripAllTags(html_entity_decode($htmlPrice, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401));
   }
 
   public function getAllowedCountries(): array {
@@ -269,20 +273,10 @@ class Helper {
   }
 
   public function getOrdersTableName() {
-    // @phpstan-ignore function.impossibleType (WC stub omits this method; the runtime check is meaningful for older WC versions)
-    if (!method_exists('\Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore', 'get_orders_table_name')) {
-      throw new RuntimeException('Cannot get orders table name when running a WooCommerce version that doesn\'t support custom order tables.');
-    }
-
     return \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::get_orders_table_name();
   }
 
   public function getAddressesTableName() {
-    // @phpstan-ignore function.impossibleType (WC stub omits this method; the runtime check is meaningful for older WC versions)
-    if (!method_exists('\Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore', 'get_addresses_table_name')) {
-      throw new RuntimeException('Cannot get addresses table name when running a WooCommerce version that doesn\'t support custom order tables.');
-    }
-
     return \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::get_addresses_table_name();
   }
 

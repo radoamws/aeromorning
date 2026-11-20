@@ -10,12 +10,13 @@ use MailPoet\Captcha\CaptchaRenderer;
 use MailPoet\Cron\CronTrigger;
 use MailPoet\Cron\Workers\AuthorizedSendingEmailsCheck;
 use MailPoet\Cron\Workers\BackfillEngagementData;
-use MailPoet\Cron\Workers\InactiveSubscribers;
+use MailPoet\Cron\Workers\InactiveSubscribersMaintenance;
 use MailPoet\Cron\Workers\Mixpanel;
 use MailPoet\Cron\Workers\NewsletterTemplateThumbnails;
 use MailPoet\Cron\Workers\StatsNotifications\Worker;
 use MailPoet\Cron\Workers\SubscriberLinkTokens;
 use MailPoet\Cron\Workers\SubscribersLastEngagement;
+use MailPoet\Cron\Workers\SubscribersSegmentsCountSync;
 use MailPoet\Cron\Workers\Tracks;
 use MailPoet\Cron\Workers\UnsubscribeTokens;
 use MailPoet\Doctrine\WPDB\Connection;
@@ -184,6 +185,7 @@ class Populator {
     $this->scheduleSubscriberLastEngagementDetection();
     $this->scheduleNewsletterTemplateThumbnails();
     $this->scheduleBackfillEngagementData();
+    $this->scheduleSubscribersSegmentsCountSync();
     $this->scheduleMixpanel();
     $this->scheduleTracks();
   }
@@ -268,7 +270,7 @@ class Populator {
 
     // set installation date
     if (!$this->settings->get('installed_at')) {
-      $this->settings->set('installed_at', date("Y-m-d H:i:s"));
+      $this->settings->set('installed_at', gmdate("Y-m-d H:i:s"));
     }
 
     // set captcha settings
@@ -321,6 +323,11 @@ class Populator {
     } elseif (isset($woocommerceOptinOnCheckout['message']) && $woocommerceOptinOnCheckout['message'] === $legacyLabelText) {
       $this->settings->set('woocommerce.optin_on_checkout.message', $currentLabelText);
     }
+
+    if ($this->settings->get('editor_choice_modal.enabled') === null) {
+      $this->settings->set('editor_choice_modal.enabled', empty($settingsDbVersion)); // enable on new installs only
+    }
+
     // reset mailer log
     MailerLog::resetMailerLog();
   }
@@ -677,7 +684,7 @@ class Populator {
 
   private function scheduleInitialInactiveSubscribersCheck() {
     $this->scheduleTask(
-      InactiveSubscribers::TASK_TYPE,
+      InactiveSubscribersMaintenance::TASK_TYPE,
       Carbon::now()->millisecond(0)->addHour()
     );
   }
@@ -762,17 +769,35 @@ class Populator {
   }
 
   private function scheduleBackfillEngagementData(): void {
+    $this->scheduleOneTimeBackfillTask(BackfillEngagementData::TASK_TYPE);
+  }
+
+  private function scheduleSubscribersSegmentsCountSync(): void {
+    $this->scheduleOneTimeBackfillTask(SubscribersSegmentsCountSync::TASK_TYPE);
+  }
+
+  /**
+   * Schedule a one-time backfill task unless a healthy instance already exists.
+   * Uses an allowlist of healthy statuses rather than finding any task, so a
+   * failed or cancelled task does not permanently block re-scheduling.
+   */
+  private function scheduleOneTimeBackfillTask(string $type): void {
     $existingTask = $this->scheduledTasksRepository->findOneBy(
       [
-        'type' => BackfillEngagementData::TASK_TYPE,
+        'type' => $type,
+        'status' => [
+          ScheduledTaskEntity::STATUS_SCHEDULED,
+          null, // running (stored as null for historical reasons)
+          ScheduledTaskEntity::STATUS_COMPLETED,
+          ScheduledTaskEntity::STATUS_PAUSED,
+          ScheduledTaskEntity::STATUS_CLI,
+        ],
       ]
     );
+
     if ($existingTask) {
       return;
     }
-    $this->scheduleTask(
-      BackfillEngagementData::TASK_TYPE,
-      Carbon::now()->millisecond(0)
-    );
+    $this->scheduleTask($type, Carbon::now()->millisecond(0));
   }
 }

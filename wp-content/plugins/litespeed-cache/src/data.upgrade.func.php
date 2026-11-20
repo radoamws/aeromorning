@@ -13,6 +13,7 @@ defined( 'WPINC' ) || exit();
 use LiteSpeed\Debug2;
 use LiteSpeed\Cloud;
 use LiteSpeed\Conf;
+use LiteSpeed\Htaccess;
 
 /**
  * Check whether a DB table exists.
@@ -180,4 +181,38 @@ function litespeed_update_5_3() {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$wpdb->query( $q );
 	}
+}
+
+/**
+ * Drop the legacy img_optm table. [2026-07-02]
+ *
+ * The permanent img_optm table was replaced by the img_optming working queue + DB_SIZE postmeta + optimized-file existence checks. Fresh installs never created it; this migration removes the leftover table on upgraded sites.
+ *
+ * @since 7.9
+ */
+function litespeed_update_7_9() {
+	global $wpdb;
+	Debug2::debug( '[Data] Drop legacy img_optm table' );
+
+	$tb = $wpdb->prefix . 'litespeed_img_optm';
+	if ( litespeed_table_exists( $tb ) ) {
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange
+		$wpdb->query( "DROP TABLE IF EXISTS `{$tb}`" );
+	}
+}
+
+/**
+ * Remove debug, purge and crawler logs still named by the v7.9.1 formula. [2026-10-14]
+ *
+ * The log files were renamed in v7.9.2, so the old copies were neither cleared nor downloadable; this runs regardless of the debug setting.
+ * Also flags LiteSpeed blocks v7.9.1 left in an ancestor .htaccess, which v7.9.2 no longer manages.
+ *
+ * @since 7.9.2
+ * @return void
+ */
+function litespeed_update_7_9_2() {
+	Debug2::remove_legacy_logs();
+
+	// v7.9.2 no longer writes outside the WordPress/frontend roots; point the administrator to any block left there.
+	Htaccess::cls()->notice_orphan_rules();
 }

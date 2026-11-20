@@ -5,14 +5,18 @@ namespace MailPoet\EmailEditor\Integrations\MailPoet\ProductCollection;
 if (!defined('ABSPATH')) exit;
 
 
+use Automattic\WooCommerce\Blocks\BlockTypesController as WooCommerceBlockTypesController;
+use Automattic\WooCommerce\Blocks\Package as WooCommerceBlocksPackage;
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Initializer as WooCommerceBlocksInitializer;
+use MailPoet\EmailEditor\Integrations\MailPoet\EmailEditor;
+use MailPoet\Logging\LoggerFactory;
 use MailPoet\WP\Functions as WPFunctions;
 
 /**
- * Wires WooCommerce's email block renderers when WooCommerce registers the
- * blocks but leaves render_email_callback unset.
+ * Makes sure WooCommerce's product blocks are registered and wired to their
+ * email renderers before an email renders.
  *
  * WooCommerce sets render_email_callback through the block_type_metadata_settings
  * filter while blocks register. On some builds the product blocks are registered
@@ -34,10 +38,14 @@ class ProductCollectionEmailRendererRegistrar {
 
   private WPFunctions $wp;
 
+  private LoggerFactory $loggerFactory;
+
   public function __construct(
-    WPFunctions $wp
+    WPFunctions $wp,
+    LoggerFactory $loggerFactory
   ) {
     $this->wp = $wp;
+    $this->loggerFactory = $loggerFactory;
   }
 
   public function init(): void {
@@ -58,6 +66,8 @@ class ProductCollectionEmailRendererRegistrar {
       return;
     }
 
+    $this->registerWooCommerceBlocksIfSkipped();
+
     $renderEmailCallbackProperty = 'render_email_callback';
     $registry = \WP_Block_Type_Registry::get_instance();
     foreach (self::PRODUCT_BLOCK_NAMES as $blockName) {
@@ -73,6 +83,68 @@ class ProductCollectionEmailRendererRegistrar {
 
       // @phpstan-ignore-next-line -- WooCommerce email editor reads this dynamic block setting.
       $blockType->{$renderEmailCallbackProperty} = [$renderer, 'render_block'];
+    }
+  }
+
+  /**
+   * WooCommerce 11.1+ skips registering its blocks on cron and AJAX requests,
+   * which is where MailPoet sends emails from, so register them on demand. Only
+   * MailPoet emails are covered: WooCommerce's own emails also fire
+   * woocommerce_email_editor_render_start, for example during checkout, and are
+   * left to WooCommerce.
+   */
+  private function registerWooCommerceBlocksIfSkipped(): void {
+    if (\WP_Block_Type_Registry::get_instance()->is_registered('woocommerce/product-collection')) {
+      return;
+    }
+    if (!$this->isRenderingMailPoetEmail()) {
+      return;
+    }
+    if (!class_exists(WooCommerceBlocksPackage::class) || !class_exists(WooCommerceBlockTypesController::class)) {
+      return;
+    }
+
+    try {
+      $blockTypesController = WooCommerceBlocksPackage::container()->get(WooCommerceBlockTypesController::class);
+    } catch (\Throwable $e) {
+      return;
+    }
+    if (!$blockTypesController instanceof WooCommerceBlockTypesController) {
+      return;
+    }
+
+    // WC 11.1+ skips block registration in some requests (e.g. cron), so register them when they have not run.
+    if ($blockTypesController->register_blocks_has_run()) {
+      return;
+    }
+
+    $this->registerWooCommerceBlocks($blockTypesController);
+  }
+
+  /**
+   * The email editor sets $post to the email it renders before firing
+   * woocommerce_email_editor_render_start.
+   */
+  private function isRenderingMailPoetEmail(): bool {
+    global $post;
+    return $post instanceof \WP_Post && $post->post_type === EmailEditor::MAILPOET_EMAIL_POST_TYPE; // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
+  }
+
+  private function registerWooCommerceBlocks(WooCommerceBlockTypesController $blockTypesController): void {
+    // The controller's constructor adds this filter. When the controller is created during an
+    // email render, the filter runs after the email renderer's filter and adds every block
+    // attribute to the sent email as a data-* attribute.
+    $this->wp->removeFilter('render_block', [$blockTypesController, 'add_data_attributes']);
+
+    // Registration runs third-party hooks. The sending worker only catches \Exception, so an
+    // \Error thrown there would leave the sending task stuck.
+    try {
+      $blockTypesController->register_blocks();
+    } catch (\Throwable $e) {
+      $this->loggerFactory->getLogger(LoggerFactory::TOPIC_EMAIL_EDITOR)->error(
+        'Registering WooCommerce blocks for email rendering failed: ' . $e->getMessage(),
+        ['message' => $e->getMessage()]
+      );
     }
   }
 

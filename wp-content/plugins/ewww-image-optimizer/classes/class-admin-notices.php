@@ -332,10 +332,10 @@ final class Admin_Notices extends Base {
 			return;
 		}
 		// Increase the version when the next bump is coming.
-		if ( ! \defined( 'PHP_VERSION_ID' ) || PHP_VERSION_ID >= 70400 ) {
+		if ( ! \defined( 'PHP_VERSION_ID' ) || PHP_VERSION_ID >= 80200 ) {
 			return;
 		}
-		echo '<div id="ewww-image-optimizer-notice-php" class="notice notice-info"><p><a href="https://docs.ewww.io/article/55-upgrading-php" target="_blank" data-beacon-article="5ab2baa6042863478ea7c2ae">' . esc_html__( 'The next release of EWWW Image Optimizer will require PHP 8.1 or greater. Newer versions of PHP are significantly faster and much more secure. If you are unsure how to upgrade to a supported version, ask your webhost for instructions.', 'ewww-image-optimizer' ) . '</a></p></div>';
+		echo '<div id="ewww-image-optimizer-notice-php" class="notice notice-info"><p><a href="https://docs.ewww.io/article/55-upgrading-php" target="_blank" data-beacon-article="5ab2baa6042863478ea7c2ae">' . esc_html__( 'The next release of EWWW Image Optimizer will require PHP 8.2 or greater. Newer versions of PHP are significantly faster and much more secure. If you are unsure how to upgrade to a supported version, please ask your webhost for instructions.', 'ewww-image-optimizer' ) . '</a></p></div>';
 	}
 
 	/**
@@ -786,7 +786,7 @@ final class Admin_Notices extends Base {
 		if ( ! empty( $missing ) && 'quiet' !== $quiet ) {
 			if ( ! \is_dir( $this->content_dir ) ) {
 				$this->tool_folder_notice();
-			} elseif ( ! \is_writable( $this->content_dir ) || ! is_readable( $this->content_dir ) ) {
+			} elseif ( ! $this->is_writable( $this->content_dir ) || ! $this->is_readable( $this->content_dir ) ) {
 				$this->tool_folder_permissions_notice();
 			} elseif ( ! \is_executable( $this->content_dir ) && PHP_OS !== 'WINNT' ) {
 				$this->tool_folder_permissions_notice();
@@ -885,9 +885,9 @@ final class Admin_Notices extends Base {
 			<?php $this->display_exec_dismiss_script(); ?>
 		<?php elseif ( \ewwwio()->local->tools_missing ) : ?>
 			<?php
-			if ( ! \is_dir( \EWWW_IMAGE_OPTIMIZER_TOOL_PATH ) ) {
+			if ( ! $this->is_dir( \EWWW_IMAGE_OPTIMIZER_TOOL_PATH ) ) {
 				$this->tool_folder_notice();
-			} elseif ( ! is_writable( \EWWW_IMAGE_OPTIMIZER_TOOL_PATH ) || ! \is_readable( \EWWW_IMAGE_OPTIMIZER_TOOL_PATH ) ) {
+			} elseif ( ! $this->is_writable( \EWWW_IMAGE_OPTIMIZER_TOOL_PATH ) || ! $this->is_readable( \EWWW_IMAGE_OPTIMIZER_TOOL_PATH ) ) {
 				$this->tool_folder_permissions_notice();
 			} elseif ( ! \is_executable( \EWWW_IMAGE_OPTIMIZER_TOOL_PATH ) && \PHP_OS !== 'WINNT' ) {
 				$this->tool_folder_permissions_notice();

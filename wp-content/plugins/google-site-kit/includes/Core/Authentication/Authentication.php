@@ -19,6 +19,7 @@ use Google\Site_Kit\Core\Storage\Encrypted_Options;
 use Google\Site_Kit\Core\Storage\Options;
 use Google\Site_Kit\Core\Storage\User_Options;
 use Google\Site_Kit\Core\Storage\Transients;
+use Google\Site_Kit\Core\Admin\Dashboard_Widget_Enabled;
 use Google\Site_Kit\Core\Admin\Notice;
 use Google\Site_Kit\Core\Util\Method_Proxy_Trait;
 use Google\Site_Kit\Core\Authentication\Google_Proxy;
@@ -28,6 +29,7 @@ use Google\Site_Kit\Core\Modules\Modules;
 use Google\Site_Kit\Core\Util\BC_Functions;
 use Google\Site_Kit\Core\Util\URL;
 use Google\Site_Kit\Core\Util\Auto_Updates;
+use Google\Site_Kit\Core\Util\Plugin_Update;
 use Google\Site_Kit\Core\Authentication\REST_Authentication_Controller;
 use Google\Site_Kit\Core\Tracking\Feature_Metrics_Trait;
 use Google\Site_Kit\Core\Tracking\Provides_Feature_Metrics;
@@ -74,7 +76,7 @@ final class Authentication implements Provides_Feature_Metrics {
 	private $user_options = null;
 
 	/**
-	 * User_Input
+	 * User_Input.
 	 *
 	 * @since 1.90.0
 	 *
@@ -221,9 +223,18 @@ final class Authentication implements Provides_Feature_Metrics {
 	protected $rest_authentication_controller;
 
 	/**
+	 * Dashboard_Widget_Enabled instance.
+	 *
+	 * @since 1.192.0
+	 * @var Dashboard_Widget_Enabled
+	 */
+	private $dashboard_widget_enabled;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.0.0
+	 * @since 1.192.0 Added Dashboard_Widget_Enabled instance.
 	 *
 	 * @param Context      $context      Plugin context.
 	 * @param Options      $options      Optional. Option API instance. Default is a new instance.
@@ -257,12 +268,15 @@ final class Authentication implements Provides_Feature_Metrics {
 		$this->disconnected_reason            = new Disconnected_Reason( $this->user_options );
 		$this->initial_version                = new Initial_Version( $this->user_options );
 		$this->rest_authentication_controller = new REST_Authentication_Controller( $this );
+		$this->dashboard_widget_enabled       = new Dashboard_Widget_Enabled( $this->options );
 	}
 
 	/**
 	 * Registers functionality through WordPress hooks.
 	 *
 	 * @since 1.0.0
+	 * @since 1.191.0 Skips syncing site fields when the site URL differs from the connected URL.
+	 * @since 1.192.0 Syncs site fields again when the plugin version is written, always without scopes.
 	 */
 	public function register() {
 		$this->credentials()->register();
@@ -340,8 +354,17 @@ final class Authentication implements Provides_Feature_Metrics {
 				// This method should run no more than once per request.
 				$this->did_sync_fields = true;
 
+				// Don't sync from a site whose URL differs from the one it connected with, such as a copy of the site.
+				$connected_url = $this->connected_proxy_url->get();
+				if ( $connected_url && ! $this->connected_proxy_url->matches_url( $this->context->get_canonical_home_url() ) ) {
+					return;
+				}
+
 				if ( $this->credentials->using_proxy() ) {
-					$this->google_proxy->sync_site_fields( $this->credentials() );
+					// Sync without scopes. Site Kit's service treats a site fields sync without scopes as
+					// unattended and doesn't let it change the site's URL, so a fresh proxy instance is used
+					// rather than the shared one that setup adds scopes to.
+					( new Google_Proxy( $this->context ) )->sync_site_fields( $this->credentials() );
 				}
 			};
 			add_action( 'shutdown', $sync_site_fields );
@@ -349,6 +372,10 @@ final class Authentication implements Provides_Feature_Metrics {
 
 		add_action( 'update_option_blogname', $option_updated );
 		add_action( 'update_option_googlesitekit_db_version', $option_updated );
+		// WordPress fires `add_option_` the first time an option is saved and `update_option_` after
+		// that. Both are needed, otherwise the first release that saves the version would not sync.
+		add_action( 'add_option_' . Plugin_Update::VERSION_OPTION, $option_updated );
+		add_action( 'update_option_' . Plugin_Update::VERSION_OPTION, $option_updated );
 
 		add_action(
 			OAuth_Client::CRON_REFRESH_PROFILE_DATA,
@@ -641,6 +668,7 @@ final class Authentication implements Provides_Feature_Metrics {
 	 *
 	 * @since 1.42.0
 	 * @since 1.70.0 Moved the closure within regiser() to this method.
+	 * @since 1.192.0 Skips the WordPress dashboard screen when the WordPress dashboard widget is disabled.
 	 *
 	 * @param string $screen_id The unique ID of the current WP_Screen.
 	 *
@@ -648,6 +676,10 @@ final class Authentication implements Provides_Feature_Metrics {
 	 */
 	private function maybe_refresh_token_for_screen( $screen_id ) {
 		if ( 'dashboard' !== $screen_id && 'toplevel_page_googlesitekit-dashboard' !== $screen_id ) {
+			return;
+		}
+
+		if ( 'dashboard' === $screen_id && ! $this->dashboard_widget_enabled->should_display() ) {
 			return;
 		}
 
@@ -827,6 +859,7 @@ final class Authentication implements Provides_Feature_Metrics {
 	 * Modifies the base data to pass to JS.
 	 *
 	 * @since 1.2.0
+	 * @since 1.191.0 Redoes setup from the site after a proxy access code.
 	 *
 	 * @param array $data Inline JS data.
 	 * @return array Filtered $data.
@@ -862,21 +895,11 @@ final class Authentication implements Provides_Feature_Metrics {
 				$data['setupErrorCode']    = $error_code;
 				$data['setupErrorMessage'] = $auth_client->get_error_message( $error_code );
 
-				// Get credentials needed to authenticate with the proxy
-				// so we can build a new setup URL.
-				$credentials = $this->credentials->get();
-
 				$access_code = $this->user_options->get( OAuth_Client::OPTION_PROXY_ACCESS_CODE );
 
-				// Both the access code and site ID are needed to generate
-				// a setup URL.
-				if ( $access_code && ! empty( $credentials['oauth2_client_id'] ) ) {
-					$setup_url = $this->google_proxy->setup_url(
-						array(
-							'code'    => $access_code,
-							'site_id' => $credentials['oauth2_client_id'],
-						)
-					);
+				// Not resumed with the access code: the proxy session it names has no nonce for the site to check.
+				if ( $access_code ) {
+					$setup_url = $data['proxySetupURL'];
 
 					$this->user_options->delete( OAuth_Client::OPTION_PROXY_ACCESS_CODE );
 				} elseif ( $this->is_authenticated() ) {
@@ -998,7 +1021,7 @@ final class Authentication implements Provides_Feature_Metrics {
 	}
 
 	/**
-	 * Add allowed redirect host to safe wp_safe_redirect
+	 * Add allowed redirect host to safe wp_safe_redirect.
 	 *
 	 * @since 1.0.0
 	 *
@@ -1079,7 +1102,11 @@ final class Authentication implements Provides_Feature_Metrics {
 
 					// Only show the comparison if URLs don't match as it is possible
 					// they could already match again at this point, although they most likely won't.
-					if ( ! $this->connected_proxy_url->matches_url( $current_url ) ) {
+					// A stored value the plugin can't decode reads as no URL.
+					// Ensure the currently-connected URL isn't empty;
+					// if it is, we shouldn't output the old/new URLs, because the
+					// old URL will be blank.
+					if ( ! empty( $connected_url ) && ! $this->connected_proxy_url->matches_url( $current_url ) ) {
 						$content .= sprintf(
 							'<ul><li>%s</li><li>%s</li></ul>',
 							sprintf(
@@ -1133,7 +1160,7 @@ final class Authentication implements Provides_Feature_Metrics {
 						?>
 						<a
 							href="#"
-							onclick="reauthenticateAndContinueSetup()"
+							onclick="event.preventDefault(); reauthenticateAndContinueSetup();"
 						><?php esc_html_e( 'Click here', 'google-site-kit' ); ?></a>
 					</p>
 					<?php
@@ -1141,11 +1168,32 @@ final class Authentication implements Provides_Feature_Metrics {
 						sprintf(
 							"
 							function reauthenticateAndContinueSetup() {
-								const moduleSlug = getAbandonedModuleSlug();
+								const moduleSetup = getAbandonedModuleSetup();
 
-								if ( moduleSlug ) {
-									const redirect = '%3\$s&slug=' + moduleSlug;
-									document.location = '%2\$s&redirect=' + encodeURIComponent( redirect );
+								if ( moduleSetup?.slug ) {
+									const {
+										additionalScopes = [],
+										redirectQueryArgs = {},
+									} = moduleSetup.options || {};
+
+									const redirect = new URL( '%3\$s' );
+									redirect.searchParams.set( 'slug', moduleSetup.slug );
+									Object.entries( redirectQueryArgs ).forEach( ( [ key, value ] ) =>
+										redirect.searchParams.set( key, value )
+									);
+
+									const connect = new URL( '%2\$s' );
+									connect.searchParams.set( 'redirect', redirect.toString() );
+									// Rewrite the scheme as getConnectURL does, to avoid host security
+									// filters that block query parameters beginning with a URL.
+									additionalScopes.forEach( ( scope ) =>
+										connect.searchParams.append(
+											'additional_scopes[]',
+											scope.replace( /^http(s)?:/, 'gttp\$1:' )
+										)
+									);
+
+									document.location = connect.toString();
 								} else {
 									if ( localStorage ) {
 										localStorage.clear();
@@ -1157,7 +1205,7 @@ final class Authentication implements Provides_Feature_Metrics {
 								}
 							}
 
-							function getAbandonedModuleSlug() {
+							function getAbandonedModuleSetup() {
 								for ( const storage of [ localStorage, sessionStorage ] ) {
 									if ( ! storage ) {
 										continue;
@@ -1258,17 +1306,24 @@ final class Authentication implements Provides_Feature_Metrics {
 	 * Gets the publicly visible URL to set up the plugin with the authentication proxy.
 	 *
 	 * @since 1.17.0
+	 * @since 1.190.0 Added the `purpose=intent` argument when the current request has it.
+	 * @since 1.191.0 Made public.
 	 *
 	 * @return string An URL for googlesitekit_proxy_connect_user action protected with a nonce.
 	 */
-	private function get_proxy_setup_url() {
-		return add_query_arg(
-			array(
-				'action' => Google_Proxy::ACTION_SETUP_START,
-				'nonce'  => wp_create_nonce( Google_Proxy::ACTION_SETUP_START ),
-			),
-			admin_url( 'index.php' )
+	public function get_proxy_setup_url() {
+		$query_args = array(
+			'action' => Google_Proxy::ACTION_SETUP_START,
+			'nonce'  => wp_create_nonce( Google_Proxy::ACTION_SETUP_START ),
 		);
+
+		// The setup mode is resolved on the setup-start request, which does not have
+		// the splash screen's query arguments.
+		if ( Google_Proxy::PURPOSE_INTENT === $this->context->input()->filter( INPUT_GET, Google_Proxy::PARAM_PURPOSE ) ) {
+			$query_args[ Google_Proxy::PARAM_PURPOSE ] = Google_Proxy::PURPOSE_INTENT;
+		}
+
+		return add_query_arg( $query_args, admin_url( 'index.php' ) );
 	}
 
 	/**

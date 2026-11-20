@@ -339,7 +339,7 @@ class ExportSlider {
             'replaceHTMLImageHrefLightbox'
         ), $sliderHTML);
 
-        $headHTML = preg_replace_callback('/"([^"]*?\.(jpg|png|gif|jpeg|webp|svg|mp4))"/i', array(
+        $headHTML = preg_replace_callback('/"([^"]*?\.(jpg|png|gif|jpeg|webp|avif|svg|mp4))"/i', array(
             $this,
             'replaceJSON'
         ), $headHTML);

@@ -329,6 +329,9 @@ class Base extends Root {
 	 * @var string[]
 	 */
 	protected static $single_site_options = [
+		self::HASH,
+		self::O_CACHE_EXC_CAT,
+		self::O_CACHE_EXC_TAG,
 		self::O_CRAWLER,
 		self::O_CRAWLER_SITEMAP,
 		self::O_CDN,
@@ -663,8 +666,8 @@ class Base extends Root {
 			return self::get_option( $id, $default_v );
 		}
 
-		// Preload all options for this blog if not cached.
-		if ( ! isset( self::$_blog_options_cache[ $blog_id ] ) ) {
+		// Reload if a third-party option was registered after this blog's preload.
+		if ( ! isset( self::$_blog_options_cache[ $blog_id ] ) || ! array_key_exists( $id, self::$_blog_options_cache[ $blog_id ] ) ) {
 			self::_preload_blog_options( $blog_id );
 		}
 
@@ -729,6 +732,19 @@ class Base extends Root {
 			// from textarea input
 			if ( ! is_array( $val ) ) {
 				$val = Utility::sanitize_lines( $val, $this->_conf_filter( $id ) );
+			}
+			if ( self::O_CDN_MAPPING === $id ) {
+				foreach ( $val as &$row ) {
+					if ( ! is_array( $row ) ) {
+						continue;
+					}
+					foreach ( [ self::CDN_MAPPING_INC_IMG, self::CDN_MAPPING_INC_CSS, self::CDN_MAPPING_INC_JS ] as $toggle ) {
+						if ( array_key_exists( $toggle, $row ) ) {
+							$row[ $toggle ] = 'false' === $row[ $toggle ] ? false : (bool) $row[ $toggle ];
+						}
+					}
+				}
+				unset( $row );
 			}
 		} elseif ( ! is_string( $default_v ) ) {
 			$val = (int) $val;
@@ -946,8 +962,9 @@ class Base extends Root {
 			self::O_OPTM_CCSS_SEP_URI => 'uri',
 			// self::O_OPTM_JS_DEFER_EXC    => 'uri',
 			self::O_OPTM_DNS_PREFETCH => 'domain',
+			self::O_OPTM_DNS_PRECONNECT => 'domain',
 			self::O_CDN_ORI => 'noprotocol,trailingslash', // `Original URLs`
-			// self::O_OPTM_LOCALIZE_DOMAINS    => 'noprotocol', // `Localize Resources`
+			self::O_OPTM_LOCALIZE_DOMAINS => 'urlchars',
 			// self::   => '',
 			// self::   => '',
 		];
@@ -1007,6 +1024,17 @@ class Base extends Root {
 		$check_ids = [ self::O_CDN_CLOUDFLARE_KEY, self::O_OBJECT_PSWD ];
 
 		return in_array( $id, $check_ids, true );
+	}
+
+	/**
+	 * If the setting is a credential that must never leave the site in a backup.
+	 *
+	 * @since 7.9.2
+	 * @param string $id Option ID.
+	 * @return bool
+	 */
+	protected function _conf_secret( $id ) {
+		return $this->_conf_pswd( $id ) || in_array( $id, [ self::HASH, self::O_API_KEY, self::O_CDN_CLOUDFLARE_EMAIL, self::O_OBJECT_USER, self::O_CRAWLER_COOKIES ], true );
 	}
 
 	/**
@@ -1080,7 +1108,7 @@ class Base extends Root {
 	 *
 	 * Shared by UCSS, CSS, and Optimax classes.
 	 *
-	 * @since 8.0
+	 * @since 7.8
 	 *
 	 * @param string $type      CSS type ('ucss' or 'ccss').
 	 * @param string $css       CSS content.
@@ -1089,14 +1117,14 @@ class Base extends Root {
 	 * @param string $queue_k   Queue key (for filter and purge tag).
 	 * @param bool   $is_mobile Whether is mobile.
 	 * @param bool   $is_webp   Whether supports webp.
-	 * @return void
+	 * @return bool
 	 */
 	protected function _save_css_con( $type, $css, $url_tag, $vary, $queue_k, $is_mobile, $is_webp ) {
 		$css = apply_filters( 'litespeed_' . $type, $css, $queue_k );
 		// Font optimize
 		$css = $this->cls('Optimizer')->optm_font_face( $css );
-		// Sanitize: CSS must not contain HTML tags
-		$css = wp_strip_all_tags( $css );
+		// Preserve CSS syntax; style-element terminators are escaped at inline sinks.
+		$css = File::remove_zero_space( $css );
 		self::debug2( 'con: ', $css );
 
 		if ( '/*' === substr( $css, 0, 2 ) && '*/' === substr( $css, -2 ) ) {
@@ -1107,11 +1135,18 @@ class Base extends Root {
 		$filepath_prefix = $this->_build_filepath_prefix( $type );
 		$static_file     = LITESPEED_STATIC_DIR . $filepath_prefix . $filecon_md5 . '.css';
 
-		File::save( $static_file, $css, true );
+		if ( ! File::save_atomic( $static_file, $css ) ) {
+			return false;
+		}
 		self::debug2( "Save URL to file [file] $static_file [vary] $vary" );
 
-		$this->cls( 'Data' )->save_url( $url_tag, $vary, $type, $filecon_md5, dirname( $static_file ), $is_mobile, $is_webp );
+		$data = $this->cls( 'Data' );
+		$data->save_url( $url_tag, $vary, $type, $filecon_md5, dirname( $static_file ), $is_mobile, $is_webp );
+		if ( $filecon_md5 !== $data->load_url_file( $url_tag, $vary, $type ) ) {
+			return false;
+		}
 
 		Purge::add( strtoupper( $type ) . '.' . md5( $queue_k ) );
+		return true;
 	}
 }

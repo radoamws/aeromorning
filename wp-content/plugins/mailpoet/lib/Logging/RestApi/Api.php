@@ -8,6 +8,7 @@ if (!defined('ABSPATH')) exit;
 use MailPoet\API\REST\API as RestApi;
 use MailPoet\Logging\RestApi\Endpoints\LogsDeleteEndpoint;
 use MailPoet\Logging\RestApi\Endpoints\LogsListingEndpoint;
+use MailPoet\Logging\RestApi\Endpoints\LogsNamesEndpoint;
 use MailPoet\WP\Functions as WPFunctions;
 
 class Api {
@@ -28,6 +29,7 @@ class Api {
   public function initialize(): void {
     $this->wp->addAction(RestApi::REST_API_INIT_ACTION, function (): void {
       $this->api->registerGetRoute('logs', LogsListingEndpoint::class);
+      $this->api->registerGetRoute('logs/names', LogsNamesEndpoint::class);
       $this->api->registerPostRoute('logs/delete', LogsDeleteEndpoint::class);
     });
   }

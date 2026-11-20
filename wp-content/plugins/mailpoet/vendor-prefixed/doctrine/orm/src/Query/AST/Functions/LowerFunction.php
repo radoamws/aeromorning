@@ -9,16 +9,16 @@ use MailPoetVendor\Doctrine\ORM\Query\TokenType;
 use function sprintf;
 class LowerFunction extends FunctionNode
 {
- public $stringPrimary;
- public function getSql(SqlWalker $sqlWalker)
- {
- return sprintf('LOWER(%s)', $sqlWalker->walkSimpleArithmeticExpression($this->stringPrimary));
- }
- public function parse(Parser $parser)
- {
- $parser->match(TokenType::T_IDENTIFIER);
- $parser->match(TokenType::T_OPEN_PARENTHESIS);
- $this->stringPrimary = $parser->StringPrimary();
- $parser->match(TokenType::T_CLOSE_PARENTHESIS);
- }
+public $stringPrimary;
+public function getSql(SqlWalker $sqlWalker)
+{
+return sprintf('LOWER(%s)', $sqlWalker->walkSimpleArithmeticExpression($this->stringPrimary));
+}
+public function parse(Parser $parser)
+{
+$parser->match(TokenType::T_IDENTIFIER);
+$parser->match(TokenType::T_OPEN_PARENTHESIS);
+$this->stringPrimary = $parser->StringPrimary();
+$parser->match(TokenType::T_CLOSE_PARENTHESIS);
+}
 }

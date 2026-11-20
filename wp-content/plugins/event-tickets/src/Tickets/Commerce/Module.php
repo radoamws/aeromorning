@@ -1,4 +1,11 @@
 <?php
+/**
+ * Tickets Commerce Module.
+ *
+ * @since 5.1.9
+ *
+ * @package TEC\Tickets\Commerce
+ */
 
 namespace TEC\Tickets\Commerce;
 
@@ -7,7 +14,8 @@ use WP_Error;
 use TEC\Tickets\Commerce;
 use Tribe__Utils__Array as Arr;
 use TEC\Tickets\Commerce\Communication\Email as Email_Communication;
-use TEC\Tickets\Commerce\Reports\Attendees as Attendees_Reports;
+use TEC\Tickets\Commerce\Emails\RSVP_Email_Sender;
+use TEC\Tickets\RSVP\V2\Constants as RSVP_V2_Constants;
 
 /**
  * Class Tickets Provider class for Tickets Commerce
@@ -57,6 +65,8 @@ class Module extends \Tribe__Tickets__Tickets {
 
 	/**
 	 * {@inheritdoc}
+	 *
+	 * @var string
 	 */
 	public $orm_provider = \TEC\Tickets\Commerce::PROVIDER;
 
@@ -252,7 +262,7 @@ class Module extends \Tribe__Tickets__Tickets {
 	 * @since 5.1.9
 	 */
 	public function hooks() {
-		// if the hooks have already been bound, don't do it again
+		// If the hooks have already been bound, don't do it again.
 		if ( $this->is_loaded ) {
 			return false;
 		}
@@ -263,9 +273,9 @@ class Module extends \Tribe__Tickets__Tickets {
 	 *
 	 * @since 5.1.9
 	 *
-	 * @param array       $attendees   List of attendees.
-	 * @param array       $args        {
-	 *                                 The list of arguments to use for sending ticket emails.
+	 * @param array $attendees   List of attendees.
+	 * @param array $args        {
+	 *                           The list of arguments to use for sending ticket emails.
 	 *
 	 * @type string       $subject     The email subject.
 	 * @type string       $content     The email content.
@@ -298,6 +308,7 @@ class Module extends \Tribe__Tickets__Tickets {
 	 * Shows the tickets form in the front end
 	 *
 	 * @since 5.1.9
+	 * @since 5.30.3 Shows the TC-RSVP when another provider sells the event's tickets.
 	 *
 	 * @param string $unused_content Unused content.
 	 *
@@ -306,7 +317,7 @@ class Module extends \Tribe__Tickets__Tickets {
 	public function front_end_tickets_form( $unused_content ) {
 
 		$post    = $GLOBALS['post'];
-		$tickets = $this->get_tickets( $post->ID );
+		$tickets = $this->get_tickets( $post->ID, RSVP_V2_Constants::FRONT_END_TICKETS_FORM_CONTEXT );
 
 		foreach ( $tickets as $index => $ticket ) {
 			if ( __CLASS__ !== $ticket->provider_class ) {
@@ -315,10 +326,59 @@ class Module extends \Tribe__Tickets__Tickets {
 		}
 
 		if ( empty( $tickets ) ) {
+			// Another provider sells this event's tickets: its TC-RSVP still shows, as a V1 RSVP did.
+			if ( $this->has_tc_rsvp( $post->ID ) ) {
+				tribe( Tickets_View::class )->get_rsvp_block( $post );
+			}
+
 			return;
 		}
 
-		tribe( Tickets_View::class )->get_tickets_block( $post->ID );
+		$tickets_view = tribe( Tickets_View::class );
+
+		$tickets_view->get_tickets_block( $post->ID );
+
+		// TC-RSVP tickets are rendered by the RSVP block: render it when RSVP tickets are present.
+		foreach ( $tickets as $ticket ) {
+			if ( RSVP_V2_Constants::TC_RSVP_TYPE === $ticket->type ) {
+				$tickets_view->get_rsvp_block( $post );
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Whether the post has Tickets Commerce tickets to show in its content.
+	 *
+	 * The TC-RSVP counts even when another provider sells the post's tickets.
+	 *
+	 * @since 5.30.3
+	 *
+	 * @param int $post_id The post ID.
+	 *
+	 * @return bool Whether the post has Tickets Commerce tickets to show in its content.
+	 */
+	protected function has_tickets_for_post_content( int $post_id ): bool {
+		return parent::has_tickets_for_post_content( $post_id ) || $this->has_tc_rsvp( $post_id );
+	}
+
+	/**
+	 * Whether the post has a TC-RSVP, whichever provider sells its tickets.
+	 *
+	 * @since 5.30.3
+	 *
+	 * @param int $post_id The post ID.
+	 *
+	 * @return bool Whether the post has a TC-RSVP.
+	 */
+	private function has_tc_rsvp( int $post_id ): bool {
+		foreach ( (array) $this->get_tickets_ids( $post_id, RSVP_V2_Constants::FRONT_END_TICKETS_FORM_CONTEXT ) as $ticket_id ) {
+			if ( RSVP_V2_Constants::TC_RSVP_TYPE === get_post_meta( $ticket_id, '_type', true ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -330,7 +390,7 @@ class Module extends \Tribe__Tickets__Tickets {
 	 * @return bool
 	 */
 	public function login_required() {
-		$requirements = (array) tribe_get_option( 'ticket-authentication-requirements', array() );
+		$requirements = (array) tribe_get_option( 'ticket-authentication-requirements', [] );
 
 		return in_array( 'event-tickets_all', $requirements, true );
 	}
@@ -347,6 +407,10 @@ class Module extends \Tribe__Tickets__Tickets {
 	 * @return array|mixed
 	 */
 	public function get_attendees_by_id( $post_id, $post_type = null ) {
+		if ( ! tec_tickets_commerce_is_enabled() ) {
+			return [];
+		}
+
 		if ( ! $post_type ) {
 			$post_type = get_post_type( $post_id );
 		}
@@ -361,7 +425,6 @@ class Module extends \Tribe__Tickets__Tickets {
 			default:
 				return $this->get_attendees_by_post_id( $post_id );
 		}
-
 	}
 
 	/**
@@ -371,8 +434,7 @@ class Module extends \Tribe__Tickets__Tickets {
 	 *
 	 * @since 5.2.0
 	 *
-	 * @param int|string $order_id  Order ID.
-	 * @param null|int   $ticket_id (optional) Ticket ID.
+	 * @param int|string $order_id Order ID.
 	 *
 	 * @return array List of attendees.
 	 */
@@ -484,12 +546,23 @@ class Module extends \Tribe__Tickets__Tickets {
 	 * order creation, cause the inventory to be decreased.
 	 *
 	 * @since 5.1.9
+	 * @since 5.30.0 Attendees marked with a `ticket_type` of RSVP are excluded from inventory
+	 *            decrease based on their RSVP status.
 	 *
-	 * @param array $attendee The attendee.
+	 * @param array $attendee The attendee. May include a `ticket_type` key.
 	 *
 	 * @return bool
 	 */
 	public function attendee_decreases_inventory( array $attendee ) {
+		$type = $attendee['ticket_type'] ?? 'default';
+
+		if ( $type === RSVP_V2_Constants::TC_RSVP_TYPE ) {
+			$meta_exists = metadata_exists( 'post', $attendee['ID'], RSVP_V2_Constants::RSVP_STATUS_META_KEY );
+			if ( $meta_exists && ! tribe_is_truthy( get_post_meta( $attendee['ID'], RSVP_V2_Constants::RSVP_STATUS_META_KEY, true ) ) ) {
+				return false;
+			}
+		}
+
 		return tribe( Attendee::class )->decreases_inventory( $attendee );
 	}
 
@@ -497,6 +570,10 @@ class Module extends \Tribe__Tickets__Tickets {
 	 * {@inheritdoc}
 	 */
 	public function get_attendee( $attendee, $post_id = 0 ) {
+		if ( ! tec_tickets_commerce_is_enabled() ) {
+			return false;
+		}
+
 		return tec_tc_get_attendee( $attendee, ARRAY_A );
 	}
 
@@ -505,8 +582,7 @@ class Module extends \Tribe__Tickets__Tickets {
 	 *
 	 * @since 5.1.9
 	 *
-	 *
-	 * @param string|int $order_id
+	 * @param string|int $order_id The order ID.
 	 *
 	 * @return array
 	 */
@@ -569,8 +645,8 @@ class Module extends \Tribe__Tickets__Tickets {
 	 * @since 5.1.9
 	 * @since 5.6.7 Set some provider-invariant ticket properties.
 	 *
-	 * @param int|WP_post $post_id
-	 * @param int|WP_post $ticket_id
+	 * @param int|WP_post $post_id   The post ID.
+	 * @param int|WP_post $ticket_id The ticket ID.
 	 *
 	 * @return null|\Tribe__Tickets__Ticket_Object
 	 */
@@ -716,8 +792,8 @@ class Module extends \Tribe__Tickets__Tickets {
 		$extra              = [];
 		$extra['attendees'] = [
 			1 => [
-				'meta' => Arr::get( $attendee_data, 'attendee_meta', [] )
-			]
+				'meta' => Arr::get( $attendee_data, 'attendee_meta', [] ),
+			],
 		];
 		$extra['optout']    = ! Arr::get( $attendee_data, 'send_ticket_email', true );
 		$extra['iac']       = false;
@@ -728,7 +804,7 @@ class Module extends \Tribe__Tickets__Tickets {
 				'ticket_id' => $ticket->ID,
 				'quantity'  => 1,
 				'extra'     => $extra,
-			]
+			],
 		];
 
 		$purchaser = [
@@ -757,9 +833,7 @@ class Module extends \Tribe__Tickets__Tickets {
 			return $updated;
 		}
 
-		$attendee = tec_tc_attendees()->by( 'order_id', $order->ID )->first();
-
-		return $attendee;
+		return tec_tc_attendees()->by( 'order_id', $order->ID )->first();
 	}
 
 	/**
@@ -811,12 +885,14 @@ class Module extends \Tribe__Tickets__Tickets {
 
 			$attendee->save();
 
+			$this->maybe_update_rsvp_status( $attendee_id, $attendee_data );
+
 			// Send attendee email.
 			$send_ticket_email      = (bool) Arr::get( $attendee_data, 'send_ticket_email', false );
 			$send_ticket_email_args = (array) Arr::get( $attendee_data, 'send_ticket_email_args', [] );
 
 			// Check if we need to send the ticket email.
-			if ( $send_ticket_email ) {
+			if ( $send_ticket_email && ! $this->maybe_send_rsvp_email( $attendee_id ) ) {
 				$attendee_tickets = [
 					$attendee_id,
 				];
@@ -831,6 +907,80 @@ class Module extends \Tribe__Tickets__Tickets {
 		}
 
 		return $attendee;
+	}
+
+	/**
+	 * Persists a Going / Not Going answer supplied alongside an Attendee update.
+	 *
+	 * The RSVP status lives in its own meta rather than in an Attendee field, so it is not covered by the
+	 * field updates above. Callers that offer the answer, such as the Attendees screen's "Edit Attendee"
+	 * modal, supply it as `attendee_status`. Without this the update reports success while the answer
+	 * silently stays as it was.
+	 *
+	 * @since 5.30.0
+	 *
+	 * @param int                 $attendee_id   The Attendee being updated.
+	 * @param array<string,mixed> $attendee_data The submitted Attendee data.
+	 *
+	 * @return void
+	 */
+	protected function maybe_update_rsvp_status( int $attendee_id, array $attendee_data ): void {
+		$status = $attendee_data['attendee_status'] ?? null;
+
+		if ( null === $status || '' === $status ) {
+			return;
+		}
+
+		$ticket_id = (int) get_post_meta( $attendee_id, Attendee::$ticket_relation_meta_key, true );
+
+		if ( ! $ticket_id || RSVP_V2_Constants::TC_RSVP_TYPE !== get_post_meta( $ticket_id, '_type', true ) ) {
+			return;
+		}
+
+		update_post_meta(
+			$attendee_id,
+			RSVP_V2_Constants::RSVP_STATUS_META_KEY,
+			tribe_is_truthy( $status ) ? 'yes' : 'no'
+		);
+	}
+
+	/**
+	 * Sends the RSVP confirmation matching an Attendee's current answer, in place of the ticket email.
+	 *
+	 * An RSVP has no ticket to hand over, so the generic ticket email is the wrong thing to send: it
+	 * carries a QR code, and it says the same thing whether the person is coming or not. This sends the
+	 * Going or Not Going email instead, chosen from the answer stored on the Attendee.
+	 *
+	 * @since 5.30.0
+	 *
+	 * @param int $attendee_id The Attendee to email.
+	 *
+	 * @return bool Whether this Attendee was handled as an RSVP, and so the ticket email should be skipped.
+	 */
+	protected function maybe_send_rsvp_email( int $attendee_id ): bool {
+		$ticket_id = (int) get_post_meta( $attendee_id, Attendee::$ticket_relation_meta_key, true );
+
+		if ( ! $ticket_id || RSVP_V2_Constants::TC_RSVP_TYPE !== get_post_meta( $ticket_id, '_type', true ) ) {
+			return false;
+		}
+
+		$attendee = $this->get_attendee( $attendee_id );
+
+		if ( empty( $attendee ) ) {
+			// Still an RSVP, so the ticket email stays the wrong thing to fall back to.
+			return true;
+		}
+
+		$going = 'no' !== get_post_meta( $attendee_id, RSVP_V2_Constants::RSVP_STATUS_META_KEY, true );
+
+		tribe( RSVP_Email_Sender::class )->send_rsvp_email(
+			[ $attendee ],
+			(int) ( $attendee['event_id'] ?? 0 ),
+			(string) ( $attendee['holder_email'] ?? '' ),
+			$going
+		);
+
+		return true;
 	}
 
 	/**

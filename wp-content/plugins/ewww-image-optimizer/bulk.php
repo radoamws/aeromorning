@@ -248,7 +248,6 @@ function ewwwio_table_nav_controls( $location = 'top' ) {
 					);
 					?>
 				</div>
-
 				<a class="tablenav-pages-navspan button next-page disabled">&rsaquo;</a>
 				<a class="tablenav-pages-navspan button last-page disabled">&raquo;</a>
 			</div>
@@ -460,16 +459,19 @@ function ewww_image_optimizer_bulk_footer_output() {
 		$help_email   = $current_user->user_email;
 		$hs_debug     = '';
 		if ( ! empty( EWWW\Base::$debug_data ) ) {
-			$hs_debug = str_replace( array( "'", '<br>', '<b>', '</b>', '=>' ), array( "\'", '\n', '**', '**', '=' ), EWWW\Base::$debug_data );
+			$hs_debug = str_replace( array( "'", '<br>', '<b>', '</b>', '=>' ), array( "\'", "\n", '**', '**', '=' ), EWWW\Base::$debug_data );
 		}
+		$beacon_data = array(
+			'email' => $help_email,
+			'text'  => "\n\n---------------------------------------\nOrigin: Bulk Optimizer\n" . $hs_debug,
+		);
 		?>
 <script>!function(e,t,n){function a(){var e=t.getElementsByTagName("script")[0],n=t.createElement("script");n.type="text/javascript",n.async=!0,n.src="https://beacon-v2.helpscout.net",e.parentNode.insertBefore(n,e)}if(e.Beacon=n=function(t,n,a){e.Beacon.readyQueue.push({method:t,options:n,data:a})},n.readyQueue=[],"complete"===t.readyState)return a();e.attachEvent?e.attachEvent("onload",a):e.addEventListener("load",a,!1)}(window,document,window.Beacon||function(){});</script>
 <script>
 	window.Beacon('init', 'aa9c3d3b-d4bc-4e9b-b6cb-f11c9f69da87');
-	Beacon( 'prefill', {
-		email: '<?php echo esc_js( $help_email ); ?>',
-		text: '\n\n---------------------------------------\n<?php echo wp_kses_post( $hs_debug ); ?>',
-	});
+	Beacon( 'prefill',
+		<?php echo wp_json_encode( $beacon_data ); ?>
+	);
 </script>
 		<?php
 	}
@@ -1787,7 +1789,7 @@ function ewww_image_optimizer_media_scan( $hook = '' ) {
 				continue;
 			}
 
-			$should_resize = ewww_image_optimizer_should_resize( $file_path, true );
+			$should_resize = empty( $meta['ewww_noresize'] ) && ewww_image_optimizer_should_resize( $file_path, true );
 			if (
 				! empty( $attachments_meta[ $selected_id ]['tinypng'] ) &&
 				empty( ewwwio()->force ) &&
@@ -2492,7 +2494,7 @@ function ewww_image_optimizer_bulk_loop( $hook = '', $delay = 0 ) {
 		// See if the image needs fetching from a CDN.
 		if ( ! ewwwio_is_file( $image->file ) ) {
 			$meta      = wp_get_attachment_metadata( $image->attachment_id );
-			$file_path = ewww_image_optimizer_remote_fetch( $image->attachment_id, $meta );
+			$file_path = ewww_image_optimizer_remote_fetch( (int) $image->attachment_id, $meta );
 			// Nuke the meta, otherwise this will trigger unnecessary metadata updates,
 			// which should be reserved for conversion/resize operations on the full-size image only.
 			unset( $meta );
@@ -2521,7 +2523,9 @@ function ewww_image_optimizer_bulk_loop( $hook = '', $delay = 0 ) {
 			if ( empty( $meta ) || ! is_array( $meta ) ) {
 				$meta = wp_get_attachment_metadata( $image->attachment_id );
 			}
-			$new_dimensions = ewww_image_optimizer_resize_upload( $image->file );
+			if ( empty( $meta['ewww_noresize'] ) ) {
+				$new_dimensions = ewww_image_optimizer_resize_upload( $image->file );
+			}
 			if ( ! empty( $new_dimensions ) && is_array( $new_dimensions ) ) {
 				$meta['width']  = $new_dimensions[0];
 				$meta['height'] = $new_dimensions[1];

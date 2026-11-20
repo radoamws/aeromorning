@@ -231,6 +231,7 @@ class Tribe__Events__iCal {
 	 * Executes the iCal generator when the appropriate query_var or $_GET is set up.
 	 *
 	 * @since 3.6.0
+	 * @since 6.18.4.1 Deduplicate the requested event IDs and cap them at the feed size.
 	 */
 	public function do_ical_template() {
 		// Bail if a relevant query string is not included.
@@ -279,12 +280,15 @@ class Tribe__Events__iCal {
 		$event_ids = apply_filters( 'tribe_ical_template_event_ids', $event_ids );
 
 		if ( false !== $event_ids ) {
-			$event_ids = Arr::list_to_array( $event_ids );
+			$event_ids = array_unique( array_filter( array_map( 'absint', Arr::list_to_array( $event_ids ) ) ) );
 
 			// Exit if there are no events, or the feed will still generate.
 			if ( empty( $event_ids ) ) {
 				die();
 			}
+
+			// The request picks its own IDs, so hold it to the size of a feed built from a query.
+			$event_ids = array_slice( $event_ids, 0, $this->feed_posts_per_page() );
 
 			$events = array_map( 'tribe_get_event', $event_ids );
 			$this->generate_ical_feed( $events );
@@ -319,6 +323,7 @@ class Tribe__Events__iCal {
 	 * Checks access to an event, in the context for generating an iCal file.
 	 *
 	 * @since 6.1.3
+	 * @since 6.18.4.1 Deny any post that is not an event.
 	 *
 	 * @param numeric|WP_Post $post The post to evaluate our access to.
 	 *
@@ -327,6 +332,10 @@ class Tribe__Events__iCal {
 	public static function has_access_to_see_event_exists( $post ): bool {
 		$post = get_post( $post );
 		if ( ! $post instanceof WP_Post ) {
+			return false;
+		}
+		// Request IDs reach this check unfiltered, and other post types are not always public.
+		if ( Tribe__Events__Main::POSTTYPE !== $post->post_type ) {
 			return false;
 		}
 		// Most events.
@@ -827,6 +836,7 @@ class Tribe__Events__iCal {
 	 *
 	 * @since 5.1.6
 	 * @since 6.2.2   Sanitize organizer name using new method.
+	 * @since 6.18.3     Omit the venue location and organizer when the current user may not see them.
 	 *
 	 * @param \WP_Post             $event_post The event post object.
 	 * @param \Tribe__Events__Main $tec        An instance of the main TEC Class.
@@ -947,10 +957,12 @@ class Tribe__Events__iCal {
 		}
 
 		// Add organizer if available.
-		$organizer_email = tribe_get_organizer_email( $event_post->ID, false );
+		$organizer_id    = absint( tribe_get_organizer_id( $event_post->ID ) );
+		$organizer_email = ! $organizer_id || Tribe__Events__Linked_Posts::instance()->is_linked_post_visible( $organizer_id )
+			? tribe_get_organizer_email( $event_post->ID, false )
+			: '';
 		if ( $organizer_email ) {
-			$organizer_id = tribe_get_organizer_id( $event_post->ID );
-			$organizer    = get_post( $organizer_id );
+			$organizer = get_post( $organizer_id );
 
 			if ( $organizer_id ) {
 				$sanitized_name = $this->sanitize_organizer_name( $organizer->post_title );

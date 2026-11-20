@@ -63,8 +63,12 @@ class __TwigTemplate_1453f1606febf8a9b6e30a893bcc22827936ceb21531b5a8f8a196260a5
         // line 9
         yield $this->extensions['MailPoet\Twig\Functions']->jsonEncode(($context["welcome_wizard_current_step"] ?? null));
         yield ";
+    var mailpoet_can_manage_settings = ";
+        // line 10
+        yield ((($context["can_manage_settings"] ?? null)) ? ("true") : ("false"));
+        yield ";
   ";
-        // line 11
+        // line 12
         yield "</script>
 ";
         return; yield '';
@@ -91,7 +95,7 @@ class __TwigTemplate_1453f1606febf8a9b6e30a893bcc22827936ceb21531b5a8f8a196260a5
      */
     public function getDebugInfo()
     {
-        return array (  65 => 11,  61 => 9,  56 => 8,  51 => 4,  47 => 3,  36 => 1,);
+        return array (  69 => 12,  65 => 10,  61 => 9,  56 => 8,  51 => 4,  47 => 3,  36 => 1,);
     }
 
     public function getSourceContext()

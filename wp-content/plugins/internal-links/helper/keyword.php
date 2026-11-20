@@ -71,7 +71,7 @@ class Keyword {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- We are handling local file.
 		$handle = fopen($file, 'r');
 
-		for ($i = 0; $row = fgetcsv($handle, 0, ';'); ++$i) {
+		for ($i = 0; $row = fgetcsv($handle, 0, ';', '"', '\\'); ++$i) {
 
 			if (0 === $i) {
 				continue;

@@ -44,15 +44,17 @@ class Cloudflare extends Base {
 		}
 
 		$zone = $this->fetch_zone();
-		if ($zone) {
+		if ( false === $zone ) {
+			Debug2::debug('[Cloudflare] Zone lookup failed; saved configuration unchanged');
+		} elseif ( ! $zone ) {
+			$this->cls('Conf')->update(self::O_CDN_CLOUDFLARE_ZONE, '');
+			Debug2::debug('[Cloudflare] Zone lookup succeeded with no active zones; cleared the saved zone');
+		} else {
 			$this->cls('Conf')->update(self::O_CDN_CLOUDFLARE_NAME, $zone['name']);
 
 			$this->cls('Conf')->update(self::O_CDN_CLOUDFLARE_ZONE, $zone['id']);
 
 			Debug2::debug("[Cloudflare] Get zone successfully \t\t[ID] " . $zone['id']);
-		} else {
-			$this->cls('Conf')->update(self::O_CDN_CLOUDFLARE_ZONE, '');
-			Debug2::debug('[Cloudflare] ❌ Get zone failed, clean zone');
 		}
 	}
 
@@ -89,6 +91,7 @@ class Cloudflare extends Base {
 
 		// update status
 		self::update_option(self::ITEM_STATUS, $curr_status);
+		return true;
 	}
 
 	/**
@@ -199,7 +202,10 @@ class Cloudflare extends Base {
 
 		// Try exact match first
 		if ($kw && false !== strpos($kw, '.')) {
-			$zones = $this->cloudflare_call($url . '&name=' . $kw, 'GET', false, false);
+			$zones = $this->cloudflare_call($url . '&name=' . rawurlencode( $kw ), 'GET', false, false);
+			if ( false === $zones ) {
+				return false;
+			}
 			if ($zones) {
 				Debug2::debug('[Cloudflare] fetch_zone exact matched');
 				return $zones[0];
@@ -209,9 +215,13 @@ class Cloudflare extends Base {
 		// Can't find, try to get default one
 		$zones = $this->cloudflare_call($url, 'GET', false, false);
 
-		if (!$zones) {
+		if ( false === $zones ) {
 			Debug2::debug('[Cloudflare] fetch_zone no zone');
 			return false;
+		}
+		if ( ! $zones ) {
+			Debug2::debug('[Cloudflare] fetch_zone empty zone list');
+			return [];
 		}
 
 		if (!$kw) {
@@ -244,12 +254,11 @@ class Cloudflare extends Base {
 	private function cloudflare_call( $url, $method = 'GET', $data = false, $show_msg = true ) {
 		Debug2::debug("[Cloudflare] cloudflare_call \t\t[URL] $url");
 
-		/**
-		 * Detect key type: Global API Key (37-char hex) vs API Token (Bearer)
-		 * @since 1.9.0
-		 */
-		$cf_key = $this->conf( self::O_CDN_CLOUDFLARE_KEY );
-		if ( strlen( $cf_key ) === 37 && preg_match( '/^[0-9a-f]+$/', $cf_key ) ) {
+		// Route by Cloudflare credential format: new "cfk_" prefix or legacy 37-45 lowercase hex → Global API Key (X-Auth-*); everything else (incl. "cfat_"/"cfut_" tokens or legacy 40-char tokens) → Bearer
+		// @ref https://developers.cloudflare.com/fundamentals/api/get-started/token-formats/
+		$cf_key        = $this->conf( self::O_CDN_CLOUDFLARE_KEY );
+		$is_global_key = 0 === strncmp( $cf_key, 'cfk_', 4 ) || preg_match( '/^[0-9a-f]{37,45}$/', $cf_key );
+		if ( $is_global_key ) {
 			$headers = [
 				'Content-Type' => 'application/json',
 				'X-Auth-Email' => $this->conf( self::O_CDN_CLOUDFLARE_EMAIL ),
@@ -274,7 +283,7 @@ class Cloudflare extends Base {
 			$wp_args['body'] = $data;
 		}
 		add_filter( 'http_api_curl', $fn = function ( $handle ) {
-			defined( 'CURLOPT_SSL_ENABLE_ALPN' ) && \curl_setopt( $handle, CURLOPT_SSL_ENABLE_ALPN, false );
+			defined( 'CURLOPT_SSL_ENABLE_ALPN' ) && \curl_setopt( $handle, CURLOPT_SSL_ENABLE_ALPN, false ); // phpcs:ignore WordPress.WP.AlternativeFunctions.curl_curl_setopt -- http_api_curl filter requires direct curl handle manipulation; wp_remote_get() is not applicable here.
 			return $handle;
 		}, 9999 );
 		$resp = wp_remote_request( $url, $wp_args );
@@ -292,7 +301,7 @@ class Cloudflare extends Base {
 
 		$json = \json_decode($result, true);
 
-		if ($json && $json['success'] && $json['result']) {
+		if ( is_array( $json ) && ! empty( $json['success'] ) && isset( $json['result'] ) && is_array( $json['result'] ) ) {
 			Debug2::debug('[Cloudflare] cloudflare_call called successfully');
 			if ($show_msg) {
 				$msg = __('Communicated with Cloudflare successfully.', 'litespeed-cache');
@@ -322,16 +331,16 @@ class Cloudflare extends Base {
 
 		switch ($type) {
 			case self::TYPE_PURGE_ALL:
-				$this->purge_all_private();
+			$this->purge_all_private();
 				break;
 
 			case self::TYPE_GET_DEVMODE:
-				$this->get_devmode();
+            $this->get_devmode();
 				break;
 
 			case self::TYPE_SET_DEVMODE_ON:
 			case self::TYPE_SET_DEVMODE_OFF:
-				$this->set_devmode($type);
+            $this->set_devmode($type);
 				break;
 
 			default:

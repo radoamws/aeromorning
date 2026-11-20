@@ -2,12 +2,12 @@
 # This file is distributed under the same license as the Plugins - AddToAny Share Buttons - Stable (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-03-23 13:28:27+0000\n"
+"PO-Revision-Date: 2026-09-29 12:26:59+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: GlotPress/4.0.1\n"
+"X-Generator: GlotPress/4.1.0\n"
 "Language: fr\n"
 "Project-Id-Version: Plugins - AddToAny Share Buttons - Stable (latest release)\n"
 
@@ -55,10 +55,6 @@ msgstr "Hauteur"
 msgid "Width"
 msgstr "Largeur"
 
-#: addtoany.admin.php:686
-msgid "Additional CSS"
-msgstr "CSS compl&eacute;mentaire"
-
 #. Plugin Name of the plugin
 #: add-to-any.php
 msgid "AddToAny Share Buttons"
@@ -71,6 +67,10 @@ msgstr "Ci-dessous, vous pouvez ajouter du code CSS spécifique à AddToAny."
 #: addtoany.admin.php:674
 msgid "Additional JavaScript"
 msgstr "JavaScript additionnel"
+
+#: addtoany.admin.php:686
+msgid "Additional CSS"
+msgstr "CSS additionnel"
 
 #: addtoany.admin.php:721
 msgid "Cache AddToAny locally with daily cache updates"
@@ -196,14 +196,6 @@ msgstr "Enregistrer"
 msgid "Subscribe"
 msgstr "S'abonner"
 
-#: add-to-any.php:546
-msgid "Show all"
-msgstr "Montrer tout"
-
-#: add-to-any.php:547
-msgid "Show less"
-msgstr "Montrer moins"
-
 #: add-to-any.php:548
 msgid "Find service(s)"
 msgstr "Trouver des service(s)"
@@ -212,17 +204,9 @@ msgstr "Trouver des service(s)"
 msgid "Instantly find any service to add to"
 msgstr "Trouver instantan&eacute;ment des services &agrave; ajouter &agrave;"
 
-#: add-to-any.php:550
-msgid "Powered by"
-msgstr "Propuls&eacute; par"
-
 #: add-to-any.php:555
 msgid "Add to your favorites"
 msgstr "Ajouter &agrave; vos favoris"
-
-#: addtoany.admin.php:439
-msgid "Settings saved."
-msgstr "Param&egrave;tres sauvegard&eacute;s."
 
 #: addtoany.admin.php:502
 msgid "Choose the services you want below. &nbsp;Click a chosen service again to remove. &nbsp;Reorder services by dragging and dropping as they appear above."
@@ -276,10 +260,6 @@ msgstr "Partager par e-mail"
 msgid "Bookmark in your browser"
 msgstr "Ajouter un signet dans votre navigateur"
 
-#: addtoany.admin.php:794 addtoany.admin.php:862
-msgid "Icon Size"
-msgstr "Taille de l'icone"
-
 #: addtoany.admin.php:591
 msgid "Share this:"
 msgstr "Partagez ceci&nbsp;:"
@@ -287,10 +267,6 @@ msgstr "Partagez ceci&nbsp;:"
 #: addtoany.admin.php:707
 msgid "Filename extension"
 msgstr "Extension du nom de fichier"
-
-#: addtoany.admin.php:698
-msgid "Advanced Options"
-msgstr "Options Avancées"
 
 #: add-to-any.php:554
 msgid "Press Ctrl+D or \\u2318+D to bookmark this page"
@@ -300,7 +276,7 @@ msgstr "Appuyez sur Ctrl+D ou \\u2318+D pour mettre cette page en signet"
 msgid "Floating"
 msgstr "Flottant"
 
-#: add-to-any.php:1257 addtoany.admin.php:455
+#: add-to-any.php:1255 addtoany.admin.php:455
 msgid "AddToAny Share Settings"
 msgstr "Paramètres AddToAny Share"
 
@@ -309,7 +285,7 @@ msgid "Show sharing buttons."
 msgstr "Afficher les boutons de partage."
 
 #. Author of the plugin
-#: add-to-any.php add-to-any.php:1258 addtoany.admin.php:10
+#: add-to-any.php add-to-any.php:1256 addtoany.admin.php:10
 msgid "AddToAny"
 msgstr "AddToAny"
 
@@ -366,10 +342,34 @@ msgstr "Partager l’en-tête"
 msgid "This option will disable universal sharing. Are you sure you want to disable universal sharing?"
 msgstr "Cette option désactivera le partage universel. Confirmez-vous vouloir désactiver le partage universel ?"
 
-#: add-to-any.php:1287
+#: add-to-any.php:1285
 msgid "Settings"
 msgstr "Réglages"
 
 #: add-to-any.php:545
 msgid "Bookmark"
 msgstr "Marque-page"
+
+#: addtoany.admin.php:698
+msgid "Advanced Options"
+msgstr "Options avancées"
+
+#: addtoany.admin.php:439
+msgid "Settings saved."
+msgstr "Réglages enregistrés."
+
+#: add-to-any.php:550
+msgid "Powered by"
+msgstr "Propulsé par"
+
+#: add-to-any.php:546
+msgid "Show all"
+msgstr "Tout afficher"
+
+#: add-to-any.php:547
+msgid "Show less"
+msgstr "Afficher moins"
+
+#: addtoany.admin.php:794 addtoany.admin.php:862
+msgid "Icon Size"
+msgstr "Taille de l’icône"

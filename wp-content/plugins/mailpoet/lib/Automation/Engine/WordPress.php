@@ -61,6 +61,10 @@ class WordPress {
     return current_user_can($capability, ...$args);
   }
 
+  /**
+   * @param non-falsy-string $namespace
+   * @param non-falsy-string $route
+   */
   public function registerRestRoute(string $namespace, string $route, array $args = [], bool $override = false): bool {
     return register_rest_route($namespace, $route, $args, $override);
   }
@@ -186,6 +190,9 @@ class WordPress {
   }
 
   public function getEditableRoles(): array {
+    if (!function_exists('get_editable_roles')) {
+      require_once ABSPATH . 'wp-admin/includes/user.php';
+    }
     return get_editable_roles();
   }
 
@@ -276,5 +283,9 @@ class WordPress {
 
   public function sanitizeFileName(string $filename): string {
     return sanitize_file_name($filename);
+  }
+
+  public function wpStripAllTags(string $text, bool $removeBreaks = false): string {
+    return wp_strip_all_tags($text, $removeBreaks);
   }
 }

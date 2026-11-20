@@ -11,13 +11,19 @@ use function get_the_excerpt;
 use function get_the_ID;
 use function get_the_permalink;
 use function get_the_title;
+use function sanitize_text_field;
 use function wp_get_attachment_url;
 
 class WordPressContent extends AbstractPlatformContent {
 
     public function searchLink($keyword) {
 
-        $the_query = new WP_Query('post_type=any&posts_per_page=20&post_status=publish&s=' . $keyword);
+        $the_query = new WP_Query(array(
+            'post_type'      => 'any',
+            'posts_per_page' => 20,
+            'post_status'    => 'publish',
+            's'              => sanitize_text_field($keyword)
+        ));
 
         $links = array();
         if ($the_query->have_posts()) {
@@ -42,7 +48,12 @@ class WordPressContent extends AbstractPlatformContent {
 
     public function searchContent($keyword) {
 
-        $the_query = new WP_Query('post_type=any&posts_per_page=20&post_status=publish&s=' . $keyword);
+        $the_query = new WP_Query(array(
+            'post_type'      => 'any',
+            'posts_per_page' => 20,
+            'post_status'    => 'publish',
+            's'              => sanitize_text_field($keyword)
+        ));
 
         $links = array();
         if ($the_query->have_posts()) {

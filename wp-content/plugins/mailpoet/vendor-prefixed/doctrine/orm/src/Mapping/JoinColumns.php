@@ -4,5 +4,5 @@ namespace MailPoetVendor\Doctrine\ORM\Mapping;
 if (!defined('ABSPATH')) exit;
 final class JoinColumns implements MappingAttribute
 {
- public $value;
+public $value;
 }

@@ -10,6 +10,7 @@
 namespace TEC\Tickets\Seating;
 
 use TEC\Common\Asset;
+use TEC\Common\Editor\Canvas_Styles;
 use TEC\Common\StellarWP\Assets\Assets;
 use TEC\Tickets\Seating\Service\Service;
 use Tribe__Tickets__Main as Tickets;
@@ -106,8 +107,22 @@ class Editor extends \TEC\Common\Contracts\Provider\Controller {
 	 * Registers the meta for the Tickets and the ticketable post types.
 	 *
 	 * @since 5.16.0
+	 * @since 5.29.5 Registered the Attendee seat label meta.
 	 */
 	public function register_meta(): void {
+		/* Attendee post types vary by ticket provider, so this one is registered for all of them. */
+		register_meta(
+			'post',
+			Meta::META_KEY_ATTENDEE_SEAT_LABEL,
+			[
+				'show_in_rest'      => false,
+				'single'            => true,
+				'type'              => 'string',
+				'sanitize_callback' => [ Meta::class, 'sanitize_seat_label' ],
+				'auth_callback'     => '__return_false',
+			]
+		);
+
 		foreach ( tribe_tickets()->ticket_types() as $ticket_type ) {
 			foreach (
 				[
@@ -202,6 +217,7 @@ class Editor extends \TEC\Common\Contracts\Provider\Controller {
 	 * Registers the Block Editor JavaScript and CSS assets.
 	 *
 	 * @since 5.16.0
+	 * @since 5.31.1 Added the block editor style to the editor canvas styles group.
 	 *
 	 * @return void
 	 */
@@ -245,6 +261,7 @@ class Editor extends \TEC\Common\Contracts\Provider\Controller {
 			->enqueue_on( 'enqueue_block_editor_assets' )
 			->add_to_group( 'tec-tickets-seating-editor' )
 			->add_to_group( 'tec-tickets-seating' )
+			->add_to_group( Canvas_Styles::GROUP )
 			->register();
 	}
 

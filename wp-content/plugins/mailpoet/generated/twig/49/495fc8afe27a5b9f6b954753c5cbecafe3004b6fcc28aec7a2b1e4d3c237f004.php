@@ -48,7 +48,7 @@ class __TwigTemplate_057d90fe2d8b70e6391f41de22f26510bd3c9fd07231d908f25ca03dea1
         yield "</div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_social_block_alignment\" value=\"left\" {{#ifCond model.styles.block.textAlign '===' 'left'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_social_block_alignment\" value=\"left\" {{#ifCond model.styles.block.textAlign \x27===\x27 \x27left\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 7
         yield $this->extensions['MailPoet\Twig\I18n']->translateWithContext("Left", "Visual alignment settings");
@@ -57,7 +57,7 @@ class __TwigTemplate_057d90fe2d8b70e6391f41de22f26510bd3c9fd07231d908f25ca03dea1
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_social_block_alignment\" value=\"center\" {{#ifCond model.styles.block.textAlign '===' 'center'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_social_block_alignment\" value=\"center\" {{#ifCond model.styles.block.textAlign \x27===\x27 \x27center\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 13
         yield $this->extensions['MailPoet\Twig\I18n']->translateWithContext("Center", "Visual alignment settings");
@@ -66,7 +66,7 @@ class __TwigTemplate_057d90fe2d8b70e6391f41de22f26510bd3c9fd07231d908f25ca03dea1
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_social_block_alignment\" value=\"right\" {{#ifCond model.styles.block.textAlign '===' 'right'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_social_block_alignment\" value=\"right\" {{#ifCond model.styles.block.textAlign \x27===\x27 \x27right\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 19
         yield $this->extensions['MailPoet\Twig\I18n']->translateWithContext("Right", "Visual alignment settings");

@@ -23,6 +23,13 @@ class Task extends Root {
 	const LOG_TAG = '⏰';
 
 	/**
+	 * Async job types accepted by async_call() and async_litespeed_handler().
+	 *
+	 * @var string[]
+	 */
+	const ASYNC_TYPES = [ 'crawler', 'crawler_force', 'imgoptm', 'imgoptm_force' ];
+
+	/**
 	 * Map of option id => cron hook registration.
 	 *
 	 * @var array<string,array{name:string,hook:callable|string}>
@@ -43,6 +50,10 @@ class Task extends Root {
 		Base::O_MEDIA_VPI_CRON => [
 			'name' => 'litespeed_task_vpi',
 			'hook' => 'LiteSpeed\VPI::cron',
+		],
+		Base::O_OPTIMAX => [
+			'name' => 'litespeed_task_optimax',
+			'hook' => 'LiteSpeed\Optimax::cron',
 		],
 		Base::O_MEDIA_PLACEHOLDER_RESP_ASYNC => [
 			'name' => 'litespeed_task_lqip',
@@ -101,12 +112,41 @@ class Task extends Root {
 		$guest_optm = $this->conf( Base::O_GUEST ) && $this->conf( Base::O_GUEST_OPTM );
 
 		foreach ( self::$_triggers as $id => $trigger ) {
+			// Avatar cron is a sub-switch of avatar cache: skip registration and clear any leftover schedule when the master switch is off, even if the sub-switch itself is off too.
+			if ( Base::O_DISCUSS_AVATAR_CRON === $id && ! $this->conf( Base::O_DISCUSS_AVATAR_CACHE ) ) {
+				if ( wp_next_scheduled( $trigger['name'] ) ) {
+					wp_clear_scheduled_hook( $trigger['name'] );
+					self::debug( 'Cleared avatar cron schedule as avatar cache is off' );
+				}
+				continue;
+			}
+
 			if ( Base::O_IMG_OPTM_CRON === $id ) {
 				if ( ! Img_Optm::need_pull() ) {
 					continue;
 				}
 			} elseif ( ! $this->conf( $id ) ) {
 				if ( ! $guest_optm || ! in_array( $id, self::$_guest_options, true ) ) {
+					continue;
+				}
+			}
+
+			// Skip cron registration if waiting for try_later timeout
+			$try_later_map = [
+				Base::O_OPTM_UCSS     => [ 'UCSS', 'ucss_next_run_after' ],
+				Base::O_OPTM_CSS_ASYNC => [ 'CSS', 'ccss_next_run_after' ],
+				Base::O_OPTIMAX       => [ 'Optimax', 'ox_next_run_after' ],
+			];
+			if ( isset( $try_later_map[ $id ] ) ) {
+				list( $cls_name, $summary_key ) = $try_later_map[ $id ];
+				$next_run_after                 = $this->cls( $cls_name )::get_summary( $summary_key );
+				if ( $next_run_after && time() < $next_run_after ) {
+					$wait_seconds = $next_run_after - time();
+					self::debug( "Skip $cls_name cron: try_later $wait_seconds s remaining" );
+					if ( wp_next_scheduled( $trigger['name'] ) ) {
+						wp_clear_scheduled_hook( $trigger['name'] );
+						self::debug( "Cleared existing $cls_name cron schedule" );
+					}
 					continue;
 				}
 			}
@@ -137,6 +177,19 @@ class Task extends Root {
 
 			add_action( $trigger['name'], $trigger['hook'] );
 		}
+
+		// Health: schedule single-event cron when pending request exists
+		$health_pending = Health::get_summary( 'pending' );
+		if ( $health_pending ) {
+			$hook = 'litespeed_task_health';
+			if ( ! wp_next_scheduled( $hook ) ) {
+				$next_run = Health::get_summary( 'health_next_run_after' );
+				$run_at   = $next_run && time() < $next_run ? $next_run : time() + 5;
+				wp_schedule_single_event( $run_at, $hook );
+				self::debug( 'Cron hook register [name] ' . $hook );
+			}
+			add_action( $hook, 'LiteSpeed\Health::cron' );
+		}
 	}
 
 	/**
@@ -146,20 +199,25 @@ class Task extends Root {
 	 * @return void
 	 */
 	public static function async_litespeed_handler() {
-		$hash_data = self::get_option( 'async_call-hash', [] );
+		$type = Router::verify_type();
+		if ( ! in_array( $type, self::ASYNC_TYPES, true ) ) {
+			return;
+		}
+
+		$key       = 'async_call-hash.' . $type;
+		$hash_data = self::get_option( $key, [] );
 		if ( ! $hash_data || ! is_array( $hash_data ) || empty( $hash_data['hash'] ) || empty( $hash_data['ts'] ) ) {
-			self::debug( 'async_litespeed_handler no hash data', $hash_data );
+			self::debug( 'async_litespeed_handler no hash data' );
 			return;
 		}
 
 		$nonce = isset( $_GET['nonce'] ) ? sanitize_text_field( wp_unslash( $_GET['nonce'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( 120 < time() - (int) $hash_data['ts'] || '' === $nonce || $nonce !== $hash_data['hash'] ) {
+		if ( 120 < time() - (int) $hash_data['ts'] || '' === $nonce || ! is_string( $hash_data['hash'] ) || ! hash_equals( $hash_data['hash'], $nonce ) ) {
 			self::debug( 'async_litespeed_handler nonce mismatch' );
 			return;
 		}
-		self::delete_option( 'async_call-hash' );
+		self::delete_option( $key );
 
-		$type = Router::verify_type();
 		self::debug( 'type=' . $type );
 
 		// Don't lock up other requests while processing.
@@ -192,9 +250,13 @@ class Task extends Root {
 	 * @return void
 	 */
 	public static function async_call( $type ) {
+		if ( ! in_array( $type, self::ASYNC_TYPES, true ) ) {
+			return;
+		}
+
 		$hash = Str::rrand( 32 );
 		self::update_option(
-			'async_call-hash',
+			'async_call-hash.' . $type,
 			[
 				'hash' => $hash,
 				'ts'   => time(),
@@ -215,7 +277,7 @@ class Task extends Root {
 		];
 
 		$url = add_query_arg( $qs, admin_url( 'admin-ajax.php' ) );
-		self::debug( 'async call to ' . $url );
+		self::debug( 'async call dispatched [type] ' . $type );
 		wp_safe_remote_post( esc_url_raw( $url ), $args );
 	}
 

@@ -10,13 +10,13 @@ use MailPoetVendor\Doctrine\ORM\Tools\Pagination\Exception\RowNumberOverFunction
 use function trim;
 class RowNumberOverFunction extends FunctionNode
 {
- public $orderByClause;
- public function getSql(SqlWalker $sqlWalker)
- {
- return 'ROW_NUMBER() OVER(' . trim($sqlWalker->walkOrderByClause($this->orderByClause)) . ')';
- }
- public function parse(Parser $parser)
- {
- throw RowNumberOverFunctionNotEnabled::create();
- }
+public $orderByClause;
+public function getSql(SqlWalker $sqlWalker)
+{
+return 'ROW_NUMBER() OVER(' . trim($sqlWalker->walkOrderByClause($this->orderByClause)) . ')';
+}
+public function parse(Parser $parser)
+{
+throw RowNumberOverFunctionNotEnabled::create();
+}
 }

@@ -8,20 +8,20 @@ use MailPoetVendor\Doctrine\ORM\Query\AST;
 use MailPoetVendor\Doctrine\ORM\Query\SqlWalker;
 class SingleTableDeleteUpdateExecutor extends AbstractSqlExecutor
 {
- public function __construct(AST\Node $AST, $sqlWalker)
- {
- parent::__construct();
- if ($AST instanceof AST\UpdateStatement) {
- $this->sqlStatements = $sqlWalker->walkUpdateStatement($AST);
- } elseif ($AST instanceof AST\DeleteStatement) {
- $this->sqlStatements = $sqlWalker->walkDeleteStatement($AST);
- }
- }
- public function execute(Connection $conn, array $params, array $types)
- {
- if ($conn instanceof PrimaryReadReplicaConnection) {
- $conn->ensureConnectedToPrimary();
- }
- return $conn->executeStatement($this->sqlStatements, $params, $types);
- }
+public function __construct(AST\Node $AST, $sqlWalker)
+{
+parent::__construct();
+if ($AST instanceof AST\UpdateStatement) {
+$this->sqlStatements = $sqlWalker->walkUpdateStatement($AST);
+} elseif ($AST instanceof AST\DeleteStatement) {
+$this->sqlStatements = $sqlWalker->walkDeleteStatement($AST);
+}
+}
+public function execute(Connection $conn, array $params, array $types)
+{
+if ($conn instanceof PrimaryReadReplicaConnection) {
+$conn->ensureConnectedToPrimary();
+}
+return $conn->executeStatement($this->sqlStatements, $params, $types);
+}
 }

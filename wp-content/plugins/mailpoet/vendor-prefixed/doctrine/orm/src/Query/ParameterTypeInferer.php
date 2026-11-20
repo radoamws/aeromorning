@@ -17,36 +17,36 @@ use function is_bool;
 use function is_int;
 class ParameterTypeInferer
 {
- public static function inferType($value)
- {
- if (is_int($value)) {
- return Types::INTEGER;
- }
- if (is_bool($value)) {
- return Types::BOOLEAN;
- }
- if ($value instanceof DateTimeImmutable) {
- return Types::DATETIME_IMMUTABLE;
- }
- if ($value instanceof DateTimeInterface) {
- return Types::DATETIME_MUTABLE;
- }
- if ($value instanceof DateInterval) {
- return Types::DATEINTERVAL;
- }
- if ($value instanceof BackedEnum) {
- return is_int($value->value) ? Types::INTEGER : Types::STRING;
- }
- if (is_array($value)) {
- $firstValue = current($value);
- if ($firstValue instanceof BackedEnum) {
- $firstValue = $firstValue->value;
- }
- if (!class_exists(ArrayParameterType::class)) {
- return is_int($firstValue) ? Connection::PARAM_INT_ARRAY : Connection::PARAM_STR_ARRAY;
- }
- return is_int($firstValue) ? ArrayParameterType::INTEGER : ArrayParameterType::STRING;
- }
- return ParameterType::STRING;
- }
+public static function inferType($value)
+{
+if (is_int($value)) {
+return Types::INTEGER;
+}
+if (is_bool($value)) {
+return Types::BOOLEAN;
+}
+if ($value instanceof DateTimeImmutable) {
+return Types::DATETIME_IMMUTABLE;
+}
+if ($value instanceof DateTimeInterface) {
+return Types::DATETIME_MUTABLE;
+}
+if ($value instanceof DateInterval) {
+return Types::DATEINTERVAL;
+}
+if ($value instanceof BackedEnum) {
+return is_int($value->value) ? Types::INTEGER : Types::STRING;
+}
+if (is_array($value)) {
+$firstValue = current($value);
+if ($firstValue instanceof BackedEnum) {
+$firstValue = $firstValue->value;
+}
+if (!class_exists(ArrayParameterType::class)) {
+return is_int($firstValue) ? Connection::PARAM_INT_ARRAY : Connection::PARAM_STR_ARRAY;
+}
+return is_int($firstValue) ? ArrayParameterType::INTEGER : ArrayParameterType::STRING;
+}
+return ParameterType::STRING;
+}
 }

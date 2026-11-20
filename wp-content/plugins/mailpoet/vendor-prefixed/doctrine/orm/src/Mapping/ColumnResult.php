@@ -4,5 +4,5 @@ namespace MailPoetVendor\Doctrine\ORM\Mapping;
 if (!defined('ABSPATH')) exit;
 final class ColumnResult implements MappingAttribute
 {
- public $name;
+public $name;
 }

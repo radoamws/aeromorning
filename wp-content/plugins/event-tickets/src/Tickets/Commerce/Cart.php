@@ -33,10 +33,13 @@ class Cart {
 	public static $url_query_arg = 'tec-tc-cart';
 
 	/**
-	 * Which URL param we use to tell the checkout page to set a cookie, since you cannot set a cookie on a 302
-	 * redirect.
+	 * Which URL param was historically used to tell the checkout page to set a cart hash cookie.
 	 *
 	 * @since 5.1.9
+	 *
+	 * @deprecated 5.29.0.1 The cart hash is now derived solely from the server-set cart cookie; this
+	 *             parameter is no longer read or emitted by the plugin and has no effect. Kept only
+	 *             to avoid breaking any external references. See SVUL-L34.
 	 *
 	 * @var string
 	 */
@@ -77,10 +80,14 @@ class Cart {
 	 *
 	 * @since 5.1.9
 	 * @since 5.21.0 Updated to use Cart_Interface instead of Unmanaged_Cart.
+	 * @since 5.30.0 Added the $ticket_type parameter, passed through to the `tec_tickets_commerce_cart_repository`
+	 *            filter so subscribers can swap the repository per ticket type without global state.
+	 *
+	 * @param string $ticket_type The type of ticket the repository is being resolved for.
 	 *
 	 * @return Cart_Interface
 	 */
-	public function get_repository() {
+	public function get_repository( string $ticket_type = 'ticket' ) {
 		$default_cart = tribe( Cart_Interface::class );
 
 		/**
@@ -88,10 +95,12 @@ class Cart {
 		 *
 		 * @since 5.1.9
 		 * @since 5.21.0 Updated to use Cart_Interface instead of Unmanaged_Cart.
+		 * @since 5.30.0 Added the $ticket_type parameter.
 		 *
-		 * @param Cart_Interface $cart Instance of the cart repository managing the cart.
+		 * @param Cart_Interface $cart        Instance of the cart repository managing the cart.
+		 * @param string         $ticket_type The type of ticket the repository is being resolved for.
 		 */
-		return apply_filters( 'tec_tickets_commerce_cart_repository', $default_cart );
+		return apply_filters( 'tec_tickets_commerce_cart_repository', $default_cart, $ticket_type );
 	}
 
 	/**
@@ -290,10 +299,13 @@ class Cart {
 	 * Clear the cart.
 	 *
 	 * @since 5.1.9
+	 * @since 5.29.0.1 Added Pending_Order clean up before anything else.
 	 *
 	 * @return bool
 	 */
 	public function clear_cart() {
+		// Important that this is called before the cart hash is cleared.
+		tribe( Pending_Order::class )->clear();
 		$this->set_cart_hash_cookie( null );
 		$this->get_repository()->clear();
 
@@ -550,12 +562,20 @@ class Cart {
 	 * Prepares the data from the Tickets form.
 	 *
 	 * @since 5.1.9
+	 * @since 5.29.0.1 Stopped adding the cart hash to the checkout redirect URL. See SVUL-L34.
+	 * @since 5.29.2 Sent no-cache headers on the cart-to-checkout redirect so the cart-hash cookie survives edge caches.
+	 * @since 5.31.1.1 Refuses to fill the cart of a logged-out visitor when purchasing tickets requires login.
 	 *
 	 * @return bool
 	 */
 	public function parse_request() {
 		// When it's not the current page we just bail.
 		if ( ! $this->is_current_page() ) {
+			return false;
+		}
+
+		// The tickets form hides its button from these visitors, but this handler takes any request.
+		if ( tribe( Order::class )->must_login() ) {
 			return false;
 		}
 
@@ -596,13 +616,6 @@ class Cart {
 			 */
 			$redirect_url = apply_filters( 'tec_tickets_commerce_cart_to_checkout_redirect_url_base', $redirect_url, $data );
 
-			if (
-				! isset( $_COOKIE[ $this->get_cart_hash() ] )
-				|| ! $_COOKIE[ $this->get_cart_hash() ]
-			) {
-				$redirect_url = add_query_arg( [ static::$cookie_query_arg => $this->get_cart_hash() ], $redirect_url );
-			}
-
 			/**
 			 * Which url it redirects after the processing of the cart.
 			 *
@@ -614,6 +627,12 @@ class Cart {
 			$redirect_url = apply_filters( 'tec_tickets_commerce_cart_to_checkout_redirect_url', $redirect_url, $data );
 
 			if ( null !== $redirect_url ) {
+				/*
+				 * The cart hash is carried to checkout only by the Set-Cookie header emitted while
+				 * processing the cart. A cacheable 302 lets full-page and edge caches (e.g. Pantheon,
+				 * Varnish) cache the redirect and strip that header, leaving checkout with no cart.
+				 */
+				nocache_headers();
 				wp_safe_redirect( $redirect_url );
 				tribe_exit();
 			}
@@ -688,6 +707,7 @@ class Cart {
 	 * Map the ticket data to a more usable format.
 	 *
 	 * @since 5.21.0
+	 * @since 5.31.1.1 Drops the tickets of a password-protected post until its password is entered.
 	 *
 	 * @param array $ticket_data  Array of raw ticket data.
 	 * @param array $tickets_meta Array of ticket meta data.
@@ -721,6 +741,11 @@ class Cart {
 				// Normalize and validate the ticket ID.
 				$ticket['ticket_id'] = (int) $ticket['ticket_id'];
 				if ( true !== $handler->is_ticket_readable( $ticket['ticket_id'] ) ) {
+					return false;
+				}
+
+				// The tickets of a password-protected post are only for visitors who entered its password.
+				if ( post_password_required( tribe_events_get_ticket_event( $ticket['ticket_id'] ) ) ) {
 					return false;
 				}
 

@@ -8,9 +8,6 @@
 
 namespace LiteSpeed;
 
-use WpOrg\Requests\Autoload;
-use WpOrg\Requests\Requests;
-
 defined( 'WPINC' ) || exit();
 
 /**
@@ -20,6 +17,7 @@ defined( 'WPINC' ) || exit();
  */
 class Img_Optm extends Base {
 	use Img_Optm_Send;
+	use Img_Optm_Notify;
 	use Img_Optm_Pull;
 	use Img_Optm_Manage;
 
@@ -60,6 +58,10 @@ class Img_Optm extends Base {
 
 	const DB_NEED_PULL = 'need_pull';
 
+	// `_summary` keys carrying failed-attachment counts across batch_switch / destroy redirects.
+	const SUMMARY_SWITCH_FAILED  = 'switch_failed';
+	const SUMMARY_DESTROY_FAILED = 'destroy_failed';
+
 	/**
 	 * WordPress upload directory info.
 	 *
@@ -89,6 +91,13 @@ class Img_Optm extends Base {
 	private $tmp_path;
 
 	/**
+	 * Temporary next-gen format (webp/avif) for the current single-image switch.
+	 *
+	 * @var string
+	 */
+	private $_tmp_switch_format = '';
+
+	/**
 	 * Images queued for optimization.
 	 *
 	 * @var array
@@ -115,13 +124,6 @@ class Img_Optm extends Base {
 	 * @var string
 	 */
 	private $_thumbnail_set = '';
-
-	/**
-	 * Image optimization table name.
-	 *
-	 * @var string
-	 */
-	private $_table_img_optm;
 
 	/**
 	 * Image optimization working table name.
@@ -159,13 +161,6 @@ class Img_Optm extends Base {
 	private $__data;
 
 	/**
-	 * Summary data.
-	 *
-	 * @var array
-	 */
-	protected $_summary;
-
-	/**
 	 * Output format (webp/avif).
 	 *
 	 * @var string
@@ -183,7 +178,6 @@ class Img_Optm extends Base {
 		$this->wp_upload_dir      = wp_upload_dir();
 		$this->__media            = $this->cls( 'Media' );
 		$this->__data             = $this->cls( 'Data' );
-		$this->_table_img_optm    = $this->__data->tb( 'img_optm' );
 		$this->_table_img_optming = $this->__data->tb( 'img_optming' );
 
 		$this->_summary = self::get_summary();

@@ -10,7 +10,6 @@ use TEC\Common\Libraries\Provider as Libraries_Provider;
 use TEC\Common\StellarWP\Shepherd\Provider as Shepherd_Provider;
 use TEC\Common\StellarWP\DB\Database\Exceptions\DatabaseQueryException;
 use TEC\Common\StellarWP\Shepherd\Config;
-use TEC\Common\StellarWP\AdminNotices\AdminNotices;
 
 /**
  * Controller for setting up the Shepherd library.
@@ -24,8 +23,9 @@ class Shepherd extends Controller_Contract {
 	 * Register the controller.
 	 *
 	 * @since 6.9.0
+	 * @since 6.14.1 Leaves picking the logger to Shepherd.
 	 */
-	public function do_register(): void {
+	protected function do_register(): void {
 		$hook_prefix = tribe( Libraries_Provider::class )->get_hook_prefix();
 		Config::set_container( $this->container );
 		Config::set_hook_prefix( $hook_prefix );
@@ -69,25 +69,17 @@ class Shepherd extends Controller_Contract {
 	 * Handle tables error.
 	 *
 	 * @since 6.10.0
+	 * @since 6.14.1 Displays the notice without a fatal error, and lists each query error message.
 	 *
 	 * @param DatabaseQueryException $error The error.
+	 *
+	 * @return void
 	 */
 	public function handle_tables_error( DatabaseQueryException $error ): void {
-		AdminNotices::show(
+		$this->container->get( Tables_Error_Notice::class )->show(
 			'tec_common_shepherd_tables_error',
-			function () use ( $error ) {
-				?>
-				<div class="notice notice-error">
-					<p><?php esc_html_e( 'Shepherd tables could not be created/updated. This is a critical issue since important functionality might be affected. Reach out to support if you need help.', 'tribe-common' ); ?></p>
-					<?php // Translators: %s is the query error message. ?>
-					<p><?php printf( esc_html__( 'The below query failed with the message(s): %s', 'tribe-common' ), '<code>' . esc_html( implode( '<br>', $error->getQueryErrors() ) ) . '</code>' ); ?></p>
-					<p><code><?php echo esc_html( $error->getQuery() ); ?></code></p>
-				</div>
-				<?php
-			}
-		)
-			->urgency( 'error' )
-			->dismissible( false )
-			->inline();
+			__( 'Shepherd tables could not be created/updated. This is a critical issue since important functionality might be affected. Reach out to support if you need help.', 'tribe-common' ),
+			$error
+		);
 	}
 }

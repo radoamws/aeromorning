@@ -109,6 +109,15 @@ class Tribe__Events__Aggregator__Tabs__Scheduled extends Tribe__Events__Aggregat
 		}
 	}
 
+	/**
+	 * Handles a bulk action submitted on the Scheduled Imports tab.
+	 *
+	 * @since 6.18.4 Returns early when the action is not one the tab supports, such as an empty bulk action.
+	 *
+	 * @param array{action?: string, nonce?: string, records?: array<int|string>, ids?: string}|object|null $data The submitted request data; defaults to `$_POST['aggregator']`.
+	 *
+	 * @return false|void False when nothing is done; otherwise it redirects back to the tab and exits.
+	 */
 	private function handle_post( $data = null ) {
 		if ( is_null( $data ) ) {
 			if ( ! isset( $_POST['aggregator'] ) ) {
@@ -153,6 +162,9 @@ class Tribe__Events__Aggregator__Tabs__Scheduled extends Tribe__Events__Aggregat
 			case 'run-import':
 				list( $success, $errors ) = $this->action_run_import( $data->records );
 				break;
+
+			default:
+				return false;
 		}
 
 		$args = array(
@@ -334,8 +346,21 @@ class Tribe__Events__Aggregator__Tabs__Scheduled extends Tribe__Events__Aggregat
 			}
 
 			$child = $record->create_child_record();
+
+			if ( is_wp_error( $child ) ) {
+				$errors[ $record->id ] = $child;
+				$record->log_error( $child );
+				$record->update_meta( 'last_import_status', 'error:import-failed' );
+				continue;
+			}
+
 			$child->update_meta( 'interactive', true );
 			$status = $child->queue_import();
+
+			if ( is_numeric( $status ) ) {
+				$record->update_meta( 'last_import_status', 'queued' );
+				continue;
+			}
 
 			if ( is_wp_error( $status ) ) {
 				$errors[ $record->id ] = $status;

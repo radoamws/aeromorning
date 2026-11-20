@@ -55,7 +55,7 @@ class __TwigTemplate_6600fff5a3f9873439474a07dab72aaab7a4466f14e9ab17e0fb500adee
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Standard fonts");
         yield "\">
         {{#each availableStyles.fonts.standard}}
-            <option value=\"{{ this }}\" {{#ifCond this '==' ../model.styles.text.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
+            <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.styles.text.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
         {{/each}}
         </optgroup>
         <optgroup label=\"";
@@ -63,13 +63,13 @@ class __TwigTemplate_6600fff5a3f9873439474a07dab72aaab7a4466f14e9ab17e0fb500adee
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Custom fonts");
         yield "\">
         {{#each availableStyles.fonts.custom}}
-            <option value=\"{{ this }}\" {{#ifCond this '==' ../model.styles.text.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
+            <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.styles.text.fontFamily}}SELECTED{{/ifCond}}>{{ this }}</option>
         {{/each}}
         </optgroup>
         </select>
         <select id=\"mailpoet_field_header_text_size\" name=\"font-size\" class=\"mailpoet_select mailpoet_select_small mailpoet_field_header_text_size mailpoet_font_size\">
         {{#each availableStyles.textSizes}}
-            <option value=\"{{ this }}\" {{#ifCond this '==' ../model.styles.text.fontSize}}SELECTED{{/ifCond}}>{{ this }}</option>
+            <option value=\"{{ this }}\" {{#ifCond this \x27==\x27 ../model.styles.text.fontSize}}SELECTED{{/ifCond}}>{{ this }}</option>
         {{/each}}
         </select>
     </div>
@@ -84,7 +84,7 @@ class __TwigTemplate_6600fff5a3f9873439474a07dab72aaab7a4466f14e9ab17e0fb500adee
         yield "</div>
     <label>
         <div class=\"mailpoet_form_field_checkbox_option mailpoet_option_offset_left_small\">
-            <input type=\"checkbox\" name=\"underline\" value=\"underline\" id=\"mailpoet_field_header_link_underline\" {{#ifCond model.styles.link.textDecoration '==' 'underline'}}CHECKED{{/ifCond}}/> ";
+            <input type=\"checkbox\" name=\"underline\" value=\"underline\" id=\"mailpoet_field_header_link_underline\" {{#ifCond model.styles.link.textDecoration \x27==\x27 \x27underline\x27}}CHECKED{{/ifCond}}/> ";
         // line 33
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Underline");
         yield "
@@ -105,7 +105,7 @@ class __TwigTemplate_6600fff5a3f9873439474a07dab72aaab7a4466f14e9ab17e0fb500adee
 <div class=\"mailpoet_form_field\">
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-        <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_header_alignment\" value=\"left\" {{#ifCond model.styles.text.textAlign '===' 'left'}}CHECKED{{/ifCond}}/>
+        <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_header_alignment\" value=\"left\" {{#ifCond model.styles.text.textAlign \x27===\x27 \x27left\x27}}CHECKED{{/ifCond}}/>
         ";
         // line 49
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Left");
@@ -114,7 +114,7 @@ class __TwigTemplate_6600fff5a3f9873439474a07dab72aaab7a4466f14e9ab17e0fb500adee
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_header_alignment\" value=\"center\" {{#ifCond model.styles.text.textAlign '===' 'center'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_header_alignment\" value=\"center\" {{#ifCond model.styles.text.textAlign \x27===\x27 \x27center\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 55
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Center");
@@ -123,7 +123,7 @@ class __TwigTemplate_6600fff5a3f9873439474a07dab72aaab7a4466f14e9ab17e0fb500adee
     </div>
     <div class=\"mailpoet_form_field_radio_option\">
         <label>
-            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_header_alignment\" value=\"right\" {{#ifCond model.styles.text.textAlign '===' 'right'}}CHECKED{{/ifCond}}/>
+            <input type=\"radio\" name=\"alignment\" class=\"mailpoet_field_header_alignment\" value=\"right\" {{#ifCond model.styles.text.textAlign \x27===\x27 \x27right\x27}}CHECKED{{/ifCond}}/>
             ";
         // line 61
         yield $this->extensions['MailPoet\Twig\I18n']->translate("Right");
@@ -145,7 +145,7 @@ class __TwigTemplate_6600fff5a3f9873439474a07dab72aaab7a4466f14e9ab17e0fb500adee
         yield "</p>
 
 <script type=\"text/javascript\">
-    fontsSelect('#mailpoet_field_header_text_font_family');
+    fontsSelect(\x27#mailpoet_field_header_text_font_family\x27);
 </script>
 ";
         return; yield '';

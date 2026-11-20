@@ -67,11 +67,11 @@ class __TwigTemplate_9b0ddf3688f2dc81e331ee62fce3c53bfc8110f9d6615c3cf10d5c5c68f
       window.clearInterval(intervalHandle)
       return;
     }
-    window.top.postMessage({MailPoetIframeHeight: document.body.scrollHeight + additionalHeight + 'px'}, '*');
+    window.top.postMessage({MailPoetIframeHeight: document.body.scrollHeight + additionalHeight + \x27px\x27}, \x27*\x27);
     attemptsToAdjust--;
   };
 
-  window.addEventListener('load', function () {
+  window.addEventListener(\x27load\x27, function () {
     sendSize();
     if(!window.MutationObserver) {
       intervalHandle = setInterval(sendSize, delayToAdjust);

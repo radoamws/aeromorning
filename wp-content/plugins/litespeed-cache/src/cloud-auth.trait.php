@@ -25,18 +25,19 @@ trait Cloud_Auth {
 	 * @since 7.0
 	 */
 	public function init_qc_prepare() {
-		if ( empty( $this->_summary['sk_b64'] ) ) {
-			$keypair                  = sodium_crypto_sign_keypair();
-			$pk                       = base64_encode( sodium_crypto_sign_publickey( $keypair ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-			$sk                       = base64_encode( sodium_crypto_sign_secretkey( $keypair ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-			$this->_summary['pk_b64'] = $pk;
-			$this->_summary['sk_b64'] = $sk;
-			$this->save_summary();
-			// ATM `qc_activated` = null
-			return true;
+		if ( false !== $this->_local_sign_sk() ) {
+			return false;
 		}
 
-		return false;
+		$keypair = sodium_crypto_sign_keypair();
+		$this->save_summary(
+			[
+				'pk_b64' => base64_encode( sodium_crypto_sign_publickey( $keypair ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+				'sk_b64' => base64_encode( sodium_crypto_sign_secretkey( $keypair ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+			],
+			true
+		);
+		return true;
 	}
 
 	/**
@@ -147,7 +148,6 @@ trait Cloud_Auth {
 
 		// Load separate thread echoed data from storage
 		if ( empty( $echobox['wpapi_ts'] ) || empty( $echobox['wpapi_signature_b64'] ) ) {
-			self::debug( 'Resp: ', $echobox );
 			Admin_Display::error( __( 'Failed to get echo data from WPAPI', 'litespeed-cache' ) );
 			return;
 		}
@@ -228,7 +228,7 @@ trait Cloud_Auth {
 		$data                     = [
 			'wp_ts' => time(),
 		];
-		$data['wp_signature_b64'] = $this->_sign_b64( $data['wp_ts'] );
+		$data['wp_signature_b64'] = $this->_sign_b64( "link\n" . site_url() . "\n" . $data['wp_ts'] );
 
 		// Activation redirect
 		$param = [
@@ -295,8 +295,7 @@ trait Cloud_Auth {
 		$data = [
 			'action2' => $action2,
 		];
-		$res  = $this->post( self::SVC_D_API, $data );
-		self::debug( 'API link call result: ', $res );
+		$this->post( self::SVC_D_API, $data );
 	}
 
 	/**
@@ -313,7 +312,7 @@ trait Cloud_Auth {
 		$data                     = [
 			'wp_ts' => time(),
 		];
-		$data['wp_signature_b64'] = $this->_sign_b64( $data['wp_ts'] );
+		$data['wp_signature_b64'] = $this->_sign_b64( "enable_cdn\n" . site_url() . "\n" . $data['wp_ts'] );
 
 		// Activation redirect
 		$param = [
@@ -332,13 +331,16 @@ trait Cloud_Auth {
 	 * @since 7.0
 	 */
 	public function reset_qc() {
-		unset( $this->_summary['pk_b64'] );
-		unset( $this->_summary['sk_b64'] );
-		unset( $this->_summary['qc_activated'] );
-		if ( ! empty( $this->_summary['partner'] ) ) {
-			unset( $this->_summary['partner'] );
-		}
-		$this->save_summary();
+		$this->save_summary(
+			[
+				'pk_b64'      => '',
+				'sk_b64'      => '',
+				'qc_activated' => '',
+				'partner'      => '',
+				'main_domain'  => '',
+			],
+			true
+		);
 		self::debug( 'Clear local QC activation.' );
 
 		$this->clear_cloud();
@@ -364,11 +366,19 @@ trait Cloud_Auth {
 	 * @return string
 	 */
 	public function qc_link() {
-		$data = [
-			'site_url' => site_url(),
-			'ver' => LSCWP_V,
-			'ref' => $this->_get_ref_url(),
+		$site_url = site_url();
+		$data     = [ 'wp_ts' => time() ];
+		// Bind the proof to this site and action; link signatures must not authorize manage.
+		$data['wp_signature_b64'] = $this->_sign_b64( "manage\n" . $site_url . "\n" . $data['wp_ts'] );
+		if ( false === $data['wp_signature_b64'] ) {
+			return $this->_cloud_server_dash;
+		}
+		$param = [
+			'site_url' => $site_url,
+			'ver'      => Core::VER,
+			'data'     => $data,
+			'ref'      => $this->_get_ref_url(),
 		];
-		return $this->_cloud_server_dash . '/u/wp3/manage?data=' . rawurlencode( Utility::arr2str( $data ) ); // . (!empty($this->_summary['is_linked']) ? '?wplogin=1' : '');
+		return $this->_cloud_server_dash . '/u/wp3/manage?data=' . rawurlencode( Utility::arr2str( $param ) );
 	}
 }

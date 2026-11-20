@@ -9,6 +9,7 @@ use MailPoet\DI\ContainerWrapper;
 use MailPoet\Entities\NewsletterEntity;
 use MailPoet\Entities\SendingQueueEntity;
 use MailPoet\Entities\SubscriberEntity;
+use MailPoet\Newsletter\Sending\Placeholders\PlaceholderCollector;
 use MailPoet\Newsletter\Shortcodes\Shortcodes as NewsletterShortcodes;
 
 class Shortcodes {
@@ -18,11 +19,27 @@ class Shortcodes {
    * @param NewsletterEntity|null $newsletter
    * @param SubscriberEntity|null $subscriber
    * @param SendingQueueEntity|null $queue
+   * @param bool $isPlainText see NewsletterShortcodes::replace()
    */
-  public static function process($content, $contentSource = null, ?NewsletterEntity $newsletter = null, ?SubscriberEntity $subscriber = null, ?SendingQueueEntity $queue = null) {
+  public static function process($content, $contentSource = null, ?NewsletterEntity $newsletter = null, ?SubscriberEntity $subscriber = null, ?SendingQueueEntity $queue = null, bool $isPlainText = false) {
+    $shortcodes = self::getShortcodes($newsletter, $subscriber, $queue);
+    return $shortcodes->replace($content, $contentSource, null, $isPlainText);
+  }
+
+  /**
+   * @param string $content
+   * @param string|null $contentSource
+   * @param string $part One of the PlaceholderCollector::PART_* constants
+   * @return string
+   */
+  public static function processWithPlaceholders($content, $contentSource, ?NewsletterEntity $newsletter, ?SubscriberEntity $subscriber, ?SendingQueueEntity $queue, PlaceholderCollector $collector, string $part) {
+    $shortcodes = self::getShortcodes($newsletter, $subscriber, $queue);
+    return $shortcodes->replaceWithPlaceholders($content, $contentSource, $collector, $part);
+  }
+
+  private static function getShortcodes(?NewsletterEntity $newsletter, ?SubscriberEntity $subscriber, ?SendingQueueEntity $queue): NewsletterShortcodes {
     /** @var NewsletterShortcodes $shortcodes */
     $shortcodes = ContainerWrapper::getInstance()->get(NewsletterShortcodes::class);
-
     if ($queue instanceof SendingQueueEntity) {
       $shortcodes->setQueue($queue);
     } else {
@@ -40,6 +57,6 @@ class Shortcodes {
     } else {
       $shortcodes->setSubscriber(null);
     }
-    return $shortcodes->replace($content, $contentSource);
+    return $shortcodes;
   }
 }

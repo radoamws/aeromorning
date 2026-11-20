@@ -58,18 +58,14 @@ class WpPostsStore {
 	}
 
 	/** @return WP_Query */
-	private function wpQuery( array $args = array() ): WP_Query {
-		if ( $this->postTypes === null ) {
-			$this->postTypes = get_post_types( array( 'public' => true ), 'names' );
-		}
-
+	protected function wpQuery( array $args = array() ): WP_Query {
 		$metaQuery = $args['meta_query'] ?? array();
 		unset( $args['meta_query'] );
 
 		$args = wp_parse_args(
 			$args,
 			array(
-				'post_type' => $this->postTypes,
+				'post_type' => $this->getPostTypes(),
 				'post_status' => 'any',
 				'ignore_sticky_posts' => true,
 				'suppress_filters' => true,
@@ -93,6 +89,21 @@ class WpPostsStore {
 		wp_reset_postdata();
 
 		return $query;
+	}
+
+	/**
+	 * Gets the public post types that imported posts can be stored as.
+	 *
+	 * @since 5.8.0
+	 *
+	 * @return array<string,string> The post type names.
+	 */
+	protected function getPostTypes(): array {
+		if ( $this->postTypes === null ) {
+			$this->postTypes = get_post_types( array( 'public' => true ), 'names' );
+		}
+
+		return $this->postTypes;
 	}
 
 	/** @return Result<iterable<IrPost>> */
@@ -153,7 +164,9 @@ class WpPostsStore {
 		?int $num = null,
 		int $page = 1,
 		string $orderBy = '',
-		string $order = 'asc'
+		string $order = 'asc',
+		?string $status = null,
+		bool $excludePasswordProtected = false
 	): Result {
 		$args = array(
 			's' => $filter,
@@ -169,6 +182,21 @@ class WpPostsStore {
 				'key' => ImportedPost::SOURCE,
 				'compare' => 'IN',
 				'value' => $sources,
+			);
+		}
+
+		if ( $status !== null ) {
+			$args['post_status'] = $status;
+		}
+
+		if ( $excludePasswordProtected ) {
+			$args['has_password'] = false;
+		}
+
+		if ( $orderBy === 'date' ) {
+			$args['orderby'] = array(
+				'date' => $order,
+				'ID' => $order,
 			);
 		}
 
@@ -245,7 +273,10 @@ class WpPostsStore {
 			return Result::Ok( array() );
 		}
 
-		$cacheKey = 'wpra_posts_by_guid_' . md5( implode( ',', $guids ) );
+		// I salt the key with WordPress's posts "last changed" time, so that inserted or deleted posts are never
+		// served from a stale lookup on sites with a persistent object cache.
+		$lastChanged = wp_cache_get_last_changed( 'posts' );
+		$cacheKey = 'wpra_posts_by_guid_' . md5( $lastChanged . '|' . implode( ',', $guids ) );
 		$cachedPosts = wp_cache_get( $cacheKey, 'wpra' );
 
 		if ( $cachedPosts !== false ) {
@@ -395,6 +426,35 @@ class WpPostsStore {
 	}
 
 	/**
+	 * Deletes imported posts for a source in fixed-size batches.
+	 *
+	 * @since 5.3.0
+	 *
+	 * @param int $srcId The source ID.
+	 * @param int $batchSize The maximum number of posts to delete per batch.
+	 * @return Result<int> The number of deleted posts.
+	 */
+	public function deleteFromSourceInBatches( int $srcId, int $batchSize = 500 ): Result {
+		$total = 0;
+		$batchSize = max( 1, $batchSize );
+
+		do {
+			$result = $this->deleteFromSources( array( $srcId ), false, $batchSize, 1, 'ASC' );
+
+			if ( $result->isErr() ) {
+				return Result::Err( $result->error() );
+			}
+
+			$numDeleted = $result->get();
+			$total += $numDeleted;
+
+			if ( $numDeleted < $batchSize ) {
+				return Result::Ok( $total );
+			}
+		} while ( true );
+	}
+
+	/**
 	 * Deletes posts older than a given date, optionally from a specific source.
 	 *
 	 * @return Result<int> The number of deleted posts.
@@ -410,17 +470,34 @@ class WpPostsStore {
 			);
 		}
 
-		$result = $this->wpQuery(
-			array(
-				'meta_query' => $metaQuery,
-				'date_query' => array(
-					'column' => 'post_date_gmt',
-					'before' => $minDate->format( 'Y-m-d H:i:s' ),
-				),
-			)
-		);
+		$num = 0;
 
-		$num = $this->deleteWpPosts( $result->posts );
+		do {
+			$result = $this->wpQuery(
+				array(
+					'posts_per_page' => 50,
+					'meta_query' => $metaQuery,
+					'date_query' => array(
+						'column' => 'post_date_gmt',
+						'before' => $minDate->format( 'Y-m-d H:i:s' ),
+					),
+				)
+			);
+
+			if ( empty( $result->posts ) ) {
+				break;
+			}
+
+			$posts = ( function ( WP_Query $result ) {
+				foreach ( $result->posts as $post ) {
+					yield IrPost::fromWpPost( $post );
+				}
+			} )( $result );
+
+			$numDeleted = $this->deleteWpPosts( $posts );
+			$num += $numDeleted;
+		} while ( $numDeleted > 0 );
+
 		return Result::Ok( $num );
 	}
 
@@ -474,6 +551,43 @@ class WpPostsStore {
 		$result = $this->wpQuery( $queryArgs );
 
 		return Result::Ok( $result->post_count );
+	}
+
+	/**
+	 * Checks whether a source has imported posts stored as a post type other than the given one.
+	 *
+	 * @since 5.8.0
+	 *
+	 * @param int    $srcId The ID of the source.
+	 * @param string $postType The post type that the source currently imports into.
+	 * @return Result<bool> True if at least one of the source's imported posts has a different post type.
+	 */
+	public function hasPostsNotOfType( int $srcId, string $postType ): Result {
+		$otherTypes = array_values( array_diff( $this->getPostTypes(), array( $postType ) ) );
+
+		if ( empty( $otherTypes ) ) {
+			return Result::Ok( false );
+		}
+
+		try {
+			$result = $this->wpQuery(
+				array(
+					'post_type' => $otherTypes,
+					'posts_per_page' => 1,
+					'fields' => 'ids',
+					'meta_query' => array(
+						'source' => array(
+							'key' => ImportedPost::SOURCE,
+							'value' => $srcId,
+						),
+					),
+				)
+			);
+
+			return Result::Ok( $result->post_count > 0 );
+		} catch ( Throwable $err ) {
+			return Result::Err( $err );
+		}
 	}
 
 	/**

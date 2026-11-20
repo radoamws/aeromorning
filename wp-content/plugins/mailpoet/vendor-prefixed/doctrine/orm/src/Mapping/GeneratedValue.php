@@ -4,12 +4,12 @@ namespace MailPoetVendor\Doctrine\ORM\Mapping;
 if (!defined('ABSPATH')) exit;
 use Attribute;
 use MailPoetVendor\Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
-#[\Attribute(Attribute::TARGET_PROPERTY)]
+#[Attribute(Attribute::TARGET_PROPERTY)]
 final class GeneratedValue implements MappingAttribute
 {
- public $strategy = 'AUTO';
- public function __construct(string $strategy = 'AUTO')
- {
- $this->strategy = $strategy;
- }
+public $strategy = 'AUTO';
+public function __construct(string $strategy = 'AUTO')
+{
+$this->strategy = $strategy;
+}
 }

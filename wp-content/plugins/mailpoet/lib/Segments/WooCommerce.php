@@ -11,10 +11,12 @@ use MailPoet\Entities\SubscriberEntity;
 use MailPoet\Entities\SubscriberSegmentEntity;
 use MailPoet\Services\Validator;
 use MailPoet\Settings\SettingsController;
+use MailPoet\Subscribers\SegmentsCountRecalculator;
 use MailPoet\Subscribers\Source;
 use MailPoet\Subscribers\SubscriberSaveController;
 use MailPoet\Subscribers\SubscriberSegmentRepository;
 use MailPoet\Subscribers\SubscribersRepository;
+use MailPoet\Subscribers\WPUserSubscriberLink;
 use MailPoet\WooCommerce\Helper as WCHelper;
 use MailPoet\WooCommerce\Subscription;
 use MailPoet\WP\Functions as WPFunctions;
@@ -25,6 +27,18 @@ use MailPoetVendor\Doctrine\DBAL\ParameterType;
 use MailPoetVendor\Doctrine\ORM\EntityManager;
 
 class WooCommerce {
+  /**
+   * Per-email record of whether synchronizeGuestCustomer() inserted a brand new
+   * subscriber row this request, or found one that already existed.
+   * insertSubscribers() uses INSERT IGNORE, so a caller looking at the row
+   * afterwards cannot tell "just created" from "already there" — that is
+   * captured at insert time instead. Read by WooCommerce\Subscription, which
+   * runs on the same hook at a later priority and has no other way to know.
+   *
+   * @var array<string, bool>
+   */
+  private $guestSyncCreatedSubscriber = [];
+
   /** @var SettingsController */
   private $settings;
 
@@ -67,6 +81,12 @@ class WooCommerce {
   /** @var Validator */
   private $validator;
 
+  /** @var SegmentsCountRecalculator */
+  private $segmentsCountRecalculator;
+
+  /** @var WPUserSubscriberLink */
+  private $wpUserSubscriberLink;
+
   public function __construct(
     SettingsController $settings,
     WPFunctions $wp,
@@ -79,7 +99,9 @@ class WooCommerce {
     EntityManager $entityManager,
     Connection $connection,
     SubscriberChangesNotifier $subscriberChangesNotifier,
-    Validator $validator
+    Validator $validator,
+    SegmentsCountRecalculator $segmentsCountRecalculator,
+    WPUserSubscriberLink $wpUserSubscriberLink
   ) {
     $this->settings = $settings;
     $this->wp = $wp;
@@ -93,6 +115,8 @@ class WooCommerce {
     $this->connection = $connection;
     $this->subscriberChangesNotifier = $subscriberChangesNotifier;
     $this->validator = $validator;
+    $this->segmentsCountRecalculator = $segmentsCountRecalculator;
+    $this->wpUserSubscriberLink = $wpUserSubscriberLink;
   }
 
   public function shouldShowWooCommerceSegment(): bool {
@@ -106,6 +130,8 @@ class WooCommerce {
     switch ($currentFilter) {
       case 'woocommerce_delete_customer':
         // subscriber should be already deleted in WP users sync
+        // unsubscribeUsersFromSegment() recomputes segments_count for the rows it
+        // removes, so no whole-segment sweep is needed here.
         $this->unsubscribeUsersFromSegment(); // remove leftover association
         break;
       case 'woocommerce_new_customer':
@@ -124,14 +150,16 @@ class WooCommerce {
         $data = [
           'is_woocommerce_user' => 1,
         ];
-        if (!empty($newCustomer)) {
+        // Until the account confirms the address, keep the subscriber's own source and name.
+        $isLinkUnconfirmed = $this->wpUserSubscriberLink->isUnconfirmed($wpUserId);
+        if (!empty($newCustomer) && !$isLinkUnconfirmed) {
           $data['source'] = Source::WOOCOMMERCE_USER;
         }
         $data['id'] = $subscriber->getId();
-        if ($wpUser->first_name) { // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
+        if ($wpUser->first_name && !$isLinkUnconfirmed) { // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
           $data['first_name'] = $wpUser->first_name; // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
         }
-        if ($wpUser->last_name) { // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
+        if ($wpUser->last_name && !$isLinkUnconfirmed) { // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
           $data['last_name'] = $wpUser->last_name; // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
         }
         $subscriber = $this->subscriberSaveController->createOrUpdate($data, $subscriber);
@@ -161,6 +189,17 @@ class WooCommerce {
     return !$this->woocommerceHelper->isCheckoutRequest() || ($checkoutOptinEnabled && $checkoutOptinChecked);
   }
 
+  /**
+   * Whether the given email's subscriber row did not exist before the most
+   * recent synchronizeGuestCustomer() call in this request. Defaults to false,
+   * meaning "treat as pre-existing", for any email that call never saw: a
+   * missing signal must never cause an unearned overwrite of an earlier
+   * consent choice.
+   */
+  public function wasNewlyCreatedByGuestSync(string $email): bool {
+    return $this->guestSyncCreatedSubscriber[$email] ?? false;
+  }
+
   public function synchronizeGuestCustomer(int $orderId): void {
     $wcOrder = $this->woocommerceHelper->wcGetOrder($orderId);
 
@@ -171,20 +210,23 @@ class WooCommerce {
       $status = SubscriberEntity::STATUS_SUBSCRIBED;
     }
 
-    $email = $this->insertSubscriberFromOrder($wcOrder, $status);
+    $wasNewlyCreated = false;
+    $email = $this->insertSubscriberFromOrder($wcOrder, $status, $wasNewlyCreated);
 
     if (empty($email)) {
       return;
     }
+    $this->guestSyncCreatedSubscriber[$email] = $wasNewlyCreated;
     $subscriber = $this->subscribersRepository->findOneBy(['email' => $email]);
 
     if ($subscriber) {
       $firstName = $wcOrder->get_billing_first_name(); // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
       $lastName = $wcOrder->get_billing_last_name(); // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
-      if ($firstName) {
+      // Use only names that pass the character check the subscription form also runs in the browser
+      if ($firstName && strpbrk($firstName, '<>') === false) {
         $subscriber->setFirstName($firstName);
       }
-      if ($lastName) {
+      if ($lastName && strpbrk($lastName, '<>') === false) {
         $subscriber->setLastName($lastName);
       }
       if ($firstName || $lastName) {
@@ -209,6 +251,11 @@ class WooCommerce {
       $this->removeOrphanedSubscribers();
       $this->updateStatus();
       $this->updateGlobalStatus();
+      // The bulk operations above add/remove/restatus the WooCommerce segment's
+      // memberships en masse via raw SQL, so refresh segments_count for all
+      // members regardless of status — some may have just transitioned away
+      // from subscribed and must be recomputed too.
+      $this->segmentsCountRecalculator->recalculateForSegment((int)$this->segmentsRepository->getWooCommerceSegment()->getId(), false);
     }
 
     $this->subscribersRepository->invalidateTotalSubscribersCache();
@@ -257,23 +304,29 @@ class WooCommerce {
     // Mark WP users having a customer role as WooCommerce subscribers
     global $wpdb;
     $subscribersTable = $this->entityManager->getClassMetadata(SubscriberEntity::class)->getTableName();
+    // Users who haven't confirmed the address of their linked subscriber keep its source
     $this->connection->executeQuery("
       UPDATE LOW_PRIORITY {$subscribersTable} mps
         JOIN {$wpdb->users} wu ON mps.wp_user_id = wu.id
         JOIN {$wpdb->usermeta} wpum ON wu.id = wpum.user_id AND wpum.meta_key = :capabilities
-      SET is_woocommerce_user = 1, source = :source
+        LEFT JOIN {$wpdb->usermeta} linkMark ON wu.id = linkMark.user_id AND linkMark.meta_key = :unconfirmedLinkMetaKey
+      SET is_woocommerce_user = 1, source = IF(linkMark.umeta_id IS NULL, :source, mps.source)
         WHERE wpum.meta_value LIKE '%\"customer\"%'
-    ", ['capabilities' => $wpdb->prefix . 'capabilities', 'source' => Source::WOOCOMMERCE_USER]);
+    ", [
+      'capabilities' => $wpdb->prefix . 'capabilities',
+      'unconfirmedLinkMetaKey' => $this->wpUserSubscriberLink->getUnconfirmedMetaKey(),
+      'source' => Source::WOOCOMMERCE_USER,
+    ]);
   }
 
-  private function insertSubscriberFromOrder(\WC_Order $wcOrder, string $status): ?string {
+  private function insertSubscriberFromOrder(\WC_Order $wcOrder, string $status, bool &$wasNewlyCreated = false): ?string {
     $email = $wcOrder->get_billing_email();
 
     if (!$email || !$this->validator->validateEmail($email)) {
       return null;
     }
 
-    $this->insertSubscribers([$email], $status);
+    $wasNewlyCreated = $this->insertSubscribers([$email], $status) > 0;
     return $email;
   }
 
@@ -349,12 +402,14 @@ class WooCommerce {
     // Save timestamp about new subscribers before insert
     $this->subscriberChangesNotifier->subscribersBatchCreate();
     // Insert new subscribers
-    $this->connection->executeQuery('
+    // executeStatement, not executeQuery: the affected-row count is what tells
+    // a caller whether INSERT IGNORE actually inserted or silently discarded.
+    $insertedCount = $this->connection->executeStatement('
       INSERT IGNORE INTO ' . $subscribersTable . ' (`is_woocommerce_user`, `email`, `status`, `created_at`, `last_subscribed_at`, `source`) VALUES
       ' . implode(',', $subscribersValues) . '
     ');
 
-    return count($emails);
+    return (int)$insertedCount;
   }
 
   /**
@@ -416,6 +471,10 @@ class WooCommerce {
       if (!$row['meta_value']) {
         continue;
       }
+      // Use only names that pass the character check the subscription form also runs in the browser
+      if (is_string($row['meta_value']) && strpbrk($row['meta_value'], '<>') !== false) {
+        continue;
+      }
       $postId = is_numeric($row['post_id']) ? (int)$row['post_id'] : 0;
       $metaKey = is_string($row['meta_key']) ? $row['meta_key'] : '';
       if ($postId === 0 || $metaKey === '') {
@@ -455,6 +514,22 @@ class WooCommerce {
     $wcSegment = $this->segmentsRepository->getWooCommerceSegment();
     $subscribersTable = $this->entityManager->getClassMetadata(SubscriberEntity::class)->getTableName();
     $subscriberSegmentsTable = $this->entityManager->getClassMetadata(SubscriberSegmentEntity::class)->getTableName();
+
+    // Capture the affected subscriber ids before the DELETE: once the membership
+    // rows are gone, recalculateForSegment() can no longer see these subscribers,
+    // so a surviving subscriber would keep a stale segments_count. Recompute them
+    // explicitly afterwards (same pattern as SegmentsRepository::bulkDelete()).
+    $affectedIds = $this->connection->executeQuery(
+      "
+      SELECT mpss.subscriber_id FROM {$subscriberSegmentsTable} mpss
+      LEFT JOIN {$subscribersTable} mps ON mpss.subscriber_id = mps.id
+      WHERE mpss.segment_id = :segmentId AND mpss.status = :subscribedStatus
+        AND (mps.is_woocommerce_user = 0 OR mps.email = '' OR mps.email IS NULL)
+    ",
+      ['segmentId' => $wcSegment->getId(), 'subscribedStatus' => SubscriberEntity::STATUS_SUBSCRIBED],
+      ['segmentId' => ParameterType::INTEGER, 'subscribedStatus' => ParameterType::STRING]
+    )->fetchFirstColumn();
+
     // Unsubscribe non-WC or invalid users from segment
     $this->connection->executeQuery(
       "
@@ -465,6 +540,11 @@ class WooCommerce {
       ['segmentId' => $wcSegment->getId()],
       ['segmentId' => ParameterType::INTEGER]
     );
+
+    $subscriberIds = array_map(function ($id): int {
+      return is_numeric($id) ? (int)$id : 0;
+    }, $affectedIds);
+    $this->segmentsCountRecalculator->recalculateForSubscribers($subscriberIds);
   }
 
   private function updateGlobalStatus(): void {

@@ -5,9 +5,9 @@ License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl.html
 Tags: seo, internal links, automatic linking, linkbuilding, onpage, auto linker, ux, link, links
 Requires at least: 5.9.0
-Tested up to: 6.9
+Tested up to: 7.2
 Requires PHP: 7.1.0
-Stable tag: 2.26.0
+Stable tag: 2.26.1
 
 Improve your SEO and your user experience through internal linkbuilding. Automated links between your posts based on a smart keyword configuration.
 
@@ -128,6 +128,9 @@ The Pro version also provides a direct import of __post (and term) titles__ or, 
 7. Import and Export Section - Here you can easily import and export plugin settings or your configured keywords.
 
 == Changelog ==
+
+= 2.26.1 - 04/November/2026 =
+* COMPATIBILITY: Update Freemius SDK to version 2.13.5.
 
 = 2.26.0 - 10/Feb/2026 =
 * FEATURE: Internal import now supports non-hierarchical taxonomies such as product_tag. Developers can extend this via the ilj_allowed_import_tag_taxonomies filter.
@@ -313,4 +316,4 @@ Release Date: December 2nd, 2022
 For the complete changelog, please refer to [https://www.internallinkjuicer.com/changelog/](https://www.internallinkjuicer.com/changelog/).
 
 == Upgrade Notice ==
-* 2.26.0: Internal import now supports non-hierarchical taxonomies such as product_tag. Various fixes and tweaks. See the changelog for full details. A recommended update for all.
+* 2.26.1: Updated Freemius SDK. See the changelog for full details. A recommended update for all.

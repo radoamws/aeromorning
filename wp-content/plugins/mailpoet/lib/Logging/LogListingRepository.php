@@ -14,7 +14,7 @@ class LogListingRepository extends ListingRepository {
   use ListingDateRangeFilterTrait;
 
   protected function applySelectClause(QueryBuilder $queryBuilder) {
-    $queryBuilder->select('PARTIAL l.{id,name,level,message,createdAt}');
+    $queryBuilder->select('PARTIAL l.{id,name,level,message,rawMessage,context,createdAt}');
   }
 
   protected function applyFromClause(QueryBuilder $queryBuilder) {

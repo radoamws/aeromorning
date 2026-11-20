@@ -5,8 +5,8 @@ if (!defined('ABSPATH')) exit;
 use function sprintf;
 final class NamedQueryNotFound extends ORMException implements ConfigurationException
 {
- public static function fromName(string $name) : self
- {
- return new self(sprintf('Could not find a named query by the name "%s"', $name));
- }
+public static function fromName(string $name): self
+{
+return new self(sprintf('Could not find a named query by the name "%s"', $name));
+}
 }

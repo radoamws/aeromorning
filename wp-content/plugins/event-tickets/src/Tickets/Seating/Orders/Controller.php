@@ -132,6 +132,7 @@ class Controller extends Controller_Contract {
 	 */
 	protected function do_register(): void {
 		add_filter( 'tec_tickets_commerce_cart_prepare_data', [ $this, 'handle_seat_selection' ] );
+		add_filter( 'tec_tickets_commerce_cart_to_checkout_redirect_url', [ $this, 'filter_checkout_redirect_url' ], 10, 2 );
 		add_action(
 			'tec_tickets_commerce_flag_action_generated_attendee',
 			[ $this, 'save_seat_data_for_attendee' ],
@@ -230,6 +231,7 @@ class Controller extends Controller_Contract {
 	 */
 	public function unregister(): void {
 		remove_filter( 'tec_tickets_commerce_cart_prepare_data', [ $this, 'handle_seat_selection' ] );
+		remove_filter( 'tec_tickets_commerce_cart_to_checkout_redirect_url', [ $this, 'filter_checkout_redirect_url' ] );
 		remove_action(
 			'tec_tickets_commerce_flag_action_generated_attendee',
 			[ $this, 'save_seat_data_for_attendee' ]
@@ -378,6 +380,20 @@ class Controller extends Controller_Contract {
 	 */
 	public function handle_seat_selection( array $data ): array {
 		return $this->cart->handle_seat_selection( $data );
+	}
+
+	/**
+	 * Sends the buyer back to the event page when the cart left out a seated ticket.
+	 *
+	 * @since 5.31.1
+	 *
+	 * @param string|null $url  The URL the cart redirects to.
+	 * @param array       $data The cart data that was processed.
+	 *
+	 * @return string|null The URL the cart redirects to.
+	 */
+	public function filter_checkout_redirect_url( $url, $data ) {
+		return $this->cart->filter_checkout_redirect_url( $url, $data );
 	}
 
 	/**
@@ -684,6 +700,7 @@ class Controller extends Controller_Contract {
 	 * Updates an Attendee reservation from AJAX data.
 	 *
 	 * @since 5.16.0
+	 * @since 5.29.5.1 Refuse an attendee that does not belong to the post the capability was checked against.
 	 *
 	 * @return void The function does not return a value but will send the JSON response.
 	 */
@@ -718,8 +735,31 @@ class Controller extends Controller_Contract {
 
 		$attendee_id = (int) $json['attendeeId'];
 
+		if ( ! $this->attendee_belongs_to_post( $attendee_id, $post_id ) ) {
+			wp_send_json_error(
+				[
+					'error' => 'You do not have permission to perform this action.',
+				],
+				403
+			);
+
+			return;
+		}
+
 		if ( isset( $json['ticketId'] ) ) {
-			$new_ticket_id           = $json['ticketId'];
+			$new_ticket_id = $json['ticketId'];
+
+			if ( ! $this->ticket_belongs_to_post( absint( $new_ticket_id ), $post_id ) ) {
+				wp_send_json_error(
+					[
+						'error' => 'You do not have permission to perform this action.',
+					],
+					403
+				);
+
+				return;
+			}
+
 			$attendee_to_ticket_keys = array_values( tribe_attendees()->attendee_to_ticket_keys() );
 			global $wpdb;
 			$attendee_to_ticket_keys_list = DB::prepare(
@@ -840,5 +880,64 @@ class Controller extends Controller_Contract {
 		$this->cart->warmup_caches();
 
 		$this->session->confirm_all_reservations();
+	}
+
+	/**
+	 * Whether a ticket belongs to a given post.
+	 *
+	 * @since 5.29.5.1
+	 *
+	 * @param int $ticket_id The ticket to check.
+	 * @param int $post_id   The post the ticket should belong to.
+	 *
+	 * @return bool Whether the ticket belongs to the post.
+	 */
+	private function ticket_belongs_to_post( int $ticket_id, int $post_id ): bool {
+		if ( ! $ticket_id ) {
+			return false;
+		}
+
+		foreach ( tribe_tickets()->where( 'event', $post_id )->get_ids( true ) as $post_ticket_id ) {
+			if ( absint( $post_ticket_id ) === $ticket_id ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Whether an attendee is attached to a given post.
+	 *
+	 * @since 5.29.5.1
+	 *
+	 * @param int $attendee_id The attendee to check.
+	 * @param int $post_id     The post the attendee should belong to.
+	 *
+	 * @return bool Whether the attendee is attached to the post.
+	 */
+	private function attendee_belongs_to_post( int $attendee_id, int $post_id ): bool {
+		$attendee_to_event_keys = array_values( tribe_attendees()->attendee_to_event_keys() );
+
+		if ( ! $attendee_to_event_keys ) {
+			return false;
+		}
+
+		global $wpdb;
+		$attendee_to_event_keys_list = DB::prepare(
+			implode( ',', array_fill( 0, count( $attendee_to_event_keys ), '%s' ) ),
+			$attendee_to_event_keys
+		);
+
+		return tribe_is_truthy(
+			DB::get_var(
+				DB::prepare(
+					"SELECT 1 FROM %i WHERE post_id = %d AND meta_key IN ({$attendee_to_event_keys_list}) AND meta_value = %d",
+					$wpdb->postmeta,
+					$attendee_id,
+					$post_id
+				)
+			)
+		);
 	}
 }

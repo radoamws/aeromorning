@@ -40,8 +40,8 @@ class __TwigTemplate_c9698819ba62cbd2a50d0d8966b632b15dab68db5924228afc7775b0b33
         // line 1
         yield "<script type=\"text/javascript\">
   jQuery(function(\$){
-    \$('#mailpoet_woocommerce_customize_button')
-      .insertAfter(\$('#email_notification_settings-description'))
+    \$(\x27#mailpoet_woocommerce_customize_button\x27)
+      .insertAfter(\$(\x27#email_notification_settings-description\x27))
       .show();
   });
 </script>

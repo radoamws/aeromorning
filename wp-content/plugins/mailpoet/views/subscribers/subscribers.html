@@ -12,6 +12,8 @@
     var mailpoet_signup_confirmation_enabled = <%= json_encode(signup_confirmation_enabled) %>;
     var mailpoet_bulk_confirmation_resend_limit = <%= json_encode(bulk_confirmation_resend_limit) %>;
     var mailpoet_subscribers_api = <%= json_encode(api) %>;
+    var mailpoet_timezone_list = <%= json_encode(timezone_list) %>;
+    var mailpoet_collect_subscriber_timezones = <%= json_encode(collect_subscriber_timezones) %>;
   </script>
 
   <%= localize({
@@ -105,7 +107,7 @@
     'columnCount': _x('Count', 'Table column label for count of subscriber actions'),
     'unknownBadgeName': __('Unknown'),
     'unknownBadgeTooltip': __('Not enough data.'),
-    'tooltipUnknown': __('Fewer than 3 emails sent ever'),
+    'tooltipUnknown': __('Not enough tracked emails in the last year'),
     'dormantBadgeName': __('Dormant'),
     'dormantBadgeTooltip': __('Not enough recent data.'),
     'tooltipDormant': __('Fewer than 3 emails sent in the last year'),

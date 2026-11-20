@@ -18,11 +18,11 @@ use Google\Site_Kit\Core\Authentication\Google_Proxy;
 use Google\Site_Kit\Core\Authentication\Profile;
 use Google\Site_Kit\Core\Authentication\Token;
 use Google\Site_Kit\Core\Dismissals\Dismissed_Items;
+use Google\Site_Kit\Core\Intents\Intents;
 use Google\Site_Kit\Core\Permissions\Permissions;
 use Google\Site_Kit\Core\Storage\Options;
 use Google\Site_Kit\Core\Storage\Transients;
 use Google\Site_Kit\Core\Storage\User_Options;
-use Google\Site_Kit\Core\Util\Feature_Flags;
 use Google\Site_Kit\Core\Util\Scopes;
 use Google\Site_Kit\Core\Util\URL;
 use Google\Site_Kit_Dependencies\Google\Service\PeopleService as Google_Service_PeopleService;
@@ -40,6 +40,7 @@ final class OAuth_Client extends OAuth_Client_Base {
 	const OPTION_ADDITIONAL_AUTH_SCOPES = 'googlesitekit_additional_auth_scopes';
 	const OPTION_REDIRECT_URL           = 'googlesitekit_redirect_url';
 	const OPTION_ERROR_REDIRECT_URL     = 'googlesitekit_error_redirect_url';
+	const STATE_NONCE_ACTION            = 'googlesitekit_oauth_state';
 	const CRON_REFRESH_PROFILE_DATA     = 'googlesitekit_cron_refresh_profile_data';
 
 	/**
@@ -335,6 +336,7 @@ final class OAuth_Client extends OAuth_Client_Base {
 	 * @since 1.0.0
 	 * @since 1.9.0 Added $additional_scopes parameter.
 	 * @since 1.34.1 Updated handling of $additional_scopes to restore rewritten scope.
+	 * @since 1.192.0 Adds a `state` value.
 	 *
 	 * @param string   $redirect_url      Redirect URL after authentication.
 	 * @param string   $error_redirect_url Redirect URL after authentication error.
@@ -377,6 +379,9 @@ final class OAuth_Client extends OAuth_Client_Base {
 		$scopes = array_merge( $this->get_required_scopes(), $additional_scopes );
 		$this->get_client()->setScopes( array_unique( $scopes ) );
 
+		// Bind the callback to the user who started this authorization.
+		$this->get_client()->setState( wp_create_nonce( self::STATE_NONCE_ACTION ) );
+
 		return add_query_arg(
 			$this->google_proxy->get_metadata_fields(),
 			$this->get_client()->createAuthUrl()
@@ -389,10 +394,19 @@ final class OAuth_Client extends OAuth_Client_Base {
 	 *
 	 * @since 1.0.0
 	 * @since 1.49.0 Uses the new `Google_Proxy::setup_url_v2` method when the `serviceSetupV2` feature flag is enabled.
+	 * @since 1.192.0 Rejects a callback without a valid `state`.
 	 */
 	public function authorize_user() {
-		$code       = htmlspecialchars( $this->context->input()->filter( INPUT_GET, 'code' ) ?? '' );
-		$error_code = htmlspecialchars( $this->context->input()->filter( INPUT_GET, 'error' ) ?? '' );
+		// Only accept a callback for an authorization the current user started.
+		$state = $this->context->input()->filter( INPUT_GET, 'state' );
+		if ( ! wp_verify_nonce( $state, self::STATE_NONCE_ACTION ) ) {
+			$this->user_options->set( self::OPTION_ERROR_CODE, 'invalid_state' );
+			wp_safe_redirect( $this->get_authorize_user_redirect_url_for_error() );
+			exit();
+		}
+
+		$code       = htmlspecialchars( $this->context->input()->filter( INPUT_GET, 'code' ) ?? '', ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 );
+		$error_code = htmlspecialchars( $this->context->input()->filter( INPUT_GET, 'error' ) ?? '', ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 );
 
 		// If we have a code, check if there's a stored redirect URL to prevent duplicate setups.
 		// The OAuth2 spec requires that an authorization code can only be used once.
@@ -429,7 +443,8 @@ final class OAuth_Client extends OAuth_Client_Base {
 		try {
 			$token_response = $this->get_client()->fetchAccessTokenWithAuthCode( $code );
 		} catch ( Google_Proxy_Code_Exception $e ) {
-			// Redirect back to proxy immediately with the access code.
+			// Redirect back to proxy immediately with the access code. Unlike after a failed refresh, this
+			// access code names the proxy session of this browser flow, so its redirect carries `state`.
 			$credentials = $this->credentials->get();
 			$params      = array(
 				'code'    => $e->getAccessCode(),
@@ -462,7 +477,7 @@ final class OAuth_Client extends OAuth_Client_Base {
 		if ( isset( $token_response['scope'] ) ) {
 			$scopes = explode( ' ', sanitize_text_field( $token_response['scope'] ) );
 		} elseif ( $this->context->input()->filter( INPUT_GET, 'scope' ) ) {
-			$scope  = htmlspecialchars( $this->context->input()->filter( INPUT_GET, 'scope' ) );
+			$scope  = htmlspecialchars( $this->context->input()->filter( INPUT_GET, 'scope' ), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 );
 			$scopes = explode( ' ', $scope );
 		} else {
 			$scopes = $this->get_required_scopes();
@@ -619,9 +634,14 @@ final class OAuth_Client extends OAuth_Client_Base {
 	 * Return the URL to redirect the user to after authorization, including important query params.
 	 *
 	 * @since 1.170.0
+	 * @since 1.190.0 Added the `intent` and `intent_code` arguments, with a dashboard redirect when no redirect URL is stored.
 	 */
 	private function get_authorize_user_redirect_url() {
 		$redirect_url = $this->user_options->get( self::OPTION_REDIRECT_URL );
+		$intent_args  = Intents::get_query_args(
+			$this->context->input()->filter( INPUT_GET, 'intent' ),
+			$this->context->input()->filter( INPUT_GET, 'intent_code' )
+		);
 
 		if ( $redirect_url ) {
 			$url_query = URL::parse( $redirect_url, PHP_URL_QUERY );
@@ -640,8 +660,16 @@ final class OAuth_Client extends OAuth_Client_Base {
 				$redirect_url = add_query_arg( array( 'searchConsoleSetupSuccess' => 'true' ), $redirect_url );
 			}
 
+			if ( $intent_args ) {
+				$redirect_url = add_query_arg( $intent_args, $redirect_url );
+			}
+
 			$this->user_options->delete( self::OPTION_REDIRECT_URL );
 			$this->user_options->delete( self::OPTION_ERROR_REDIRECT_URL );
+		} elseif ( $intent_args ) {
+			// The user has just authorized Site Kit, so they can view the dashboard,
+			// where the intent replaces the welcome notification.
+			$redirect_url = $this->context->admin_url( 'dashboard', $intent_args );
 		} else {
 			// No redirect_url is set, use default page.
 			$redirect_url = $this->context->admin_url( 'splash', array( 'notification' => $this->get_notification_for_default_redirect_url() ) );
@@ -658,10 +686,6 @@ final class OAuth_Client extends OAuth_Client_Base {
 	 * @return string The value of the `notification` query param.
 	 */
 	private function get_notification_for_default_redirect_url() {
-		if ( ! Feature_Flags::enabled( 'setupFlowRefresh' ) ) {
-			return 'authentication_success';
-		}
-
 		if ( $this->dismissed_items->is_dismissed( 'welcome-modal-gathering-data' ) ) {
 			return 'authentication_success';
 		}

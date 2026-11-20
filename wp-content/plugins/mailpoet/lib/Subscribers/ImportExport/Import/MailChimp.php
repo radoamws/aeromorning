@@ -9,7 +9,7 @@ use MailPoet\Util\Helpers;
 
 class MailChimp {
   private const API_BASE_URI = 'https://user:%s@%s.api.mailchimp.com/3.0/';
-  private const API_KEY_REGEX = '/[a-zA-Z0-9]{32}-[a-zA-Z0-9]{2,4}$/';
+  private const API_KEY_REGEX = '/^[a-zA-Z0-9]{32}-[a-zA-Z0-9]{2,4}$/D';
   private const API_BATCH_SIZE = 100;
 
   /** @var false|string  */
@@ -180,7 +180,7 @@ class MailChimp {
       'offset' => $offset,
     ]);
 
-    $connection = @fopen($url, 'r');
+    $connection = @fopen($url, 'r'); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Streams the response so it can stop once it passes the size limit.
     if (!$connection) {
       return null;
     }
@@ -200,7 +200,7 @@ class MailChimp {
         $this->throwException('size');
       }
     }
-    fclose($connection);
+    fclose($connection); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Streams the response so it can stop once it passes the size limit.
 
     $decoded = json_decode($response, true);
     return is_array($decoded) ? $decoded : null;

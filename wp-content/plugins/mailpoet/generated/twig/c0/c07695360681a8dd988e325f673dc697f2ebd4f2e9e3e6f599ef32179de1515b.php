@@ -37,7 +37,7 @@ class __TwigTemplate_a5a2c3a6bab81ecdcc58d0244fe914977ee3578bd35f95ccc80abfbc218
     protected function doDisplay(array $context, array $blocks = [])
     {
         $macros = $this->macros;
-        yield "<a href=\"{{escapeURL link }}\" onClick=\"return false;\"><img src=\"{{#ifCond image '!=' ''}}{{ image }}{{ else }}{{ imageMissingSrc }}{{/ifCond}}\" onerror=\"if (this.src != '{{ imageMissingSrc }}') this.src = '{{ imageMissingSrc }}';\" alt=\"{{ text }}\" style=\"width: {{ width }}; height: {{ height }};\"/></a>
+        yield "<a href=\"{{escapeURL link }}\" onClick=\"return false;\"><img src=\"{{#ifCond image \x27!=\x27 \x27\x27}}{{ image }}{{ else }}{{ imageMissingSrc }}{{/ifCond}}\" onerror=\"if (this.src != \x27{{ imageMissingSrc }}\x27) this.src = \x27{{ imageMissingSrc }}\x27;\" alt=\"{{ text }}\" style=\"width: {{ width }}; height: {{ height }};\"/></a>
 ";
         return; yield '';
     }

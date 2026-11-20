@@ -17,7 +17,6 @@ use MailPoet\Automation\Engine\Registry;
 use MailPoet\Automation\Engine\Storage\AutomationStorage;
 use MailPoet\WP\Functions as WPFunctions;
 use MailPoet\WP\Notice as WPNotice;
-use MailPoet\WPCOM\DotcomHelperFunctions;
 
 class AutomationEditor {
   /** @var AssetsController */
@@ -41,9 +40,6 @@ class AutomationEditor {
   /** @var SubjectTransformerHandler */
   private $subjectTransformerHandler;
 
-  /** @var DotcomHelperFunctions */
-  private $dotcomHelperFunctions;
-
   public function __construct(
     AssetsController $assetsController,
     AutomationMapper $automationMapper,
@@ -51,8 +47,7 @@ class AutomationEditor {
     PageRenderer $pageRenderer,
     Registry $registry,
     WPFunctions $wp,
-    SubjectTransformerHandler $subjectTransformerHandler,
-    DotcomHelperFunctions $dotcomHelperFunctions
+    SubjectTransformerHandler $subjectTransformerHandler
   ) {
     $this->assetsController = $assetsController;
     $this->automationMapper = $automationMapper;
@@ -61,7 +56,6 @@ class AutomationEditor {
     $this->registry = $registry;
     $this->wp = $wp;
     $this->subjectTransformerHandler = $subjectTransformerHandler;
-    $this->dotcomHelperFunctions = $dotcomHelperFunctions;
   }
 
   public function render() {
@@ -168,8 +162,6 @@ class AutomationEditor {
     foreach ($this->registry->getContextFactories() as $key => $factory) {
       $data[$key] = $factory();
     }
-
-    $data['is_garden'] = $this->dotcomHelperFunctions->isGarden();
 
     return $data;
   }

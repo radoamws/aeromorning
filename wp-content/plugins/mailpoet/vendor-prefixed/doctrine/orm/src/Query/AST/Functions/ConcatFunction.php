@@ -8,31 +8,31 @@ use MailPoetVendor\Doctrine\ORM\Query\SqlWalker;
 use MailPoetVendor\Doctrine\ORM\Query\TokenType;
 class ConcatFunction extends FunctionNode
 {
- public $firstStringPrimary;
- public $secondStringPrimary;
- public $concatExpressions = [];
- public function getSql(SqlWalker $sqlWalker)
- {
- $platform = $sqlWalker->getConnection()->getDatabasePlatform();
- $args = [];
- foreach ($this->concatExpressions as $expression) {
- $args[] = $sqlWalker->walkStringPrimary($expression);
- }
- return $platform->getConcatExpression(...$args);
- }
- public function parse(Parser $parser)
- {
- $parser->match(TokenType::T_IDENTIFIER);
- $parser->match(TokenType::T_OPEN_PARENTHESIS);
- $this->firstStringPrimary = $parser->StringPrimary();
- $this->concatExpressions[] = $this->firstStringPrimary;
- $parser->match(TokenType::T_COMMA);
- $this->secondStringPrimary = $parser->StringPrimary();
- $this->concatExpressions[] = $this->secondStringPrimary;
- while ($parser->getLexer()->isNextToken(TokenType::T_COMMA)) {
- $parser->match(TokenType::T_COMMA);
- $this->concatExpressions[] = $parser->StringPrimary();
- }
- $parser->match(TokenType::T_CLOSE_PARENTHESIS);
- }
+public $firstStringPrimary;
+public $secondStringPrimary;
+public $concatExpressions = [];
+public function getSql(SqlWalker $sqlWalker)
+{
+$platform = $sqlWalker->getConnection()->getDatabasePlatform();
+$args = [];
+foreach ($this->concatExpressions as $expression) {
+$args[] = $sqlWalker->walkStringPrimary($expression);
+}
+return $platform->getConcatExpression(...$args);
+}
+public function parse(Parser $parser)
+{
+$parser->match(TokenType::T_IDENTIFIER);
+$parser->match(TokenType::T_OPEN_PARENTHESIS);
+$this->firstStringPrimary = $parser->StringPrimary();
+$this->concatExpressions[] = $this->firstStringPrimary;
+$parser->match(TokenType::T_COMMA);
+$this->secondStringPrimary = $parser->StringPrimary();
+$this->concatExpressions[] = $this->secondStringPrimary;
+while ($parser->getLexer()->isNextToken(TokenType::T_COMMA)) {
+$parser->match(TokenType::T_COMMA);
+$this->concatExpressions[] = $parser->StringPrimary();
+}
+$parser->match(TokenType::T_CLOSE_PARENTHESIS);
+}
 }

@@ -29,6 +29,8 @@ class Data extends Root {
 		'7.0-b26'   => [ 'litespeed_update_7' ],
 		'7.0.1-b1'  => [ 'litespeed_update_7_0_1' ],
 		'7.7-b28'   => [ 'litespeed_update_7_7' ],
+		'7.9-b5'    => [ 'litespeed_update_7_9' ],
+		'7.9.2-b60' => [ 'litespeed_update_7_9_2' ],
 	];
 
 	/**
@@ -46,14 +48,13 @@ class Data extends Root {
 	 * @var array<string,int>
 	 */
 	private $_url_file_types = [
-		'css'  => 1,
-		'js'   => 2,
-		'ccss' => 3,
-		'ucss' => 4,
+		'css'     => 1,
+		'js'      => 2,
+		'ccss'    => 3,
+		'ucss'    => 4,
+		'optimax' => 5,
 	];
 
-	/** Table: image optimization results. */
-	const TB_IMG_OPTM = 'litespeed_img_optm';
 	/** Table: image optimization working queue. */
 	const TB_IMG_OPTMING = 'litespeed_img_optming';
 	/** Table: cached avatars. */
@@ -144,9 +145,14 @@ class Data extends Root {
 		// Update related files.
 		$this->cls( 'Activation' )->update_files();
 
-		// Update version to latest.
-		Conf::delete_option( Base::_VER );
-		Conf::add_option( Base::_VER, Core::VER );
+		if ( ! Purge::queue_upgrade_invalidation() ) {
+			return;
+		}
+
+		// Update version to latest only after the page-cache purge is durable.
+		if ( ! Conf::update_option( Base::_VER, Core::VER ) ) {
+			return;
+		}
 
 		self::debug( 'Updated version to ' . Core::VER );
 
@@ -167,11 +173,11 @@ class Data extends Root {
 	 * @access public
 	 *
 	 * @param string $ver Currently stored version string.
-	 * @return void
+	 * @return bool Whether the upgrade completed.
 	 */
 	public function conf_site_upgrade( $ver ) {
 		if ( $this->_get_upgrade_lock() ) {
-			return;
+			return false;
 		}
 
 		$this->_set_upgrade_lock( true );
@@ -189,9 +195,15 @@ class Data extends Root {
 
 		// Reload options.
 		$this->cls( 'Conf' )->load_site_options();
+		$this->cls( 'Activation' )->update_files();
 
-		Conf::delete_site_option( Base::_VER );
-		Conf::add_site_option( Base::_VER, Core::VER );
+		if ( ! Purge::queue_upgrade_invalidation() ) {
+			return false;
+		}
+
+		if ( ! Conf::update_site_option( Base::_VER, Core::VER ) ) {
+			return false;
+		}
 
 		self::debug( 'Updated site_version to ' . Core::VER );
 
@@ -201,6 +213,8 @@ class Data extends Root {
 			define( 'LSWCP_EMPTYCACHE', true );
 		}
 		Purge::purge_all();
+
+		return true;
 	}
 
 	/**
@@ -236,7 +250,7 @@ class Data extends Root {
 		Admin_Display::info(
 			sprintf(
 				/* translators: %s: time string */
-				__( 'The database has been upgrading in the background since %s. This message will disappear once upgrade is complete.', 'litespeed-cache' ),
+				__( 'A database upgrade started %s has not completed yet. If it does not finish, it will be retried automatically within an hour of that start.', 'litespeed-cache' ),
 				'<code>' . Utility::readable_time( $is_upgrading ) . '</code>'
 			) . ' [LiteSpeed]',
 			true
@@ -272,9 +286,6 @@ class Data extends Root {
 		global $wpdb;
 
 		switch ( $tb ) {
-			case 'img_optm':
-				return $wpdb->prefix . self::TB_IMG_OPTM;
-
 			case 'img_optming':
 				return $wpdb->prefix . self::TB_IMG_OPTMING;
 
@@ -402,7 +413,7 @@ class Data extends Root {
 		$this->tb_del( 'url' );
 		$this->tb_del( 'url_file' );
 
-		// Deleting img_optm only can be done when destroy all optm images
+		// Deleting img_optming only can be done when destroy all optm images
 	}
 
 	/**
@@ -426,7 +437,7 @@ class Data extends Root {
 	 * @since 4.0
 	 * @access public
 	 *
-	 * @param string $file_type One of 'css','js','ccss','ucss'.
+	 * @param string $file_type One of 'css','js','ccss','ucss','optimax'.
 	 * @return void
 	 */
 	public function url_file_clean( $file_type ) {
@@ -464,7 +475,7 @@ class Data extends Root {
 	 *
 	 * @param string $request_url  Full request URL.
 	 * @param string $vary         Vary string (may be long; will be md5 if >32).
-	 * @param string $file_type    One of 'css','js','ccss','ucss'.
+	 * @param string $file_type    One of 'css','js','ccss','ucss','optimax'.
 	 * @param string $filecon_md5  MD5 of the generated file content.
 	 * @param string $path         Base path where files live.
 	 * @param bool   $mobile       Whether mapping is for mobile.
@@ -538,7 +549,7 @@ class Data extends Root {
 			$list = $wpdb->get_results( $q, ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
 			if ( $list ) {
 				foreach ( $list as $v ) {
-					$ext         = 'js' === $file_type ? 'js' : 'css';
+					$ext         = 'optimax' === $file_type ? 'html' : ( 'js' === $file_type ? 'js' : 'css' );
 					$file_to_del = trailingslashit( $path ) . $v['filename'] . '.' . $ext;
 					if ( file_exists( $file_to_del ) ) {
 						self::debug( 'Delete expired unused file: ' . $file_to_del );
@@ -559,7 +570,7 @@ class Data extends Root {
 	 *
 	 * @param string $request_url Full request URL or tag.
 	 * @param string $vary        Vary string (may be md5 if previously stored).
-	 * @param string $file_type   One of 'css','js','ccss','ucss'.
+	 * @param string $file_type   One of 'css','js','ccss','ucss','optimax'.
 	 * @return string|false Filename md5 (without extension) or false if none.
 	 */
 	public function load_url_file( $request_url, $vary, $file_type ) {

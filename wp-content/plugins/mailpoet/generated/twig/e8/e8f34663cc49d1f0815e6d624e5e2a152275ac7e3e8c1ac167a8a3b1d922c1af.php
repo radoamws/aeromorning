@@ -51,30 +51,30 @@ class __TwigTemplate_040602ebc7669cdfb9da26116daadadf72855abd5f9690ec0e527b909dc
         $macros = $this->macros;
         // line 2
         yield "<script>
-  var mailpoet_logo_url = '";
+  var mailpoet_logo_url = \x27";
         // line 3
         yield $this->extensions['MailPoet\Twig\Assets']->generateCdnUrl("welcome-wizard/mailpoet-logo.20200623.png");
-        yield "';
-  var wizard_sender_illustration_url = '";
+        yield "\x27;
+  var wizard_sender_illustration_url = \x27";
         // line 4
         yield $this->extensions['MailPoet\Twig\Assets']->generateCdnUrl("welcome-wizard/sender.20200623.png");
-        yield "';
-  var wizard_tracking_illustration_url = '";
+        yield "\x27;
+  var wizard_tracking_illustration_url = \x27";
         // line 5
         yield $this->extensions['MailPoet\Twig\Assets']->generateCdnUrl("welcome-wizard/tracking.20200623.png");
-        yield "';
-  var wizard_woocommerce_illustration_url = '";
+        yield "\x27;
+  var wizard_woocommerce_illustration_url = \x27";
         // line 6
         yield $this->extensions['MailPoet\Twig\Assets']->generateCdnUrl("welcome-wizard/woocommerce.20241219.png");
-        yield "';
-  var wizard_MSS_pitch_illustration_url = '";
+        yield "\x27;
+  var wizard_MSS_pitch_illustration_url = \x27";
         // line 7
         yield $this->extensions['MailPoet\Twig\Assets']->generateCdnUrl("welcome-wizard/illu-pitch-mss.20190912.png");
-        yield "';
-  var finish_wizard_url = '";
+        yield "\x27;
+  var finish_wizard_url = \x27";
         // line 8
         yield $this->env->getRuntime('MailPoetVendor\Twig\Runtime\EscaperRuntime')->escape(($context["finish_wizard_url"] ?? null), "html", null, true);
-        yield "';
+        yield "\x27;
   var admin_email = ";
         // line 9
         yield $this->extensions['MailPoet\Twig\Functions']->jsonEncode(($context["admin_email"] ?? null));
@@ -84,10 +84,10 @@ class __TwigTemplate_040602ebc7669cdfb9da26116daadadf72855abd5f9690ec0e527b909dc
         // line 11
         yield $this->extensions['MailPoet\Twig\Functions']->jsonEncode(($context["show_customers_import"] ?? null));
         yield ";
-  var mailpoet_account_url = '";
+  var mailpoet_account_url = \x27";
         // line 12
         yield $this->extensions['MailPoet\Twig\Functions']->addReferralId(((("https://account.mailpoet.com/?s=" . ($context["subscriber_count"] ?? null)) . "&email=") . $this->env->getRuntime('MailPoetVendor\Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, ($context["current_wp_user"] ?? null), "user_email", [], "any", false, false, false, 12), "js")));
-        yield "';
+        yield "\x27;
   var mailpoet_settings = ";
         // line 13
         yield $this->extensions['MailPoet\Twig\Functions']->jsonEncode(($context["settings"] ?? null));

@@ -18,9 +18,11 @@ wpra()->addModule(
 				'exclude_from_search' => true,
 				'publicly_queryable' => false,
 				'menu_icon' => 'dashicons-rss',
+				'capability_type' => 'post',
 				'capabilities' => array(
 					'create_posts' => 'do_not_allow',
 				),
+				'map_meta_cap' => true,
 				'supports' => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'revisions', 'custom-fields' ),
 			)
 		);
@@ -102,6 +104,13 @@ wpra()->addModule(
 			function ( string $column, $postId ) use ( $importer ) {
 				switch ( $column ) {
 					case 'wprss-title':
+						// WP's Bulk Edit reads titles from the hidden inline data that the
+						// core Title column prints. That column is replaced above, so print it here.
+						$post = get_post( $postId );
+						if ( $post instanceof \WP_Post ) {
+							get_inline_data( $post );
+						}
+
 						$title = get_the_title( $postId );
 
 						if ( empty( $title ) ) {
@@ -145,6 +154,33 @@ wpra()->addModule(
 					unset( $actions['view'] );
 				}
 				return $actions;
+			},
+			10,
+			2
+		);
+
+		// Feed Items are registered with `publicly_queryable => false`, so the
+		// local CPT URL produced by `get_permalink()` 404s. When WP code
+		// (search results, related-post widgets, themes, third-party plugins)
+		// fetches a feed item's URL, return the original source URL stored in
+		// `_wpra_url`. WPRA's own displays already do this via
+		// LayoutTrait::getItemUrl(); this gives parity for everything else.
+		add_filter(
+			'post_type_link',
+			function ( $url, $post ) {
+				if ( ! ( $post instanceof \WP_Post ) || $post->post_type !== 'wprss_feed_item' ) {
+					return $url;
+				}
+
+				$original = get_post_meta( $post->ID, ImportedPost::URL, true );
+				if ( is_string( $original ) && $original !== '' ) {
+					$safe = esc_url_raw( $original );
+					if ( $safe !== '' ) {
+						return $safe;
+					}
+				}
+
+				return $url;
 			},
 			10,
 			2

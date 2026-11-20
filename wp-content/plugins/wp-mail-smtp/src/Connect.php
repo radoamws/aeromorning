@@ -2,20 +2,42 @@
 
 namespace WPMailSMTP;
 
-use Plugin_Upgrader;
-use WP_Error;
-use WPMailSMTP\Admin\PluginsInstallSkin;
-use WPMailSMTP\Helpers\Helpers;
+use WPMailSMTP\Deprecated\Connect as DeprecatedMethods;
 
 /**
  * WP Mail SMTP Connect.
  *
- * WP Mail SMTP Connect is our service that makes it easy for non-techy users to
- * upgrade to Pro version without having to manually install Pro plugin.
+ * WP Mail SMTP Connect sends a Lite user with a license key to the upgrade page,
+ * which hands out the Pro plugin download.
  *
  * @since 2.6.0
  */
 class Connect {
+
+	/**
+	 * Backward-compatibility methods relocated from this class.
+	 *
+	 * @since 4.10.4
+	 */
+	use DeprecatedMethods;
+
+	/**
+	 * Query parameter marking a return URL as coming back from an upgrade.
+	 *
+	 * @since 4.10.0
+	 *
+	 * @var string
+	 */
+	const UPGRADED_QUERY_ARG = 'wp_mail_smtp_upgraded';
+
+	/**
+	 * The Pro plugin's basename.
+	 *
+	 * @since 4.10.1
+	 *
+	 * @var string
+	 */
+	private const PRO_PLUGIN_BASENAME = 'wp-mail-smtp-pro/wp_mail_smtp.php';
 
 	/**
 	 * Hooks.
@@ -24,42 +46,7 @@ class Connect {
 	 */
 	public function hooks() {
 
-		add_action( 'wp_mail_smtp_admin_area_enqueue_assets', [ $this, 'enqueue_scripts' ] );
 		add_action( 'wp_ajax_wp_mail_smtp_connect_url', [ $this, 'ajax_generate_url' ] );
-		add_action( 'wp_ajax_nopriv_wp_mail_smtp_connect_process', [ $this, 'process' ] );
-	}
-
-	/**
-	 * Enqueue connect JS file to WP Mail SMTP admin area hook.
-	 *
-	 * @since 2.6.0
-	 */
-	public function enqueue_scripts() {
-
-		wp_enqueue_script(
-			'wp-mail-smtp-connect',
-			wp_mail_smtp()->assets_url . '/js/connect' . WP::asset_min() . '.js',
-			[ 'jquery' ],
-			WPMS_PLUGIN_VER,
-			true
-		);
-
-		wp_localize_script(
-			'wp-mail-smtp-connect',
-			'wp_mail_smtp_connect',
-			[
-				'ajax_url'   => admin_url( 'admin-ajax.php' ),
-				'plugin_url' => wp_mail_smtp()->plugin_url,
-				'nonce'      => wp_create_nonce( 'wp-mail-smtp-connect' ),
-				'text'       => [
-					'plugin_activate_btn' => esc_html__( 'Activate', 'wp-mail-smtp' ),
-					'almost_done'         => esc_html__( 'Almost Done', 'wp-mail-smtp' ),
-					'oops'                => esc_html__( 'Oops!', 'wp-mail-smtp' ),
-					'ok'                  => esc_html__( 'OK', 'wp-mail-smtp' ),
-					'server_error'        => esc_html__( 'Unfortunately there was a server connection error.', 'wp-mail-smtp' ),
-				],
-			]
-		);
 	}
 
 	/**
@@ -67,39 +54,80 @@ class Connect {
 	 *
 	 * @since 2.6.0
 	 *
-	 * @param string $key        The license key.
-	 * @param string $oth        The One-time hash.
-	 * @param string $redirect   The redirect URL.
+	 * @param string $key      The license key.
+	 * @param string $oth      Unused, kept for backward compatibility.
+	 * @param string $redirect The redirect URL.
 	 *
 	 * @return bool|string
 	 */
-	public static function generate_url( $key, $oth = '', $redirect = '' ) {
+	public static function generate_url( $key, $oth = '', $redirect = '' ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 
 		if ( empty( $key ) || wp_mail_smtp()->is_pro() ) {
 			return false;
 		}
 
-		$oth        = ! empty( $oth ) ? $oth : hash( 'sha512', wp_rand() );
-		$hashed_oth = hash_hmac( 'sha512', $oth, wp_salt() );
-
 		$redirect = ! empty( $redirect ) ? $redirect : wp_mail_smtp()->get_admin()->get_admin_page_url();
-
-		update_option( 'wp_mail_smtp_connect_token', $oth );
-		update_option( 'wp_mail_smtp_connect', $key );
 
 		return add_query_arg(
 			[
 				'key'      => $key,
-				'oth'      => $hashed_oth,
-				'endpoint' => admin_url( 'admin-ajax.php' ),
 				'version'  => WPMS_PLUGIN_VER,
 				'siteurl'  => admin_url(),
-				'homeurl'  => site_url(),
+				'homeurl'  => wp_mail_smtp()->get_license_site_url()->derive(),
 				'redirect' => rawurldecode( base64_encode( $redirect ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 				'v'        => 2,
 			],
 			'https://upgrade.wpmailsmtp.com'
 		);
+	}
+
+	/**
+	 * The response that points the user at the Plugins screen when Pro is
+	 * already installed, empty otherwise.
+	 *
+	 * @since 4.10.4
+	 *
+	 * @param bool $is_activation_link Point at a one-click activation instead, for requests that carry the user's login cookies.
+	 *
+	 * @return array
+	 */
+	public static function get_pro_installed_response( $is_activation_link = false ) {
+
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		if ( ! array_key_exists( self::PRO_PLUGIN_BASENAME, get_plugins() ) ) {
+			return [];
+		}
+
+		// The Plugins screen keeps `s` through the post-activation redirect, so the list stays filtered to Pro.
+		$search = rawurlencode( 'WP Mail SMTP Pro' );
+
+		if ( $is_activation_link && current_user_can( 'activate_plugins' ) ) {
+			$url = add_query_arg(
+				[
+					'action'   => 'activate',
+					'plugin'   => rawurlencode( self::PRO_PLUGIN_BASENAME ),
+					's'        => $search,
+					'_wpnonce' => wp_create_nonce( 'activate-plugin_' . self::PRO_PLUGIN_BASENAME ),
+				],
+				admin_url( 'plugins.php' )
+			);
+		} else {
+			$url = add_query_arg(
+				[
+					'plugin_status' => 'inactive',
+					's'             => $search,
+				],
+				admin_url( 'plugins.php' )
+			);
+		}
+
+		return [
+			'message'          => esc_html__( 'WP Mail SMTP Pro is already installed on your site. Activate it to start using your Pro features.', 'wp-mail-smtp' ),
+			'plugins_page_url' => $url,
+		];
 	}
 
 	/**
@@ -109,200 +137,76 @@ class Connect {
 	 */
 	public function ajax_generate_url() { //phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 
-		// Run a security check.
-		check_ajax_referer( 'wp-mail-smtp-connect', 'nonce' );
+		if ( check_ajax_referer( 'wp-mail-smtp-admin', 'nonce', false ) === false ) {
+			wp_send_json_error( esc_html__( 'Your session expired. Please reload the page and try again.', 'wp-mail-smtp' ) );
+		}
 
 		// Check for permissions.
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			wp_send_json_error(
-				[
-					'message' => esc_html__( 'You are not allowed to install plugins.', 'wp-mail-smtp' ),
-				]
-			);
+			wp_send_json_error( esc_html__( 'You are not allowed to install plugins.', 'wp-mail-smtp' ) );
 		}
 
-		$key = ! empty( $_POST['key'] ) ? sanitize_text_field( wp_unslash( $_POST['key'] ) ) : '';
+		// A license key is an md5 hash, so sanitize_key cannot mangle it.
+		$key = ! empty( $_POST['key'] ) ? sanitize_key( wp_unslash( $_POST['key'] ) ) : '';
 
 		if ( empty( $key ) ) {
-			wp_send_json_error(
-				[
-					'message' => esc_html__( 'Please enter your license key to connect.', 'wp-mail-smtp' ),
-				]
-			);
+			wp_send_json_error( esc_html__( 'Please enter your license key to connect.', 'wp-mail-smtp' ) );
+		}
+
+		if ( ! $this->is_valid_key_format( $key ) ) {
+			wp_send_json_error( esc_html__( 'License key format is not valid.', 'wp-mail-smtp' ) );
 		}
 
 		if ( wp_mail_smtp()->is_pro() ) {
-			wp_send_json_error(
-				[
-					'message' => esc_html__( 'Only the Lite version can be upgraded.', 'wp-mail-smtp' ),
-				]
-			);
+			wp_send_json_error( esc_html__( 'Only the Lite version can be upgraded.', 'wp-mail-smtp' ) );
 		}
 
-		// Verify pro version is not installed.
-		$active = activate_plugin( 'wp-mail-smtp-pro/wp_mail_smtp.php', false, false, true );
+		$pro_installed = self::get_pro_installed_response( true );
 
-		if ( ! is_wp_error( $active ) ) {
-
-			// Deactivate Lite.
-			deactivate_plugins( plugin_basename( WPMS_PLUGIN_FILE ) );
-
-			wp_send_json_success(
-				[
-					'message' => esc_html__( 'WP Mail SMTP Pro was already installed, but was not active. We activated it for you.', 'wp-mail-smtp' ),
-					'reload'  => true,
-				]
-			);
+		if ( ! empty( $pro_installed ) ) {
+			wp_send_json_success( $pro_installed );
 		}
 
-		$url = self::generate_url( $key );
+		$url = self::generate_url( $key, '', $this->get_return_url() );
 
 		if ( empty( $url ) ) {
-			wp_send_json_error(
-				[
-					'message' => esc_html__( 'There was an error while generating an upgrade URL. Please try again.', 'wp-mail-smtp' ),
-				]
-			);
+			wp_send_json_error( esc_html__( 'There was an error while generating an upgrade URL. Please try again.', 'wp-mail-smtp' ) );
 		}
 
 		wp_send_json_success( [ 'url' => $url ] );
 	}
 
 	/**
-	 * AJAX callback to process WP Mail SMTP Connect.
+	 * Where the upgrade service sends the browser back to once it is done.
 	 *
-	 * @since 2.6.0
+	 * @since 4.10.0
+	 *
+	 * @return string A marked URL on this site.
 	 */
-	public function process() { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
+	private function get_return_url() {
 
-		$error = esc_html__( 'There was an error while installing an upgrade. Please download the plugin from wpmailsmtp.com and install it manually.', 'wp-mail-smtp' );
+		// The value travels to the service as a query parameter, so an unvalidated one
+		// would turn the upgrade page into an open redirect.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- ajax_generate_url() verifies the nonce before calling this.
+		$requested = ! empty( $_POST['redirect'] ) ? esc_url_raw( wp_unslash( $_POST['redirect'] ) ) : '';
+		$fallback  = wp_mail_smtp()->get_admin()->get_admin_page_url();
 
-		// Verify params present (oth & download link).
-		$post_oth = ! empty( $_REQUEST['oth'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['oth'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
-		$post_url = ! empty( $_REQUEST['file'] ) ? esc_url_raw( wp_unslash( $_REQUEST['file'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
+		$url = empty( $requested ) ? $fallback : wp_validate_redirect( $requested, $fallback );
 
-		if ( empty( $post_oth ) || empty( $post_url ) ) {
-			wp_send_json_error( $error );
-		}
+		return add_query_arg( self::UPGRADED_QUERY_ARG, '1', $url );
+	}
 
-		// Verify oth.
-		$oth = get_option( 'wp_mail_smtp_connect_token' );
+	/**
+	 * Whether the key is a 32-char MD5 hex string.
+	 *
+	 * @since 4.10.0
+	 *
+	 * @param string $key License key.
+	 *
+	 * @return bool
+	 */
+	private function is_valid_key_format( $key ) {
 
-		if ( empty( $oth ) ) {
-			wp_send_json_error( $error );
-		}
-
-		if ( hash_hmac( 'sha512', $oth, wp_salt() ) !== $post_oth ) {
-			wp_send_json_error( $error );
-		}
-
-		// Delete so cannot replay.
-		delete_option( 'wp_mail_smtp_connect_token' );
-
-		// Set the current screen to avoid undefined notices.
-		set_current_screen( 'toplevel_page_wp-mail-smtp' );
-
-		// Prepare variables.
-		$url = esc_url_raw( wp_mail_smtp()->get_admin()->get_admin_page_url() );
-
-		// Verify pro not activated.
-		if ( wp_mail_smtp()->is_pro() ) {
-			wp_send_json_success( esc_html__( 'Plugin installed & activated.', 'wp-mail-smtp' ) );
-		}
-
-		// Verify pro not installed.
-		$active = activate_plugin( 'wp-mail-smtp-pro/wp_mail_smtp.php', $url, false, true );
-
-		if ( ! is_wp_error( $active ) ) {
-			deactivate_plugins( plugin_basename( WPMS_PLUGIN_FILE ) );
-			wp_send_json_success( esc_html__( 'Plugin installed & activated.', 'wp-mail-smtp' ) );
-		}
-
-		/*
-		 * The `request_filesystem_credentials` function will output a credentials form in case of failure.
-		 * We don't want that, since it will break AJAX response. So just hide output with a buffer.
-		 */
-		ob_start();
-		// phpcs:ignore WPForms.Formatting.EmptyLineAfterAssigmentVariables.AddEmptyLine
-		$creds = request_filesystem_credentials( $url, '', false, false, null );
-		ob_end_clean();
-
-		// Check for file system permissions.
-		$perm_error = esc_html__( 'There was an error while installing an upgrade. Please check file system permissions and try again. Also, you can download the plugin from wpmailsmtp.com and install it manually.', 'wp-mail-smtp' );
-
-		if ( false === $creds || ! WP_Filesystem( $creds ) ) {
-			wp_send_json_error( $perm_error );
-		}
-
-		/*
-		 * We do not need any extra credentials if we have gotten this far, so let's install the plugin.
-		 */
-
-		// Do not allow WordPress to search/download translations, as this will break JS output.
-		remove_action( 'upgrader_process_complete', array( 'Language_Pack_Upgrader', 'async_upgrade' ), 20 );
-
-		// Import the plugin upgrader.
-		Helpers::include_plugin_upgrader();
-
-		// Create the plugin upgrader with our custom skin.
-		$installer = new Plugin_Upgrader( new PluginsInstallSkin() );
-
-		// Error check.
-		if ( ! method_exists( $installer, 'install' ) ) {
-			wp_send_json_error( $error );
-		}
-
-		// Check license key.
-		$key = get_option( 'wp_mail_smtp_connect', false );
-		delete_option( 'wp_mail_smtp_connect' );
-
-		if ( empty( $key ) ) {
-			wp_send_json_error(
-				new WP_Error(
-					'403',
-					esc_html__( 'There was an error while installing an upgrade. Please try again.', 'wp-mail-smtp' )
-				)
-			);
-		}
-
-		$installer->install( $post_url );
-
-		// Flush the cache and return the newly installed plugin basename.
-		wp_cache_flush();
-
-		$plugin_basename = $installer->plugin_info();
-
-		if ( $plugin_basename ) {
-
-			// Deactivate the lite version first.
-			deactivate_plugins( plugin_basename( WPMS_PLUGIN_FILE ) );
-
-			// Activate the plugin silently.
-			$activated = activate_plugin( $plugin_basename, '', false, true );
-
-			if ( ! is_wp_error( $activated ) ) {
-
-				// Save the license data, since it was verified on the connect page.
-				$options = Options::init();
-				$all_opt = $options->get_all_raw();
-
-				$all_opt['license']['key']              = $key;
-				$all_opt['license']['type']             = 'pro';
-				$all_opt['license']['is_expired']       = false;
-				$all_opt['license']['is_disabled']      = false;
-				$all_opt['license']['is_invalid']       = false;
-				$all_opt['license']['is_limit_reached'] = false;
-
-				$options->set( $all_opt, false, true );
-
-				wp_send_json_success( esc_html__( 'Plugin installed & activated.', 'wp-mail-smtp' ) );
-			} else {
-				// Reactivate the lite plugin if pro activation failed.
-				activate_plugin( plugin_basename( WPMS_PLUGIN_FILE ), '', false, true );
-				wp_send_json_error( esc_html__( 'Pro version installed but needs to be activated on the Plugins page.', 'wp-mail-smtp' ) );
-			}
-		}
-
-		wp_send_json_error( $error );
+		return (bool) preg_match( '/^[a-f0-9]{32}$/i', $key );
 	}
 }

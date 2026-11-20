@@ -4,11 +4,11 @@ namespace MailPoetVendor\Doctrine\ORM\Query\Expr;
 if (!defined('ABSPATH')) exit;
 class GroupBy extends Base
 {
- protected $preSeparator = '';
- protected $postSeparator = '';
- protected $parts = [];
- public function getParts()
- {
- return $this->parts;
- }
+protected $preSeparator = '';
+protected $postSeparator = '';
+protected $parts = [];
+public function getParts()
+{
+return $this->parts;
+}
 }

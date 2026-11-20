@@ -7,6 +7,7 @@ if (!defined('ABSPATH')) exit;
 
 use MailPoet\Entities\NewsletterEntity;
 use MailPoet\Newsletter\Renderer\Renderer as NewsletterRenderer;
+use MailPoet\Newsletter\Renderer\StylesHelper;
 use MailPoet\Newsletter\Shortcodes\Shortcodes;
 use MailPoetVendor\csstidy;
 use MailPoetVendor\csstidy_print;
@@ -157,6 +158,7 @@ class Renderer {
    * - We prefix the original selectors to avoid inlining those rules into content added int the MailPoet's editor.
    * - We update the font-family in the original CSS if it's set in the editor.
    * - We update the font-size for the inner content if it's set in the editor.
+   * - We set links in the WooCommerce content to the editor's link color.
    */
   public function enhanceCss(string $css, NewsletterEntity $newsletter): string {
     $this->cssParser->settings['compress_colors'] = false;
@@ -180,9 +182,17 @@ class Renderer {
     $css = $print->plain();
 
     // Enforce the special heading color for the WooCommerce email header
-    $wooHeadingColor = $newsletter->getGlobalStyle('woocommerce', 'headingFontColor');
+    $wooHeadingColor = $this->getValidGlobalStyle($newsletter, 'woocommerce', 'headingFontColor');
     if ($wooHeadingColor) {
       $css .= "#mailpoet-woo-email-header { color: $wooHeadingColor !important; }";
+    }
+
+    // WooCommerce derives link colors from its base color, which MailPoet sets to the branding color.
+    // The rule goes last, so it overrides link rules of the same specificity, including grouped ones like `a, .link`.
+    $linkColor = $this->getValidGlobalStyle($newsletter, 'link', 'fontColor');
+    if ($linkColor && $newsletter->getGlobalStyle('woocommerce', 'isSavedWithUpdatedStyles')) {
+      $container = '#' . self::CONTENT_CONTAINER_ID;
+      $css .= "$container a, $container .link, $container a.link { color: $linkColor; }";
     }
     return $css;
   }
@@ -231,9 +241,9 @@ class Renderer {
     $headingFontFamilyRaw = $newsletter->getGlobalStyle('woocommerce', 'headingFontFamily');
     $fontFamily = $fontFamilyRaw !== null ? $this->fontFamilyValidator->validateFontFamily($fontFamilyRaw) : null;
     $headingFontFamily = $headingFontFamilyRaw !== null ? $this->fontFamilyValidator->validateFontFamily($headingFontFamilyRaw) : null;
-    $fontSize = $newsletter->getGlobalStyle('text', 'fontSize');
-    $brandingColor = $newsletter->getGlobalStyle('woocommerce', 'brandingColor');
-    $contentHeadingColor = $newsletter->getGlobalStyle('woocommerce', 'contentHeadingFontColor') ?? $brandingColor;
+    $fontSize = $this->getValidGlobalStyle($newsletter, 'text', 'fontSize');
+    $brandingColor = $this->getValidGlobalStyle($newsletter, 'woocommerce', 'brandingColor');
+    $contentHeadingColor = $this->getValidGlobalStyle($newsletter, 'woocommerce', 'contentHeadingFontColor') ?? $brandingColor;
 
     // Update font family if it's set in the editor
     if (!empty($fontFamilyRaw) && !empty($properties['font-family'])) {
@@ -247,7 +257,7 @@ class Renderer {
     // Update heading font sizes and font family
     $supportedHeadings = ['h1', 'h2', 'h3'];
     foreach ($supportedHeadings as $heading) {
-      $headingFontSize = $newsletter->getGlobalStyle($heading, 'fontSize');
+      $headingFontSize = $this->getValidGlobalStyle($newsletter, $heading, 'fontSize');
       if ($headingFontSize && ($selectors === $heading)) {
         $properties['font-size'] = $headingFontSize;
       }
@@ -259,5 +269,10 @@ class Renderer {
       }
     }
     return $properties;
+  }
+
+  private function getValidGlobalStyle(NewsletterEntity $newsletter, string $category, string $style): ?string {
+    $value = $newsletter->getGlobalStyle($category, $style);
+    return StylesHelper::isValidCssValue($value) ? $value : null;
   }
 }
