@@ -147,8 +147,12 @@ final class AMNP_Publisher
         // Already done when the news is stored; repeated for rows queued before
         // AMNP_Content existed (idempotent).
         $news['content'] = AMNP_Content::cleanHtml((string) $news['content']);
-        foreach (['title', 'metadescription', 'focuskeyphrase'] as $field) {
-            $news[$field] = AMNP_Content::cleanText((string) $news[$field]);
+        foreach (['title', 'seotitle', 'metadescription', 'focuskeyphrase'] as $field) {
+            $news[$field] = AMNP_Content::cleanText((string) ($news[$field] ?? ''));
+        }
+        if ($news['lang'] === 'FR') {
+            $news['title'] = AMNP_Content::frenchTypography($news['title']);
+            $news['seotitle'] = AMNP_Content::frenchTypography($news['seotitle']);
         }
 
         switch_to_blog(AMNP_Config::blogForLang($news['lang']));
@@ -170,7 +174,11 @@ final class AMNP_Publisher
                 'tax_input'     => ['post_tag' => $this->idList($news['tags'])],
             ];
             if ($attachmentId) {
-                $postarr['meta_input'] = ['_thumbnail_id' => $attachmentId];
+                $postarr['meta_input']['_thumbnail_id'] = $attachmentId;
+            }
+            // Short rewrite (≤ 62 chars) for search results; the H1 keeps the full title.
+            if ($news['seotitle'] !== '') {
+                $postarr['meta_input']['_yoast_wpseo_title'] = $news['seotitle'];
             }
 
             $postId = wp_insert_post(wp_slash($postarr), true);

@@ -46,6 +46,23 @@ final class AMNP_Content
         return trim(preg_replace('/\s+/u', ' ', $text) ?? $text);
     }
 
+    /**
+     * French headline typography: non-breaking space before : ; ! ? and
+     * inside « », space before "(" glued to a word. Times (10:30), URLs and
+     * "?!" pairs are left alone (the sign must be followed by a space or end).
+     */
+    public static function frenchTypography(string $text): string
+    {
+        if ($text === '') {
+            return '';
+        }
+        $text = preg_replace('/(?<=[^\s:;!?])\h?:(?=\s|$)/u', "\u{00A0}:", $text) ?? $text;
+        $text = preg_replace('/(?<=[^\s:;!?])\h?([;!?])(?=\s|$|[!?])/u', "\u{202F}$1", $text) ?? $text;
+        $text = preg_replace('/«\h*(?=\S)/u', "«\u{00A0}", $text) ?? $text;
+        $text = preg_replace('/(?<=\S)\h*»/u', "\u{00A0}»", $text) ?? $text;
+        return preg_replace('/(?<=\p{L})\((?=[\p{L}\p{N}])/u', ' (', $text) ?? $text;
+    }
+
     public static function cleanHtml(string $html): string
     {
         $html = trim(self::repairEncoding($html));

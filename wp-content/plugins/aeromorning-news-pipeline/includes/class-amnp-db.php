@@ -46,6 +46,7 @@ final class AMNP_DB
   id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   lang char(2) NOT NULL,
   title text NOT NULL,
+  seotitle text NULL,
   content longtext NOT NULL,
   content_brut longtext NULL,
   metadescription text NULL,

@@ -307,13 +307,16 @@ final class AMNP_Processor
     private function createNewsFromPayload(string $lang, array $payload, string $subject, string $messageId, ?string $imagePath, string $contentBrut): bool
     {
         try {
-            $title = is_string($payload["shorttitle{$lang}"] ?? null) ? AMNP_Content::cleanText($payload["shorttitle{$lang}"]) : '';
-            if ($title === '') {
-                $title = is_string($payload["title{$lang}"] ?? null) ? AMNP_Content::cleanText($payload["title{$lang}"]) : '';
-            }
+            // Visible title (post_title / H1) = the full title of the release;
+            // the ≤ 62-char rewrite is only the Yoast SEO title (search results).
+            // Using the short rewrite as H1 gave clipped, unnatural headlines.
+            $fullTitle = is_string($payload["title{$lang}"] ?? null) ? AMNP_Content::cleanText($payload["title{$lang}"]) : '';
+            $shortTitle = is_string($payload["shorttitle{$lang}"] ?? null) ? AMNP_Content::cleanText($payload["shorttitle{$lang}"]) : '';
+            $title = $fullTitle !== '' ? $fullTitle : $shortTitle;
             if ($title === '') {
                 $title = AMNP_Content::cleanText($subject);
             }
+            $seoTitle = ($shortTitle !== '' && $shortTitle !== $title) ? $shortTitle : '';
 
             $content = is_string($payload[$lang] ?? null) ? AMNP_Content::cleanHtml($payload[$lang]) : '';
             if ($content === '') {
@@ -332,6 +335,7 @@ final class AMNP_Processor
             $id = AMNP_DB::insertNews([
                 'lang'             => $lang,
                 'title'            => $title,
+                'seotitle'         => $seoTitle,
                 'content'          => $content,
                 'content_brut'     => $contentBrut,
                 'metadescription'  => is_string($payload["metadescription{$lang}"] ?? null) ? AMNP_Content::cleanText($payload["metadescription{$lang}"]) : '',

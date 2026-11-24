@@ -117,7 +117,7 @@ final class AMNP_Admin
 
         $total = (int) $wpdb->get_var($prepare("SELECT COUNT(*) FROM {$table} WHERE {$whereSql}"));
         $offset = ($page - 1) * self::PER_PAGE;
-        $rows = $wpdb->get_results($prepare("SELECT id, lang, status, title, metadescription, focuskeyphrase, categories, tags, image_path, wp_post_id, wp_link, linkedin, linkedin_posted, created_at FROM {$table} WHERE {$whereSql} ORDER BY {$orderby} {$order} LIMIT " . self::PER_PAGE . " OFFSET {$offset}"), ARRAY_A);
+        $rows = $wpdb->get_results($prepare("SELECT id, lang, status, title, seotitle, metadescription, focuskeyphrase, categories, tags, image_path, wp_post_id, wp_link, linkedin, linkedin_posted, created_at FROM {$table} WHERE {$whereSql} ORDER BY {$orderby} {$order} LIMIT " . self::PER_PAGE . " OFFSET {$offset}"), ARRAY_A);
 
         // Stats (same figures as the Nuxt dashboard).
         $stats = $wpdb->get_results("SELECT lang, status, COUNT(*) n FROM {$table} GROUP BY lang, status", ARRAY_A);
@@ -219,11 +219,12 @@ final class AMNP_Admin
     /** Same SEO limits as the Nuxt preview: title ≤ 62, meta 107–142, keyphrase 2–5 words. */
     private static function seoChecks(array $row): array
     {
-        $titleLen = mb_strlen((string) $row['title']);
+        // Search-result title: the short rewrite when the full title is longer.
+        $titleLen = mb_strlen((string) ($row['seotitle'] ?? '' ?: $row['title']));
         $metaLen = mb_strlen((string) $row['metadescription']);
         $words = count(preg_split('/\s+/u', trim((string) $row['focuskeyphrase']), -1, PREG_SPLIT_NO_EMPTY));
         return [
-            'Titre'       => [$titleLen . ' car.', $titleLen > 0 && $titleLen <= 62],
+            'Titre SEO'   => [$titleLen . ' car.', $titleLen > 0 && $titleLen <= 62],
             'Meta'        => [$metaLen . ' car.', $metaLen >= 107 && $metaLen <= 142],
             'Expression'  => [$words . ' mot(s)', $words >= 2 && $words <= 5 && !str_contains((string) $row['focuskeyphrase'], ',')],
         ];
@@ -253,6 +254,7 @@ final class AMNP_Admin
         foreach (self::seoChecks($row) as $label => [$value, $ok]) {
             printf('<tr><th>%s</th><td><span class="amnp-badge %s">%s</span></td></tr>', esc_html($label), $ok ? 'ok' : 'ko', esc_html($value));
         }
+        printf('<tr><th>Titre SEO (Google)</th><td>%s</td></tr>', esc_html($row['seotitle'] ?? '' ?: $row['title']));
         printf('<tr><th>Meta description</th><td>%s</td></tr>', esc_html($row['metadescription']));
         printf('<tr><th>Expression clé</th><td>%s</td></tr>', esc_html($row['focuskeyphrase']));
 

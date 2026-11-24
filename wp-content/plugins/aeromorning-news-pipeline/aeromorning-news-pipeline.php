@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 define('AMNP_VERSION', '0.1.0');
-define('AMNP_DB_VERSION', '2');
+define('AMNP_DB_VERSION', '3');
 define('AMNP_DIR', __DIR__);
 define('AMNP_FILE', __FILE__);
 
