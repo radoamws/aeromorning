@@ -155,6 +155,7 @@ final class AMNP_Publisher
             $news['seotitle'] = AMNP_Content::frenchTypography($news['seotitle']);
         }
 
+        $originBlogId = get_current_blog_id();
         switch_to_blog(AMNP_Config::blogForLang($news['lang']));
 
         try {
@@ -198,6 +199,17 @@ final class AMNP_Publisher
             AMNP_DB::updateNews((int) $news['id'], ['wp_post_id' => $postId, 'wp_link' => $wpLink]);
 
             // 3. Yoast meta, computed score and indexable rebuild.
+            // MailPoet resolves its tables once, for the site the request booted on:
+            // publishing on another site (EN from the FR cron) schedules the post
+            // notification in the wrong site's tables, so the EN newsletter was never
+            // sent. Queue the post; mu-plugins/mailpoet-multisite.php schedules it on
+            // the next request served by that site.
+            if ($status === 'publish' && get_current_blog_id() !== $originBlogId) {
+                $queue = (array) get_option('amnp_mailpoet_pending', []);
+                $queue[] = (int) $postId;
+                update_option('amnp_mailpoet_pending', array_values(array_unique($queue)), true);
+            }
+
             $yoast = $this->updateYoastMeta($postId, $news);
             if (!$yoast['success']) {
                 AMNP_Logger::warning("Yoast meta update failed for post {$postId}", $yoast);
